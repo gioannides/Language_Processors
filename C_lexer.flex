@@ -27,8 +27,9 @@ extern "C" int fileno(FILE *stream);
 %}
 
 
-
 %%
+
+\/\*[.]*\*\/		 {return token(COMMENT); }
 
 auto			{ return token(AUTO);}
 
@@ -111,36 +112,6 @@ long			{ return token(LONG); }
 "intmax_t"		{return token(INTMAX_T); }
 
 "uintmax_t"		{return token(UINTMAX_T); }
-
-[(][\t]*"signed char"[\t]*[) ]		{return token(SIGNED_CHAR); }		//data type casting start
-
-[( ][\t]*"unsigned short"[\t]*[) ]	{return token(UNSIGNED_SHORT); }
-
-[( ][\t]*"unsigned int"[\t]*[) ]	{return token(UNSIGNED_INT); }
-
-[( ][\t]*"unsigned long"[\t]*[) ]	{return token(UNSIGNED_LONG); }
-
-[( ][\t]*"long double"[\t]*[) ]		{return token(LONG_DOUBLE); }
-
-[( ][\t]*"long long"[\t]*[) ]		{return token(LONG_LONG); }
-
-[( ][\t]*"unsigned long long"[\t]*[) ]	{return token(UNSIGNED_LONG_LONG); }
-
-[( ][\t]*"intmax_t"[\t]*[) ]		{return token(INTMAX_T); }
-
-[( ][\t]*"uintmax_t"[\t]*[) ]		{return token(UINTMAX_T); }
-
-[( ][\t]*"int"[\t]*[) ]			{return token(INT); }
-
-[( ][\t]*"float"[\t]*[) ]		{return token(FLOAT); }
-
-[( ][\t]*"long"[\t]*[) ]		{return token(LONG); }
-
-[( ][\t]*"short"[\t]*[) ]		{return token(SHORT); }
-
-[( ][\t]*"signed"[\t]*[) ]		{return token(SIGNED); }
-
-[( ][\t]*"unsigned"[\t]*[) ]		{return token(UNSIGNED); }		//data type casting end
 
 [\(]			{ return token(LROUND); }
 
@@ -228,8 +199,6 @@ long			{ return token(LONG); }
 
 [\*][a-zA-Z]		{return token(POINTER); }
 
-[\*][\(][a-zA-Z][\)]	{return token(POINTER); }  //pointer casting
-
 0[xX][a-fA-F0-9]+	{return token(HEX); }
 
 0[1-7]+			{return token(OCTAL); }
@@ -246,7 +215,9 @@ long			{ return token(LONG); }
 
 [\;]			{return token(SEMICOLON); }
 
-[#][^\n]*[\n]		{return token(PREPROCESSOR); }
+[#][^\n\#]*[\n]		{return token(PREPROCESSOR); }
+
+[\/][\/][^\n]*[\n]	{return token(COMMENT); }
 
 ["][^\n\"]*["]		{return token(STRING_LITERAL); }
 
@@ -258,7 +229,7 @@ long			{ return token(LONG); }
 /* Error handler. This will get called if none of the rules match. */
 void yyerror (char const *s)
 {
-  	fprintf (stderr, "Flex Error: %s\n", s); /* s is the text that wasn't matched */
+  	fprintf (stderr, "Error: %s\n", s); /* s is the text that wasn't matched */
   	exit(1);
 }
 
@@ -282,7 +253,6 @@ int token(int T) {
 	sourceCol = sourceCol_new;
 	sourceCol_new += yyleng;
 	yylval.Type = new std::string(yytext);
-	
 	return T;
 
 }
@@ -294,5 +264,6 @@ int token(int T) {
 
   //      return T;
 //}
+
 
 	

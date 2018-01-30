@@ -28,7 +28,107 @@ int main() {
 
     std::string SourceFile;
 
-
+const char * TokenT[] = { 
+	"None", 
+	"SEMICOLON",
+	"PREPROCESSOR",
+	"COMMA" ,		
+	"POINTER" ,
+	"NUMBER",
+	"HEX" ,
+	"OCTAL" ,
+	"DECIMAL" ,
+	"int_NUM" ,
+	"DIGIT",
+	"IDENTIFIER" ,
+	"WHITESPACE" ,
+	"NEWLINE" ,
+	"AUTO" ,	   	 //start of keywords, no.14
+	"BREAK" ,
+	"CASE" ,
+	"CHAR" ,
+	"CONST" ,
+	"CONTINUE" ,
+	"DEFAULT" ,
+	"DO" ,
+	"DOUBLE" ,
+	"ELSE" ,
+	"ENUM" ,
+	"EXTERN" ,
+	"FLOAT" ,
+	"FOR",
+	"GOTO",
+	"IF",
+	"INT" ,
+	"LONG" ,
+	"REGISTER" ,
+	"RETURN" ,
+	"SHORT" ,
+	"SIGNED" ,
+	"SIZEOF" ,
+	"STATIC" ,
+	"STRUCT" ,
+	"SWITCH" ,
+	"TYPEDEF" ,
+	"UNION" ,
+	"UNSIGNED" ,
+	"VOID" ,
+	"VOLATILE" ,
+	"WHILE" ,
+	"SIGNED_CHAR" ,
+	"UNSIGNED_CHAR" ,
+	"UNSIGNED_SHORT" ,
+	"UNSIGNED_INT" ,
+	"UNSIGNED_LONG" ,
+	"LONG_DOUBLE" ,
+	"LONG_LONG" ,
+	"UNSIGNED_LONG_LONG" ,
+	"INTMAX_T" ,
+	"UINTMAX_T" ,	//end of keywords, no.55
+	"LROUND" ,		//start of operators no.56
+	"RROUND",
+	"LSQUARE" ,
+	"RSQUARE",
+	"LCURLY" ,
+	"RCURLY" ,
+	"DOT_OP" ,
+	"POINTER_OP" ,
+	"LOGICAL_NOT_OP" ,
+	"BITWISE_NOT_OP" ,
+	"PLUS_OP" ,
+	"MINUS_OP" ,
+	"INC_OP" ,
+	"DEC_OP" ,
+	"MULT" ,
+	"DIV" ,
+	"MODULUS_OP" ,
+	"SHIFT_LEFT_OP" ,
+	"SHIFT_RIGHT_OP" ,
+	"LT" ,
+	"GT" ,
+	"LE" ,
+	"GE" ,
+	"EQ" ,
+	"NOT_EQ" ,
+	"AND" ,
+	"XOR" ,
+	"OR" ,
+	"LOG_AND" ,
+	"LOG_OR" ,
+	"COND_OP" ,
+	"ASSIGN_OP" ,
+	"SHRT_ASSIGNPLUS" ,
+	"SHRT_ASSIGNMINUS" ,
+	"SHRT_ASSIGNMULT" ,
+	"SHRT_ASSIGNMOD" ,
+	"SHRT_ASSIGNAND" ,
+	"SHRT_ASSIGNOR" ,
+	"SHRT_ASSIGNXOR" ,
+	"SHRT_ASSIGNLSHIFT" ,
+	"SHRT_ASSIGNRSHIFT" , //end of operators no.96
+	"STRING_LITERAL",
+	"COMMENT" };  // The blank string at the beginning is so that Sunday is 1 instead of 0.
+  
     while(1){
             TokenType type=(TokenType)yylex();
 
@@ -38,244 +138,18 @@ int main() {
 	
 	}
 
-	else if( type == 1) {
+	else if( type >= 1 && type <= 98) {
 
 		string temp;
 		temp = *(yylval.Type);
-		Operator.push_back(temp);
+		cout << TokenT[type] << ": " << temp << endl;
 		delete yylval.Type;
-		yylval.Type = NULL;
-		ss << "{'Text':'" << temp << "','Class':'Operator'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
 
 	}
 
-	else if( type == 2) {
-
-		string temp;
-		temp = *(yylval.Type);
-		Operator.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Operator'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	else if( type == 3) {
-
-		string temp;
-		temp = *(yylval.Type);
-		Operator.push_back(temp);
-		delete yylval.Type;
-		cout << "{'Text':'" << temp << "','Class':'Operator'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	else if( type == 4) {
-
-		string temp;
-		temp = *(yylval.Type);
-		Operator.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Operator'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	else if( type == 5) {
-
-		string temp;
-		temp = *(yylval.Type);
-		Constant.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Constant'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	else if( type == 6) {
-
-		string temp;
-		temp = *(yylval.Type);
-		Constant.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Constant'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-
-	}
-
-	else if( type == 7) {
-
-		string temp;
-		temp = *(yylval.Type);
-		Constant.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Constant'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	else if( type == 8) {
-
-		string temp;
-		temp = *(yylval.Type);
-		Constant.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Constant'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	else if( type == 9) {
-
-		string temp;
-		temp = *(yylval.Type);
-		Constant.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Constant'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	else if( type == 10) {
-
-		string temp;
-		temp = *(yylval.Type);
-		Constant.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Constant'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	else if( type == 11) {					//IDENTIFIERS
-
-		string temp;
-		temp = *(yylval.Type);
-		Identifier.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Identifier'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	else if( type == 12) {
-
-		string temp;
-		temp = *(yylval.Type);
-		StringLiteral.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'StringLiteral'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	else if( type == 13) {
-
-		string temp;
-		temp = *(yylval.Type);
-		StringLiteral.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'StringLiteral'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	
-	else if ( type >= 14 && type <= 55) {			//KEYWORDS
-		
-		string temp;
-		temp = *(yylval.Type);
-		Keyword.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Keyword'}" << endl; 
-       		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
-
-	else if( type >= 56 && type <= 96) {			//OPERATORS
-		
-		string temp;
-		temp = *(yylval.Type);
-		Operator.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Operator'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";	
-		yylval.Type = NULL;
-	}
-
-	else if ( type == 97 ) {				//STRING_LITERALS
-
-		string temp;
-		temp = *(yylval.Type);
-		StringLiteral.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'StringLiteral'}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
-	}
 
     	else{
-		string temp;
-		temp = *(yylval.Type);
-		StringLiteral.push_back(temp);
-		delete yylval.Type;
-		ss << "{'Text':'" << temp << "','Class':'Invalid'," << Invalid << "}" << endl; 
-		temp = ss.str();
-		cout << temp;
-		ss.clear();
-		temp = "";
-		yylval.Type = NULL;
+		cout << Invalid << endl << " Text: " << *(yylval.Type) << endl;
         	assert(0); // There are only n token types.
         	return 1;
 

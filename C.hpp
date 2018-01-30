@@ -101,7 +101,8 @@ enum TokenType{		//TODO: Arrange them in class order so a range of consecutive n
 	SHRT_ASSIGNXOR =94,
 	SHRT_ASSIGNLSHIFT =95,
 	SHRT_ASSIGNRSHIFT =96, //end of operators no.96
-	STRING_LITERAL =97
+	STRING_LITERAL =97,
+	COMMENT =98
 };
 
 union TokenValue{
