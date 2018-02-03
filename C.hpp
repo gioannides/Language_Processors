@@ -3,8 +3,8 @@
 
 #include <string>
 
-enum TokenType{		//TODO: Arrange them in class order so a range of consecutive numbers represents a class
-	None   = 0, 	// This indicates there are no more tokens
+enum TokenType{		//Arranged them in class order so a range of consecutive numbers represents a class
+	None   = 0, 	//This indicates there are no more tokens
 	SEMICOLON =1,
 	PREPROCESSOR =2,
 	COMMA =3,		
@@ -12,7 +12,7 @@ enum TokenType{		//TODO: Arrange them in class order so a range of consecutive n
 	NUMBER =5,
 	HEX =6,
 	OCTAL =7,
-	DECIMAL =8,
+	FLOAT_LITERAL =8,
 	int_NUM =9,
 	DIGIT =10,
 	IDENTIFIER =11,
@@ -102,13 +102,13 @@ enum TokenType{		//TODO: Arrange them in class order so a range of consecutive n
 	SHRT_ASSIGNLSHIFT =95,
 	SHRT_ASSIGNRSHIFT =96, //end of operators no.96
 	STRING_LITERAL =97,
-	COMMENT =98
+	COMMENT =98,
+	ELLIPSIS =99
 };
 
 union TokenValue{
-    double const_numeric;
-    char   const_letter;
-    std::string  *Type;
+    std::string  *value;
+    std::string  *Type; //THIS IS FOR DEBUGGING, NOT NEEDED
 };
 
 
@@ -116,7 +116,7 @@ union TokenValue{
 // attribute value from the lexer back to the
 // main program.
 // By convention it is called yylval, as that is
-// the name that will be automatially generated
+// the name that will be automatically generated
 // by Bison.
 extern TokenValue yylval;
 

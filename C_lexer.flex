@@ -13,6 +13,7 @@
 #include <queue>		
 
 void yyerror (char const *s);
+void preprocessor();
 
 int token(int T);
 int vtoken(int T);
@@ -20,208 +21,223 @@ int vtoken(int T);
 std::string sourceFile = "";
 int sourceLine = 1;
 int sourceCol = 1;
-int sourceCol_new = 1;
+int new_sourceCol = 1;
 
 // This is to work around an irritating bug in Flex
 extern "C" int fileno(FILE *stream);
 %}
 
+FLOAT_LIT	        ({FLOAT_FRACTION}{FLOAT_EXP}?|{FLOAT_DIG}{FLOAT_EXP}){FLOAT_SUFFIX}?
+FLOAT_FRACTION          {FLOAT_DIG}?\.{FLOAT_DIG}|{FLOAT_DIG}\.
+FLOAT_EXP               [eE]{FLOAT_SIGN}?{FLOAT_DIG}
+FLOAT_SIGN              \+|-
+FLOAT_DIG            	[0-9]+
+FLOAT_SUFFIX      	f|l|F|L
 
 %%
 
-\/\*[.]*\*\/		 {return token(COMMENT); }
+auto				{ return token(AUTO);}
 
-auto			{ return token(AUTO);}
+break				{ return token(BREAK); }
 
-break			{ return token(BREAK); }
+case				{ return token(CASE); } 
 
-case			{ return token(CASE); } 
+char				{ return token(CHAR); }
 
-char			{ return token(CHAR); }
+const				{ return token(CONST); }
 
-const			{ return token(CONST); }
+continue			{ return token(CONTINUE); }
 
-continue		{ return token(CONTINUE); }
+default				{ return token(DEFAULT); }
 
-default			{ return token(DEFAULT); }
+do				{ return token(DO); }
 
-do			{ return token(DO); }
+double				{ return token(DOUBLE); }
 
-double			{return  token(DOUBLE); }
+else				{ return token(ELSE); }
 
-else			{ return token(ELSE); }
+enum				{ return token(ENUM); }
 
-enum			{ return token(ENUM); }
+extern				{ return token(EXTERN); }
 
-extern			{ return token(EXTERN); }
+for				{ return  token(FOR); }
 
-for			{return  token(FOR); }
+goto				{ return token(GOTO); }
+	
+if				{ return token(IF); }
 
-goto			{ return token(GOTO); }
+register			{ return token(REGISTER); }
 
-if			{ return token(IF); }
+return				{ return token(RETURN); }
 
-register		{ return token(REGISTER); }
+short				{ return token(SHORT); }
 
-return			{ return token(RETURN); }
+sizeof				{ return token(SIZEOF); }
 
-short			{ return token(SHORT); }
+static				{ return token(STATIC); }
+	
+struct				{ return token(STRUCT); }
 
-sizeof			{ return token(SIZEOF); }
+switch				{ return token(SWITCH); }
 
-static			{ return token(STATIC); }
+typedef				{ return token(TYPEDEF); }
 
-struct			{ return token(STRUCT); }
+union				{ return token(UNION); }
 
-switch			{ return token(SWITCH); }
+void				{ return token(VOID); }
 
-typedef			{ return token(TYPEDEF); }
+volatile			{ return token(VOLATILE); }
 
-union			{ return token(UNION); }
+while				{ return token(WHILE); }
 
-void			{ return token(VOID); }
+signed				{ return token(SIGNED); }
 
-volatile		{ return token(VOLATILE); }
+unsigned			{ return token(UNSIGNED); }
 
-while			{ return token(WHILE); }
+float				{ return token(FLOAT); }
 
-signed			{ return token(SIGNED); }
+"signed char"			{ return token(SIGNED_CHAR); }
 
-unsigned		{ return token(UNSIGNED); }
+"unsigned short"		{ return token(UNSIGNED_SHORT); }
 
-float			{ return token(FLOAT); }
+int				{ return token(INT); }
 
-"signed char"		{return token(SIGNED_CHAR); }
+long				{ return token(LONG); }
 
-"unsigned short"	{return token(UNSIGNED_SHORT); }
+"unsigned int"			{ return token(UNSIGNED_INT); }
 
-int			{ return token(INT); }
+"unsigned long"			{ return token(UNSIGNED_LONG); }
 
-long			{ return token(LONG); }
+"long double"			{ return token(LONG_DOUBLE); }
 
-"unsigned int"		{return token(UNSIGNED_INT); }
+"long long"			{ return token(LONG_LONG); }
+	
+"unsigned long long"		{ return token(UNSIGNED_LONG_LONG); }
 
-"unsigned long"		{return token(UNSIGNED_LONG); }
+"intmax_t"			{ return token(INTMAX_T); }
 
-"long double"		{return token(LONG_DOUBLE); }
+"uintmax_t"			{ return token(UINTMAX_T); }
 
-"long long"		{return token(LONG_LONG); }
+[\(]				{ return token(LROUND); }
 
-"unsigned long long"	{return token(UNSIGNED_LONG_LONG); }
+[\)]				{ return token(RROUND); }
 
-"intmax_t"		{return token(INTMAX_T); }
+[\[]				{ return token(LSQUARE); }
 
-"uintmax_t"		{return token(UINTMAX_T); }
+[\]]				{ return token(RSQUARE); /* \ is ok here */ }
+	
+[\{]				{ return token(LCURLY); }
 
-[\(]			{ return token(LROUND); }
+[\}]				{ return token(RCURLY); }
 
-[\)]			{ return token(RROUND); }
+[\.]				{ return token(DOT_OP); }
 
-[\[]			{ return token(LSQUARE); }
+[\-][\>]			{ return token(POINTER_OP); }
 
-[\]]			{ return token(RSQUARE); /* \ is ok here */ }
+\!				{ return token(LOGICAL_NOT_OP); }
 
-[\{]			{ return token(LCURLY); }
+\~				{ return token(BITWISE_NOT_OP); }
 
-[\}]			{ return token(RCURLY); }
+\+				{ return token(PLUS_OP); }
 
-[\.]			{ return token(DOT_OP); }
+\-				{ return token(MINUS_OP); }
 
-[\-][\>]		{ return token(POINTER_OP); }
+\+\+				{ return token(INC_OP); }
 
-\!			{ return token(LOGICAL_NOT_OP); }
+\-\-				{ return token(DEC_OP); }
 
-\~			{ return token(BITWISE_NOT_OP); }
+\&				{ return token(AND); }
 
-\+			{ return token(PLUS_OP); }
+\*				{ return token(MULT); }
 
-\-			{ return token(MINUS_OP); }
+\/				{ return token(DIV); }
 
-\+\+			{ return token(INC_OP); }
+\%				{ return token(MODULUS_OP); }
 
-\-\-			{ return token(DEC_OP); }
+\<\<				{ return token(SHIFT_LEFT_OP); }
 
-\&			{return token(AND); }
+\>\>				{ return token(SHIFT_RIGHT_OP); }
+ 
+\<				{ return token(LT); }
 
-\*			{return token(MULT); }
+\>				{ return token(GT); }
 
-\/			{return token(DIV); }
+\<\=				{ return token(LE); }
 
-\%			{return token(MODULUS_OP); }
+\>\=				{ return token(GE); }
 
-\<\<			{return token(SHIFT_LEFT_OP); }
+\=\=				{ return token(EQ); }
 
-\>\>			{return token(SHIFT_RIGHT_OP); }
+\!\=				{ return token(NOT_EQ); }
 
-\<			{return token(LT); }
+[\^]				{ return token(XOR); /* \ is ok here */} 
 
-\>			{return token(GT); }
+[\|]				{ return token(OR); }
 
-\<\=			{return token(LE); }
+\&\&				{ return token(LOG_AND); }
 
-\>\=			{return token(GE); }
+\|\|				{ return token(LOG_OR); }
 
-\=\=			{return token(EQ); }
+\?\:				{ return token(COND_OP); }
 
-\!\=			{return token(NOT_EQ); }
+\=				{ return token(ASSIGN_OP); }
 
-[\^]			{return token(XOR); /* \ is ok here */} 
+\+\=				{ return token(SHRT_ASSIGNPLUS); }
 
-[\|]			{return token(OR); }
+\-\=				{ return token(SHRT_ASSIGNMINUS); }
 
-\&\&			{return token(LOG_AND); }
+\*\=				{ return token(SHRT_ASSIGNMULT); }
 
-\|\|			{return token(LOG_OR); }
+\%\=				{ return token(SHRT_ASSIGNMOD); }
 
-\?\:			{return token(COND_OP); }
+\&\=				{ return token(SHRT_ASSIGNAND); }
 
-\=			{return token(ASSIGN_OP); }
+\|\=				{ return token(SHRT_ASSIGNOR); }
 
-\+\=			{return token(SHRT_ASSIGNPLUS); }
+\^\=				{ return token(SHRT_ASSIGNXOR); }
 
-\-\=			{return token(SHRT_ASSIGNMINUS); }
+\<\<\=				{ return token(SHRT_ASSIGNLSHIFT); }
 
-\*\=			{return token(SHRT_ASSIGNMULT); }
+\>\>\=				{ return token(SHRT_ASSIGNRSHIFT); }
 
-\%\=			{return token(SHRT_ASSIGNMOD); }
+[,]				{ return token(COMMA); }
 
-\&\=			{return token(SHRT_ASSIGNAND); }
+[\*][a-zA-Z]			{ return token(POINTER); }
 
-\|\=			{return token(SHRT_ASSIGNOR); }
+0[xX][a-fA-F0-9]+(([uU][lL])?)	{ return token(HEX); } //suffix included
 
-\^\=			{return token(SHRT_ASSIGNXOR); }
+0[xX][a-fA-F0-9]+(([lL][uU])?)	{ return token(HEX); } //suffix included
 
-\<\<\=			{return token(SHRT_ASSIGNLSHIFT); }
+0[1-7]+(([uU][lL])?)		{ return token(OCTAL); } //suffix included
 
-\>\>\=			{return token(SHRT_ASSIGNRSHIFT); }
+0[1-7]+(([lL][uU])?)		{ return token(OCTAL); } //suffix included
 
-[,]			{return token(COMMA); }
+{FLOAT_LIT}			{ return token(FLOAT_LITERAL); }
 
-[\*][a-zA-Z]		{return token(POINTER); }
+[-]?[0-9]+(([uU][lL])?)		{ return token(int_NUM); } //suffix included
 
-0[xX][a-fA-F0-9]+	{return token(HEX); }
+[-]?[0-9]+(([lL][uU])?)		{ return token(int_NUM); } //suffix included
 
-0[1-7]+			{return token(OCTAL); }
+[ \t]+				{ return token(WHITESPACE);
+			 	 new_sourceCol += yyleng; }
 
-[-]?([0-9]+[.])[0-9]+	{return token(DECIMAL); }
+[\n]+				{ return token(NEWLINE); }
 
-[-]?[0-9]+		{return token(int_NUM); }
+[\;]				{ return token(SEMICOLON); }
 
-[A-Za-z_][A-Za-z_0-9]*	{return token(IDENTIFIER); }
+[#][^\n\#]*[\n]			{ preprocessor(); 
+			 	  new_sourceCol = 1; 
+			 	  return token(PREPROCESSOR); }
 
-[ \t]+			{return token(WHITESPACE); }
+[\/][\/][^\n]*[\n]		{ return token(COMMENT); }
 
-[\n]+			{return token(NEWLINE); }
+["][^\n\"]*["]			{ return token(STRING_LITERAL); }
 
-[\;]			{return token(SEMICOLON); }
+\.\.\.				{ return token(ELLIPSIS); }
 
-[#][^\n\#]*[\n]		{return token(PREPROCESSOR); }
+[A-Za-z_][A-Za-z_0-9]*		{ return token(IDENTIFIER); }
 
-[\/][\/][^\n]*[\n]	{return token(COMMENT); }
-
-["][^\n\"]*["]		{return token(STRING_LITERAL); }
-
-.			{ yyerror(yytext); /* no [] here */ } 
+.				{ yyerror(yytext); } 
 
 
 %%
@@ -229,41 +245,60 @@ long			{ return token(LONG); }
 /* Error handler. This will get called if none of the rules match. */
 void yyerror (char const *s)
 {
-  	fprintf (stderr, "Error: %s\n", s); /* s is the text that wasn't matched */
+  	fprintf (stderr, "Lexical Error: %s\n", s); /* s is the text that wasn't matched */
   	exit(1);
 }
 
 
-void handlePreprocessor()
-{
+void preprocessor(){
         std::string preprocessor_text(yytext);
-        // Pattern for matching preprocessor
-        std::regex pattern("#[ ]*([0-9]+)[ ]*\"([^\"]+)\"([ ]*[1-4])*[ ]*\n");
-        std::smatch match;
-        if (std::regex_search(preprocessor_text, match, pattern)) {
-                sourceLine = stoi(match.str(1));
-                sourceFile = match.str(2);
+	std::smatch match_pattern;
+        std::regex valid_pattern("#[ ]*([0-9]+)[ ]*\"([^\"]+)\"([ ]*[1-4])*[ ]*\n");
+        if (std::regex_search(preprocessor_text, match_pattern, valid_pattern)) {
+                sourceLine = stoi(match_pattern.str(1));
+                sourceFile = match_pattern.str(2);
         }
-        // if the regex pattern doesn't match, then there was no useful information
 }
 
 
 int token(int T) {
 	
-	sourceCol = sourceCol_new;
-	sourceCol_new += yyleng;
-	yylval.Type = new std::string(yytext);
-	return T;
+	if( T == IDENTIFIER || T == STRING_LITERAL || T == HEX || T == OCTAL || T == FLOAT_LITERAL || T == int_NUM) {
 
+		sourceCol = new_sourceCol;
+		new_sourceCol += yyleng;
+		return vtoken(T);
+
+	}
+
+	else{
+		sourceCol = new_sourceCol;
+		new_sourceCol += yyleng;
+		yylval.Type = new std::string(yytext);
+		return T;
+	}
 }
 
-//int vtoken(int T){
-//	
-//	std::string temp = yytext;
-//        yylval.txt = new std::string(temp);
-
-  //      return T;
-//}
-
-
+int vtoken(int T){
 	
+	if( T == IDENTIFIER || T == HEX || T == OCTAL || T == FLOAT_LITERAL || T == int_NUM) {
+
+		std::string token_value = yytext;
+        	yylval.value = new std::string(token_value);
+	}
+
+	else if( T == STRING_LITERAL) {
+
+		std::string temp = yytext;
+	    	temp[temp.find_first_of('"')] = 0;
+	    	temp[temp.find_last_of('"')] = 0;
+		std::string myWord = "";
+		for ( unsigned i = 0; i < temp.size(); ++i){
+			if(temp[i] != 0) {
+				myWord += temp[i];
+			}
+		}
+		yylval.value = new std::string(myWord);
+	}
+	return T;
+}	

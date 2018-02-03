@@ -127,7 +127,8 @@ const char * TokenT[] = {
 	"SHRT_ASSIGNLSHIFT" ,
 	"SHRT_ASSIGNRSHIFT" , //end of operators no.96
 	"STRING_LITERAL",
-	"COMMENT" };  // The blank string at the beginning is so that Sunday is 1 instead of 0.
+	"COMMENT",
+	"ELLIPSIS" };  // The blank string at the beginning is so that Sunday is 1 instead of 0.
   
     while(1){
             TokenType type=(TokenType)yylex();
@@ -138,7 +139,7 @@ const char * TokenT[] = {
 	
 	}
 
-	else if( type >= 1 && type <= 98) {
+	else if( type >= 1 && type <= 99) {
 
 		string temp;
 		temp = *(yylval.Type);
