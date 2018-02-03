@@ -5,7 +5,7 @@ CompleteTheCLexer,BasicCLexer,8,ap4116,,The Lexer can identify complex regular e
 BasicCParser,ParsingLab,3,gi316,,The Parser can parse trivial expressions/statements and most importantly have a working communication between Bison and Flex
 TestBasicCParser,BasicCParser,8,ap4116,,Be able to group tokens that are syntactically legal and parse an Abstract Syntax Tree
 CompleteCParser,TestBasicCparser,7,ap4116,,Be confident that the C parser is at the required final level of required complexity. Test it extensively to see what has been achieved
-LearnBasicPython,None,,ap4116,,Need to learn basic Python syntax in order to be able to write a C to Python Translator
+LearnBasicPython,None,5,ap4116,,Need to learn basic Python syntax in order to be able to write a C to Python Translator
 ConstructCtoPythonTranslator,CompletedCParser,8,ap4116,,"Using the Lexer and the Parser implemented, create an Abstract Syntax Tree to Python from C"
 TestCtoPythonParser,ConstructedCtoPythonParser,8,gi316,,Test C to python Translator
 StartCodeGen,CompletedCodeGenLab,6,gi316,,"Using principles learned from the CodeGen lab, structure the implementation of the Abstract Syntax Tree to MIPS I assembly"
