@@ -1,7 +1,8 @@
 %code requires{
   #include "ast.hpp"
-
-  extern const Expression *g_root; // A way of getting the AST out
+  #include <iostream>
+  #include <cassert>
+  extern const Statement *g_root; // A way of getting the AST out
 
   //! This is to fix problems when generating C++
   // We are declaring the functions provided by Flex, so
@@ -11,12 +12,13 @@
 }
 
 
-// Represents the value associated with AST node.
-%union {
-
-//POSSIBLE AST NODE VALUES
-
+%union{
+  const Statement* statement;
+  std::string *text;
 }
+
+// Represents the value associated with AST node.
+
 
 
 %token None SEMICOLON PREPROCESSOR COMMA POINTER NUMBER HEX OCTAL FLOAT_LITERAL int_NUM DIGIT IDENTIFIER WHITESPACE NEWLINE AUTO BREAK CASE CHAR CONST
@@ -26,10 +28,7 @@
 %token LT GT LE	GE EQ NOT_EQ AND XOR OR LOG_AND	LOG_OR COND_OP ASSIGN_OP SHRT_ASSIGNPLUS SHRT_ASSIGNMINUS SHRT_ASSIGNMULT SHRT_ASSIGNMOD SHRT_ASSIGNAND	SHRT_ASSIGNOR
 %token SHRT_ASSIGNXOR SHRT_ASSIGNLSHIFT	SHRT_ASSIGNRSHIFT STRING_LITERAL COMMENT
 
-%union{
-  const Statement* statement
-  std::string *text
-}%
+
 
 %type <statement> STATEMENT
 %type <text> INT
@@ -46,9 +45,9 @@ STATEMENT: INT IDENTIFIER SEMICOLON { $$ = new Statement($2); }
 
 %%
 
-const Expression *g_root; // Definition of variable (to match declaration earlier)
+const Statement *g_root; // Definition of variable (to match declaration earlier)
 
-const Expression *parseAST()
+const Statement *parseAST()
 {
   g_root=0;
   yyparse();
