@@ -1,20 +1,21 @@
-CPPFLAGS += -W -Wall -g 
+CPPFLAGS += -std=c++11 -W -Wall -g -Wno-unused-parameter
+CPPFLAGS += -I include
 
-# This avoids error: ‘fileno’ was not declared in this scope
-CPPFLAGS += -std=c++0x
+all : bin/c_compiler 
 
-# Avoid warnings about yyunput not used
-CPPFLAGS += -Wno-unused-function
+src/C_parser.tab.cpp src/C_parser.tab.hpp : src/C_parser.y
+	bison -v -d src/C_parser.y -o src/C_parser.tab.cpp
 
-all : C
+src/C_lexer.yy.cpp : src/C_lexer.flex src/C_parser.tab.hpp
+	flex -o src/C_lexer.yy.cpp  src/C_lexer.flex
 
-C_lexer.yy.cpp : C_lexer.flex
-	flex -o C_lexer.yy.cpp  C_lexer.flex
+bin/c_compiler : src/c_compiler.o src/C_parser.tab.o src/C_lexer.yy.o src/C_parser.tab.o
+	mkdir -p bin
+	g++ $(CPPFLAGS) -o bin/c_compiler $^
 
-C : C_lexer.yy.o C_main.o
-	g++ $(CPPFLAGS) -o C  C_lexer.yy.o C_main.o
 
 clean :
-	-rm C C.exe
-	-rm *.yy.cpp
-	-rm test/out/*
+	rm src/*.o
+	rm bin/*
+	rm src/*.tab.cpp
+	rm src/*.yy.cpp
