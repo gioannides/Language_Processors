@@ -550,9 +550,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    42,    42,    44,    45,    49,    50,    51,    52,    55,
-      56,    57,    58,    59,    60,    61,    63,    64,    65,    66,
-      67,    68,    69,    70,    71,    72
+       0,    42,    42,    44,    45,    71,    72,    73,    74,    77,
+      78,    79,    80,    81,    83,    84,    85,    86,    87,    88,
+      89,    90,    91,    92,    93,    94
 };
 #endif
 
@@ -627,8 +627,8 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     9,    17,    14,    20,    11,    19,    16,    10,    18,
-      21,    12,    24,    13,    25,    22,    23,    15,     0,     2,
+       0,     9,    15,    24,    18,    11,    17,    14,    10,    16,
+      19,    12,    22,    13,    23,    20,    21,    25,     0,     2,
        4,     0,     0,     1,     3,     8,     0,     7,     0,     5,
        6
 };
@@ -678,7 +678,7 @@ static const yytype_uint8 yystos[] =
 static const yytype_uint8 yyr1[] =
 {
        0,   101,   102,   103,   103,   104,   104,   104,   104,   105,
-     105,   105,   105,   105,   105,   105,   106,   106,   106,   106,
+     105,   105,   105,   105,   106,   106,   106,   106,   106,   106,
      106,   106,   106,   106,   106,   106
 };
 
@@ -1382,127 +1382,127 @@ yyreduce:
     break;
 
   case 5:
-#line 49 "src/C_parser.y" /* yacc.c:1646  */
+#line 71 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.GlobalDecl) = new StorageSpecifierDecl( (yyvsp[-2].text) , (yyvsp[-1].text)  ) ; }
 #line 1388 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 50 "src/C_parser.y" /* yacc.c:1646  */
+#line 72 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.GlobalDecl) = new TypeSpecifierDecl( (yyvsp[-2].text) , (yyvsp[-1].text)  ) ; }
 #line 1394 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 51 "src/C_parser.y" /* yacc.c:1646  */
+#line 73 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.GlobalDecl) = new TypeSpecifierDecl( (yyvsp[-1].text) ) ; }
 #line 1400 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 52 "src/C_parser.y" /* yacc.c:1646  */
+#line 74 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.GlobalDecl) = new StorageSpecifierDecl( (yyvsp[-1].text) ) ; }
 #line 1406 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 55 "src/C_parser.y" /* yacc.c:1646  */
+#line 77 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1412 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 56 "src/C_parser.y" /* yacc.c:1646  */
+#line 78 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1418 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 57 "src/C_parser.y" /* yacc.c:1646  */
+#line 79 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1424 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 58 "src/C_parser.y" /* yacc.c:1646  */
+#line 80 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1430 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 59 "src/C_parser.y" /* yacc.c:1646  */
+#line 81 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1436 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 60 "src/C_parser.y" /* yacc.c:1646  */
+#line 83 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1442 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 61 "src/C_parser.y" /* yacc.c:1646  */
+#line 84 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1448 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 63 "src/C_parser.y" /* yacc.c:1646  */
+#line 85 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1454 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 64 "src/C_parser.y" /* yacc.c:1646  */
+#line 86 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1460 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 65 "src/C_parser.y" /* yacc.c:1646  */
+#line 87 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1466 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 66 "src/C_parser.y" /* yacc.c:1646  */
+#line 88 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1472 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 67 "src/C_parser.y" /* yacc.c:1646  */
+#line 89 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1478 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 68 "src/C_parser.y" /* yacc.c:1646  */
+#line 90 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1484 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 69 "src/C_parser.y" /* yacc.c:1646  */
+#line 91 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1490 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 70 "src/C_parser.y" /* yacc.c:1646  */
+#line 92 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1496 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 71 "src/C_parser.y" /* yacc.c:1646  */
+#line 93 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1502 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 72 "src/C_parser.y" /* yacc.c:1646  */
+#line 94 "src/C_parser.y" /* yacc.c:1646  */
     { (yyval.text) = (yyvsp[0].text) ; }
 #line 1508 "src/C_parser.tab.cpp" /* yacc.c:1646  */
     break;
@@ -1736,7 +1736,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 76 "src/C_parser.y" /* yacc.c:1906  */
+#line 98 "src/C_parser.y" /* yacc.c:1906  */
 
 
 const Node *g_root; // Definition of variable (to match declaration earlier)

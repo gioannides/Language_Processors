@@ -43,6 +43,28 @@ ROOT : NODE { g_root = $1; }
 
 NODE : NODE GLOBAL_DECLARATION			{ $$ = $2 ; }
      | GLOBAL_DECLARATION			{ $$ = $1 ; }
+//     | NODE FUNCTION				{ $$ = $2 ; }
+  //   | FUNCTION					{ $$ = $1 ; }
+
+
+
+//FUNCTION : FUNCTION_DEFINITION			{ $$ = $1 ; }
+//	 | FUNCTION_DECLARATION			{ $$ = $1 ; }
+//	 | FUNCTION_CALL			{ $$ = $1 ; }
+
+
+//FUNCTION_DEFINITION : STORAGE_SPECIFIER FUNCTION_ID LROUND PARAMETERS RROUND SEMICOLON
+
+///FUNCTION_ID : IDENTIFIER
+
+//PARAMETERS : STORAGE_SPECIFIER IDENTIFIER
+//	   | TYPE_SPECIFIER IDENTIFIER
+//	   | STORAGE_SPECIFIER 
+//	   | TYPE_SPECIFIER
+//	   | PARAMETERS STORAGE_SPECIFIER IDENTIFIER COMMA
+//	   | PARAMETERS TYPE_SPECIFIER IDENTIFIER COMMA
+//	   | 
+
 
  
 
@@ -57,8 +79,6 @@ STORAGE_SPECIFIER : AUTO 		{ $$ = $1 ; }
 		  | EXTERN 		{ $$ = $1 ; }
 		  | STATIC 		{ $$ = $1 ; }
 		  | TYPEDEF  		{ $$ = $1 ; }
-		  | CONST		{ $$ = $1 ; }
-		  | VOLATILE		{ $$ = $1 ; }
 
 TYPE_SPECIFIER : INT			{ $$ = $1 ; }
 	       | CHAR			{ $$ = $1 ; }
@@ -70,6 +90,8 @@ TYPE_SPECIFIER : INT			{ $$ = $1 ; }
                | VOID 			{ $$ = $1 ; }
                | STRUCT 		{ $$ = $1 ; }
                | UNION			{ $$ = $1 ; }
+	       | CONST			{ $$ = $1 ; }
+	       | VOLATILE		{ $$ = $1 ; }
 
 
 
