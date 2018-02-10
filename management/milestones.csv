@@ -1,7 +1,7 @@
 MilestoneID,             Dependencies, EstimatedEffort, Lead,  Completed, Description
 MakeAPlan,None,2,gi316,5e05c8b5adb177b6a207381dccbcd25a0a25bfc5,Make an estimated plan of how the workload will be spread across the allowed timeframe
 BasicCLexer,LexingLab,6,gi316,5e05c8b5adb177b6a207381dccbcd25a0a25bfc5,Create a Basic C Lexer that can identify most of the trivial tokens in the C language
-CompleteTheCLexer,BasicCLexer,8,ap4116,,The Lexer can identify complex regular expressions and can successfully read and tokenize provided C source codes
+CompleteTheCLexer,BasicCLexer,8,ap4116,f355062ec5b9fd148505be3b9e902a21f8b013d3,The Lexer can identify complex regular expressions and can successfully read and tokenize provided C source codes
 BasicCParser,ParsingLab,3,gi316,,The Parser can parse trivial expressions/statements and most importantly have a working communication between Bison and Flex
 TestBasicCParser,BasicCParser,8,ap4116,,Be able to group tokens that are syntactically legal and parse an Abstract Syntax Tree
 CompleteCParser,TestBasicCparser,7,ap4116,,Be confident that the C parser is at the required final level of required complexity. Test it extensively to see what has been achieved
