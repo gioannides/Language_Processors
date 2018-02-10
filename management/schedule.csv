@@ -1,9 +1,0 @@
-Week,    DateRange,          PlannedEffort,  ActualEffort,  OtherDeadlines
-4, 29th Jan -  4th Feb,7,              ,Lexical Analysis Lab
-5,  5th Feb - 11th Feb,12,              ,Communications Lab LogBook Submission
-6, 12th Feb - 18th Feb,7,              ,"Communications Lab Oral Examination, Databases CW,Distributed Systems & Networks"
-7, 19th Feb - 25th Feb,16,              ,None
-8, 26th Feb -  4th Mar,12,              ,"Database CW2, Regex/Lexers Test"
-9,  5th Mar - 11th Mar,14,              ,Grammars/Parsers Test
-10, 12th Mar - 18th Mar,9,              ,"Compilers/CodeGeneration Test, Maths Numerical Analysis CourseWork"
-11, 19th Mar - 27th Mar,17,              ,None
