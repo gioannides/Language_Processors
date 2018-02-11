@@ -54,9 +54,9 @@ extern int yydebug;
   int yylex(void);
   void yyerror(const char *);
 
-  void addTolist(listPtr& hdList,std::string data_t, std::string id);
-  void addTolist2(listPtr& hdList,std::string data_t);
-  void addTolist3(listPtr& hdList,std::string id);
+  void addTolist(listPtr& hdList,std::string& data_t, std::string& id);
+  void addTolist2(listPtr& hdList,std::string& data_t);
+  void addTolist3(listPtr& hdList,std::string& id);
   extern listPtr hdList;
 
 #line 63 "src/C_parser.tab.hpp" /* yacc.c:1909  */

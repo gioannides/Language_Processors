@@ -11,9 +11,9 @@
   int yylex(void);
   void yyerror(const char *);
 
-  void addTolist(listPtr& hdList,std::string data_t, std::string id);
-  void addTolist2(listPtr& hdList,std::string data_t);
-  void addTolist3(listPtr& hdList,std::string id);
+  void addTolist(listPtr& hdList,std::string& data_t, std::string& id);
+  void addTolist2(listPtr& hdList,std::string& data_t);
+  void addTolist3(listPtr& hdList,std::string& id);
   extern listPtr hdList;
 }
 
@@ -35,10 +35,10 @@
 %token SHRT_ASSIGNXOR SHRT_ASSIGNLSHIFT	SHRT_ASSIGNRSHIFT STRING_LITERAL ELLIPSIS
 
 
-%type <GlobalDecl> NODE GLOBAL_DECLARATION
+%type <GlobalDecl> NODE GLOBAL_DECLARATION DECLARATION DECLARATION_LIST
 %type <text> AUTO REGISTER EXTERN STATIC TYPEDEF INT CHAR SHORT FLOAT DOUBLE SIGNED UNSIGNED VOID STRUCT UNION IDENTIFIER STORAGE_SPECIFIER TYPE_SPECIFIER CONST VOLATILE FUNCTION_ID
 %type <text> PARAMETER_ID STRING_LITERAL
-%type <linkedlist> FORMAL_PARAMETERS ACTUAL_PARAMETERS;
+%type <linkedlist> FORMAL_PARAMETERS ACTUAL_PARAMETERS
 %type <FunctionDeclCall> FUNCTION FUNCTION_DECLARATION FUNCTION_CALL
 %type <text> int_NUM FLOAT_LITERAL HEX OCTAL
 
@@ -49,13 +49,23 @@
 %%
 
 
+//*****************************************************************************
+//				  START
+//*****************************************************************************
+
+
 ROOT : NODE { g_root = $1; }
 
-NODE : NODE GLOBAL_DECLARATION			{ $$ = $2 ; }
-     | GLOBAL_DECLARATION			{ $$ = $1 ; }
-     | NODE FUNCTION				{ $$ = $2 ; }
-     | FUNCTION					{ $$ = $1 ; }
+NODE : NODE DECLARATION			{ $$ = $2 ; } 
+     | DECLARATION			{ $$ = $1 ; }
 
+DECLARATION : FUNCTION			{ $$ = $1 ;}
+	    | GLOBAL_DECLARATION	{ $$ = $1 ;}
+
+
+//*****************************************************************************
+//				FUNCTIONS
+//*****************************************************************************
 
 
 FUNCTION : //FUNCTION_DEFINITION		{ $$ = $1 ; }
@@ -95,16 +105,24 @@ ACTUAL_PARAMETERS : PARAMETER_ID					    {  addTolist3(hdList,*$1); $$ = hdList;
 		  | HEX							    {  addTolist3(hdList,*$1); $$ = hdList;}
 		  | OCTAL						    {  addTolist3(hdList,*$1); $$ = hdList;}
 		  | STRING_LITERAL					    {  addTolist3(hdList,*$1); $$ = hdList;}
-		//  | ACTUAL_PARAMETERS PARAMETER_ID COMMA 		    { $$ = $2 ;}
-		//  | ACTUAL_PARAMETERS TYPE_SPECIFIER COMMA 		    { $$ = $2 ;}
-		//  | ACTUAL_PARAMETERS STORAGE_SPECIFIER COMMA 		    { $$ = $2 ;}
-		//  | ACTUAL_PARAMETERS FLOAT_LIT COMMA 		    	    { $$ = $2 ;}
-		//  | ACTUAL_PARAMETERS int_NUM COMMA 		    	    { $$ = $2 ;}
-		//  | ACTUAL_PARAMETERS HEX COMMA 		            { $$ = $2 ;}
-		//  | ACTUAL_PARAMETERS OCTAL COMMA 		            { $$ = $2 ;}
-		//  | ACTUAL_PARAMETERS STRING_LITERAL COMMA 		    { $$ = $2 ;}
+		  | ACTUAL_PARAMETERS COMMA PARAMETER_ID  		    {  addTolist3(hdList,*$3); $$ = hdList;}
+		  | ACTUAL_PARAMETERS COMMA TYPE_SPECIFIER  		    {  addTolist2(hdList,*$3); $$ = hdList;}
+		  | ACTUAL_PARAMETERS COMMA STORAGE_SPECIFIER  		    {  addTolist2(hdList,*$3); $$ = hdList;}
+		  | ACTUAL_PARAMETERS COMMA FLOAT_LITERAL	    	    {  addTolist3(hdList,*$3); $$ = hdList;}
+		  | ACTUAL_PARAMETERS COMMA int_NUM  		    	    {  addTolist3(hdList,*$3); $$ = hdList;}
+		  | ACTUAL_PARAMETERS COMMA HEX  		            {  addTolist3(hdList,*$3); $$ = hdList;}
+		  | ACTUAL_PARAMETERS COMMA OCTAL  		            {  addTolist3(hdList,*$3); $$ = hdList;}
+		  | ACTUAL_PARAMETERS COMMA STRING_LITERAL  		    {  addTolist3(hdList,*$3); $$ = hdList;}
 
+
+//*****************************************************************************
+//			GLOBAL DECLARATIONS
+//*****************************************************************************
  
+DECLARATION_LIST : GLOBAL_DECLARATION					{ $$ = $1; }
+		 | DECLARATION_LIST COMMA GLOBAL_DECLARATION		{ $$ = $3; }
+
+
 
 GLOBAL_DECLARATION : STORAGE_SPECIFIER IDENTIFIER SEMICOLON		{ $$ = new StorageSpecifierDecl( $1 , $2  ) ; }
 	 	   | TYPE_SPECIFIER IDENTIFIER SEMICOLON		{ $$ = new TypeSpecifierDecl( $1 , $2  ) ; }
@@ -135,11 +153,15 @@ TYPE_SPECIFIER : INT			{ $$ = $1 ; }
 
 %%
 
+//*****************************************************************************
+//THIS SECTION CONTAINS ALL THE GLOBAL FUNCTIONS USED BY THE GRAMMAR
+//*****************************************************************************
+
 listPtr hdList = NULL;
 
 const Node *g_root; // Definition of variable (to match declaration earlier)
 
-void addTolist(listPtr& hdList,std::string data_t , std::string id ){
+void addTolist(listPtr& hdList, std::string& data_t , std::string& id ){
 	if(hdList == NULL){
 		hdList = new list;
 		hdList->data_type = data_t;
@@ -155,7 +177,7 @@ void addTolist(listPtr& hdList,std::string data_t , std::string id ){
 	}
 }
 
-void addTolist2(listPtr& hdList,std::string data_t){
+void addTolist2(listPtr& hdList,std::string& data_t){
 	if(hdList == NULL){
 		hdList = new list;
 		hdList->data_type = data_t;
@@ -171,7 +193,7 @@ void addTolist2(listPtr& hdList,std::string data_t){
 	}
 }
 
-void addTolist3(listPtr& hdList,std::string id){
+void addTolist3(listPtr& hdList,std::string& id){
 	if(hdList == NULL){
 		hdList = new list;
 		hdList->data_type = "";

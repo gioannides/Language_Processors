@@ -2558,14 +2558,15 @@ int vtoken(int T){
 	else if( T == STRING_LITERAL) {
 
 		std::string temp = yytext;
+		std::string temp2;
 	    	temp[temp.find_first_of('"')] = 0;
 	    	temp[temp.find_last_of('"')] = 0;
-		yylval.text = 0;
 		for ( unsigned i = 0; i < temp.size(); ++i){
 			if(temp[i] != 0) {
-				yylval.text += temp[i];
+				temp2 += temp[i];
 			}
 		}
+		yylval.text = new std::string(temp2);
 	}
 	return T;
 }	
