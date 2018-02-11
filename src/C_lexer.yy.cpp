@@ -2537,7 +2537,7 @@ int token(int T) {
 	}
 
 	else{
-		yylval.text = (yytext);
+		yylval.text = new std::string(yytext);
 		return T;
 	}
 }
@@ -2546,12 +2546,12 @@ int vtoken(int T){
 	
 	if( T == IDENTIFIER ) {
 
-        	yylval.text = (yytext);
+        	yylval.text = new std::string(yytext);
 	}
 
 	else if( T == HEX || T == OCTAL || T == FLOAT_LITERAL || T == int_NUM ) {
 
-        	yylval.numberValue = std::atof(yytext);
+        	yylval.text = new std::string(yytext);
 
 	}		
 

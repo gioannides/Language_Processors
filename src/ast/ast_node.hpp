@@ -4,10 +4,11 @@
 #include <string>
 #include <iostream>
 
-
+#include "printList.hpp"
 #include <memory>
 
 class Node;
+
 
 
 typedef Node* NodePtr;
@@ -26,14 +27,14 @@ class Node{
 class GlobalDeclaration : public Node {
 
 	private:
-		char* SPECIFIER;
-		char* IDENTIFIER;
+		std::string* SPECIFIER=0;
+		std::string* IDENTIFIER=0;
 
 	public:	
 
-		GlobalDeclaration( char* _SPECIFIER, char* _IDENTIFIER) : SPECIFIER(_SPECIFIER), IDENTIFIER(_IDENTIFIER) {}
+		GlobalDeclaration( std::string* _SPECIFIER, std::string* _IDENTIFIER) : SPECIFIER(_SPECIFIER), IDENTIFIER(_IDENTIFIER) {}
 
-		GlobalDeclaration( char* _SPECIFIER) : SPECIFIER(_SPECIFIER) {}
+		GlobalDeclaration( std::string* _SPECIFIER) : SPECIFIER(_SPECIFIER) {}
 
 
 		~GlobalDeclaration() {}
@@ -41,7 +42,7 @@ class GlobalDeclaration : public Node {
 	
 		virtual void print(std::ostream &dst)  const {
 
-        		dst << SPECIFIER << " " << IDENTIFIER  ;
+        		dst << *SPECIFIER << " " << *IDENTIFIER << ";" ;
 		}
 
 
@@ -51,12 +52,12 @@ class StorageSpecifierDecl : public GlobalDeclaration  {
 
 
 	public:
-		StorageSpecifierDecl ( char* _SPECIFIER, char* _IDENTIFIER ) : GlobalDeclaration(_SPECIFIER,_IDENTIFIER) {
+		StorageSpecifierDecl ( std::string* _SPECIFIER, std::string* _IDENTIFIER ) : GlobalDeclaration(_SPECIFIER,_IDENTIFIER) {
 		
 			
 		}
 
-		StorageSpecifierDecl ( char* _SPECIFIER ) : GlobalDeclaration(_SPECIFIER) {
+		StorageSpecifierDecl ( std::string* _SPECIFIER ) : GlobalDeclaration(_SPECIFIER) {
 		
 			
 		}
@@ -70,11 +71,11 @@ class StorageSpecifierDecl : public GlobalDeclaration  {
 class TypeSpecifierDecl : public GlobalDeclaration {
 
 	public:
-		TypeSpecifierDecl ( char* _SPECIFIER, char* _IDENTIFIER ) : GlobalDeclaration(_SPECIFIER,_IDENTIFIER) {
+		TypeSpecifierDecl ( std::string* _SPECIFIER, std::string* _IDENTIFIER ) : GlobalDeclaration(_SPECIFIER,_IDENTIFIER) {
 
 		}
 
-		TypeSpecifierDecl ( char* _SPECIFIER) : GlobalDeclaration(_SPECIFIER) {
+		TypeSpecifierDecl ( std::string* _SPECIFIER) : GlobalDeclaration(_SPECIFIER) {
 
 		}
 
@@ -83,4 +84,85 @@ class TypeSpecifierDecl : public GlobalDeclaration {
 
 
 
+/*									FUNCTIONS					*/
+
+class Function : public Node {
+
+	private:
+		std::string* SPECIFIER=NULL;
+		std::string* IDENTIFIER=NULL;
+		listPtr PARAMETERS = NULL;
+		std::string out;
+
+	public:
+
+	/* FUNCTION DECL*/
+	Function( std::string* _SPECIFIER, std::string* _IDENTIFIER, listPtr _PARAMETERS) :  SPECIFIER(_SPECIFIER) , IDENTIFIER(_IDENTIFIER), PARAMETERS(_PARAMETERS) {}
+
+	/* FUNCTION DEF */
+	/*NOT IMPLEMENTED YET */
+
+	virtual void print(std::ostream &dst)  const {
+
+			if(PARAMETERS != NULL && SPECIFIER != NULL ) {
+		
+				
+				std::string test = PrintAList(PARAMETERS,out);
+        			dst << *SPECIFIER << " " << *IDENTIFIER << "(" << test << ");" ;
+		
+			}
+		
+			else if (SPECIFIER != NULL && PARAMETERS == NULL) {
+
+				dst << *SPECIFIER << " " << *IDENTIFIER << "();" ;
+
+			}
+
+			else if ( SPECIFIER == NULL && PARAMETERS == NULL){
+			
+				dst << *IDENTIFIER << "();" ;
+				
+			}
+
+			else if ( SPECIFIER == NULL && PARAMETERS != NULL){
+
+				std::string test = PrintAList(PARAMETERS,out);			
+				dst << *IDENTIFIER << "(" << test << ");" ;
+				
+			}
+	}
+						
+
+
+};
+
+
+class StorageSpecFunctDeclCall : public Function {
+
+	private:
+		listPtr PARAMETERS=NULL;
+		std::string* SPECIFIER=NULL;
+
+	public:
+		StorageSpecFunctDeclCall( std::string* _SPECIFIER, std::string* _IDENTIFIER, listPtr _PARAMETERS) : Function( _SPECIFIER,  _IDENTIFIER, _PARAMETERS) {}
+
+
+		~StorageSpecFunctDeclCall() {}
+
+};
+
+
+class TypeSpecFunctDeclCall : public Function {
+
+	private:
+		listPtr PARAMETERS=NULL;
+		std::string* SPECIFIER=NULL;
+
+	public:
+		TypeSpecFunctDeclCall( std::string* _SPECIFIER, std::string* _IDENTIFIER, listPtr _PARAMETERS) : Function( _SPECIFIER,  _IDENTIFIER, _PARAMETERS) {}
+
+
+		~TypeSpecFunctDeclCall() {}
+
+};
 #endif

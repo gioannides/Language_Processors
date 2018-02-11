@@ -1,13 +1,8 @@
 Terminals unused in grammar
 
    PREPROCESSOR
-   COMMA
    POINTER
    NUMBER
-   HEX
-   OCTAL
-   FLOAT_LITERAL
-   int_NUM
    DIGIT
    WHITESPACE
    NEWLINE
@@ -36,8 +31,6 @@ Terminals unused in grammar
    UNSIGNED_LONG_LONG
    INTMAX_T
    UINTMAX_T
-   LROUND
-   RROUND
    LSQUARE
    RSQUARE
    LCURLY
@@ -77,7 +70,6 @@ Terminals unused in grammar
    SHRT_ASSIGNXOR
    SHRT_ASSIGNLSHIFT
    SHRT_ASSIGNRSHIFT
-   STRING_LITERAL
    ELLIPSIS
 
 
@@ -89,80 +81,118 @@ Grammar
 
     2 NODE: NODE GLOBAL_DECLARATION
     3     | GLOBAL_DECLARATION
+    4     | NODE FUNCTION
+    5     | FUNCTION
 
-    4 GLOBAL_DECLARATION: STORAGE_SPECIFIER IDENTIFIER SEMICOLON
-    5                   | TYPE_SPECIFIER IDENTIFIER SEMICOLON
-    6                   | TYPE_SPECIFIER SEMICOLON
-    7                   | STORAGE_SPECIFIER SEMICOLON
+    6 FUNCTION: FUNCTION_DECLARATION
+    7         | FUNCTION_CALL
 
-    8 STORAGE_SPECIFIER: AUTO
-    9                  | REGISTER
-   10                  | EXTERN
-   11                  | STATIC
-   12                  | TYPEDEF
+    8 FUNCTION_DECLARATION: STORAGE_SPECIFIER FUNCTION_ID LROUND FORMAL_PARAMETERS RROUND SEMICOLON
+    9                     | TYPE_SPECIFIER FUNCTION_ID LROUND FORMAL_PARAMETERS RROUND SEMICOLON
+   10                     | TYPE_SPECIFIER FUNCTION_ID LROUND RROUND SEMICOLON
+   11                     | STORAGE_SPECIFIER FUNCTION_ID LROUND RROUND SEMICOLON
 
-   13 TYPE_SPECIFIER: INT
-   14               | CHAR
-   15               | SHORT
-   16               | FLOAT
-   17               | DOUBLE
-   18               | SIGNED
-   19               | UNSIGNED
-   20               | VOID
-   21               | STRUCT
-   22               | UNION
-   23               | CONST
-   24               | VOLATILE
+   12 FUNCTION_CALL: FUNCTION_ID LROUND ACTUAL_PARAMETERS RROUND SEMICOLON
+   13              | FUNCTION_ID LROUND RROUND SEMICOLON
+
+   14 FUNCTION_ID: IDENTIFIER
+
+   15 PARAMETER_ID: IDENTIFIER
+
+   16 FORMAL_PARAMETERS: STORAGE_SPECIFIER PARAMETER_ID
+   17                  | TYPE_SPECIFIER PARAMETER_ID
+   18                  | STORAGE_SPECIFIER
+   19                  | TYPE_SPECIFIER
+   20                  | FLOAT_LITERAL
+   21                  | int_NUM
+   22                  | HEX
+   23                  | OCTAL
+   24                  | STRING_LITERAL
+   25                  | FORMAL_PARAMETERS COMMA STORAGE_SPECIFIER PARAMETER_ID
+   26                  | FORMAL_PARAMETERS COMMA TYPE_SPECIFIER PARAMETER_ID
+
+   27 ACTUAL_PARAMETERS: PARAMETER_ID
+   28                  | STORAGE_SPECIFIER
+   29                  | TYPE_SPECIFIER
+   30                  | FLOAT_LITERAL
+   31                  | int_NUM
+   32                  | HEX
+   33                  | OCTAL
+   34                  | STRING_LITERAL
+
+   35 GLOBAL_DECLARATION: STORAGE_SPECIFIER IDENTIFIER SEMICOLON
+   36                   | TYPE_SPECIFIER IDENTIFIER SEMICOLON
+   37                   | TYPE_SPECIFIER SEMICOLON
+   38                   | STORAGE_SPECIFIER SEMICOLON
+
+   39 STORAGE_SPECIFIER: AUTO
+   40                  | REGISTER
+   41                  | EXTERN
+   42                  | STATIC
+   43                  | TYPEDEF
+
+   44 TYPE_SPECIFIER: INT
+   45               | CHAR
+   46               | SHORT
+   47               | FLOAT
+   48               | DOUBLE
+   49               | SIGNED
+   50               | UNSIGNED
+   51               | VOID
+   52               | STRUCT
+   53               | UNION
+   54               | CONST
+   55               | VOLATILE
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-SEMICOLON (258) 4 5 6 7
+SEMICOLON (258) 8 9 10 11 12 13 35 36 37 38
 PREPROCESSOR (259)
-COMMA (260)
+COMMA (260) 25 26
 POINTER (261)
 NUMBER (262)
-HEX (263)
-OCTAL (264)
-FLOAT_LITERAL (265)
-int_NUM (266)
+HEX (263) 22 32
+OCTAL (264) 23 33
+FLOAT_LITERAL (265) 20 30
+int_NUM (266) 21 31
 DIGIT (267)
-IDENTIFIER (268) 4 5
+IDENTIFIER (268) 14 15 35 36
 WHITESPACE (269)
 NEWLINE (270)
-AUTO (271) 8
+AUTO (271) 39
 BREAK (272)
 CASE (273)
-CHAR (274) 14
-CONST (275) 23
+CHAR (274) 45
+CONST (275) 54
 CONTINUE (276)
 DEFAULT (277)
 DO (278)
-DOUBLE (279) 17
+DOUBLE (279) 48
 ELSE (280)
 ENUM (281)
-EXTERN (282) 10
-FLOAT (283) 16
+EXTERN (282) 41
+FLOAT (283) 47
 FOR (284)
 GOTO (285)
 IF (286)
-INT (287) 13
+INT (287) 44
 LONG (288)
-REGISTER (289) 9
+REGISTER (289) 40
 RETURN (290)
-SHORT (291) 15
-SIGNED (292) 18
+SHORT (291) 46
+SIGNED (292) 49
 SIZEOF (293)
-STATIC (294) 11
-STRUCT (295) 21
+STATIC (294) 42
+STRUCT (295) 52
 SWITCH (296)
-TYPEDEF (297) 12
-UNION (298) 22
-UNSIGNED (299) 19
-VOID (300) 20
-VOLATILE (301) 24
+TYPEDEF (297) 43
+UNION (298) 53
+UNSIGNED (299) 50
+VOID (300) 51
+VOLATILE (301) 55
 WHILE (302)
 SIGNED_CHAR (303)
 UNSIGNED_CHAR (304)
@@ -174,8 +204,8 @@ LONG_LONG (309)
 UNSIGNED_LONG_LONG (310)
 INTMAX_T (311)
 UINTMAX_T (312)
-LROUND (313)
-RROUND (314)
+LROUND (313) 8 9 10 11 12 13
+RROUND (314) 8 9 10 11 12 13
 LSQUARE (315)
 RSQUARE (316)
 LCURLY (317)
@@ -215,7 +245,7 @@ SHRT_ASSIGNOR (350)
 SHRT_ASSIGNXOR (351)
 SHRT_ASSIGNLSHIFT (352)
 SHRT_ASSIGNRSHIFT (353)
-STRING_LITERAL (354)
+STRING_LITERAL (354) 24 34
 ELLIPSIS (355)
 
 
@@ -226,276 +256,785 @@ $accept (101)
 ROOT (102)
     on left: 1, on right: 0
 NODE (103)
-    on left: 2 3, on right: 1 2
-GLOBAL_DECLARATION (104)
-    on left: 4 5 6 7, on right: 2 3
-STORAGE_SPECIFIER (105)
-    on left: 8 9 10 11 12, on right: 4 7
-TYPE_SPECIFIER (106)
-    on left: 13 14 15 16 17 18 19 20 21 22 23 24, on right: 5 6
+    on left: 2 3 4 5, on right: 1 2 4
+FUNCTION (104)
+    on left: 6 7, on right: 4 5
+FUNCTION_DECLARATION (105)
+    on left: 8 9 10 11, on right: 6
+FUNCTION_CALL (106)
+    on left: 12 13, on right: 7
+FUNCTION_ID (107)
+    on left: 14, on right: 8 9 10 11 12 13
+PARAMETER_ID (108)
+    on left: 15, on right: 16 17 25 26 27
+FORMAL_PARAMETERS (109)
+    on left: 16 17 18 19 20 21 22 23 24 25 26, on right: 8 9 25 26
+ACTUAL_PARAMETERS (110)
+    on left: 27 28 29 30 31 32 33 34, on right: 12
+GLOBAL_DECLARATION (111)
+    on left: 35 36 37 38, on right: 2 3
+STORAGE_SPECIFIER (112)
+    on left: 39 40 41 42 43, on right: 8 11 16 18 25 28 35 38
+TYPE_SPECIFIER (113)
+    on left: 44 45 46 47 48 49 50 51 52 53 54 55, on right: 9 10 17
+    19 26 29 36 37
 
 
 State 0
 
     0 $accept: . ROOT $end
 
-    AUTO      shift, and go to state 1
-    CHAR      shift, and go to state 2
-    CONST     shift, and go to state 3
-    DOUBLE    shift, and go to state 4
-    EXTERN    shift, and go to state 5
-    FLOAT     shift, and go to state 6
-    INT       shift, and go to state 7
-    REGISTER  shift, and go to state 8
-    SHORT     shift, and go to state 9
-    SIGNED    shift, and go to state 10
-    STATIC    shift, and go to state 11
-    STRUCT    shift, and go to state 12
-    TYPEDEF   shift, and go to state 13
-    UNION     shift, and go to state 14
-    UNSIGNED  shift, and go to state 15
-    VOID      shift, and go to state 16
-    VOLATILE  shift, and go to state 17
+    IDENTIFIER  shift, and go to state 1
+    AUTO        shift, and go to state 2
+    CHAR        shift, and go to state 3
+    CONST       shift, and go to state 4
+    DOUBLE      shift, and go to state 5
+    EXTERN      shift, and go to state 6
+    FLOAT       shift, and go to state 7
+    INT         shift, and go to state 8
+    REGISTER    shift, and go to state 9
+    SHORT       shift, and go to state 10
+    SIGNED      shift, and go to state 11
+    STATIC      shift, and go to state 12
+    STRUCT      shift, and go to state 13
+    TYPEDEF     shift, and go to state 14
+    UNION       shift, and go to state 15
+    UNSIGNED    shift, and go to state 16
+    VOID        shift, and go to state 17
+    VOLATILE    shift, and go to state 18
 
-    ROOT                go to state 18
-    NODE                go to state 19
-    GLOBAL_DECLARATION  go to state 20
-    STORAGE_SPECIFIER   go to state 21
-    TYPE_SPECIFIER      go to state 22
+    ROOT                  go to state 19
+    NODE                  go to state 20
+    FUNCTION              go to state 21
+    FUNCTION_DECLARATION  go to state 22
+    FUNCTION_CALL         go to state 23
+    FUNCTION_ID           go to state 24
+    GLOBAL_DECLARATION    go to state 25
+    STORAGE_SPECIFIER     go to state 26
+    TYPE_SPECIFIER        go to state 27
 
 
 State 1
 
-    8 STORAGE_SPECIFIER: AUTO .
+   14 FUNCTION_ID: IDENTIFIER .
 
-    $default  reduce using rule 8 (STORAGE_SPECIFIER)
+    $default  reduce using rule 14 (FUNCTION_ID)
 
 
 State 2
 
-   14 TYPE_SPECIFIER: CHAR .
+   39 STORAGE_SPECIFIER: AUTO .
 
-    $default  reduce using rule 14 (TYPE_SPECIFIER)
+    $default  reduce using rule 39 (STORAGE_SPECIFIER)
 
 
 State 3
 
-   23 TYPE_SPECIFIER: CONST .
+   45 TYPE_SPECIFIER: CHAR .
 
-    $default  reduce using rule 23 (TYPE_SPECIFIER)
+    $default  reduce using rule 45 (TYPE_SPECIFIER)
 
 
 State 4
 
-   17 TYPE_SPECIFIER: DOUBLE .
+   54 TYPE_SPECIFIER: CONST .
 
-    $default  reduce using rule 17 (TYPE_SPECIFIER)
+    $default  reduce using rule 54 (TYPE_SPECIFIER)
 
 
 State 5
 
-   10 STORAGE_SPECIFIER: EXTERN .
+   48 TYPE_SPECIFIER: DOUBLE .
 
-    $default  reduce using rule 10 (STORAGE_SPECIFIER)
+    $default  reduce using rule 48 (TYPE_SPECIFIER)
 
 
 State 6
 
-   16 TYPE_SPECIFIER: FLOAT .
+   41 STORAGE_SPECIFIER: EXTERN .
 
-    $default  reduce using rule 16 (TYPE_SPECIFIER)
+    $default  reduce using rule 41 (STORAGE_SPECIFIER)
 
 
 State 7
 
-   13 TYPE_SPECIFIER: INT .
+   47 TYPE_SPECIFIER: FLOAT .
 
-    $default  reduce using rule 13 (TYPE_SPECIFIER)
+    $default  reduce using rule 47 (TYPE_SPECIFIER)
 
 
 State 8
 
-    9 STORAGE_SPECIFIER: REGISTER .
+   44 TYPE_SPECIFIER: INT .
 
-    $default  reduce using rule 9 (STORAGE_SPECIFIER)
+    $default  reduce using rule 44 (TYPE_SPECIFIER)
 
 
 State 9
 
-   15 TYPE_SPECIFIER: SHORT .
+   40 STORAGE_SPECIFIER: REGISTER .
 
-    $default  reduce using rule 15 (TYPE_SPECIFIER)
+    $default  reduce using rule 40 (STORAGE_SPECIFIER)
 
 
 State 10
 
-   18 TYPE_SPECIFIER: SIGNED .
+   46 TYPE_SPECIFIER: SHORT .
 
-    $default  reduce using rule 18 (TYPE_SPECIFIER)
+    $default  reduce using rule 46 (TYPE_SPECIFIER)
 
 
 State 11
 
-   11 STORAGE_SPECIFIER: STATIC .
+   49 TYPE_SPECIFIER: SIGNED .
 
-    $default  reduce using rule 11 (STORAGE_SPECIFIER)
+    $default  reduce using rule 49 (TYPE_SPECIFIER)
 
 
 State 12
 
-   21 TYPE_SPECIFIER: STRUCT .
+   42 STORAGE_SPECIFIER: STATIC .
 
-    $default  reduce using rule 21 (TYPE_SPECIFIER)
+    $default  reduce using rule 42 (STORAGE_SPECIFIER)
 
 
 State 13
 
-   12 STORAGE_SPECIFIER: TYPEDEF .
+   52 TYPE_SPECIFIER: STRUCT .
 
-    $default  reduce using rule 12 (STORAGE_SPECIFIER)
+    $default  reduce using rule 52 (TYPE_SPECIFIER)
 
 
 State 14
 
-   22 TYPE_SPECIFIER: UNION .
+   43 STORAGE_SPECIFIER: TYPEDEF .
 
-    $default  reduce using rule 22 (TYPE_SPECIFIER)
+    $default  reduce using rule 43 (STORAGE_SPECIFIER)
 
 
 State 15
 
-   19 TYPE_SPECIFIER: UNSIGNED .
+   53 TYPE_SPECIFIER: UNION .
 
-    $default  reduce using rule 19 (TYPE_SPECIFIER)
+    $default  reduce using rule 53 (TYPE_SPECIFIER)
 
 
 State 16
 
-   20 TYPE_SPECIFIER: VOID .
+   50 TYPE_SPECIFIER: UNSIGNED .
 
-    $default  reduce using rule 20 (TYPE_SPECIFIER)
+    $default  reduce using rule 50 (TYPE_SPECIFIER)
 
 
 State 17
 
-   24 TYPE_SPECIFIER: VOLATILE .
+   51 TYPE_SPECIFIER: VOID .
 
-    $default  reduce using rule 24 (TYPE_SPECIFIER)
+    $default  reduce using rule 51 (TYPE_SPECIFIER)
 
 
 State 18
 
-    0 $accept: ROOT . $end
+   55 TYPE_SPECIFIER: VOLATILE .
 
-    $end  shift, and go to state 23
+    $default  reduce using rule 55 (TYPE_SPECIFIER)
 
 
 State 19
 
-    1 ROOT: NODE .
-    2 NODE: NODE . GLOBAL_DECLARATION
+    0 $accept: ROOT . $end
 
-    AUTO      shift, and go to state 1
-    CHAR      shift, and go to state 2
-    CONST     shift, and go to state 3
-    DOUBLE    shift, and go to state 4
-    EXTERN    shift, and go to state 5
-    FLOAT     shift, and go to state 6
-    INT       shift, and go to state 7
-    REGISTER  shift, and go to state 8
-    SHORT     shift, and go to state 9
-    SIGNED    shift, and go to state 10
-    STATIC    shift, and go to state 11
-    STRUCT    shift, and go to state 12
-    TYPEDEF   shift, and go to state 13
-    UNION     shift, and go to state 14
-    UNSIGNED  shift, and go to state 15
-    VOID      shift, and go to state 16
-    VOLATILE  shift, and go to state 17
-
-    $default  reduce using rule 1 (ROOT)
-
-    GLOBAL_DECLARATION  go to state 24
-    STORAGE_SPECIFIER   go to state 21
-    TYPE_SPECIFIER      go to state 22
+    $end  shift, and go to state 28
 
 
 State 20
+
+    1 ROOT: NODE .
+    2 NODE: NODE . GLOBAL_DECLARATION
+    4     | NODE . FUNCTION
+
+    IDENTIFIER  shift, and go to state 1
+    AUTO        shift, and go to state 2
+    CHAR        shift, and go to state 3
+    CONST       shift, and go to state 4
+    DOUBLE      shift, and go to state 5
+    EXTERN      shift, and go to state 6
+    FLOAT       shift, and go to state 7
+    INT         shift, and go to state 8
+    REGISTER    shift, and go to state 9
+    SHORT       shift, and go to state 10
+    SIGNED      shift, and go to state 11
+    STATIC      shift, and go to state 12
+    STRUCT      shift, and go to state 13
+    TYPEDEF     shift, and go to state 14
+    UNION       shift, and go to state 15
+    UNSIGNED    shift, and go to state 16
+    VOID        shift, and go to state 17
+    VOLATILE    shift, and go to state 18
+
+    $default  reduce using rule 1 (ROOT)
+
+    FUNCTION              go to state 29
+    FUNCTION_DECLARATION  go to state 22
+    FUNCTION_CALL         go to state 23
+    FUNCTION_ID           go to state 24
+    GLOBAL_DECLARATION    go to state 30
+    STORAGE_SPECIFIER     go to state 26
+    TYPE_SPECIFIER        go to state 27
+
+
+State 21
+
+    5 NODE: FUNCTION .
+
+    $default  reduce using rule 5 (NODE)
+
+
+State 22
+
+    6 FUNCTION: FUNCTION_DECLARATION .
+
+    $default  reduce using rule 6 (FUNCTION)
+
+
+State 23
+
+    7 FUNCTION: FUNCTION_CALL .
+
+    $default  reduce using rule 7 (FUNCTION)
+
+
+State 24
+
+   12 FUNCTION_CALL: FUNCTION_ID . LROUND ACTUAL_PARAMETERS RROUND SEMICOLON
+   13              | FUNCTION_ID . LROUND RROUND SEMICOLON
+
+    LROUND  shift, and go to state 31
+
+
+State 25
 
     3 NODE: GLOBAL_DECLARATION .
 
     $default  reduce using rule 3 (NODE)
 
 
-State 21
+State 26
 
-    4 GLOBAL_DECLARATION: STORAGE_SPECIFIER . IDENTIFIER SEMICOLON
-    7                   | STORAGE_SPECIFIER . SEMICOLON
+    8 FUNCTION_DECLARATION: STORAGE_SPECIFIER . FUNCTION_ID LROUND FORMAL_PARAMETERS RROUND SEMICOLON
+   11                     | STORAGE_SPECIFIER . FUNCTION_ID LROUND RROUND SEMICOLON
+   35 GLOBAL_DECLARATION: STORAGE_SPECIFIER . IDENTIFIER SEMICOLON
+   38                   | STORAGE_SPECIFIER . SEMICOLON
 
-    SEMICOLON   shift, and go to state 25
-    IDENTIFIER  shift, and go to state 26
+    SEMICOLON   shift, and go to state 32
+    IDENTIFIER  shift, and go to state 33
 
-
-State 22
-
-    5 GLOBAL_DECLARATION: TYPE_SPECIFIER . IDENTIFIER SEMICOLON
-    6                   | TYPE_SPECIFIER . SEMICOLON
-
-    SEMICOLON   shift, and go to state 27
-    IDENTIFIER  shift, and go to state 28
+    FUNCTION_ID  go to state 34
 
 
-State 23
+State 27
+
+    9 FUNCTION_DECLARATION: TYPE_SPECIFIER . FUNCTION_ID LROUND FORMAL_PARAMETERS RROUND SEMICOLON
+   10                     | TYPE_SPECIFIER . FUNCTION_ID LROUND RROUND SEMICOLON
+   36 GLOBAL_DECLARATION: TYPE_SPECIFIER . IDENTIFIER SEMICOLON
+   37                   | TYPE_SPECIFIER . SEMICOLON
+
+    SEMICOLON   shift, and go to state 35
+    IDENTIFIER  shift, and go to state 36
+
+    FUNCTION_ID  go to state 37
+
+
+State 28
 
     0 $accept: ROOT $end .
 
     $default  accept
 
 
-State 24
+State 29
+
+    4 NODE: NODE FUNCTION .
+
+    $default  reduce using rule 4 (NODE)
+
+
+State 30
 
     2 NODE: NODE GLOBAL_DECLARATION .
 
     $default  reduce using rule 2 (NODE)
 
 
-State 25
+State 31
 
-    7 GLOBAL_DECLARATION: STORAGE_SPECIFIER SEMICOLON .
+   12 FUNCTION_CALL: FUNCTION_ID LROUND . ACTUAL_PARAMETERS RROUND SEMICOLON
+   13              | FUNCTION_ID LROUND . RROUND SEMICOLON
 
-    $default  reduce using rule 7 (GLOBAL_DECLARATION)
+    HEX             shift, and go to state 38
+    OCTAL           shift, and go to state 39
+    FLOAT_LITERAL   shift, and go to state 40
+    int_NUM         shift, and go to state 41
+    IDENTIFIER      shift, and go to state 42
+    AUTO            shift, and go to state 2
+    CHAR            shift, and go to state 3
+    CONST           shift, and go to state 4
+    DOUBLE          shift, and go to state 5
+    EXTERN          shift, and go to state 6
+    FLOAT           shift, and go to state 7
+    INT             shift, and go to state 8
+    REGISTER        shift, and go to state 9
+    SHORT           shift, and go to state 10
+    SIGNED          shift, and go to state 11
+    STATIC          shift, and go to state 12
+    STRUCT          shift, and go to state 13
+    TYPEDEF         shift, and go to state 14
+    UNION           shift, and go to state 15
+    UNSIGNED        shift, and go to state 16
+    VOID            shift, and go to state 17
+    VOLATILE        shift, and go to state 18
+    RROUND          shift, and go to state 43
+    STRING_LITERAL  shift, and go to state 44
+
+    PARAMETER_ID       go to state 45
+    ACTUAL_PARAMETERS  go to state 46
+    STORAGE_SPECIFIER  go to state 47
+    TYPE_SPECIFIER     go to state 48
 
 
-State 26
+State 32
 
-    4 GLOBAL_DECLARATION: STORAGE_SPECIFIER IDENTIFIER . SEMICOLON
+   38 GLOBAL_DECLARATION: STORAGE_SPECIFIER SEMICOLON .
 
-    SEMICOLON  shift, and go to state 29
-
-
-State 27
-
-    6 GLOBAL_DECLARATION: TYPE_SPECIFIER SEMICOLON .
-
-    $default  reduce using rule 6 (GLOBAL_DECLARATION)
+    $default  reduce using rule 38 (GLOBAL_DECLARATION)
 
 
-State 28
+State 33
 
-    5 GLOBAL_DECLARATION: TYPE_SPECIFIER IDENTIFIER . SEMICOLON
+   14 FUNCTION_ID: IDENTIFIER .
+   35 GLOBAL_DECLARATION: STORAGE_SPECIFIER IDENTIFIER . SEMICOLON
 
-    SEMICOLON  shift, and go to state 30
+    SEMICOLON  shift, and go to state 49
 
-
-State 29
-
-    4 GLOBAL_DECLARATION: STORAGE_SPECIFIER IDENTIFIER SEMICOLON .
-
-    $default  reduce using rule 4 (GLOBAL_DECLARATION)
+    $default  reduce using rule 14 (FUNCTION_ID)
 
 
-State 30
+State 34
 
-    5 GLOBAL_DECLARATION: TYPE_SPECIFIER IDENTIFIER SEMICOLON .
+    8 FUNCTION_DECLARATION: STORAGE_SPECIFIER FUNCTION_ID . LROUND FORMAL_PARAMETERS RROUND SEMICOLON
+   11                     | STORAGE_SPECIFIER FUNCTION_ID . LROUND RROUND SEMICOLON
 
-    $default  reduce using rule 5 (GLOBAL_DECLARATION)
+    LROUND  shift, and go to state 50
+
+
+State 35
+
+   37 GLOBAL_DECLARATION: TYPE_SPECIFIER SEMICOLON .
+
+    $default  reduce using rule 37 (GLOBAL_DECLARATION)
+
+
+State 36
+
+   14 FUNCTION_ID: IDENTIFIER .
+   36 GLOBAL_DECLARATION: TYPE_SPECIFIER IDENTIFIER . SEMICOLON
+
+    SEMICOLON  shift, and go to state 51
+
+    $default  reduce using rule 14 (FUNCTION_ID)
+
+
+State 37
+
+    9 FUNCTION_DECLARATION: TYPE_SPECIFIER FUNCTION_ID . LROUND FORMAL_PARAMETERS RROUND SEMICOLON
+   10                     | TYPE_SPECIFIER FUNCTION_ID . LROUND RROUND SEMICOLON
+
+    LROUND  shift, and go to state 52
+
+
+State 38
+
+   32 ACTUAL_PARAMETERS: HEX .
+
+    $default  reduce using rule 32 (ACTUAL_PARAMETERS)
+
+
+State 39
+
+   33 ACTUAL_PARAMETERS: OCTAL .
+
+    $default  reduce using rule 33 (ACTUAL_PARAMETERS)
+
+
+State 40
+
+   30 ACTUAL_PARAMETERS: FLOAT_LITERAL .
+
+    $default  reduce using rule 30 (ACTUAL_PARAMETERS)
+
+
+State 41
+
+   31 ACTUAL_PARAMETERS: int_NUM .
+
+    $default  reduce using rule 31 (ACTUAL_PARAMETERS)
+
+
+State 42
+
+   15 PARAMETER_ID: IDENTIFIER .
+
+    $default  reduce using rule 15 (PARAMETER_ID)
+
+
+State 43
+
+   13 FUNCTION_CALL: FUNCTION_ID LROUND RROUND . SEMICOLON
+
+    SEMICOLON  shift, and go to state 53
+
+
+State 44
+
+   34 ACTUAL_PARAMETERS: STRING_LITERAL .
+
+    $default  reduce using rule 34 (ACTUAL_PARAMETERS)
+
+
+State 45
+
+   27 ACTUAL_PARAMETERS: PARAMETER_ID .
+
+    $default  reduce using rule 27 (ACTUAL_PARAMETERS)
+
+
+State 46
+
+   12 FUNCTION_CALL: FUNCTION_ID LROUND ACTUAL_PARAMETERS . RROUND SEMICOLON
+
+    RROUND  shift, and go to state 54
+
+
+State 47
+
+   28 ACTUAL_PARAMETERS: STORAGE_SPECIFIER .
+
+    $default  reduce using rule 28 (ACTUAL_PARAMETERS)
+
+
+State 48
+
+   29 ACTUAL_PARAMETERS: TYPE_SPECIFIER .
+
+    $default  reduce using rule 29 (ACTUAL_PARAMETERS)
+
+
+State 49
+
+   35 GLOBAL_DECLARATION: STORAGE_SPECIFIER IDENTIFIER SEMICOLON .
+
+    $default  reduce using rule 35 (GLOBAL_DECLARATION)
+
+
+State 50
+
+    8 FUNCTION_DECLARATION: STORAGE_SPECIFIER FUNCTION_ID LROUND . FORMAL_PARAMETERS RROUND SEMICOLON
+   11                     | STORAGE_SPECIFIER FUNCTION_ID LROUND . RROUND SEMICOLON
+
+    HEX             shift, and go to state 55
+    OCTAL           shift, and go to state 56
+    FLOAT_LITERAL   shift, and go to state 57
+    int_NUM         shift, and go to state 58
+    AUTO            shift, and go to state 2
+    CHAR            shift, and go to state 3
+    CONST           shift, and go to state 4
+    DOUBLE          shift, and go to state 5
+    EXTERN          shift, and go to state 6
+    FLOAT           shift, and go to state 7
+    INT             shift, and go to state 8
+    REGISTER        shift, and go to state 9
+    SHORT           shift, and go to state 10
+    SIGNED          shift, and go to state 11
+    STATIC          shift, and go to state 12
+    STRUCT          shift, and go to state 13
+    TYPEDEF         shift, and go to state 14
+    UNION           shift, and go to state 15
+    UNSIGNED        shift, and go to state 16
+    VOID            shift, and go to state 17
+    VOLATILE        shift, and go to state 18
+    RROUND          shift, and go to state 59
+    STRING_LITERAL  shift, and go to state 60
+
+    FORMAL_PARAMETERS  go to state 61
+    STORAGE_SPECIFIER  go to state 62
+    TYPE_SPECIFIER     go to state 63
+
+
+State 51
+
+   36 GLOBAL_DECLARATION: TYPE_SPECIFIER IDENTIFIER SEMICOLON .
+
+    $default  reduce using rule 36 (GLOBAL_DECLARATION)
+
+
+State 52
+
+    9 FUNCTION_DECLARATION: TYPE_SPECIFIER FUNCTION_ID LROUND . FORMAL_PARAMETERS RROUND SEMICOLON
+   10                     | TYPE_SPECIFIER FUNCTION_ID LROUND . RROUND SEMICOLON
+
+    HEX             shift, and go to state 55
+    OCTAL           shift, and go to state 56
+    FLOAT_LITERAL   shift, and go to state 57
+    int_NUM         shift, and go to state 58
+    AUTO            shift, and go to state 2
+    CHAR            shift, and go to state 3
+    CONST           shift, and go to state 4
+    DOUBLE          shift, and go to state 5
+    EXTERN          shift, and go to state 6
+    FLOAT           shift, and go to state 7
+    INT             shift, and go to state 8
+    REGISTER        shift, and go to state 9
+    SHORT           shift, and go to state 10
+    SIGNED          shift, and go to state 11
+    STATIC          shift, and go to state 12
+    STRUCT          shift, and go to state 13
+    TYPEDEF         shift, and go to state 14
+    UNION           shift, and go to state 15
+    UNSIGNED        shift, and go to state 16
+    VOID            shift, and go to state 17
+    VOLATILE        shift, and go to state 18
+    RROUND          shift, and go to state 64
+    STRING_LITERAL  shift, and go to state 60
+
+    FORMAL_PARAMETERS  go to state 65
+    STORAGE_SPECIFIER  go to state 62
+    TYPE_SPECIFIER     go to state 63
+
+
+State 53
+
+   13 FUNCTION_CALL: FUNCTION_ID LROUND RROUND SEMICOLON .
+
+    $default  reduce using rule 13 (FUNCTION_CALL)
+
+
+State 54
+
+   12 FUNCTION_CALL: FUNCTION_ID LROUND ACTUAL_PARAMETERS RROUND . SEMICOLON
+
+    SEMICOLON  shift, and go to state 66
+
+
+State 55
+
+   22 FORMAL_PARAMETERS: HEX .
+
+    $default  reduce using rule 22 (FORMAL_PARAMETERS)
+
+
+State 56
+
+   23 FORMAL_PARAMETERS: OCTAL .
+
+    $default  reduce using rule 23 (FORMAL_PARAMETERS)
+
+
+State 57
+
+   20 FORMAL_PARAMETERS: FLOAT_LITERAL .
+
+    $default  reduce using rule 20 (FORMAL_PARAMETERS)
+
+
+State 58
+
+   21 FORMAL_PARAMETERS: int_NUM .
+
+    $default  reduce using rule 21 (FORMAL_PARAMETERS)
+
+
+State 59
+
+   11 FUNCTION_DECLARATION: STORAGE_SPECIFIER FUNCTION_ID LROUND RROUND . SEMICOLON
+
+    SEMICOLON  shift, and go to state 67
+
+
+State 60
+
+   24 FORMAL_PARAMETERS: STRING_LITERAL .
+
+    $default  reduce using rule 24 (FORMAL_PARAMETERS)
+
+
+State 61
+
+    8 FUNCTION_DECLARATION: STORAGE_SPECIFIER FUNCTION_ID LROUND FORMAL_PARAMETERS . RROUND SEMICOLON
+   25 FORMAL_PARAMETERS: FORMAL_PARAMETERS . COMMA STORAGE_SPECIFIER PARAMETER_ID
+   26                  | FORMAL_PARAMETERS . COMMA TYPE_SPECIFIER PARAMETER_ID
+
+    COMMA   shift, and go to state 68
+    RROUND  shift, and go to state 69
+
+
+State 62
+
+   16 FORMAL_PARAMETERS: STORAGE_SPECIFIER . PARAMETER_ID
+   18                  | STORAGE_SPECIFIER .
+
+    IDENTIFIER  shift, and go to state 42
+
+    $default  reduce using rule 18 (FORMAL_PARAMETERS)
+
+    PARAMETER_ID  go to state 70
+
+
+State 63
+
+   17 FORMAL_PARAMETERS: TYPE_SPECIFIER . PARAMETER_ID
+   19                  | TYPE_SPECIFIER .
+
+    IDENTIFIER  shift, and go to state 42
+
+    $default  reduce using rule 19 (FORMAL_PARAMETERS)
+
+    PARAMETER_ID  go to state 71
+
+
+State 64
+
+   10 FUNCTION_DECLARATION: TYPE_SPECIFIER FUNCTION_ID LROUND RROUND . SEMICOLON
+
+    SEMICOLON  shift, and go to state 72
+
+
+State 65
+
+    9 FUNCTION_DECLARATION: TYPE_SPECIFIER FUNCTION_ID LROUND FORMAL_PARAMETERS . RROUND SEMICOLON
+   25 FORMAL_PARAMETERS: FORMAL_PARAMETERS . COMMA STORAGE_SPECIFIER PARAMETER_ID
+   26                  | FORMAL_PARAMETERS . COMMA TYPE_SPECIFIER PARAMETER_ID
+
+    COMMA   shift, and go to state 68
+    RROUND  shift, and go to state 73
+
+
+State 66
+
+   12 FUNCTION_CALL: FUNCTION_ID LROUND ACTUAL_PARAMETERS RROUND SEMICOLON .
+
+    $default  reduce using rule 12 (FUNCTION_CALL)
+
+
+State 67
+
+   11 FUNCTION_DECLARATION: STORAGE_SPECIFIER FUNCTION_ID LROUND RROUND SEMICOLON .
+
+    $default  reduce using rule 11 (FUNCTION_DECLARATION)
+
+
+State 68
+
+   25 FORMAL_PARAMETERS: FORMAL_PARAMETERS COMMA . STORAGE_SPECIFIER PARAMETER_ID
+   26                  | FORMAL_PARAMETERS COMMA . TYPE_SPECIFIER PARAMETER_ID
+
+    AUTO      shift, and go to state 2
+    CHAR      shift, and go to state 3
+    CONST     shift, and go to state 4
+    DOUBLE    shift, and go to state 5
+    EXTERN    shift, and go to state 6
+    FLOAT     shift, and go to state 7
+    INT       shift, and go to state 8
+    REGISTER  shift, and go to state 9
+    SHORT     shift, and go to state 10
+    SIGNED    shift, and go to state 11
+    STATIC    shift, and go to state 12
+    STRUCT    shift, and go to state 13
+    TYPEDEF   shift, and go to state 14
+    UNION     shift, and go to state 15
+    UNSIGNED  shift, and go to state 16
+    VOID      shift, and go to state 17
+    VOLATILE  shift, and go to state 18
+
+    STORAGE_SPECIFIER  go to state 74
+    TYPE_SPECIFIER     go to state 75
+
+
+State 69
+
+    8 FUNCTION_DECLARATION: STORAGE_SPECIFIER FUNCTION_ID LROUND FORMAL_PARAMETERS RROUND . SEMICOLON
+
+    SEMICOLON  shift, and go to state 76
+
+
+State 70
+
+   16 FORMAL_PARAMETERS: STORAGE_SPECIFIER PARAMETER_ID .
+
+    $default  reduce using rule 16 (FORMAL_PARAMETERS)
+
+
+State 71
+
+   17 FORMAL_PARAMETERS: TYPE_SPECIFIER PARAMETER_ID .
+
+    $default  reduce using rule 17 (FORMAL_PARAMETERS)
+
+
+State 72
+
+   10 FUNCTION_DECLARATION: TYPE_SPECIFIER FUNCTION_ID LROUND RROUND SEMICOLON .
+
+    $default  reduce using rule 10 (FUNCTION_DECLARATION)
+
+
+State 73
+
+    9 FUNCTION_DECLARATION: TYPE_SPECIFIER FUNCTION_ID LROUND FORMAL_PARAMETERS RROUND . SEMICOLON
+
+    SEMICOLON  shift, and go to state 77
+
+
+State 74
+
+   25 FORMAL_PARAMETERS: FORMAL_PARAMETERS COMMA STORAGE_SPECIFIER . PARAMETER_ID
+
+    IDENTIFIER  shift, and go to state 42
+
+    PARAMETER_ID  go to state 78
+
+
+State 75
+
+   26 FORMAL_PARAMETERS: FORMAL_PARAMETERS COMMA TYPE_SPECIFIER . PARAMETER_ID
+
+    IDENTIFIER  shift, and go to state 42
+
+    PARAMETER_ID  go to state 79
+
+
+State 76
+
+    8 FUNCTION_DECLARATION: STORAGE_SPECIFIER FUNCTION_ID LROUND FORMAL_PARAMETERS RROUND SEMICOLON .
+
+    $default  reduce using rule 8 (FUNCTION_DECLARATION)
+
+
+State 77
+
+    9 FUNCTION_DECLARATION: TYPE_SPECIFIER FUNCTION_ID LROUND FORMAL_PARAMETERS RROUND SEMICOLON .
+
+    $default  reduce using rule 9 (FUNCTION_DECLARATION)
+
+
+State 78
+
+   25 FORMAL_PARAMETERS: FORMAL_PARAMETERS COMMA STORAGE_SPECIFIER PARAMETER_ID .
+
+    $default  reduce using rule 25 (FORMAL_PARAMETERS)
+
+
+State 79
+
+   26 FORMAL_PARAMETERS: FORMAL_PARAMETERS COMMA TYPE_SPECIFIER PARAMETER_ID .
+
+    $default  reduce using rule 26 (FORMAL_PARAMETERS)

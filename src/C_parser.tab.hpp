@@ -54,7 +54,12 @@ extern int yydebug;
   int yylex(void);
   void yyerror(const char *);
 
-#line 58 "src/C_parser.tab.hpp" /* yacc.c:1909  */
+  void addTolist(listPtr& hdList,std::string data_t, std::string id);
+  void addTolist2(listPtr& hdList,std::string data_t);
+  void addTolist3(listPtr& hdList,std::string id);
+  extern listPtr hdList;
+
+#line 63 "src/C_parser.tab.hpp" /* yacc.c:1909  */
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -167,13 +172,15 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 17 "src/C_parser.y" /* yacc.c:1909  */
+#line 22 "src/C_parser.y" /* yacc.c:1909  */
 
   const Node* GlobalDecl;
-  char* text;
-  double numberValue;
+  const Node* FunctionDeclCall;
+  std::string* text;
+  double* numberValue;
+  listPtr linkedlist;
 
-#line 177 "src/C_parser.tab.hpp" /* yacc.c:1909  */
+#line 184 "src/C_parser.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
