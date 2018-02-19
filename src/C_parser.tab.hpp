@@ -42,11 +42,15 @@ extern int yydebug;
 /* "%code requires" blocks.  */
 #line 1 "src/C_parser.y" /* yacc.c:1909  */
 
-  #include "ast.hpp"
+  #include "include/ast.hpp"
 
   #include <cassert>
+  #include <fstream>
+  
+  
+  extern FILE *yyin;
+  extern const TranslationUnit *g_root; // A way of getting the AST out
 
-  extern const Node *g_root; // A way of getting the AST out
 
   //! This is to fix problems when generating C++
   // We are declaring the functions provided by Flex, so
@@ -54,116 +58,79 @@ extern int yydebug;
   int yylex(void);
   void yyerror(const char *);
 
-  void addTolist(listPtr& hdList,std::string& data_t, std::string& id);
-  void addTolist2(listPtr& hdList,std::string& data_t);
-  void addTolist3(listPtr& hdList,std::string& id);
-  extern listPtr hdList;
 
-#line 63 "src/C_parser.tab.hpp" /* yacc.c:1909  */
+
+#line 64 "src/C_parser.tab.hpp" /* yacc.c:1909  */
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    SEMICOLON = 258,
-    PREPROCESSOR = 259,
-    COMMA = 260,
-    POINTER = 261,
-    NUMBER = 262,
-    HEX = 263,
-    OCTAL = 264,
-    FLOAT_LITERAL = 265,
-    int_NUM = 266,
-    DIGIT = 267,
-    IDENTIFIER = 268,
-    WHITESPACE = 269,
-    NEWLINE = 270,
-    AUTO = 271,
-    BREAK = 272,
-    CASE = 273,
-    CHAR = 274,
-    CONST = 275,
-    CONTINUE = 276,
-    DEFAULT = 277,
-    DO = 278,
-    DOUBLE = 279,
-    ELSE = 280,
-    ENUM = 281,
-    EXTERN = 282,
-    FLOAT = 283,
-    FOR = 284,
-    GOTO = 285,
-    IF = 286,
-    INT = 287,
-    LONG = 288,
-    REGISTER = 289,
-    RETURN = 290,
-    SHORT = 291,
-    SIGNED = 292,
-    SIZEOF = 293,
-    STATIC = 294,
-    STRUCT = 295,
-    SWITCH = 296,
-    TYPEDEF = 297,
-    UNION = 298,
-    UNSIGNED = 299,
-    VOID = 300,
-    VOLATILE = 301,
-    WHILE = 302,
-    SIGNED_CHAR = 303,
-    UNSIGNED_CHAR = 304,
-    UNSIGNED_SHORT = 305,
-    UNSIGNED_INT = 306,
-    UNSIGNED_LONG = 307,
-    LONG_DOUBLE = 308,
-    LONG_LONG = 309,
-    UNSIGNED_LONG_LONG = 310,
-    INTMAX_T = 311,
-    UINTMAX_T = 312,
-    LROUND = 313,
-    RROUND = 314,
-    LSQUARE = 315,
-    RSQUARE = 316,
-    LCURLY = 317,
-    RCURLY = 318,
-    DOT_OP = 319,
-    POINTER_OP = 320,
-    LOGICAL_NOT_OP = 321,
-    BITWISE_NOT_OP = 322,
-    PLUS_OP = 323,
-    MINUS_OP = 324,
-    INC_OP = 325,
-    DEC_OP = 326,
-    MULT = 327,
-    DIV = 328,
-    MODULUS_OP = 329,
-    SHIFT_LEFT_OP = 330,
-    SHIFT_RIGHT_OP = 331,
-    LT = 332,
-    GT = 333,
-    LE = 334,
-    GE = 335,
-    EQ = 336,
-    NOT_EQ = 337,
-    AND = 338,
-    XOR = 339,
-    OR = 340,
-    LOG_AND = 341,
-    LOG_OR = 342,
-    COND_OP = 343,
-    ASSIGN_OP = 344,
-    SHRT_ASSIGNPLUS = 345,
-    SHRT_ASSIGNMINUS = 346,
-    SHRT_ASSIGNMULT = 347,
-    SHRT_ASSIGNMOD = 348,
-    SHRT_ASSIGNAND = 349,
-    SHRT_ASSIGNOR = 350,
-    SHRT_ASSIGNXOR = 351,
-    SHRT_ASSIGNLSHIFT = 352,
-    SHRT_ASSIGNRSHIFT = 353,
-    STRING_LITERAL = 354,
-    ELLIPSIS = 355
+    IDENTIFIER = 258,
+    CONSTANT = 259,
+    STRING_LITERAL = 260,
+    SIZEOF = 261,
+    PTR_OP = 262,
+    INC_OP = 263,
+    DEC_OP = 264,
+    LEFT_OP = 265,
+    RIGHT_OP = 266,
+    LE_OP = 267,
+    GE_OP = 268,
+    EQ_OP = 269,
+    NE_OP = 270,
+    AND_OP = 271,
+    OR_OP = 272,
+    MUL_ASSIGN = 273,
+    DIV_ASSIGN = 274,
+    MOD_ASSIGN = 275,
+    ADD_ASSIGN = 276,
+    SUB_ASSIGN = 277,
+    LEFT_ASSIGN = 278,
+    RIGHT_ASSIGN = 279,
+    AND_ASSIGN = 280,
+    XOR_ASSIGN = 281,
+    OR_ASSIGN = 282,
+    GT = 283,
+    LT = 284,
+    PLUS = 285,
+    MINUS = 286,
+    MULTIPLY = 287,
+    MODULO = 288,
+    DIVIDE = 289,
+    TYPEDEF = 290,
+    EXTERN = 291,
+    STATIC = 292,
+    AUTO = 293,
+    REGISTER = 294,
+    CHAR = 295,
+    SHORT = 296,
+    INT = 297,
+    LONG = 298,
+    SIGNED = 299,
+    UNSIGNED = 300,
+    FLOAT = 301,
+    DOUBLE = 302,
+    CONST = 303,
+    VOLATILE = 304,
+    VOID = 305,
+    STRUCT = 306,
+    UNION = 307,
+    ENUM = 308,
+    ELLIPSIS = 309,
+    CASE = 310,
+    DEFAULT = 311,
+    IF = 312,
+    ELSE = 313,
+    SWITCH = 314,
+    WHILE = 315,
+    DO = 316,
+    FOR = 317,
+    GOTO = 318,
+    CONTINUE = 319,
+    BREAK = 320,
+    RETURN = 321
   };
 #endif
 
@@ -172,15 +139,60 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 22 "src/C_parser.y" /* yacc.c:1909  */
+#line 23 "src/C_parser.y" /* yacc.c:1909  */
 
-  const Node* GlobalDecl;
-  const Node* FunctionDeclCall;
-  std::string* text;
-  double* numberValue;
-  listPtr linkedlist;
 
-#line 184 "src/C_parser.tab.hpp" /* yacc.c:1909  */
+	TranslationUnit* ASTtree;
+	ExternalDeclaration* ExternalDecLaration;
+	FunctionDefinition* FunctionDefinitionPtr;
+	Declaration* DecLaration;
+	DeclarationSpecifiers* DeclarationSpecifierS;
+	TypeQualifier* TypeQuaLifier;
+	TypeSpecifier* TypeSpeCifier;
+	StructOrUnionSpecifier* StructOrUnionSpecifieR;
+	StructDeclarationList* StructDeclarationLisT;
+	StructDeclarator* STructDeclarator;
+	StructDeclaration* StructDecLaration;
+	StructDeclaratorList* StructDeclaratoRList;
+	StorageClassSpecifiers* StorageClassSpecifierS;
+	InitDeclaratorList* InitDeclaratoRList;
+	InitDeclarator* InitDeclArator;
+	Declarator* DecLarator;
+	DirectDeclarator* DirectDeclaratorPtr;
+	ConstantExpression* ConstanTExpression;
+	DirectDeclarator* DiRectDeclarator;
+	StructOrUnion* StruCtOrUnion;
+	ConditionalExpression* COnditionalExpression;
+	EnumSpecifier* ENumSpecifier;
+	LogicalOrExpression* LOgicalOrExpression;
+	LogicalAndExpression* LogicalANDexpression;
+	InclusiveOrExpression* InclusiveOrExpressioN;
+	ExclusiveOrExpression* ExclusiveOrExpressioN;
+	AndExpression* AndExpressioN;
+	EqualityExpression* EQualityExpression;
+	RelationalExpression* RElationalExpression;
+	ShiftExpression* SHiftExpression;
+	AdditiveExpression* ADDitiveExpression;
+	MultiplicativeExpression* MUltiplicativeExpression;
+	CastExpression* CAstExpression;
+	Initializer* InitializerPtr;
+	AssignmentExpression* AssignmentExpressionPtr;
+	UnaryExpression* UnaryExpressionPtr;
+	PostFixExpression* PostFixExpressionPtr;
+	PrimaryExpression* PrimaryExpressionPtr;
+	ArgumentExpressionList* ArgumentExpressionListPtr;
+	CompoundStatement* CompoundStatementPtr;
+	StatementList* StatementListPtr;
+	Statement* StatementPtr;
+	JumpStatement* JumpStatementPtr;
+	IterationStatement* IterationStatementPtr;
+	SelectionStatement* SelectionStatementPtr;
+	ExpressionStatement* ExpressionStatementPtr;
+	LabeledStatement* LabeledStatementPtr;
+	std::string* text;
+	DeclarationList* DeclarationListPtr;
+
+#line 196 "src/C_parser.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

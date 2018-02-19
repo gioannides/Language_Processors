@@ -4,6 +4,7 @@
 #include "ast/ast_node.hpp"
 
 
-extern const Node *parseAST();
+extern const TranslationUnit *parseAST(char* x, char* y);
+
 
 #endif
