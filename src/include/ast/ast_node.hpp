@@ -536,16 +536,25 @@ class DirectDeclarator : public Node {
 	
 				IDENTIFIER(IDENTIFIER) , ConstantExpRession(ConstantExpRession), ParameterTypeLiSt(ParameterTypeLiSt), IDentifierList(IDentifierList) {}
 
-		void print_py(std::ofstream& file, bool initialized) {
+		void print_py(std::ofstream& file, bool initialized=false, bool function=false) {
+
+			if(!function) {
 	
-			if(!initialized){
-				file << *IDENTIFIER << "=0" << std::endl;
+				if(!initialized){
+					file << *IDENTIFIER << "=0" << std::endl;
+				}
+
+				else{
+					file << *IDENTIFIER << "=";
+				}
+
 			}
 
 			else{
-				file << *IDENTIFIER << "=";
-			}
 
+				file << "def:" << *IDENTIFIER << "(";
+
+			}
 		}
 
 
@@ -568,8 +577,8 @@ class Declarator : public Node {
 	
 		Declarator(Pointer* PoinTer, DirectDeclarator* DirectDecLarator) : PoinTer(PoinTer) , DirectDecLarator(DirectDecLarator) {}
 
-		void print_py(std::ofstream& file, bool initialized) {
-			DirectDecLarator->print_py(file,initialized);
+		void print_py(std::ofstream& file, bool initialized=false, bool function=false) {
+			DirectDecLarator->print_py(file,initialized,function);
 		}
 
 		~Declarator() {}
@@ -922,6 +931,8 @@ class JumpStatement : public Node {
 
 		~JumpStatement() {}
 
+		void print_py(std::ofstream& file) {}
+
 };
 
 
@@ -941,6 +952,8 @@ class IterationStatement : public Node {
 		IterationStatement(AssignmentExpression* AssignmentExpressionPtr , Statement* StatementPtr, ExpressionStatement* ExpressionStatementPtr, ExpressionStatement* ExpressionStatementPtr2, std::string* ITERATIVE_TYPE) : AssignmentExpressionPtr(AssignmentExpressionPtr) , StatementPtr(StatementPtr) , ExpressionStatementPtr(ExpressionStatementPtr) , ExpressionStatementPtr2(ExpressionStatementPtr2) , ITERATIVE_TYPE(ITERATIVE_TYPE) {}
 
 		~IterationStatement() {}
+
+		void print_py(std::ofstream& file) {}
 
 };
 		
@@ -962,6 +975,9 @@ class SelectionStatement : public Node {
 
 		~SelectionStatement() {}
 
+		void print_py(std::ofstream& file) ;
+		
+
 };
 
 
@@ -979,6 +995,8 @@ class ExpressionStatement : public Node {
 
 		~ExpressionStatement() {}
 
+		void print_py(std::ofstream& file) {}
+
 };
 
 
@@ -991,6 +1009,8 @@ class DeclarationList : public Node {
 		DeclarationList(Declaration* DeclarationPtr) : 	DeclarationPtr(DeclarationPtr) {}
 
 		~DeclarationList() {}
+
+		void print_py(std::ofstream& file) {}
 
 };
 	
@@ -1011,6 +1031,8 @@ class LabeledStatement : public Node {
 			IDENTIFIER(IDENTIFIER) , ConstantExpressionPtr(ConstantExpressionPtr) , StatementPtr(StatementPtr) , LABELED_TYPE(LABELED_TYPE)  {}
 
 		~LabeledStatement() {}
+
+		void print_py(std::ofstream& file) {}
 
 };
 
@@ -1034,6 +1056,9 @@ class Statement : public Node {
 
 		~Statement() {}
 
+		void print_py(std::ofstream& file);				 
+				
+
 };
 
 
@@ -1050,6 +1075,16 @@ class StatementList : public Node {
 		StatementList(Statement* StatementPtr) : StatementPtr(StatementPtr) {}
 
 		~StatementList() {}
+
+		void print_py(std::ofstream& file) {
+
+			if( StatementPtr != NULL) {
+				StatementPtr->print_py(file);
+
+			}
+
+		}
+				
 
 };
 
@@ -1068,6 +1103,8 @@ class CompoundStatement : public Node {
 		CompoundStatement( StatementList* StatementListPtr , DeclarationList* DeclarationListPtr) : StatementListPtr(StatementListPtr) , DeclarationListPtr(DeclarationListPtr) {}
 
 		~CompoundStatement() {}
+
+		void print_py(std::ofstream& file, bool initialized=false, bool function=true) ;
 
 };
 
@@ -1090,6 +1127,35 @@ class FunctionDefinition : public Node {
 
 		~FunctionDefinition() {}
 
+
+		void print_py(std::ofstream& file) {
+		
+			if( DeclarationSpecifiersPtr != NULL ) {
+				//do-nothing
+			}
+
+			if( DeclaratorPtr != NULL ) {
+				DeclaratorPtr->print_py(file,false,true);
+				if(DeclarationListPtr == NULL) {
+					file << "):" << std::endl;
+				}
+			}
+
+			if( DeclarationListPtr != NULL ) {   //have not done this yet (having parameters)
+				//DeclarationListPtr->print_py(file,false,true);
+			}
+
+			if( CompoundStatementPtr != NULL ) {
+				CompoundStatementPtr->print_py(file,false,true);
+			}
+
+
+			file << "if __name__ == " << "__main__:"; 
+   			file <<  std::endl << "import sys";
+    			file <<  std::endl << "ret=main()";
+    			file << std::endl << "sys.exit(ret)";
+				
+		}
 };
 
 
@@ -1114,7 +1180,15 @@ class ExternalDeclaration : public Node {
 			DecLaration->print_C(file);
 		}
 		void print_py(std::ofstream& file) {
-			DecLaration->print_py(file);
+		
+			if( FunctionDef == NULL ) {
+				DecLaration->print_py(file);
+			}
+
+			else {
+				FunctionDef->print_py(file);
+			}
+				
 		}
 		
 
@@ -1160,6 +1234,86 @@ class TranslationUnit : public Node{
 
 		 virtual ~TranslationUnit() {}
 };
+
+
+inline void SelectionStatement::print_py(std::ofstream& file) {
+			if( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL && SELECTIVE_ELSE == NULL && SELECTIVE_SWITCH == NULL) {
+				
+				file << "\tif(";
+				AssignmentExpressionPtr->print_py(file) ;
+				file << "):" << std::endl << "\t\t";
+				StatementPtr->print_py(file);
+			}
+
+			else {
+				//....
+			}
+}
+
+
+
+
+inline void Statement::print_py(std::ofstream& file) {
+
+
+
+			if( LabeledStatementPtr != NULL ) {
+		
+				LabeledStatementPtr->print_py(file);
+			}
+
+			if( CompoundStatementPtr != NULL ) {
+				CompoundStatementPtr->print_py(file);
+
+			}
+
+			if( ExpressionStatementPtr != NULL ) {
+
+				ExpressionStatementPtr->print_py(file);
+			}
+
+			if( SelectionStatementPtr != NULL ) {
+				SelectionStatementPtr->print_py(file);
+
+			}
+
+			if( IterationStatementPtr != NULL ) {
+
+				IterationStatementPtr->print_py(file);
+
+			}
+
+			if( JumpStatementPtr != NULL ) {
+
+				JumpStatementPtr->print_py(file);
+
+			}
+
+		}				 
+
+
+
+inline void CompoundStatement::print_py(std::ofstream& file, bool initialized, bool function) {
+
+			if( StatementListPtr == NULL && DeclarationListPtr == NULL ) {
+				file << std:: endl;
+				return;
+			}
+			//else if( StatementListPtr == NULL && DeclarationListPtr != NULL ) {
+			//	DeclarationListPtr->print_py(file);
+			//	return;
+			//}
+			else if( StatementListPtr != NULL && DeclarationListPtr == NULL ) {
+				StatementListPtr->print_py(file);
+				return;
+			}
+			//else if( StatementListPtr != NULL && DeclarationListPtr != NULL ) {
+			//	DeclarationListPtr->print_py(file);
+			//	StatementListPtr->print_py(file);
+			//	return;
+			//}
+}
+
 
 
 
