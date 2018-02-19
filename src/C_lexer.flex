@@ -1,13 +1,6 @@
 %option noyywrap
 %option yylineno
 
-H			[a-fA-F0-9]
-E			([Ee][+-]?{D}+)
-P                       ([Pp][+-]?{D}+)
-D			[0-9]
-FS			(f|F|l|L)
-IS                      ((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))
-L			[a-zA-Z_]
 
 %{
 
@@ -70,21 +63,21 @@ extern "C" int fileno(FILE *stream);
 "volatile"		{  return token(VOLATILE); }
 "while"			{  return token(WHILE); }
 
-[A-Za-z_][A-Za-z_0-9]*		{  return token(IDENTIFIER); }
+[A-Za-z_][A-Za-z_0-9]*							{  return token(IDENTIFIER); }
 
-0[xX]{H}+{IS}?			{  return token(CONSTANT); }
-0[0-7]*{IS}?			{  return token(CONSTANT); }
-[1-9]{D}*{IS}?			{  return token(CONSTANT); }
-L?'(\\.|[^\\'\n])+'		{  return token(CONSTANT); }
+0[xX][a-fA-F0-9]+((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))?		{  return token(CONSTANT); }
+0[0-7]*((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))?			{  return token(CONSTANT); }
+[1-9][0-9]*((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))?			{  return token(CONSTANT); }
+[a-zA-Z_]?'(\\.|[^\\'\n])+'						{  return token(CONSTANT); }
 
-{D}+{E}{FS}?			{  return token(CONSTANT); }
-{D}*"."{D}+{E}?{FS}?		{  return token(CONSTANT); }
-{D}+"."{D}*{E}?{FS}?		{  return token(CONSTANT); }
-0[xX]{H}+{P}{FS}?		{  return token(CONSTANT); }
-0[xX]{H}*"."{H}+{P}{FS}?        {  return token(CONSTANT); }
-0[xX]{H}+"."{H}*{P}{FS}?        {  return token(CONSTANT); }
+[0-9]+([Ee][+-]?[0-9]+)(f|F|l|L)?					{  return token(CONSTANT); }
+[0-9]*"."[0-9]+([Ee][+-]?[0-9]+)?(f|F|l|L)?				{  return token(CONSTANT); }
+[0-9]+"."[0-9]*([Ee][+-]?[0-9]+)?(f|F|l|L)?				{  return token(CONSTANT); }
+0[xX][a-fA-F0-9]+([Pp][+-]?[0-9]+)(f|F|l|L)?				{  return token(CONSTANT); }
+0[xX][a-fA-F0-9]*"."[a-fA-F0-9]+([Pp][+-]?[0-9]+)(f|F|l|L)?        	{  return token(CONSTANT); }
+0[xX][a-fA-F0-9]+"."[a-fA-F0-9]*([Pp][+-]?[0-9]+)(f|F|l|L)?        	{  return token(CONSTANT); }
 
-["][^\n\"]*["] 		{ return vtoken(STRING_LITERAL); /* L?\"(\\.|[^\\"\n])*\" */}
+["][^\n\"]*["] 		{ return vtoken(STRING_LITERAL); }
 "..."			{  return token(ELLIPSIS); }
 ">>="			{  return token(RIGHT_ASSIGN); }
 "<<="			{  return token(LEFT_ASSIGN); }
