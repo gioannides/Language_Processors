@@ -76,7 +76,7 @@ extern "C" int fileno(FILE *stream);
 0[xX][a-fA-F0-9]*"."[a-fA-F0-9]+([Pp][+-]?[0-9]+)(f|F|l|L)?        	{  return token(CONSTANT); }
 0[xX][a-fA-F0-9]+"."[a-fA-F0-9]*([Pp][+-]?[0-9]+)(f|F|l|L)?        	{  return token(CONSTANT); }
 
-["][^\n\"]*["] 		{ return vtoken(STRING_LITERAL); }
+["][^\n\"]*["] 		{  return vtoken(STRING_LITERAL); }
 "..."			{  return token(ELLIPSIS); }
 ">>="			{  return token(RIGHT_ASSIGN); }
 "<<="			{  return token(LEFT_ASSIGN); }
@@ -120,13 +120,6 @@ extern "C" int fileno(FILE *stream);
 "&"			{  return('&'); }
 "!"			{  return('!'); }
 "~"			{  return('~'); }
-"-"			{  return('-'); }
-"+"			{  return('+'); }
-"*"			{  return('*'); }
-"/"			{  return('/'); }
-"%"			{  return('%'); }
-"<"			{  return('<'); }
-">"			{  return('>'); }
 "^"			{  return('^'); }
 "|"			{  return('|'); }
 "?"			{  return('?'); }
