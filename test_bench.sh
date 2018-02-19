@@ -2,17 +2,18 @@
 
 let id=0;
 
-for testfile in bin/*.cpp
+for testfile in bin/*.c
 do
 	let id++;
-	./bin/c_compiler bin/$testfile
-	gcc bin/outfile.cpp -o bin/ourout
-	./bin/out
+	 b=$(basename ${testfile}); #take the name without the extension
+	./bin/c_compiler --translate  bin/testfile -o bin/${b}.py
+	gcc bin/${b}.py -o bin/ourout #compile the pyhton
+	./bin/out 		
 	let our = $?
-	gcc bin/$testfile -o bin/goldenout
+	gcc bin/$testfile -o bin/goldenout #compile the input code
 	./bin/goldenout
 	let golden = $?
-	if [$our -eq $goldenout]
+	if [$our -eq $goldenout] #compare exit codes
 	then
 		echo $id, $testfile, PASS
 	else 
