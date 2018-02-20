@@ -160,7 +160,7 @@ EXTERNAL_DECLARATION: FUNCTION_DEFINITION						{ $$ = new ExternalDeclaration($1
 
 
 FUNCTION_DEFINITION: DECLARATION_SPECIFIERS DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT 	{ $$ = new FunctionDefinition($1,$2,$3,$4); }
-		   | DECLARATION_SPECIFIERS DECLARATOR COMPOUND_STATEMENT			{ $$ = new FunctionDefinition($1,$2,NULL,$3); }
+		   | DECLARATION_SPECIFIERS DECLARATOR COMPOUND_STATEMENT			{ $$ = new FunctionDefinition($1,$2,NULL,$3); } //DONE
 		   | DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT				{ $$ = new FunctionDefinition(NULL,$1,$2,$3); }
 		   | DECLARATOR COMPOUND_STATEMENT						{ $$ = new FunctionDefinition(NULL,$1,NULL,$2); }
 
@@ -507,8 +507,8 @@ LABELED_STATEMENT: IDENTIFIER ':' STATEMENT			{ $$ = new LabeledStatement($1,NUL
 
 	
 
-COMPOUND_STATEMENT: '{' '}'					{ $$ = new CompoundStatement(NULL,NULL); }
-		  | '{' STATEMENT_LIST '}'			{ $$ = new CompoundStatement($2,NULL); }
+COMPOUND_STATEMENT: '{' '}'					{ $$ = new CompoundStatement(NULL,NULL); } //DONE
+		  | '{' STATEMENT_LIST '}'			{ $$ = new CompoundStatement($2,NULL); }   //DONE
 		  | '{' DECLARATION_LIST '}'			{ $$ = new CompoundStatement(NULL,$2); }
 		  | '{' DECLARATION_LIST STATEMENT_LIST '}'	{ $$ = new CompoundStatement($3,$2); }
 
@@ -516,8 +516,8 @@ COMPOUND_STATEMENT: '{' '}'					{ $$ = new CompoundStatement(NULL,NULL); }
 
 
 
-DECLARATION_LIST: DECLARATION					{ $$ = new DeclarationList($1) ; }				
-		| DECLARATION_LIST DECLARATION			{ $$ = new DeclarationList($2) ; }
+DECLARATION_LIST: DECLARATION					{ $$ = new DeclarationList($1,NULL) ; }				
+		| DECLARATION_LIST DECLARATION			{ $$ = new DeclarationList($2,$1) ; }
 
 
 	
@@ -533,8 +533,8 @@ EXPRESSION_STATEMENT: ';'						{ $$ = new ExpressionStatement(NULL) ; }
 		    | EXPRESSION ';'					{ $$ = new ExpressionStatement($1) ; }
 
 
-SELECTION_STATEMENT: IF '(' EXPRESSION ')' STATEMENT			{ $$ = new SelectionStatement($3,$5,NULL,$1,NULL,NULL); }
-		| IF '(' EXPRESSION ')' STATEMENT ELSE STATEMENT	{ $$ = new SelectionStatement($3,$5,$7,$1,$6,NULL); }
+SELECTION_STATEMENT: IF '(' EXPRESSION ')' STATEMENT			{ $$ = new SelectionStatement($3,$5,NULL,$1,NULL,NULL); } //DONE
+		| IF '(' EXPRESSION ')' STATEMENT ELSE STATEMENT	{ $$ = new SelectionStatement($3,$5,$7,$1,$6,NULL); }     
 		| SWITCH '(' EXPRESSION ')' STATEMENT			{ $$ = new SelectionStatement($3,$5,NULL,NULL,NULL,$1); }
 
 

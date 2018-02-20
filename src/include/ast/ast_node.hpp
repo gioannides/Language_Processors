@@ -640,6 +640,7 @@ class InitDeclarator : public Node {
 			else{
 				DecLarator->print_py(file,true);
 				InitiaLizer->print_py(file);
+				file << "\t\t" << std::endl;
 			}
 				
 		}
@@ -1017,14 +1018,23 @@ class DeclarationList : public Node {
 
 	private:
 		Declaration* DeclarationPtr;
+		DeclarationList* DeclarationListPtr;
 
 	public:
-		DeclarationList(Declaration* DeclarationPtr) : 	DeclarationPtr(DeclarationPtr) {}
+		DeclarationList(Declaration* DeclarationPtr, DeclarationList* DeclarationListPtr) : 	DeclarationPtr(DeclarationPtr) , DeclarationListPtr(DeclarationListPtr) {}
 
 		~DeclarationList() {}
 
-		void print_py(std::ofstream& file) {}
+		void print_py(std::ofstream& file) {
+			if( DeclarationListPtr != NULL) {
+				DeclarationListPtr->print_py(file);
 
+			}
+			DeclarationPtr->print_py(file);
+
+				
+
+		}
 };
 	
 
@@ -1273,9 +1283,13 @@ inline void SelectionStatement::print_py(std::ofstream& file) {
 				StatementPtr->print_py(file);
 			}
 
-			else {
-				//....
-			}
+			/*else if ( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL && SELECTIVE_ELSE != NULL && SELECTIVE_SWITCH == NULL)			 {
+				file << "\tif(";
+				AssignmentExpressionPtr->print_py(file) ;
+				file << "):" << std::endl << "\t";
+				StatementPtr->print_py(file);
+				file <<
+			}*/
 }
 
 
@@ -1327,19 +1341,19 @@ inline void CompoundStatement::print_py(std::ofstream& file, bool initialized, b
 				file << std:: endl;
 				return;
 			}
-			//else if( StatementListPtr == NULL && DeclarationListPtr != NULL ) {
-			//	DeclarationListPtr->print_py(file);
-			//	return;
-			//}
+			else if( StatementListPtr == NULL && DeclarationListPtr != NULL ) {
+				DeclarationListPtr->print_py(file);
+				return;
+			}
 			else if( StatementListPtr != NULL && DeclarationListPtr == NULL ) {
 				StatementListPtr->print_py(file);
 				return;
 			}
-			//else if( StatementListPtr != NULL && DeclarationListPtr != NULL ) {
-			//	DeclarationListPtr->print_py(file);
-			//	StatementListPtr->print_py(file);
-			//	return;
-			//}
+			else if( StatementListPtr != NULL && DeclarationListPtr != NULL ) {
+				DeclarationListPtr->print_py(file);
+				StatementListPtr->print_py(file);
+				return;
+			}
 }
 
 
