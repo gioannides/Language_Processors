@@ -565,7 +565,7 @@ class DirectDeclarator : public Node {
 
 			else{
 
-				file << "def:" << *IDENTIFIER << "(";
+				file << "def " << *IDENTIFIER << "(";
 
 			}
 		}
@@ -1266,10 +1266,10 @@ class TranslationUnit : public Node{
 				file.open(file_name.c_str());
 				ExternalDecl->print_py(file);
 
-				file << std::endl << std::endl << "if __name__ == " << "__main__:"; 
-   				file <<  std::endl << "import sys";
-    				file <<  std::endl << "ret=main()";
-    				file << std::endl << "sys.exit(ret)";
+				file << std::endl << std::endl << "if __name__ == " << "main:"; 
+   				file <<  std::endl << "\timport sys";
+    				file <<  std::endl << "\tret=main()";
+    				file << std::endl << "\tsys.exit(ret)";
 
 				file.close();
 				
