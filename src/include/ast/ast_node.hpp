@@ -1012,7 +1012,10 @@ class ExpressionStatement : public Node {
 
 		~ExpressionStatement() {}
 
-		void print_py(std::ofstream& file) {}
+		void print_py(std::ofstream& file) {
+
+			AssignmentExpressionPtr->print_py(file);
+		}
 
 };
 
@@ -1287,13 +1290,17 @@ inline void SelectionStatement::print_py(std::ofstream& file) {
 				StatementPtr->print_py(file);
 			}
 
-			/*else if ( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL && SELECTIVE_ELSE != NULL && SELECTIVE_SWITCH == NULL)			 {
-				file << "\tif(";
+			else if ( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL && SELECTIVE_ELSE != NULL && SELECTIVE_SWITCH == NULL)			 {
+				for( int i(0); i<counter_py; i++) { file << "\t"; }				
+				file << "if(";
 				AssignmentExpressionPtr->print_py(file) ;
-				file << "):" << std::endl << "\t";
+				file << "):" << std::endl;
 				StatementPtr->print_py(file);
-				file <<
-			}*/
+				for( int i(0); i<counter_py; i++) { file << "\t"; }
+				file << "else:";
+				file << std::endl;
+				StatementPtr2->print_py(file);
+			}
 }
 
 
