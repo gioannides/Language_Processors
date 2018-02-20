@@ -152,8 +152,10 @@ TRANSLATION_UNIT: EXTERNAL_DECLARATION							{ g_root = new TranslationUnit($1);
 
 
 
-EXTERNAL_DECLARATION: FUNCTION_DEFINITION						{ $$ = new ExternalDeclaration($1,NULL) ; }
-		     |DECLARATION							{ $$ = new ExternalDeclaration(NULL,$1) ; }
+EXTERNAL_DECLARATION: FUNCTION_DEFINITION						{ $$ = new ExternalDeclaration($1,NULL,NULL) ; }
+		     |DECLARATION							{ $$ = new ExternalDeclaration(NULL,$1,NULL) ; }
+		     |EXTERNAL_DECLARATION FUNCTION_DEFINITION				{ $$ = new ExternalDeclaration($2,NULL,$1) ; }
+		     |EXTERNAL_DECLARATION DECLARATION					{ $$ = new ExternalDeclaration(NULL,$2,$1) ; }
 
 
 
@@ -521,8 +523,8 @@ DECLARATION_LIST: DECLARATION					{ $$ = new DeclarationList($1) ; }
 	
 
 
-STATEMENT_LIST: STATEMENT					{ $$ = new StatementList($1); }
-	      | STATEMENT_LIST STATEMENT			{ $$ = new StatementList($2); }
+STATEMENT_LIST: STATEMENT					{ $$ = new StatementList($1,NULL); }
+	      | STATEMENT_LIST STATEMENT			{ $$ = new StatementList($2,$1); }
 
 
 

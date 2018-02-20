@@ -44,7 +44,7 @@ class StatementList;
 class JumpStatement;
 class ExpressionStatement;
 class CompoundStatement;
-
+class Declarator;
 
 class ParameterTypeList : public Node {};
 class IdentifierList : public Node {};
@@ -529,14 +529,22 @@ class DirectDeclarator : public Node {
 		ConstantExpression* ConstantExpRession;
 		ParameterTypeList* ParameterTypeLiSt;
 		IdentifierList* IDentifierList;
+		//DirectDeclarator* DirectDeclaratorPtr;
+		//Declarator* DeclaratorPtr;
 
 	public:
 
-		DirectDeclarator( std::string* IDENTIFIER, ConstantExpression* ConstantExpRession, ParameterTypeList* ParameterTypeLiSt, IdentifierList* IDentifierList) :
+		DirectDeclarator( std::string* IDENTIFIER, ConstantExpression* ConstantExpRession, ParameterTypeList* ParameterTypeLiSt, IdentifierList* IDentifierList      /*DirectDeclarator* DirectDeclaratorPtr, Declarator* DeclaratorPtr*/) :
 	
-				IDENTIFIER(IDENTIFIER) , ConstantExpRession(ConstantExpRession), ParameterTypeLiSt(ParameterTypeLiSt), IDentifierList(IDentifierList) {}
+				IDENTIFIER(IDENTIFIER) , ConstantExpRession(ConstantExpRession), ParameterTypeLiSt(ParameterTypeLiSt), IDentifierList(IDentifierList)
+				/*DirectDeclaratorPtr(DirectDeclaratorPtr) , DeclaratorPtr(DeclaratorPtr)*/ {}
 
 		void print_py(std::ofstream& file, bool initialized=false, bool function=false) {
+
+			/*if( DirectDeclaratorPtr != NULL) {
+
+				DirectDeclaratorPtr->print_py(file,initialized,function);
+			}*/
 
 			if(!function) {
 	
@@ -572,12 +580,17 @@ class Declarator : public Node {
 	private:
 		Pointer* PoinTer;
 		DirectDeclarator* DirectDecLarator;
+		//Declarator* DeclaratorPtr;
 
 	public:
 	
-		Declarator(Pointer* PoinTer, DirectDeclarator* DirectDecLarator) : PoinTer(PoinTer) , DirectDecLarator(DirectDecLarator) {}
+		Declarator(Pointer* PoinTer, DirectDeclarator* DirectDecLarator /*Declarator* DeclaratorPtr*/) : PoinTer(PoinTer) , DirectDecLarator(DirectDecLarator) /* , DeclaratorPtr(DeclaratorPtr)*/ {}
 
 		void print_py(std::ofstream& file, bool initialized=false, bool function=false) {
+
+			//if( DeclaratorPtr != NULL) {
+			//	DeclaratorPtr->print_py(file,initialized,function);
+			//}
 			DirectDecLarator->print_py(file,initialized,function);
 		}
 
@@ -970,7 +983,7 @@ class SelectionStatement : public Node {
 		std::string* SELECTIVE_ELSE;
 		std::string* SELECTIVE_SWITCH;
 	public:
-		SelectionStatement(AssignmentExpression* AssignmentExpressionPtr , Statement* StatementPtr, Statement* StatementPtr2, std::string* SELECTIVE_IF, std::string* SELECTIVE_ELSE , std::string* SELECTIVE_SWITCH) : AssignmentExpressionPtr(AssignmentExpressionPtr) , StatementPtr(StatementPtr) , SELECTIVE_IF(SELECTIVE_IF) , StatementPtr2(StatementPtr2) ,
+		SelectionStatement(AssignmentExpression* AssignmentExpressionPtr , Statement* StatementPtr, Statement* StatementPtr2, std::string* SELECTIVE_IF, std::string* SELECTIVE_ELSE , std::string* SELECTIVE_SWITCH) : AssignmentExpressionPtr(AssignmentExpressionPtr) , StatementPtr(StatementPtr) , StatementPtr2(StatementPtr2) ,SELECTIVE_IF(SELECTIVE_IF) , 
 			SELECTIVE_ELSE(SELECTIVE_ELSE) , SELECTIVE_SWITCH(SELECTIVE_SWITCH) {}
 
 		~SelectionStatement() {}
@@ -1052,7 +1065,9 @@ class Statement : public Node {
 
 	public:
 		Statement( LabeledStatement*  LabeledStatementPtr , CompoundStatement* CompoundStatementPtr , ExpressionStatement* ExpressionStatementPtr , 
-				SelectionStatement* SelectionStatementPtr , IterationStatement* IterationStatementPtr , JumpStatement* JumpStatementPtr ) {}
+				SelectionStatement* SelectionStatementPtr , IterationStatement* IterationStatementPtr , JumpStatement* JumpStatementPtr ) :
+				LabeledStatementPtr(LabeledStatementPtr) , CompoundStatementPtr(CompoundStatementPtr) , ExpressionStatementPtr(ExpressionStatementPtr) ,
+				SelectionStatementPtr(SelectionStatementPtr) , IterationStatementPtr(IterationStatementPtr) , JumpStatementPtr(JumpStatementPtr) {}
 
 		~Statement() {}
 
@@ -1070,18 +1085,22 @@ class StatementList : public Node {
 
 	private:
 		Statement* StatementPtr;
+		StatementList* StatementListPtr;
 
 	public:
-		StatementList(Statement* StatementPtr) : StatementPtr(StatementPtr) {}
+		StatementList(Statement* StatementPtr, StatementList* StatementListPtr) : StatementPtr(StatementPtr) , StatementListPtr(StatementListPtr) {}
 
 		~StatementList() {}
 
 		void print_py(std::ofstream& file) {
 
-			if( StatementPtr != NULL) {
-				StatementPtr->print_py(file);
+			if( StatementListPtr != NULL) {
+				StatementListPtr->print_py(file);
 
 			}
+				StatementPtr->print_py(file);
+
+				
 
 		}
 				
@@ -1148,12 +1167,6 @@ class FunctionDefinition : public Node {
 			if( CompoundStatementPtr != NULL ) {
 				CompoundStatementPtr->print_py(file,false,true);
 			}
-
-
-			file << "if __name__ == " << "__main__:"; 
-   			file <<  std::endl << "import sys";
-    			file <<  std::endl << "ret=main()";
-    			file << std::endl << "sys.exit(ret)";
 				
 		}
 };
@@ -1170,9 +1183,10 @@ class ExternalDeclaration : public Node {
 
 	FunctionDefinition* FunctionDef;
 	Declaration* DecLaration;
+	ExternalDeclaration* ExternalDeclarationPtr;
 
 	public:
-		ExternalDeclaration(FunctionDefinition* FunctionDef, Declaration* DecLaration) : FunctionDef(FunctionDef),  DecLaration(DecLaration) {}
+		ExternalDeclaration(FunctionDefinition* FunctionDef, Declaration* DecLaration, ExternalDeclaration* ExternalDeclarationPtr) : FunctionDef(FunctionDef),  DecLaration(DecLaration) , ExternalDeclarationPtr(ExternalDeclarationPtr){}
 
 		ExternalDeclaration(Declaration* DecLaration) : DecLaration(DecLaration) {} //THIS NEEDS TO BE REMOVED AT THE END
 
@@ -1181,13 +1195,21 @@ class ExternalDeclaration : public Node {
 		}
 		void print_py(std::ofstream& file) {
 		
-			if( FunctionDef == NULL ) {
-				DecLaration->print_py(file);
+			if( ExternalDeclarationPtr != NULL ) {
+				ExternalDeclarationPtr->print_py(file);
+
 			}
 
-			else {
+			if ( DecLaration  == NULL){
 				FunctionDef->print_py(file);
+				file << std::endl;
 			}
+
+			if ( FunctionDef  == NULL){
+				DecLaration->print_py(file);
+				file << std::endl;
+			}
+
 				
 		}
 		
@@ -1226,6 +1248,12 @@ class TranslationUnit : public Node{
 				std::ofstream file;
 				file.open(file_name.c_str());
 				ExternalDecl->print_py(file);
+
+				file << std::endl << "if __name__ == " << "__main__:"; 
+   				file <<  std::endl << "import sys";
+    				file <<  std::endl << "ret=main()";
+    				file << std::endl << "sys.exit(ret)";
+
 				file.close();
 				
 
@@ -1241,7 +1269,7 @@ inline void SelectionStatement::print_py(std::ofstream& file) {
 				
 				file << "\tif(";
 				AssignmentExpressionPtr->print_py(file) ;
-				file << "):" << std::endl << "\t\t";
+				file << "):" << std::endl << "\t";
 				StatementPtr->print_py(file);
 			}
 
