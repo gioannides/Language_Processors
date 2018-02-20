@@ -23,6 +23,7 @@ typedef Node* NodePtr;
 
 
 static int counter_py(0);
+static bool ifstatemnt = false;
 
 class Node{
 
@@ -1284,22 +1285,27 @@ inline void SelectionStatement::print_py(std::ofstream& file) {
 			if( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL && SELECTIVE_ELSE == NULL && SELECTIVE_SWITCH == NULL) {
 				
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
+				ifstatemnt = false;
 				file << "if(";
 				AssignmentExpressionPtr->print_py(file) ;
 				file << "):" << std::endl;
+				ifstatemnt = true;
 				StatementPtr->print_py(file);
 			}
 
 			else if ( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL && SELECTIVE_ELSE != NULL && SELECTIVE_SWITCH == NULL)			 {
-				for( int i(0); i<counter_py; i++) { file << "\t"; }				
+				for( int i(0); i<counter_py; i++) { file << "\t"; }
+				ifstatemnt = false;				
 				file << "if(";
 				AssignmentExpressionPtr->print_py(file) ;
 				file << "):" << std::endl;
+				ifstatemnt = true;
 				StatementPtr->print_py(file);
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				file << "else:";
 				file << std::endl;
 				StatementPtr2->print_py(file);
+				
 			}
 }
 
@@ -1461,8 +1467,12 @@ inline void PrimaryExpression::print_py(std::ofstream& file) {
 			if(IDENTIFIER != NULL) {
 				file << " " << *IDENTIFIER << " ";
 			}
-			else if( CONSTANT != NULL) {
+			else if( CONSTANT != NULL && ifstatemnt == false) {
 				file << " " << *CONSTANT << " ";
+
+			}
+			else if( CONSTANT != NULL && ifstatemnt == true) {
+				file << " " << *CONSTANT << " "<< std::endl;
 
 			}
 			else if( STRING_LITERAL != NULL) {

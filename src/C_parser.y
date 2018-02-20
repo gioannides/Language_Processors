@@ -137,8 +137,8 @@
 %type <text> '{' '}' ':' ',' CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN AND_OP '|' '^' PLUS MINUS  MULTIPLY MODULO DIVIDE
 
 
-%nonassoc IF
-%nonassoc ELSE
+%precedence IF
+%precedence ELSE
 
 %start TRANSLATION_UNIT 
 
@@ -154,8 +154,8 @@ TRANSLATION_UNIT: EXTERNAL_DECLARATION							{ g_root = new TranslationUnit($1);
 
 EXTERNAL_DECLARATION: FUNCTION_DEFINITION						{ $$ = new ExternalDeclaration($1,NULL,NULL) ; }
 		     |DECLARATION							{ $$ = new ExternalDeclaration(NULL,$1,NULL) ; }
-		     |EXTERNAL_DECLARATION FUNCTION_DEFINITION				{ $$ = new ExternalDeclaration($2,NULL,$1) ; }
-		     |EXTERNAL_DECLARATION DECLARATION					{ $$ = new ExternalDeclaration(NULL,$2,$1) ; }
+		     //|EXTERNAL_DECLARATION FUNCTION_DEFINITION				{ $$ = new ExternalDeclaration($2,NULL,$1) ; }
+		     //|EXTERNAL_DECLARATION DECLARATION					{ $$ = new ExternalDeclaration(NULL,$2,$1) ; }
 
 
 
@@ -511,6 +511,7 @@ COMPOUND_STATEMENT: '{' '}'					{ $$ = new CompoundStatement(NULL,NULL); } //DON
 		  | '{' STATEMENT_LIST '}'			{ $$ = new CompoundStatement($2,NULL); }   //DONE
 		  | '{' DECLARATION_LIST '}'			{ $$ = new CompoundStatement(NULL,$2); }
 		  | '{' DECLARATION_LIST STATEMENT_LIST '}'	{ $$ = new CompoundStatement($3,$2); }
+		  | '{' STATEMENT_LIST DECLARATION_LIST '}'	{ $$ = new CompoundStatement($2,$3); }
 
 
 
