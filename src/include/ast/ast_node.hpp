@@ -101,10 +101,12 @@ class PrimaryExpression : public Node {
 class ArgumentExpressionList : public Node {
 	
 	private:
+		ArgumentExpressionList* ArgumentExpressionListPtr;
 		AssignmentExpression* AssignmentExpressionPtr;
 
 	public:
-		ArgumentExpressionList( AssignmentExpression* AssignmentExpressionPtr) : AssignmentExpressionPtr(AssignmentExpressionPtr) {}
+		ArgumentExpressionList( ArgumentExpressionList* ArgumentExpressionListPtr,AssignmentExpression* AssignmentExpressionPtr) : AssignmentExpressionPtr(AssignmentExpressionPtr)
+			, ArgumentExpressionListPtr(ArgumentExpressionListPtr) {}
 
 		~ArgumentExpressionList() {}
 
@@ -119,13 +121,14 @@ class PostFixExpression : public Node {
 		PrimaryExpression* PrimaryExpressionPtr;
 		AssignmentExpression* AssignmentExpressionPtr;
 		ArgumentExpressionList* ArgumentExpressionListPtr;
+		PostFixExpression* PostFixExpressionPtr;
 		std::string* IDENTIFIER;
 		std::string* OPERATOR;
 		
 	public:
-		PostFixExpression(PrimaryExpression* PrimaryExpressionPtr, AssignmentExpression* AssignmentExpressionPtr, ArgumentExpressionList* ArgumentExpressionListPtr, std::string* IDENTIFIER, std::string* OPERATOR) :
+		PostFixExpression(PostFixExpression* PostFixExpressionPtr, PrimaryExpression* PrimaryExpressionPtr, AssignmentExpression* AssignmentExpressionPtr, ArgumentExpressionList* ArgumentExpressionListPtr, std::string* IDENTIFIER, std::string* OPERATOR) :
 	
-				PrimaryExpressionPtr(PrimaryExpressionPtr), AssignmentExpressionPtr(AssignmentExpressionPtr) , ArgumentExpressionListPtr(ArgumentExpressionListPtr) , IDENTIFIER(IDENTIFIER) , OPERATOR(OPERATOR) {}
+				PrimaryExpressionPtr(PrimaryExpressionPtr), AssignmentExpressionPtr(AssignmentExpressionPtr) , ArgumentExpressionListPtr(ArgumentExpressionListPtr) , IDENTIFIER(IDENTIFIER) , OPERATOR(OPERATOR) , PostFixExpressionPtr(PostFixExpressionPtr) {}
 
 
 		~PostFixExpression() {}
@@ -754,6 +757,9 @@ class Initializer : public Node {
 
 		void print_py(std::ofstream& file) {
 	
+			if(InitializerListPtr!=NULL){
+				InitializerListPtr->print_py(file);
+			}
 			AssignmentExpressionPtr->print_py(file);
 
 		}
@@ -1132,7 +1138,11 @@ class SelectionStatement : public Node {
 
 		~SelectionStatement() {}
 
-		void print_py(std::ofstream& file) ;
+		void print_py(std::ofstream& file,bool elseif=false) ;
+
+		std::string* get_info() {
+			return SELECTIVE_IF;
+		}		 
 		
 
 };
@@ -1217,9 +1227,11 @@ class Statement : public Node {
 		LabeledStatement*  LabeledStatementPtr;
 		CompoundStatement* CompoundStatementPtr;
 		ExpressionStatement* ExpressionStatementPtr;
-		SelectionStatement* SelectionStatementPtr;
+		
 		IterationStatement* IterationStatementPtr;
 		JumpStatement* JumpStatementPtr;
+	public:
+		SelectionStatement* SelectionStatementPtr;
 
 	public:
 		Statement( LabeledStatement*  LabeledStatementPtr , CompoundStatement* CompoundStatementPtr , ExpressionStatement* ExpressionStatementPtr , 
@@ -1229,7 +1241,11 @@ class Statement : public Node {
 
 		~Statement() {}
 
-		void print_py(std::ofstream& file);				 
+		void print_py(std::ofstream& file,bool elseif=false);	
+	
+		std::string* get_info() {
+			return SelectionStatementPtr->get_info();
+		}		 
 				
 
 };
@@ -1308,10 +1324,10 @@ class FunctionDefinition : public Node {
 		void print_py(std::ofstream& file) {
 		
 			if( DeclarationSpecifiersPtr != NULL ) {
-				//do-nothing because it is not significant in our case (only int)
+										//do-nothing because it is not significant in our case (only int)
 			}
 
-			if( DeclaratorPtr != NULL ) {
+			if( DeclaratorPtr != NULL ) {				//handles global variables after printing function name
 				
 				DeclaratorPtr->print_py(file,false,true);
 				if(DeclarationListPtr == NULL) {
@@ -1319,16 +1335,11 @@ class FunctionDefinition : public Node {
 
 					for( int i= 0; i < GlobalVars.size(); i++) {
 						file << "\tglobal " << GlobalVars[i] << std::endl;
-					}
-
-					
-
-
-					
+					}					
 				}
 			}
 
-			if( DeclarationListPtr != NULL ) {   							//have not done this yet ( functions having parameters )
+			if( DeclarationListPtr != NULL ) {   			//have not done this yet ( functions having parameters )
 				ParametrizedFunction = true;
 				DeclarationListPtr->print_py(file);
 			}
@@ -1459,74 +1470,99 @@ inline void IterationStatement::print_py(std::ofstream& file) {
 		 }
 
 
-inline void SelectionStatement::print_py(std::ofstream& file) {
+inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) {
 			if( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL && SELECTIVE_ELSE == NULL && SELECTIVE_SWITCH == NULL) {
 				
 				file << std::endl;
-				for( int i(0); i<counter_py; i++) { file << "\t"; }
-				file << "if(";
-				AssignmentExpressionPtr->print_py(file) ;
-				file << "):" << std::endl;
-				counter_py++;
+				for( int i(0); i<counter_py; i++) { file << "\t"; } 
+				if(elseif == false){
+					file << "if(";
+					AssignmentExpressionPtr->print_py(file) ;
+					file << "):" << std::endl;
+				}
+				else{
+					file <<"elif(";
+				       	AssignmentExpressionPtr->print_py(file) ;
+					file << "):" << std::endl;
+				}
+				//counter_py++;
 				StatementPtr->print_py(file);
 				file << std:: endl;
-				counter_py--;
+				//counter_py--;
 			}
 
 			else if ( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL && SELECTIVE_ELSE != NULL && SELECTIVE_SWITCH == NULL)			 {
 				file << std::endl;
 				for( int i(0); i<counter_py; i++) { file << "\t"; }				
-				file << "if(";
-				AssignmentExpressionPtr->print_py(file) ;
-				file << "):" << std::endl;
-				counter_py++;
-				StatementPtr->print_py(file);
-				file << std:: endl;
-				counter_py--;
-				file << std::endl;
+				if(elseif == false){
+					file << "if(";
+					AssignmentExpressionPtr->print_py(file) ;
+					file << "):" << std::endl;
+					file << std::endl;
+					StatementPtr->print_py(file,true);				
+					file << std::endl;	
+				}
+				else{
+					file <<"elif(";
+				       	AssignmentExpressionPtr->print_py(file) ;
+					file << "):" << std::endl;
+					file << std::endl;
+					StatementPtr->print_py(file,true);				
+					file << std::endl;	
+				}			
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
-				file << "else:";
-				file << std::endl;
-				StatementPtr2->print_py(file);
-				file << std:: endl;
+				if(StatementPtr2->SelectionStatementPtr != NULL) {
+					file << std::endl;
+					StatementPtr2->print_py(file,true);				
+					file << std::endl;	
+				}
+				else{
+					file << "else:";
+					file << std::endl;
+					StatementPtr2->print_py(file,false);				
+					file << std:: endl;
+				}
+				
 				
 			}
+
+
 }
 
 
 
 
-inline void Statement::print_py(std::ofstream& file) {
+inline void Statement::print_py(std::ofstream& file, bool elseif) {
 
-
+			
 
 			if( LabeledStatementPtr != NULL ) {
 		
 				LabeledStatementPtr->print_py(file);
 			}
 
-			if( CompoundStatementPtr != NULL ) {
+			else if( CompoundStatementPtr != NULL ) {
 				CompoundStatementPtr->print_py(file);
 
 			}
 
-			if( ExpressionStatementPtr != NULL ) {
+			else if( ExpressionStatementPtr != NULL ) {
 
 				ExpressionStatementPtr->print_py(file);
 			}
 
-			if( SelectionStatementPtr != NULL ) {
-				SelectionStatementPtr->print_py(file);
+			else if( SelectionStatementPtr != NULL ) {
+				SelectionStatementPtr->print_py(file,elseif);
 
 			}
 
-			if( IterationStatementPtr != NULL ) {
+			else if( IterationStatementPtr != NULL ) {
 
 				IterationStatementPtr->print_py(file);
 
 			}
 
-			if( JumpStatementPtr != NULL ) {
+			else if( JumpStatementPtr != NULL ) {
 
 				JumpStatementPtr->print_py(file);
 
@@ -1538,6 +1574,7 @@ inline void Statement::print_py(std::ofstream& file) {
 
 inline void CompoundStatement::print_py(std::ofstream& file, bool initialized, bool function) {
 			
+	
 			counter_py++;
 			if( StatementListPtr == NULL && DeclarationListPtr == NULL ) {
 				file << std:: endl;
@@ -1554,6 +1591,7 @@ inline void CompoundStatement::print_py(std::ofstream& file, bool initialized, b
 				
 			}
 			counter_py--;
+		
 			
 }
 
@@ -1599,7 +1637,15 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 }
 
 inline void PostFixExpression::print_py(std::ofstream& file)  {
-			if( PrimaryExpressionPtr != NULL ) {
+
+			if(PostFixExpressionPtr !=NULL) {
+			
+				for( int i(0); i<counter_py; i++) { file << "\t"; }
+				PostFixExpressionPtr->print_py(file);
+				file << "()" << std::endl;
+
+			}
+			else if( PrimaryExpressionPtr != NULL ) {
 				PrimaryExpressionPtr->print_py(file);
 			}
 			else if( AssignmentExpressionPtr != NULL ) {
@@ -1645,15 +1691,23 @@ inline void CastExpression::print_py(std::ofstream& file) {
 
 inline void ArgumentExpressionList::print_py(std::ofstream& file) {
 
+		if( ArgumentExpressionListPtr != NULL) {
+			ArgumentExpressionListPtr->print_py(file);
+		}
 		AssignmentExpressionPtr->print_py(file);
 
 }
 
 inline void PrimaryExpression::print_py(std::ofstream& file) {
 
+			if( AssignmentExpressionPtr != NULL ) {
+
+				AssignmentExpressionPtr->print_py(file);
+			}
+
 			if(IDENTIFIER != NULL) {
 		
-				file << *IDENTIFIER << " ";
+				file << *IDENTIFIER;
 			}
 			else if( CONSTANT != NULL ) {
 				file << " " << *CONSTANT << " "; 
@@ -1664,10 +1718,7 @@ inline void PrimaryExpression::print_py(std::ofstream& file) {
 	
 				file << " " << '"' << *STRING_LITERAL << '"' << " ";
 			}
-			else if( AssignmentExpressionPtr != NULL ) {
-
-				AssignmentExpressionPtr->print_py(file);
-			}
+			
 }
 
 #endif

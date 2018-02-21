@@ -446,14 +446,14 @@ UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,N
 
 
 
-POSTFIX_EXPRESSION: PRIMARY_EXPRESSION				      				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,NULL); }
-		  | POSTFIX_EXPRESSION '[' EXPRESSION ']'		     			{ $$ = new PostFixExpression(NULL,$3,NULL,NULL,NULL); }
-		  | POSTFIX_EXPRESSION '(' ')'			      				{ $$ = $1; }
-		  | POSTFIX_EXPRESSION '(' ARGUMENT_EXPRESSION_LIST ')' 			{ $$ = new PostFixExpression(NULL,NULL,$3,NULL,NULL);}
-		  | POSTFIX_EXPRESSION '.' IDENTIFIER		     				{ $$ = new PostFixExpression(NULL,NULL,NULL,$3,$2); }
-		  | POSTFIX_EXPRESSION PTR_OP IDENTIFIER		      			{ $$ = new PostFixExpression(NULL,NULL,NULL,$3,$2); }
-		  | POSTFIX_EXPRESSION INC_OP			     				{ $$ = new PostFixExpression(NULL,NULL,NULL,$2,NULL); }
-		  | POSTFIX_EXPRESSION DEC_OP			     				{ $$ = new PostFixExpression(NULL,NULL,NULL,$2,NULL); }
+POSTFIX_EXPRESSION: PRIMARY_EXPRESSION				      				{ $$ = new PostFixExpression(NULL,$1,NULL,NULL,NULL,NULL); }
+		  | POSTFIX_EXPRESSION '[' EXPRESSION ']'		     			{ $$ = new PostFixExpression(NULL,NULL,$3,NULL,NULL,NULL); }
+		  | POSTFIX_EXPRESSION '(' ')'			      				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,NULL,NULL); }
+		  | POSTFIX_EXPRESSION '(' ARGUMENT_EXPRESSION_LIST ')' 			{ $$ = new PostFixExpression(NULL,NULL,NULL,$3,NULL,NULL);}
+		  | POSTFIX_EXPRESSION '.' IDENTIFIER		     				{ $$ = new PostFixExpression(NULL,NULL,NULL,NULL,$3,$2); }
+		  | POSTFIX_EXPRESSION PTR_OP IDENTIFIER		      			{ $$ = new PostFixExpression(NULL,NULL,NULL,NULL,$3,$2); }
+		  | POSTFIX_EXPRESSION INC_OP			     				{ $$ = new PostFixExpression(NULL,NULL,NULL,NULL,$2,NULL); }
+		  | POSTFIX_EXPRESSION DEC_OP			     				{ $$ = new PostFixExpression(NULL,NULL,NULL,NULL,$2,NULL); }
 
 
 
@@ -479,8 +479,8 @@ UNARY_OPERATOR:   '&'		{ $$ = $1;}								//DONE COMPLETELY
 	
 
 
-ARGUMENT_EXPRESSION_LIST: ASSIGNMENT_EXPRESSION							{ $$ = new ArgumentExpressionList($1); }
-			| ARGUMENT_EXPRESSION_LIST ',' ASSIGNMENT_EXPRESSION			{ $$ = new ArgumentExpressionList($3); }
+ARGUMENT_EXPRESSION_LIST: ASSIGNMENT_EXPRESSION							{ $$ = new ArgumentExpressionList(NULL,$1); }
+			| ARGUMENT_EXPRESSION_LIST ',' ASSIGNMENT_EXPRESSION			{ $$ = new ArgumentExpressionList($1,$3); }
 
 
 
