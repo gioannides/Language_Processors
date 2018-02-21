@@ -29,7 +29,7 @@ static bool ParametrizedFunction = false;
 static bool main_ = false;				//Will be used for emitting the main python code
 static std::vector<std::string> GlobalVars; 		//Will be used to store the globals variables
 static bool is_while = false;				//Identifies loops for indentation manners
-
+static bool elif = false;
 
 
 class Node{
@@ -1473,6 +1473,7 @@ inline void IterationStatement::print_py(std::ofstream& file) {
 inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) {
 			if( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL && SELECTIVE_ELSE == NULL && SELECTIVE_SWITCH == NULL) {
 				
+				elif = elseif;
 				file << std::endl;
 				for( int i(0); i<counter_py; i++) { file << "\t"; } 
 				if(elseif == false){
@@ -1492,9 +1493,11 @@ inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) {
 			}
 
 			else if ( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL && SELECTIVE_ELSE != NULL && SELECTIVE_SWITCH == NULL)			 {
+				elif = elseif;
 				file << std::endl;
 				for( int i(0); i<counter_py; i++) { file << "\t"; }				
 				if(elseif == false){
+
 					file << "if(";
 					AssignmentExpressionPtr->print_py(file) ;
 					file << "):" << std::endl;
@@ -1630,7 +1633,7 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 
 				AssignmentExpressionPtr->print_py(file);
 			}
-			if(!function && !is_while){
+			if(!function && !is_while && !elif){
 				file << std::endl;
 			}
 
