@@ -1323,10 +1323,11 @@ class FunctionDefinition : public Node {
 					for( int i(0); i<counter_py; i++) { file << "\t"; }
 
 					for( int i= 0; i < count_globals; i++) {
-						file << "global " << GlobalVars[i] << std::endl;
+						file << "\tglobal " << GlobalVars[i] << std::endl;
 					}
 
 					
+
 
 					
 				}
