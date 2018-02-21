@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <fstream>
+#include <vector>
 
 class Node;
 class ExternalDeclaration;
@@ -21,9 +22,14 @@ class TranslationUnit;
 class ConditionalExpression;
 typedef Node* NodePtr;
 
-
+static int count_globals = 0;
 static int counter_py(0);
-static bool ifstatemnt = false;
+static bool function = false;
+static bool ScopedStatement = false;
+static bool ParametrizedFunction = false;
+static bool main_ = false;
+static std::vector<std::string> GlobalVars; 
+static std::vector<std::string> GlobalFunct; 
 
 class Node{
 
@@ -50,8 +56,6 @@ class ExpressionStatement;
 class CompoundStatement;
 class Declarator;
 
-class ParameterTypeList : public Node {};
-class IdentifierList : public Node {};
 class Pointer : public Node {};
 
 class SpecifierQualifierList : public Node {};
@@ -60,6 +64,17 @@ class InclusiveAndExpression : public Node {};
 class Expression : public Node {};
 class AssignmentExpression;
 class CastExpression;
+
+class DirectAbstractDeclarator;
+class AbstractDeclarator;
+class ParameterDeclaration;
+class ParameterList;
+class ParameterTypeList;
+class IdentifierList;
+
+
+
+
 
 class TypeName : public Node {};
 
@@ -499,15 +514,28 @@ class AssignmentExpression : public Node {
 		ConditionalExpression* ConditionalExpressionPtr;
 		UnaryExpression* UnaryExpressionPtr;
 		std::string* AssignmentOperator;
+		AssignmentExpression* AssignmentExpressionPtr;
 
 	public :
-		AssignmentExpression( UnaryExpression* UnaryExpressionPtr, std::string* AssignmentOperator, ConditionalExpression* ConditionalExpressionPtr) :
-				 UnaryExpressionPtr(UnaryExpressionPtr), AssignmentOperator(AssignmentOperator) ,ConditionalExpressionPtr(ConditionalExpressionPtr) {}
+		AssignmentExpression( UnaryExpression* UnaryExpressionPtr, std::string* AssignmentOperator, ConditionalExpression* ConditionalExpressionPtr , AssignmentExpression* AssignmentExpressionPtr) :
+				AssignmentExpressionPtr(AssignmentExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr), AssignmentOperator(AssignmentOperator) ,ConditionalExpressionPtr(ConditionalExpressionPtr) {}
 
 		~AssignmentExpression() {}
 
 		void print_py(std::ofstream& file) ; 
 };
+
+
+class IdentifierList : public Node {
+
+	private:
+		std::string* IDENTIFIER;
+		IdentifierList* IdentifierListPtr;
+	public:
+		IdentifierList(std::string* IDENTIFIER , IdentifierList* IdentifierListPtr) : IDENTIFIER(IDENTIFIER) , IdentifierListPtr(IdentifierListPtr) {}
+
+};
+
 
 
 
@@ -524,6 +552,90 @@ class ConstantExpression : public Node {
 };
 
 
+class DirectAbstractDeclarator : public Node {
+
+	private:
+		AbstractDeclarator* AbstractDeclaratorPtr;
+		ConstantExpression* ConstantExpressionPtr;
+		ParameterTypeList* ParameterTypeListPtr;
+		DirectAbstractDeclarator* DirectAbstractDeclaratorPtr;
+		IdentifierList* IdentifierListPtr;
+
+	public:
+
+		DirectAbstractDeclarator( AbstractDeclarator* AbstractDeclaratorPtr , ConstantExpression* ConstantExpressionPtr , ParameterTypeList* ParameterTypeListPtr , DirectAbstractDeclarator* DirectAbstractDeclaratorPtr) :
+					AbstractDeclaratorPtr(AbstractDeclaratorPtr) , ConstantExpressionPtr(ConstantExpressionPtr) , ParameterTypeListPtr(ParameterTypeListPtr),
+					DirectAbstractDeclaratorPtr(DirectAbstractDeclaratorPtr) , IdentifierListPtr(IdentifierListPtr) {}
+
+		~DirectAbstractDeclarator() {}
+
+};
+
+
+
+class AbstractDeclarator : public Node {
+
+	private:
+		Pointer* Pointerptr;
+		DirectAbstractDeclarator* DirectAbstractDeclaratorPtr;
+	public:
+		AbstractDeclarator( Pointer* Pointerptr , DirectAbstractDeclarator* DirectAbstractDeclaratorPtr) : Pointerptr(Pointerptr) , DirectAbstractDeclaratorPtr(DirectAbstractDeclaratorPtr) {}
+
+		~AbstractDeclarator() {}
+
+};
+
+
+
+
+
+class ParameterDeclaration : public Node {
+
+	private:
+		DeclarationSpecifiers* DeclarationSpecifiersPtr;
+		Declarator* DeclaratorPtr;
+		AbstractDeclarator* AbstractDeclaratorPtr;
+	public:
+		ParameterDeclaration( DeclarationSpecifiers* DeclarationSpecifiersPtr , AbstractDeclarator* AbstractDeclaratorPtr, Declarator* DeclaratorPtr ) :
+				DeclarationSpecifiersPtr(DeclarationSpecifiersPtr) , AbstractDeclaratorPtr(AbstractDeclaratorPtr) , DeclaratorPtr(DeclaratorPtr) {}
+
+		~ParameterDeclaration() {}
+
+};
+
+
+
+
+class ParameterList : public Node {
+
+	private:
+		ParameterDeclaration* ParameterDeclarationPtr;
+		ParameterList* ParameterListPtr;
+	public:
+		ParameterList( ParameterDeclaration* ParameterDeclarationPtr , ParameterList* ParameterListPtr ) :
+			ParameterDeclarationPtr(ParameterDeclarationPtr) , ParameterListPtr(ParameterListPtr) {}
+
+		~ParameterList() {}
+
+};
+
+
+
+
+
+class ParameterTypeList : public Node {
+	private:
+		ParameterList* ParameterListPtr;
+		std::string* ELLIPSIS;
+	public:
+		ParameterTypeList(ParameterList* ParameterListPtr , std::string* ELLIPSIS) : ParameterListPtr(ParameterListPtr) , ELLIPSIS(ELLIPSIS) {}
+		
+		~ParameterTypeList() {}
+
+		void print_py(std::ofstream& file) {}
+
+};
+
 
 
 class DirectDeclarator : public Node {
@@ -533,22 +645,33 @@ class DirectDeclarator : public Node {
 		ConstantExpression* ConstantExpRession;
 		ParameterTypeList* ParameterTypeLiSt;
 		IdentifierList* IDentifierList;
-		//DirectDeclarator* DirectDeclaratorPtr;
-		//Declarator* DeclaratorPtr;
+		DirectDeclarator* DirectDeclaratorPtr;
+		Declarator* DeclaratorPtr;
 
 	public:
 
-		DirectDeclarator( std::string* IDENTIFIER, ConstantExpression* ConstantExpRession, ParameterTypeList* ParameterTypeLiSt, IdentifierList* IDentifierList      /*DirectDeclarator* DirectDeclaratorPtr, Declarator* DeclaratorPtr*/) :
+		DirectDeclarator( std::string* IDENTIFIER, ConstantExpression* ConstantExpRession, ParameterTypeList* ParameterTypeLiSt, IdentifierList* IDentifierList, DirectDeclarator* DirectDeclaratorPtr, Declarator* DeclaratorPtr) :
 	
-				IDENTIFIER(IDENTIFIER) , ConstantExpRession(ConstantExpRession), ParameterTypeLiSt(ParameterTypeLiSt), IDentifierList(IDentifierList)
-				/*DirectDeclaratorPtr(DirectDeclaratorPtr) , DeclaratorPtr(DeclaratorPtr)*/ {}
+				IDENTIFIER(IDENTIFIER) , ConstantExpRession(ConstantExpRession), ParameterTypeLiSt(ParameterTypeLiSt), IDentifierList(IDentifierList),
+				DirectDeclaratorPtr(DirectDeclaratorPtr) , DeclaratorPtr(DeclaratorPtr) {
+
+						GlobalVars.push_back(*IDENTIFIER);
+
+					}
 
 		void print_py(std::ofstream& file, bool initialized=false, bool function=false) {
 
-			/*if( DirectDeclaratorPtr != NULL) {
 
-				DirectDeclaratorPtr->print_py(file,initialized,function);
-			}*/
+	//		if( DirectDeclaratorPtr != NULL) {
+//
+//				DirectDeclaratorPtr->print_py(file,initialized,function);
+//			}
+			
+			//if(ParametrizedFunction) {
+//
+//				file << *IDENTIFIER << ",";
+//				return;
+//			}
 
 			if(!function) {
 	
@@ -565,7 +688,16 @@ class DirectDeclarator : public Node {
 
 			else{
 
+				if( *IDENTIFIER == "main") { main_ = true; }
+				GlobalFunct.push_back(*IDENTIFIER);
 				file << "def " << *IDENTIFIER << "(";
+				
+				//if( ParameterTypeLiSt != NULL) {
+				//	ParameterTypeLiSt->print_py(file);
+				//}
+				//else if( IDentifierList != NULL) {
+				//	IDentifierList->print_py(file);
+				//}
 
 			}
 		}
@@ -585,17 +717,17 @@ class Declarator : public Node {
 	private:
 		Pointer* PoinTer;
 		DirectDeclarator* DirectDecLarator;
-		//Declarator* DeclaratorPtr;
+		Declarator* DeclaratorPtr;
 
 	public:
 	
-		Declarator(Pointer* PoinTer, DirectDeclarator* DirectDecLarator /*Declarator* DeclaratorPtr*/) : PoinTer(PoinTer) , DirectDecLarator(DirectDecLarator) /* , DeclaratorPtr(DeclaratorPtr)*/ {}
+		Declarator(Pointer* PoinTer, DirectDeclarator* DirectDecLarator, Declarator* DeclaratorPtr) : PoinTer(PoinTer) , DirectDecLarator(DirectDecLarator)  , DeclaratorPtr(DeclaratorPtr) {}
 
 		void print_py(std::ofstream& file, bool initialized=false, bool function=false) {
 
-			//if( DeclaratorPtr != NULL) {
-			//	DeclaratorPtr->print_py(file,initialized,function);
-			//}
+			if( DeclaratorPtr != NULL) {
+				DeclaratorPtr->print_py(file,initialized,function);
+			}
 			DirectDecLarator->print_py(file,initialized,function);
 		}
 
@@ -660,14 +792,18 @@ class InitDeclaratorList : public Node {
 
 	private:
 		InitDeclarator* InitDecLarator;
+		InitDeclaratorList* InitDeclaratorListPtr;
 
 	public:
 
-		InitDeclaratorList(InitDeclarator* InitDecLarator) : InitDecLarator(InitDecLarator) {}
+		InitDeclaratorList(InitDeclarator* InitDecLarator, InitDeclaratorList* InitDeclaratorListPtr) : InitDecLarator(InitDecLarator), InitDeclaratorListPtr(InitDeclaratorListPtr) {}
 
 		~InitDeclaratorList() {}
 
 		void print_py(std::ofstream& file) {
+			if( InitDeclaratorListPtr != NULL){
+				InitDeclaratorListPtr->print_py(file);
+			}
 			InitDecLarator->print_py(file);
 		}
 
@@ -971,7 +1107,7 @@ class IterationStatement : public Node {
 
 		~IterationStatement() {}
 
-		void print_py(std::ofstream& file) {}
+		void print_py(std::ofstream& file) ;
 
 };
 		
@@ -1033,15 +1169,17 @@ class DeclarationList : public Node {
 		~DeclarationList() {}
 
 		void print_py(std::ofstream& file) {
-			if( DeclarationListPtr != NULL) {
-				DeclarationListPtr->print_py(file);
+
+				if( DeclarationListPtr != NULL) {
+					
+					DeclarationListPtr->print_py(file);
+
+				}
+				function = false;
+				DeclarationPtr->print_py(file);
 
 			}
-			DeclarationPtr->print_py(file);
 
-				
-
-		}
 };
 	
 
@@ -1171,14 +1309,32 @@ class FunctionDefinition : public Node {
 			}
 
 			if( DeclaratorPtr != NULL ) {
+				
 				DeclaratorPtr->print_py(file,false,true);
 				if(DeclarationListPtr == NULL) {
 					file << "):" << std::endl;
+					for( int i =0 ; i < GlobalVars.size(); i++) {				//This part will handle global declarations
+						for(int j=0; j < GlobalFunct.size(); j++) {
+							if(GlobalVars[i] == GlobalFunct[j]) {
+								GlobalVars.erase(GlobalVars.begin()+i);
+							}
+						}
+					}
+					for( int i(0); i<counter_py; i++) { file << "\t"; }
+
+					for( int i= 0; i < count_globals; i++) {
+						file << "global " << GlobalVars[i] << std::endl;
+					}
+
+					
+
+					
 				}
 			}
 
-			if( DeclarationListPtr != NULL ) {   //have not done this yet (having parameters)
-				//DeclarationListPtr->print_py(file,false,true);
+			if( DeclarationListPtr != NULL ) {   							//have not done this yet ( functions having parameters )
+				ParametrizedFunction = true;
+				DeclarationListPtr->print_py(file);
 			}
 
 			if( CompoundStatementPtr != NULL ) {
@@ -1205,7 +1361,6 @@ class ExternalDeclaration : public Node {
 	public:
 		ExternalDeclaration(FunctionDefinition* FunctionDef, Declaration* DecLaration, ExternalDeclaration* ExternalDeclarationPtr) : FunctionDef(FunctionDef),  DecLaration(DecLaration) , ExternalDeclarationPtr(ExternalDeclarationPtr){}
 
-		ExternalDeclaration(Declaration* DecLaration) : DecLaration(DecLaration) {} //THIS NEEDS TO BE REMOVED AT THE END
 
 		void print_C(std::ofstream& file) {
 			DecLaration->print_C(file);
@@ -1218,11 +1373,13 @@ class ExternalDeclaration : public Node {
 			}
 
 			if ( DecLaration  == NULL){
+				
 				FunctionDef->print_py(file);
 				file << std::endl;
 			}
 
 			if ( FunctionDef  == NULL){
+				count_globals++;
 				DecLaration->print_py(file);
 				file << std::endl;
 			}
@@ -1266,10 +1423,14 @@ class TranslationUnit : public Node{
 				file.open(file_name.c_str());
 				ExternalDecl->print_py(file);
 
+			if(main_){
+				file << std::endl << "#Boilerplate";
 				file << std::endl << std::endl << "if __name__ == " << "main:"; 
    				file <<  std::endl << "\timport sys";
     				file <<  std::endl << "\tret=main()";
     				file << std::endl << "\tsys.exit(ret)";
+
+			}
 
 				file.close();
 				
@@ -1281,25 +1442,41 @@ class TranslationUnit : public Node{
 };
 
 
+
+
+inline void IterationStatement::print_py(std::ofstream& file) {
+
+			if( *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
+				for( int i(0); i<counter_py; i++) { file << "\t"; }
+				ScopedStatement = false;
+				file << "while(";
+				AssignmentExpressionPtr->print_py(file);
+				file << "):" << std::endl;
+				ScopedStatement = true;
+				StatementPtr->print_py(file);
+			}
+		 }
+
+
 inline void SelectionStatement::print_py(std::ofstream& file) {
 			if( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL && SELECTIVE_ELSE == NULL && SELECTIVE_SWITCH == NULL) {
 				
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
-				ifstatemnt = false;
+				ScopedStatement = false;
 				file << "if(";
 				AssignmentExpressionPtr->print_py(file) ;
 				file << "):" << std::endl;
-				ifstatemnt = true;
+				ScopedStatement = true;
 				StatementPtr->print_py(file);
 			}
 
 			else if ( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL && SELECTIVE_ELSE != NULL && SELECTIVE_SWITCH == NULL)			 {
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
-				ifstatemnt = false;				
+				ScopedStatement = false;				
 				file << "if(";
 				AssignmentExpressionPtr->print_py(file) ;
 				file << "):" << std::endl;
-				ifstatemnt = true;
+				ScopedStatement = true;
 				StatementPtr->print_py(file);
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				file << "else:";
@@ -1401,14 +1578,26 @@ inline void ConditionalExpression::print_py(std::ofstream& file) {
 
 
 inline void AssignmentExpression::print_py(std::ofstream& file)  {
+
+			
+
+			if(UnaryExpressionPtr != NULL) {
+		
+				for( int i(0); i<counter_py; i++) { file << "\t"; }
+				ScopedStatement = false;
+				UnaryExpressionPtr->print_py(file);
+				file << "=";
+
+			}
 	
 			if(ConditionalExpressionPtr != NULL) {
 
 				ConditionalExpressionPtr->print_py(file);
 			}
-			else{
-				UnaryExpressionPtr->print_py(file);
-				file << " " << *AssignmentOperator << " ";
+
+			if(AssignmentExpressionPtr != NULL) {
+
+				AssignmentExpressionPtr->print_py(file);
 			}
 }
 
@@ -1464,14 +1653,20 @@ inline void ArgumentExpressionList::print_py(std::ofstream& file) {
 
 inline void PrimaryExpression::print_py(std::ofstream& file) {
 
-			if(IDENTIFIER != NULL) {
-				file << " " << *IDENTIFIER << " ";
+			if(IDENTIFIER != NULL && ScopedStatement == false) {
+		
+				file << *IDENTIFIER << " ";
 			}
-			else if( CONSTANT != NULL && ifstatemnt == false) {
+			else if( IDENTIFIER != NULL && ScopedStatement == true) {
+				
+				file << *IDENTIFIER << " "<< std::endl;
+
+			}
+			else if( CONSTANT != NULL && ScopedStatement == false) {
 				file << " " << *CONSTANT << " ";
 
 			}
-			else if( CONSTANT != NULL && ifstatemnt == true) {
+			else if( CONSTANT != NULL && ScopedStatement == true) {
 				file << " " << *CONSTANT << " "<< std::endl;
 
 			}

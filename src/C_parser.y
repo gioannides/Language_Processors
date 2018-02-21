@@ -71,6 +71,12 @@
 	LabeledStatement* LabeledStatementPtr;
 	std::string* text;
 	DeclarationList* DeclarationListPtr;
+	ParameterTypeList* ParameterTypeListPtr;
+	ParameterList* ParameterListPtr;
+	ParameterDeclaration* ParameterDeclarationPtr;
+	AbstractDeclarator* AbstractDeclaratorPtr;
+	DirectAbstractDeclarator* DirectAbstractDeclaratorPtr;
+	IdentifierList* IdentifierListPtr;
 }
 
 
@@ -86,6 +92,12 @@
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
+%type <IdentifierListPtr> IDENTIFIER_LIST
+%type <DirectAbstractDeclaratorPtr> DIRECT_ABSTRACT_DECLARATOR
+%type <AbstractDeclaratorPtr> ABSTRACT_DECLARATOR
+%type <ParameterDeclarationPtr> PARAMETER_DECLARATION
+%type <ParameterListPtr> PARAMETER_LIST
+%type <ParameterTypeListPtr> PARAMETER_TYPE_LIST
 %type <FunctionDefinitionPtr> FUNCTION_DEFINITION
 %type <DeclarationListPtr> DECLARATION_LIST
 %type <LabeledStatementPtr> LABELED_STATEMENT
@@ -134,7 +146,7 @@
 %type <text> IDENTIFIER TYPEDEF EXTERN STATIC AUTO REGISTER VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED CONST VOLATILE STRUCT UNION
 %type <text> MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN UNARY_OPERATOR SIZEOF OR_OP
 %type <text> '&' '~' '!' LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP '=' LT GT ASSIGNMENT_OPERATOR INC_OP DEC_OP '.' CONSTANT STRING_LITERAL PTR_OP
-%type <text> '{' '}' ':' ',' CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN AND_OP '|' '^' PLUS MINUS  MULTIPLY MODULO DIVIDE
+%type <text> '{' '}' ':' ',' CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN AND_OP '|' '^' PLUS MINUS  MULTIPLY MODULO DIVIDE ELLIPSIS
 
 
 %precedence IF
@@ -146,130 +158,131 @@
 %%
 
 
-TRANSLATION_UNIT: EXTERNAL_DECLARATION							{ g_root = new TranslationUnit($1); }
-    		| TRANSLATION_UNIT EXTERNAL_DECLARATION 				{ g_root = new TranslationUnit($2); }
+TRANSLATION_UNIT: EXTERNAL_DECLARATION								{ g_root = new TranslationUnit($1); }
+    		| TRANSLATION_UNIT EXTERNAL_DECLARATION 					{ g_root = new TranslationUnit($2); }
 
 
 
 
-EXTERNAL_DECLARATION: FUNCTION_DEFINITION						{ $$ = new ExternalDeclaration($1,NULL,NULL) ; }
-		     |DECLARATION							{ $$ = new ExternalDeclaration(NULL,$1,NULL) ; }
-		     //|EXTERNAL_DECLARATION FUNCTION_DEFINITION				{ $$ = new ExternalDeclaration($2,NULL,$1) ; }
-		     //|EXTERNAL_DECLARATION DECLARATION					{ $$ = new ExternalDeclaration(NULL,$2,$1) ; }
+EXTERNAL_DECLARATION: FUNCTION_DEFINITION							{ $$ = new ExternalDeclaration($1,NULL,NULL) ; }
+		     |DECLARATION								{ $$ = new ExternalDeclaration(NULL,$1,NULL) ; }
+		     |EXTERNAL_DECLARATION FUNCTION_DEFINITION					{ $$ = new ExternalDeclaration($2,NULL,$1) ; }
+		     |EXTERNAL_DECLARATION DECLARATION						{ $$ = new ExternalDeclaration(NULL,$2,$1) ; }
 
 
 
-FUNCTION_DEFINITION: DECLARATION_SPECIFIERS DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT 	{ $$ = new FunctionDefinition($1,$2,$3,$4); }
-		   | DECLARATION_SPECIFIERS DECLARATOR COMPOUND_STATEMENT			{ $$ = new FunctionDefinition($1,$2,NULL,$3); } //DONE
-		   | DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT				{ $$ = new FunctionDefinition(NULL,$1,$2,$3); }
-		   | DECLARATOR COMPOUND_STATEMENT						{ $$ = new FunctionDefinition(NULL,$1,NULL,$2); }
-
-
-
-
-
-DECLARATION : DECLARATION_SPECIFIERS ';' 			{ $$ = new Declaration($1,NULL);  } //DONE COMPLETELY
-	    | DECLARATION_SPECIFIERS INIT_DECLARATOR_LIST ';'	{ $$ = new Declaration($1,$2); } //DONE
+FUNCTION_DEFINITION: DECLARATION_SPECIFIERS DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT 	{ $$ = new FunctionDefinition($1,$2,$3,$4); } //parameters
+		   | DECLARATION_SPECIFIERS DECLARATOR COMPOUND_STATEMENT			{ $$ = new FunctionDefinition($1,$2,NULL,$3); } //DONE definition with no param
+		   | DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT				{ $$ = new FunctionDefinition(NULL,$1,$2,$3); } //call with parameters
+		   | DECLARATOR COMPOUND_STATEMENT						{ $$ = new FunctionDefinition(NULL,$1,NULL,$2); } //call with no parameters
 
 
 
 
 
-DECLARATION_SPECIFIERS: STORAGE_CLASS_SPECIFIERS				{ $$ = new DeclarationSpecifiers($1,NULL,NULL) ;}//DONE COMPLETELY
-			| DECLARATION_SPECIFIERS STORAGE_CLASS_SPECIFIERS 	{ $$ = new DeclarationSpecifiers($2,NULL,NULL) ;}//DONE COMPLETELY
-			| TYPE_SPECIFIER					{ $$ = new DeclarationSpecifiers(NULL,$1,NULL) ;}//DONE COMPLETELY
-			| DECLARATION_SPECIFIERS TYPE_SPECIFIER 		{ $$ = new DeclarationSpecifiers(NULL,$2,NULL) ;}//DONE COMPLETELY
-			| TYPE_QUALIFIER					{ $$ = new DeclarationSpecifiers(NULL,NULL,$1) ;}//DONE COMPLETELY
-			| DECLARATION_SPECIFIERS TYPE_QUALIFIER 		{ $$ = new DeclarationSpecifiers(NULL,NULL,$2) ;}//DONE COMPLETELY
+DECLARATION : DECLARATION_SPECIFIERS ';' 							{ $$ = new Declaration($1,NULL);  } //DONE COMPLETELY
+	    | DECLARATION_SPECIFIERS INIT_DECLARATOR_LIST ';'					{ $$ = new Declaration($1,$2); } //DONE
 
 
 
 
 
-STORAGE_CLASS_SPECIFIERS: TYPEDEF			{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
-			| EXTERN			{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
-			| STATIC			{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
-			| AUTO				{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
-			| REGISTER			{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
-
-
-
-	
-
-TYPE_SPECIFIER: VOID				{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| CHAR				{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| SHORT				{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| INT				{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| LONG				{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| FLOAT				{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| DOUBLE			{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| SIGNED			{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| UNSIGNED			{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| STRUCT_OR_UNION_SPECIFIER	{ $$ = new TypeSpecifier($1); } //DONE
-		| ENUM_SPECIFIER		{ $$ = new TypeSpecifier($1); } //DONE
-		//| TYPE_NAME			{ $$ = new TypeSpecifier($1); } // IMPLEMENT THIS 
+DECLARATION_SPECIFIERS: STORAGE_CLASS_SPECIFIERS						{ $$ = new DeclarationSpecifiers($1,NULL,NULL) ;}//DONE COMPLETELY
+			| DECLARATION_SPECIFIERS STORAGE_CLASS_SPECIFIERS 			{ $$ = new DeclarationSpecifiers($2,NULL,NULL) ;}//DONE COMPLETELY
+			| TYPE_SPECIFIER							{ $$ = new DeclarationSpecifiers(NULL,$1,NULL) ;}//DONE COMPLETELY
+			| DECLARATION_SPECIFIERS TYPE_SPECIFIER 				{ $$ = new DeclarationSpecifiers(NULL,$2,NULL) ;}//DONE COMPLETELY
+			| TYPE_QUALIFIER							{ $$ = new DeclarationSpecifiers(NULL,NULL,$1) ;}//DONE COMPLETELY
+			| DECLARATION_SPECIFIERS TYPE_QUALIFIER 				{ $$ = new DeclarationSpecifiers(NULL,NULL,$2) ;}//DONE COMPLETELY
 
 
 
 
 
-TYPE_QUALIFIER: CONST		{ $$ = new TypeQualifier( $1 ) ; }	//DONE COMPLETELY
-	      | VOLATILE	{ $$ = new TypeQualifier( $1 ) ; }	//DONE COMPLETELY
+STORAGE_CLASS_SPECIFIERS: TYPEDEF								{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
+			| EXTERN								{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
+			| STATIC								{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
+			| AUTO									{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
+			| REGISTER								{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
 
 
 
 	
 
-
-INIT_DECLARATOR_LIST: INIT_DECLARATOR					{ $$ = new InitDeclaratorList($1); }//DONE COMPLETELY
-		| INIT_DECLARATOR_LIST ',' INIT_DECLARATOR		{ $$ = new InitDeclaratorList($3); }//DONE
-
-
-	
-
-INIT_DECLARATOR: DECLARATOR						{ $$ = new InitDeclarator($1,NULL); }					//PARTIALLY
-		| DECLARATOR '=' INITIALIZER				{ $$ = new InitDeclarator($1,$3);  }					//PARTIALLY
-
-
-
-
-
-
-
-DECLARATOR: POINTER DIRECT_DECLARATOR				//DONE
-	  | DIRECT_DECLARATOR					{ $$ = new Declarator(NULL,$1);}					//DONE
-	  | '(' DECLARATOR ')'					{ $$ = $2; }
+TYPE_SPECIFIER: VOID										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
+		| CHAR										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
+		| SHORT										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
+		| INT										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
+		| LONG										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
+		| FLOAT										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
+		| DOUBLE									{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
+		| SIGNED									{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
+		| UNSIGNED									{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
+		| STRUCT_OR_UNION_SPECIFIER							{ $$ = new TypeSpecifier($1); } //DONE
+		| ENUM_SPECIFIER								{ $$ = new TypeSpecifier($1); } //DONE
+		//| TYPE_NAME									{ $$ = new TypeSpecifier($1); } // IMPLEMENT THIS 
 
 
 
 
 
-DIRECT_DECLARATOR: IDENTIFIER						{ $$ = new DirectDeclarator($1,NULL,NULL,NULL); }
-		//| '(' DECLARATOR ')'					//HAVE NOT MADE IT DATA MEMBER OF THIS RULE
-		| DIRECT_DECLARATOR '[' CONSTANT_EXPRESSION ']'		{ $$ = new DirectDeclarator(NULL,$3,NULL,NULL); }//DONE
-		| DIRECT_DECLARATOR '[' ']'				{ $$ = $1; }
-		//| DIRECT_DECLARATOR '(' PARAMETER_TYPE_LIST ')'	{ $$ = new DirectDeclarator(NULL,NULL,$3,NULL); }//DONE
-		//| DIRECT_DECLARATOR '(' IDENTIFIER_LIST ')'		{ $$ = new DirectDeclarator(NULL,NULL,NULL,$3); }//DONE
-		| DIRECT_DECLARATOR '(' ')'				{ $$ = $1; }//DONE
-
-
-CONSTANT_EXPRESSION: CONDITIONAL_EXPRESSION	{ $$ = new ConstantExpression($1); }//DONE COMPLETELY
-
-
+TYPE_QUALIFIER: CONST										{ $$ = new TypeQualifier( $1 ) ; }	//DONE COMPLETELY
+	      | VOLATILE									{ $$ = new TypeQualifier( $1 ) ; }	//DONE COMPLETELY
 
 
 
 	
 
-ASSIGNMENT_EXPRESSION:CONDITIONAL_EXPRESSION							{ $$ = new AssignmentExpression(NULL,NULL,$1); } 
-		     | UNARY_EXPRESSION ASSIGNMENT_OPERATOR ASSIGNMENT_EXPRESSION		{ $$ = new AssignmentExpression($1,$2,NULL); }
+
+INIT_DECLARATOR_LIST: INIT_DECLARATOR								{ $$ = new InitDeclaratorList($1,NULL); }//DONE COMPLETELY
+		| INIT_DECLARATOR_LIST ',' INIT_DECLARATOR					{ $$ = new InitDeclaratorList($3,$1); }//DONE
+
+
+	
+
+INIT_DECLARATOR: DECLARATOR									{ $$ = new InitDeclarator($1,NULL); }					//PARTIALLY
+		| DECLARATOR '=' INITIALIZER							{ $$ = new InitDeclarator($1,$3);  }					//PARTIALLY
+
+
+
+DECLARATION_LIST: DECLARATION									{ $$ = new DeclarationList($1,NULL) ; }				
+		| DECLARATION_LIST DECLARATION							{ $$ = new DeclarationList($2,$1) ; }
+
+
+
+DECLARATOR //POINTER DIRECT_DECLARATOR				//DONE
+	  : DIRECT_DECLARATOR									{ $$ = new Declarator(NULL,$1,NULL);}					//DONE
+	  | '(' DECLARATOR ')'									{ $$ = new Declarator(NULL,NULL,$2);}
+	
+
+
+
+
+DIRECT_DECLARATOR: IDENTIFIER									{ $$ = new DirectDeclarator($1,NULL,NULL,NULL,NULL,NULL); }
+		| '(' DECLARATOR ')'								{ $$ = new DirectDeclarator(NULL,NULL,NULL,NULL,NULL,$2); }
+		| DIRECT_DECLARATOR '[' CONSTANT_EXPRESSION ']'					{ $$ = new DirectDeclarator(NULL,$3,NULL,NULL,$1,NULL);   }//DONE
+		| DIRECT_DECLARATOR '[' ']'							{ $$ = $1;   }
+		| DIRECT_DECLARATOR '(' PARAMETER_TYPE_LIST ')'					{ $$ = new DirectDeclarator(NULL,NULL,$3,NULL,$1,NULL);   }//DONE
+		| DIRECT_DECLARATOR '(' IDENTIFIER_LIST ')'					{ $$ = new DirectDeclarator(NULL,NULL,NULL,$3,$1,NULL);   }//DONE
+		| DIRECT_DECLARATOR '(' ')'							{ $$ = $1 ; }//DONE
+
+
+CONSTANT_EXPRESSION: CONDITIONAL_EXPRESSION							{ $$ = new ConstantExpression($1); }//DONE COMPLETELY
 
 
 
 
 
-EXPRESSION: ASSIGNMENT_EXPRESSION					{ $$ = $1; }
-	| EXPRESSION ',' ASSIGNMENT_EXPRESSION				{ $$ = $3; }
+	
+
+ASSIGNMENT_EXPRESSION:CONDITIONAL_EXPRESSION							{ $$ = new AssignmentExpression(NULL,NULL,$1,NULL); } 
+		     | UNARY_EXPRESSION ASSIGNMENT_OPERATOR ASSIGNMENT_EXPRESSION		{ $$ = new AssignmentExpression($1,$2,NULL,$3); }
+
+
+
+
+
+EXPRESSION: ASSIGNMENT_EXPRESSION								{ $$ = $1; }
+	| EXPRESSION ',' ASSIGNMENT_EXPRESSION							{ $$ = $3; }
 
 
 
@@ -307,21 +320,21 @@ TYPE_QUALIFIER_LIST: TYPE_QUALIFIER
 
 
 
-PARAMETER_TYPE_LIST: PARAMETER_LIST
-		   | PARAMETER_LIST ',' ELLIPSIS
+PARAMETER_TYPE_LIST: PARAMETER_LIST 								{ $$ = new ParameterTypeList($1,NULL); }
+		   | PARAMETER_LIST ',' ELLIPSIS 						{ $$ = new ParameterTypeList($1,$3); }
 
 
 
 
-PARAMETER_LIST: PARAMETER_DECLARATION
-	      | PARAMETER_LIST ',' PARAMETER_DECLARATION
+PARAMETER_LIST: PARAMETER_DECLARATION 								{ $$ = new ParameterList($1,NULL); }//done
+	      | PARAMETER_LIST ',' PARAMETER_DECLARATION 					{ $$ = new ParameterList($3,$1); }//done
 
 
 
 
-PARAMETER_DECLARATION: DECLARATION_SPECIFIERS DECLARATOR
-	             | DECLARATION_SPECIFIERS ABSTRACT_DECLARATOR
-		     | DECLARATION_SPECIFIERS
+PARAMETER_DECLARATION: DECLARATION_SPECIFIERS DECLARATOR 					{ $$ = new ParameterDeclaration($1,NULL,$2); } //done
+	             | DECLARATION_SPECIFIERS ABSTRACT_DECLARATOR 				{ $$ = new ParameterDeclaration($1,$2,NULL); }//done
+		     | DECLARATION_SPECIFIERS 							{ $$ = new ParameterDeclaration($1,NULL,NULL); }//done
 
 LOGICAL_OR_EXPRESSION: LOGICAL_AND_EXPRESSION							{ $$ = new LogicalOrExpression($1, NULL, NULL);}//DONE COMPLETELY
 		     | LOGICAL_OR_EXPRESSION OR_OP LOGICAL_AND_EXPRESSION			{ $$ = new LogicalOrExpression($3, $2 ,$1);}//DONE COMPLETELY
@@ -349,25 +362,25 @@ INCLUSIVE_OR_EXPRESSION: EXCLUSIVE_OR_EXPRESSION						{ $$ = new InclusiveOrExpr
 
 
 
-EXCLUSIVE_OR_EXPRESSION: AND_EXPRESSION							{ $$ = new ExclusiveOrExpression($1, NULL, NULL);}//DONE COMPLETELY
-		       | EXCLUSIVE_OR_EXPRESSION '^' AND_EXPRESSION			{ $$ = new ExclusiveOrExpression($3, $2 ,$1);}//DONE COMPLETELY
+EXCLUSIVE_OR_EXPRESSION: AND_EXPRESSION								{ $$ = new ExclusiveOrExpression($1, NULL, NULL);}//DONE COMPLETELY
+		       | EXCLUSIVE_OR_EXPRESSION '^' AND_EXPRESSION				{ $$ = new ExclusiveOrExpression($3, $2 ,$1);}//DONE COMPLETELY
 
 
 
 	
 
 
-AND_EXPRESSION: EQUALITY_EXPRESSION							{ $$ = new AndExpression($1, NULL, NULL);}//DONE COMPLETELY
-	      | AND_EXPRESSION '&' EQUALITY_EXPRESSION					{ $$ = new AndExpression($3, $2 ,$1);}//DONE COMPLETELY
+AND_EXPRESSION: EQUALITY_EXPRESSION								{ $$ = new AndExpression($1, NULL, NULL);}//DONE COMPLETELY
+	      | AND_EXPRESSION '&' EQUALITY_EXPRESSION						{ $$ = new AndExpression($3, $2 ,$1);}//DONE COMPLETELY
 
 
 
 	
 
 
-EQUALITY_EXPRESSION: RELATIONAL_EXPRESSION						{ $$ = new EqualityExpression($1, NULL, NULL); }//DONE COMPLETELY
-		   | EQUALITY_EXPRESSION EQ_OP RELATIONAL_EXPRESSION			{ $$ = new EqualityExpression($3, $2 ,$1); }//DONE COMPLETELY
-		   | EQUALITY_EXPRESSION NE_OP RELATIONAL_EXPRESSION			{ $$ = new EqualityExpression($3, $2 ,$1); }//DONE COMPLETELY
+EQUALITY_EXPRESSION: RELATIONAL_EXPRESSION							{ $$ = new EqualityExpression($1, NULL, NULL); }//DONE COMPLETELY
+		   | EQUALITY_EXPRESSION EQ_OP RELATIONAL_EXPRESSION				{ $$ = new EqualityExpression($3, $2 ,$1); }//DONE COMPLETELY
+		   | EQUALITY_EXPRESSION NE_OP RELATIONAL_EXPRESSION				{ $$ = new EqualityExpression($3, $2 ,$1); }//DONE COMPLETELY
 
 
 
@@ -386,9 +399,9 @@ RELATIONAL_EXPRESSION: SHIFT_EXPRESSION								{ $$ = new RelationalExpression($
 
 
 SHIFT_EXPRESSION													//DONE COMPLETELY
-	: ADDITIVE_EXPRESSION							{ $$ = new ShiftExpression($1,NULL,NULL); }//DONE COMPLETELY
-	| SHIFT_EXPRESSION LEFT_OP ADDITIVE_EXPRESSION				{ $$ = new ShiftExpression($3, $2 ,$1); }//DONE COMPLETELY
-	| SHIFT_EXPRESSION RIGHT_OP ADDITIVE_EXPRESSION				{ $$ = new ShiftExpression($3, $2 ,$1); }//DONE COMPLETELY
+	: ADDITIVE_EXPRESSION									{ $$ = new ShiftExpression($1,NULL,NULL); }//DONE COMPLETELY
+	| SHIFT_EXPRESSION LEFT_OP ADDITIVE_EXPRESSION						{ $$ = new ShiftExpression($3, $2 ,$1); }//DONE COMPLETELY
+	| SHIFT_EXPRESSION RIGHT_OP ADDITIVE_EXPRESSION						{ $$ = new ShiftExpression($3, $2 ,$1); }//DONE COMPLETELY
 
 
 
@@ -402,18 +415,18 @@ ADDITIVE_EXPRESSION: MULTIPLICATIVE_EXPRESSION							{ $$ = new AdditiveExpressi
 
 	
 
-MULTIPLICATIVE_EXPRESSION: CAST_EXPRESSION								{ $$ = new MultiplicativeExpression($1,NULL,NULL); }//DONE 
-			| MULTIPLICATIVE_EXPRESSION MULTIPLY CAST_EXPRESSION				{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
-			| MULTIPLICATIVE_EXPRESSION DIVIDE CAST_EXPRESSION				{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
-			| MULTIPLICATIVE_EXPRESSION MODULO CAST_EXPRESSION				{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
+MULTIPLICATIVE_EXPRESSION: CAST_EXPRESSION							{ $$ = new MultiplicativeExpression($1,NULL,NULL); }//DONE 
+			| MULTIPLICATIVE_EXPRESSION MULTIPLY CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
+			| MULTIPLICATIVE_EXPRESSION DIVIDE CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
+			| MULTIPLICATIVE_EXPRESSION MODULO CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
 
 
 
 
 	
 
-CAST_EXPRESSION: UNARY_EXPRESSION							{ $$ = new CastExpression($1,NULL); }//DONE COMPLETELY
-		//| '(' TYPE_NAME ')' CAST_EXPRESSION					{ $$ = new CastExpression(NULL,$2); }//IMPLEMENT TYPE_NAME
+CAST_EXPRESSION: UNARY_EXPRESSION								{ $$ = new CastExpression($1,NULL); }//DONE COMPLETELY
+		//| '(' TYPE_NAME ')' CAST_EXPRESSION						{ $$ = new CastExpression(NULL,$2); }//IMPLEMENT TYPE_NAME
 
 
 
@@ -421,10 +434,10 @@ CAST_EXPRESSION: UNARY_EXPRESSION							{ $$ = new CastExpression($1,NULL); }//D
 
 
 
-UNARY_EXPRESSION: POSTFIX_EXPRESSION			{ $$ = new UnaryExpression($1,NULL,NULL) ; } //DONE
-		| INC_OP UNARY_EXPRESSION		{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
-		| DEC_OP UNARY_EXPRESSION		{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
-		| UNARY_OPERATOR CAST_EXPRESSION	{ $$ = new UnaryExpression(NULL,$1,$2) ; } //DONE COMPLETELY
+UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,NULL) ; } //DONE
+		| INC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
+		| DEC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
+		| UNARY_OPERATOR CAST_EXPRESSION						{ $$ = new UnaryExpression(NULL,$1,$2) ; } //DONE COMPLETELY
 		//| SIZEOF UNARY_EXPRESSION
 		//| SIZEOF '(' TYPE_NAME ')'							//IMPLEMENT THIS
 
@@ -433,24 +446,24 @@ UNARY_EXPRESSION: POSTFIX_EXPRESSION			{ $$ = new UnaryExpression($1,NULL,NULL) 
 
 
 
-POSTFIX_EXPRESSION: PRIMARY_EXPRESSION				      		{ $$ = new PostFixExpression($1,NULL,NULL,NULL,NULL); }
-		  | POSTFIX_EXPRESSION '[' EXPRESSION ']'		     	{ $$ = new PostFixExpression(NULL,$3,NULL,NULL,NULL); }
-		  | POSTFIX_EXPRESSION '(' ')'			      		{ $$ = $1; }
-		  | POSTFIX_EXPRESSION '(' ARGUMENT_EXPRESSION_LIST ')' 	{ $$ = new PostFixExpression(NULL,NULL,$3,NULL,NULL);}
-		  | POSTFIX_EXPRESSION '.' IDENTIFIER		     		{ $$ = new PostFixExpression(NULL,NULL,NULL,$3,$2); }
-		  | POSTFIX_EXPRESSION PTR_OP IDENTIFIER		      	{ $$ = new PostFixExpression(NULL,NULL,NULL,$3,$2); }
-		  | POSTFIX_EXPRESSION INC_OP			     		{ $$ = new PostFixExpression(NULL,NULL,NULL,$2,NULL); }
-		  | POSTFIX_EXPRESSION DEC_OP			     		{ $$ = new PostFixExpression(NULL,NULL,NULL,$2,NULL); }
+POSTFIX_EXPRESSION: PRIMARY_EXPRESSION				      				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,NULL); }
+		  | POSTFIX_EXPRESSION '[' EXPRESSION ']'		     			{ $$ = new PostFixExpression(NULL,$3,NULL,NULL,NULL); }
+		  | POSTFIX_EXPRESSION '(' ')'			      				{ $$ = $1; }
+		  | POSTFIX_EXPRESSION '(' ARGUMENT_EXPRESSION_LIST ')' 			{ $$ = new PostFixExpression(NULL,NULL,$3,NULL,NULL);}
+		  | POSTFIX_EXPRESSION '.' IDENTIFIER		     				{ $$ = new PostFixExpression(NULL,NULL,NULL,$3,$2); }
+		  | POSTFIX_EXPRESSION PTR_OP IDENTIFIER		      			{ $$ = new PostFixExpression(NULL,NULL,NULL,$3,$2); }
+		  | POSTFIX_EXPRESSION INC_OP			     				{ $$ = new PostFixExpression(NULL,NULL,NULL,$2,NULL); }
+		  | POSTFIX_EXPRESSION DEC_OP			     				{ $$ = new PostFixExpression(NULL,NULL,NULL,$2,NULL); }
 
 
 
 
 	
 
-PRIMARY_EXPRESSION: IDENTIFIER				      { $$ = new PrimaryExpression($1,NULL,NULL,NULL); }
-		  | CONSTANT				      { $$ = new PrimaryExpression(NULL,$1,NULL,NULL); }
-		  | STRING_LITERAL			      { $$ = new PrimaryExpression(NULL,NULL,$1,NULL); }
-		  | '(' EXPRESSION ')'			      { $$ = new PrimaryExpression(NULL,NULL,NULL,$2); }
+PRIMARY_EXPRESSION: IDENTIFIER				      					{ $$ = new PrimaryExpression($1,NULL,NULL,NULL); }
+		  | CONSTANT				     					{ $$ = new PrimaryExpression(NULL,$1,NULL,NULL); }
+		  | STRING_LITERAL			     					{ $$ = new PrimaryExpression(NULL,NULL,$1,NULL); }
+		  | '(' EXPRESSION ')'			      					{ $$ = new PrimaryExpression(NULL,NULL,NULL,$2); }
 
 
 
@@ -466,23 +479,23 @@ UNARY_OPERATOR:   '&'		{ $$ = $1;}								//DONE COMPLETELY
 	
 
 
-ARGUMENT_EXPRESSION_LIST: ASSIGNMENT_EXPRESSION					{ $$ = new ArgumentExpressionList($1); }
-			| ARGUMENT_EXPRESSION_LIST ',' ASSIGNMENT_EXPRESSION	{ $$ = new ArgumentExpressionList($3); }
+ARGUMENT_EXPRESSION_LIST: ASSIGNMENT_EXPRESSION							{ $$ = new ArgumentExpressionList($1); }
+			| ARGUMENT_EXPRESSION_LIST ',' ASSIGNMENT_EXPRESSION			{ $$ = new ArgumentExpressionList($3); }
 
 
 
 	
 
 
-INITIALIZER: ASSIGNMENT_EXPRESSION		 		{ $$ = new Initializer($1,NULL); }
-	   | '{' INITIALIZER_LIST '}'	 			{ $$ = new Initializer(NULL,$2); }
-	   | '{' INITIALIZER_LIST ',' '}'	  		{ $$ = new Initializer(NULL,$2); }
+INITIALIZER: ASSIGNMENT_EXPRESSION		 						{ $$ = new Initializer($1,NULL); }
+	   | '{' INITIALIZER_LIST '}'	 							{ $$ = new Initializer(NULL,$2); }
+	   | '{' INITIALIZER_LIST ',' '}'	  						{ $$ = new Initializer(NULL,$2); }
 
 
 
 
-INITIALIZER_LIST: INITIALIZER					{ $$ = $1; } 
-		| INITIALIZER_LIST ',' INITIALIZER		{ $$ = $3; }
+INITIALIZER_LIST: INITIALIZER									{ $$ = $1; } 
+		| INITIALIZER_LIST ',' INITIALIZER						{ $$ = $3; }
 
 
 
@@ -513,12 +526,6 @@ COMPOUND_STATEMENT: '{' '}'					{ $$ = new CompoundStatement(NULL,NULL); } //DON
 		  | '{' DECLARATION_LIST STATEMENT_LIST '}'	{ $$ = new CompoundStatement($3,$2); }
 		  | '{' STATEMENT_LIST DECLARATION_LIST '}'	{ $$ = new CompoundStatement($2,$3); }
 
-
-
-
-
-DECLARATION_LIST: DECLARATION					{ $$ = new DeclarationList($1,NULL) ; }				
-		| DECLARATION_LIST DECLARATION			{ $$ = new DeclarationList($2,$1) ; }
 
 
 	
@@ -559,8 +566,8 @@ JUMP_STATEMENT: GOTO IDENTIFIER ';'			{ $$ = new JumpStatement($2,NULL,$1); }
 
 
 
-IDENTIFIER_LIST: IDENTIFIER
-	       | IDENTIFIER_LIST ',' IDENTIFIER
+IDENTIFIER_LIST: IDENTIFIER				{ $$ = new IdentifierList($1,NULL); }
+	       | IDENTIFIER_LIST ',' IDENTIFIER		{ $$ = new IdentifierList($3,$1); }
 
 
 
@@ -572,22 +579,22 @@ TYPE_NAME: SPECIFIER_QUALIFIER_LIST
 
 
 
-ABSTRACT_DECLARATOR: POINTER
-		   | DIRECT_ABSTRACT_DECLARATOR
-	           | POINTER DIRECT_ABSTRACT_DECLARATOR
+ABSTRACT_DECLARATOR //POINTER 					{ $$ = new AbstractDeclarator($1,NULL) ; }//done
+		   : DIRECT_ABSTRACT_DECLARATOR 		{ $$ = new AbstractDeclarator(NULL,$1); }//done
+	          // | POINTER DIRECT_ABSTRACT_DECLARATOR 	{ $$ = new AbstractDeclarator($1,$2); }  //done
 
 
 
 
-DIRECT_ABSTRACT_DECLARATOR: '(' ABSTRACT_DECLARATOR ')'
-			  | '[' ']'
-			  | '[' CONSTANT_EXPRESSION ']'
-			  | DIRECT_ABSTRACT_DECLARATOR '[' ']'
-			  | DIRECT_ABSTRACT_DECLARATOR '[' CONSTANT_EXPRESSION ']'
-			  | '(' ')'
-			  | '(' PARAMETER_TYPE_LIST ')'
-			  | DIRECT_ABSTRACT_DECLARATOR '(' ')'
-			  | DIRECT_ABSTRACT_DECLARATOR '(' PARAMETER_TYPE_LIST ')'
+DIRECT_ABSTRACT_DECLARATOR: '(' ABSTRACT_DECLARATOR ')' 				{ $$ = new DirectAbstractDeclarator($2,NULL,NULL,NULL); } //done
+			  | '[' ']'							{ $$ = new DirectAbstractDeclarator(NULL,NULL,NULL,NULL); } 
+			  | '[' CONSTANT_EXPRESSION ']'					{ $$ = new DirectAbstractDeclarator(NULL,$2,NULL,NULL); } 
+			  | DIRECT_ABSTRACT_DECLARATOR '[' ']'				{ $$ = new DirectAbstractDeclarator(NULL,NULL,NULL,$1); } 
+			  | DIRECT_ABSTRACT_DECLARATOR '[' CONSTANT_EXPRESSION ']'	{ $$ = new DirectAbstractDeclarator(NULL,$3,NULL,$1); } 
+			  | '(' ')'						  	{ $$ = new DirectAbstractDeclarator(NULL,NULL,NULL,NULL); } 
+			  | '(' PARAMETER_TYPE_LIST ')'				   	{ $$ = new DirectAbstractDeclarator(NULL,NULL,$2,NULL); } 
+			  | DIRECT_ABSTRACT_DECLARATOR '(' ')'			   	{ $$ = new DirectAbstractDeclarator(NULL,NULL,NULL,$1); } 
+			  | DIRECT_ABSTRACT_DECLARATOR '(' PARAMETER_TYPE_LIST ')' 	{ $$ = new DirectAbstractDeclarator(NULL,NULL,$3,$1); } 
 
 
 
@@ -614,8 +621,8 @@ STRUCT_OR_UNION_SPECIFIER: STRUCT_OR_UNION IDENTIFIER '{' STRUCT_DECLARATION_LIS
 			| STRUCT_OR_UNION IDENTIFIER					 { $$ = new StructOrUnionSpecifier($1,$2,NULL); }//DONE COMPLETELY
 	
 
-STRUCT_OR_UNION: STRUCT			{ $$ = new StructOrUnion( $1 ); }	//DONE COMPLETELY
-		| UNION			{ $$ = new StructOrUnion( $1 ); }	//DONE COMPLETELY
+STRUCT_OR_UNION: STRUCT									{ $$ = new StructOrUnion( $1 ); }	//DONE COMPLETELY
+		| UNION									{ $$ = new StructOrUnion( $1 ); }	//DONE COMPLETELY
 	
 
 STRUCT_DECLARATION_LIST: STRUCT_DECLARATION						//DONE
