@@ -174,7 +174,7 @@ EXTERNAL_DECLARATION: FUNCTION_DEFINITION							{ $$ = new ExternalDeclaration($
 FUNCTION_DEFINITION: DECLARATION_SPECIFIERS DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT 	{ $$ = new FunctionDefinition($1,$2,$3,$4); } //parameters
 		   | DECLARATION_SPECIFIERS DECLARATOR COMPOUND_STATEMENT			{ $$ = new FunctionDefinition($1,$2,NULL,$3); } //DONE definition with no param
 		   | DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT				{ $$ = new FunctionDefinition(NULL,$1,$2,$3); } //call with parameters
-		   | DECLARATOR COMPOUND_STATEMENT						{ $$ = new FunctionDefinition(NULL,$1,NULL,$2); } //call with no parameters
+		   | DECLARATOR COMPOUND_STATEMENT						{ $$ = new FunctionDefinition(NULL,$1,NULL,$2); } // DONE call with no parameters
 
 
 

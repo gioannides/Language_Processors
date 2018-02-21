@@ -22,14 +22,13 @@ class TranslationUnit;
 class ConditionalExpression;
 typedef Node* NodePtr;
 
-static int count_globals = 0;
-static int counter_py(0);
+static int count_globals = 0;		//Will count the number of global variables
+static int counter_py(0);		//Will be used for indentation
 static bool function = false;
-static bool ScopedStatement = false;
 static bool ParametrizedFunction = false;
-static bool main_ = false;
-static std::vector<std::string> GlobalVars; 
-static std::vector<std::string> GlobalFunct; 
+static bool main_ = false;		//Will be used for emitting the main python code
+static std::vector<std::string> GlobalVars; //Will be used to store the globals variables
+static std::vector<std::string> GlobalFunct; //Will be used to store the global functions
 
 class Node{
 
@@ -655,7 +654,9 @@ class DirectDeclarator : public Node {
 				IDENTIFIER(IDENTIFIER) , ConstantExpRession(ConstantExpRession), ParameterTypeLiSt(ParameterTypeLiSt), IDentifierList(IDentifierList),
 				DirectDeclaratorPtr(DirectDeclaratorPtr) , DeclaratorPtr(DeclaratorPtr) {
 
-						GlobalVars.push_back(*IDENTIFIER);
+						if(counter_py == 0){
+							GlobalVars.push_back(*IDENTIFIER);
+						}
 
 					}
 
@@ -1305,7 +1306,7 @@ class FunctionDefinition : public Node {
 		void print_py(std::ofstream& file) {
 		
 			if( DeclarationSpecifiersPtr != NULL ) {
-				//do-nothing
+				//do-nothing because it is not significant in our case (only int)
 			}
 
 			if( DeclaratorPtr != NULL ) {
@@ -1320,7 +1321,7 @@ class FunctionDefinition : public Node {
 							}
 						}
 					}
-					for( int i(0); i<counter_py; i++) { file << "\t"; }
+					
 
 					for( int i= 0; i < count_globals; i++) {
 						file << "\tglobal " << GlobalVars[i] << std::endl;
@@ -1374,7 +1375,7 @@ class ExternalDeclaration : public Node {
 			}
 
 			if ( DecLaration  == NULL){
-				
+				function = true;
 				FunctionDef->print_py(file);
 				file << std::endl;
 			}
@@ -1426,10 +1427,10 @@ class TranslationUnit : public Node{
 
 			if(main_){
 				file << std::endl << "#Boilerplate";
-				file << std::endl << std::endl << "if __name__ == " << "main:"; 
-   				file <<  std::endl << "\timport sys";
-    				file <<  std::endl << "\tret=main()";
-    				file << std::endl << "\tsys.exit(ret)";
+				file << std::endl << std::endl << "if __name__ == " << "\"__main__\"" << ":"; 
+   				file <<  std::endl << "\t\timport sys";
+    				file <<  std::endl << "\t\tret=main()";
+    				file << std::endl << "\t\tsys.exit(ret)";
 
 			}
 
@@ -1448,13 +1449,15 @@ class TranslationUnit : public Node{
 inline void IterationStatement::print_py(std::ofstream& file) {
 
 			if( *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
+				file << std::endl;
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
-				ScopedStatement = false;
 				file << "while(";
 				AssignmentExpressionPtr->print_py(file);
 				file << "):" << std::endl;
-				ScopedStatement = true;
+				counter_py++;
 				StatementPtr->print_py(file);
+				file << std:: endl;
+				counter_py--;
 			}
 		 }
 
@@ -1462,27 +1465,33 @@ inline void IterationStatement::print_py(std::ofstream& file) {
 inline void SelectionStatement::print_py(std::ofstream& file) {
 			if( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL && SELECTIVE_ELSE == NULL && SELECTIVE_SWITCH == NULL) {
 				
+				file << std::endl;
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
-				ScopedStatement = false;
 				file << "if(";
 				AssignmentExpressionPtr->print_py(file) ;
 				file << "):" << std::endl;
-				ScopedStatement = true;
+				counter_py++;
 				StatementPtr->print_py(file);
+				file << std:: endl;
+				counter_py--;
 			}
 
 			else if ( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL && SELECTIVE_ELSE != NULL && SELECTIVE_SWITCH == NULL)			 {
-				for( int i(0); i<counter_py; i++) { file << "\t"; }
-				ScopedStatement = false;				
+				file << std::endl;
+				for( int i(0); i<counter_py; i++) { file << "\t"; }				
 				file << "if(";
 				AssignmentExpressionPtr->print_py(file) ;
 				file << "):" << std::endl;
-				ScopedStatement = true;
+				counter_py++;
 				StatementPtr->print_py(file);
+				file << std:: endl;
+				counter_py--;
+				file << std::endl;
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				file << "else:";
 				file << std::endl;
 				StatementPtr2->print_py(file);
+				file << std:: endl;
 				
 			}
 }
@@ -1533,37 +1542,23 @@ inline void Statement::print_py(std::ofstream& file) {
 inline void CompoundStatement::print_py(std::ofstream& file, bool initialized, bool function) {
 			
 			counter_py++;
-			
 			if( StatementListPtr == NULL && DeclarationListPtr == NULL ) {
 				file << std:: endl;
-				counter_py--;
-				return;
 			}
 			else if( StatementListPtr == NULL && DeclarationListPtr != NULL ) {
 				DeclarationListPtr->print_py(file);
-				counter_py--;
-				return;
 			}
 			else if( StatementListPtr != NULL && DeclarationListPtr == NULL ) {
 				StatementListPtr->print_py(file);
-				counter_py--;
-				return;
 			}
 			else if( StatementListPtr != NULL && DeclarationListPtr != NULL ) {
 				DeclarationListPtr->print_py(file);
 				StatementListPtr->print_py(file);
-				counter_py--;
-				return;
+				
 			}
-
+			counter_py--;
 			
 }
-
-
-
-
-
-
 
 
 
@@ -1585,7 +1580,6 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 			if(UnaryExpressionPtr != NULL) {
 		
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
-				ScopedStatement = false;
 				UnaryExpressionPtr->print_py(file);
 				file << "=";
 
@@ -1594,12 +1588,14 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 			if(ConditionalExpressionPtr != NULL) {
 
 				ConditionalExpressionPtr->print_py(file);
+
 			}
 
 			if(AssignmentExpressionPtr != NULL) {
 
 				AssignmentExpressionPtr->print_py(file);
 			}
+
 }
 
 inline void PostFixExpression::print_py(std::ofstream& file)  {
@@ -1654,23 +1650,15 @@ inline void ArgumentExpressionList::print_py(std::ofstream& file) {
 
 inline void PrimaryExpression::print_py(std::ofstream& file) {
 
-			if(IDENTIFIER != NULL && ScopedStatement == false) {
+			if(IDENTIFIER != NULL) {
 		
 				file << *IDENTIFIER << " ";
 			}
-			else if( IDENTIFIER != NULL && ScopedStatement == true) {
-				
-				file << *IDENTIFIER << " "<< std::endl;
+			else if( CONSTANT != NULL ) {
+				file << " " << *CONSTANT << " "; 
 
 			}
-			else if( CONSTANT != NULL && ScopedStatement == false) {
-				file << " " << *CONSTANT << " ";
-
-			}
-			else if( CONSTANT != NULL && ScopedStatement == true) {
-				file << " " << *CONSTANT << " "<< std::endl;
-
-			}
+		
 			else if( STRING_LITERAL != NULL) {
 	
 				file << " " << '"' << *STRING_LITERAL << '"' << " ";
