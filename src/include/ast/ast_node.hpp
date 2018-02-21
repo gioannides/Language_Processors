@@ -22,13 +22,15 @@ class TranslationUnit;
 class ConditionalExpression;
 typedef Node* NodePtr;
 
-static int count_globals = 0;		//Will count the number of global variables
-static int counter_py(0);		//Will be used for indentation
-static bool function = false;
+static int count_globals = 0;				//Will count the number of global variables
+static int counter_py(0);				//Will be used for indentation
+static bool function = false;				//Are we inside a function?
 static bool ParametrizedFunction = false;
-static bool main_ = false;		//Will be used for emitting the main python code
-static std::vector<std::string> GlobalVars; //Will be used to store the globals variables
-static std::vector<std::string> GlobalFunct; //Will be used to store the global functions
+static bool main_ = false;				//Will be used for emitting the main python code
+static std::vector<std::string> GlobalVars; 		//Will be used to store the globals variables
+static bool is_while = false;				//Identifies loops for indentation manners
+
+
 
 class Node{
 
@@ -654,11 +656,7 @@ class DirectDeclarator : public Node {
 				IDENTIFIER(IDENTIFIER) , ConstantExpRession(ConstantExpRession), ParameterTypeLiSt(ParameterTypeLiSt), IDentifierList(IDentifierList),
 				DirectDeclaratorPtr(DirectDeclaratorPtr) , DeclaratorPtr(DeclaratorPtr) {
 
-						if(counter_py == 0){
-							GlobalVars.push_back(*IDENTIFIER);
-						}
-
-					}
+										}
 
 		void print_py(std::ofstream& file, bool initialized=false, bool function=false) {
 
@@ -675,6 +673,10 @@ class DirectDeclarator : public Node {
 //			}
 
 			if(!function) {
+
+				if(counter_py == 0){
+					GlobalVars.push_back(*IDENTIFIER);
+				}
 	
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				if(!initialized){
@@ -690,7 +692,7 @@ class DirectDeclarator : public Node {
 			else{
 
 				if( *IDENTIFIER == "main") { main_ = true; }
-				GlobalFunct.push_back(*IDENTIFIER);
+				
 				file << "def " << *IDENTIFIER << "(";
 				
 				//if( ParameterTypeLiSt != NULL) {
@@ -1313,17 +1315,9 @@ class FunctionDefinition : public Node {
 				
 				DeclaratorPtr->print_py(file,false,true);
 				if(DeclarationListPtr == NULL) {
-					file << "):" << std::endl;
-					for( int i =0 ; i < GlobalVars.size(); i++) {				//This part will handle global declarations
-						for(int j=0; j < GlobalFunct.size(); j++) {
-							if(GlobalVars[i] == GlobalFunct[j]) {
-								GlobalVars.erase(GlobalVars.begin()+i);
-							}
-						}
-					}
-					
+					file << "):" << std::endl;					
 
-					for( int i= 0; i < count_globals; i++) {
+					for( int i= 0; i < GlobalVars.size(); i++) {
 						file << "\tglobal " << GlobalVars[i] << std::endl;
 					}
 
@@ -1340,8 +1334,10 @@ class FunctionDefinition : public Node {
 			}
 
 			if( CompoundStatementPtr != NULL ) {
+			
 				CompoundStatementPtr->print_py(file,false,true);
 			}
+			
 				
 		}
 };
@@ -1374,14 +1370,14 @@ class ExternalDeclaration : public Node {
 
 			}
 
-			if ( DecLaration  == NULL){
+			if ( DecLaration  == NULL && FunctionDef != NULL){
 				function = true;
 				FunctionDef->print_py(file);
 				file << std::endl;
+				function = false;
 			}
 
-			if ( FunctionDef  == NULL){
-				count_globals++;
+			if ( FunctionDef  == NULL && DecLaration != NULL){
 				DecLaration->print_py(file);
 				file << std::endl;
 			}
@@ -1426,7 +1422,6 @@ class TranslationUnit : public Node{
 				ExternalDecl->print_py(file);
 
 			if(main_){
-				file << std::endl << "#Boilerplate";
 				file << std::endl << std::endl << "if __name__ == " << "\"__main__\"" << ":"; 
    				file <<  std::endl << "\t\timport sys";
     				file <<  std::endl << "\t\tret=main()";
@@ -1450,6 +1445,7 @@ inline void IterationStatement::print_py(std::ofstream& file) {
 
 			if( *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
 				file << std::endl;
+				is_while = true;
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				file << "while(";
 				AssignmentExpressionPtr->print_py(file);
@@ -1458,6 +1454,7 @@ inline void IterationStatement::print_py(std::ofstream& file) {
 				StatementPtr->print_py(file);
 				file << std:: endl;
 				counter_py--;
+				is_while = false;
 			}
 		 }
 
@@ -1595,6 +1592,9 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 
 				AssignmentExpressionPtr->print_py(file);
 			}
+			if(!function && !is_while){
+				file << std::endl;
+			}
 
 }
 
@@ -1614,6 +1614,7 @@ inline void PostFixExpression::print_py(std::ofstream& file)  {
 			else if( OPERATOR != NULL && IDENTIFIER == NULL) {
 				file << " " << OPERATOR << " ";
 			}
+			
 		}
 
 inline void UnaryExpression::print_py(std::ofstream& file) {
