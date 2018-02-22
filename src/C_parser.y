@@ -261,7 +261,7 @@ DIRECT_DECLARATOR: IDENTIFIER									{ $$ = new DirectDeclarator($1,NULL,NULL,N
 		| '(' DECLARATOR ')'								{ $$ = new DirectDeclarator(NULL,NULL,NULL,NULL,NULL,$2); }
 		| DIRECT_DECLARATOR '[' CONSTANT_EXPRESSION ']'					{ $$ = new DirectDeclarator(NULL,$3,NULL,NULL,$1,NULL);   }//DONE
 		| DIRECT_DECLARATOR '[' ']'							{ $$ = $1;   }
-		| DIRECT_DECLARATOR '(' PARAMETER_TYPE_LIST ')'					{ $$ = new DirectDeclarator(NULL,NULL,$3,NULL,$1,NULL);   }//DONE
+		| DIRECT_DECLARATOR '(' PARAMETER_TYPE_LIST ')'					{ $$ = new DirectDeclarator(NULL,NULL,$3,NULL,$1,NULL);   }//DONE 
 		| DIRECT_DECLARATOR '(' IDENTIFIER_LIST ')'					{ $$ = new DirectDeclarator(NULL,NULL,NULL,$3,$1,NULL);   }//DONE
 		| DIRECT_DECLARATOR '(' ')'							{ $$ = $1 ; }//DONE
 
