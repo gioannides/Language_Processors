@@ -1094,7 +1094,15 @@ class JumpStatement : public Node {
 
 		~JumpStatement() {}
 
-		void print_py(std::ofstream& file) {}
+		void print_py(std::ofstream& file) {
+			
+			for( int i(0); i<counter_py; i++) { file << "\t"; }
+			file << *JUMP_TYPE << " ";
+			if(AssignmentExpressionPtr != NULL) {
+				AssignmentExpressionPtr->print_py(file);
+			}
+
+		}
 
 };
 
