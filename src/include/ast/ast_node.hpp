@@ -31,6 +31,7 @@ static std::vector<std::string> GlobalVars; 		//Will be used to store the global
 static bool is_while = false;				//Identifies loops for indentation manners
 static int parentheses = 0;
 static bool elif = false;
+static bool ParameterVariable = false;
 
 
 class Node{
@@ -539,6 +540,18 @@ class IdentifierList : public Node {
 	public:
 		IdentifierList(std::string* IDENTIFIER , IdentifierList* IdentifierListPtr) : IDENTIFIER(IDENTIFIER) , IdentifierListPtr(IdentifierListPtr) {}
 
+		void print_py(std::ofstream& file) {
+
+			if( IdentifierListPtr != NULL) {
+				IdentifierListPtr->print_py(file);
+				file << ",";
+			}
+
+			file << *IDENTIFIER;					
+		
+		}
+
+
 };
 
 
@@ -606,6 +619,8 @@ class ParameterDeclaration : public Node {
 
 		~ParameterDeclaration() {}
 
+		void print_py(std::ofstream& file) ;
+
 };
 
 
@@ -622,6 +637,17 @@ class ParameterList : public Node {
 
 		~ParameterList() {}
 
+		void print_py(std::ofstream& file) {
+
+			if( ParameterListPtr != NULL) {
+				ParameterListPtr->print_py(file);
+				file << ",";
+			}
+
+			ParameterDeclarationPtr->print_py(file);						
+		
+		}
+
 };
 
 
@@ -637,7 +663,13 @@ class ParameterTypeList : public Node {
 		
 		~ParameterTypeList() {}
 
-		void print_py(std::ofstream& file) {}
+		void print_py(std::ofstream& file) {
+
+			if( ParameterListPtr != NULL) {
+				ParameterListPtr->print_py(file);
+			}			
+		
+		}
 
 };
 
@@ -665,10 +697,10 @@ class DirectDeclarator : public Node {
 		void print_py(std::ofstream& file, bool initialized=false, bool function=false) {
 
 
-	//		if( DirectDeclaratorPtr != NULL) {
-//
-//				DirectDeclaratorPtr->print_py(file,initialized,function);
-//			}
+			if( DirectDeclaratorPtr != NULL) {
+
+				DirectDeclaratorPtr->print_py(file,initialized,function);
+			}
 			
 			//if(ParametrizedFunction) {
 //
@@ -678,35 +710,45 @@ class DirectDeclarator : public Node {
 
 			if(!function) {
 
-				if(counter_py == 0){
+				if(counter_py == 0 && !ParameterVariable ){
 					GlobalVars.push_back(*IDENTIFIER);
 				}
 	
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
-				if(!initialized){
+				if(!initialized && !ParameterVariable){
 					file << *IDENTIFIER << "=0" << std::endl;
 				}
 
-				else{
+				else if(!ParameterVariable){
 					file << *IDENTIFIER << "=";
+				}
+				else{
+					file << *IDENTIFIER;
+					ParameterVariable = false;
 				}
 				
 
 			}
+			
 			else{
 
-				if( *IDENTIFIER == "main") { main_ = true; }
+				if( IDENTIFIER != NULL ) {
+					if( *IDENTIFIER == "main") { main_ = true; }
 				
-				file << "def " << *IDENTIFIER << "(";
-				
-				//if( ParameterTypeLiSt != NULL) {
-				//	ParameterTypeLiSt->print_py(file);
-				//}
-				//else if( IDentifierList != NULL) {
-				//	IDentifierList->print_py(file);
-				//}
+					file << "def " << *IDENTIFIER << "(";
+
+				}
+			
+				if( ParameterTypeLiSt != NULL) {
+					ParameterTypeLiSt->print_py(file);
+					
+				}
+				else if( IDentifierList != NULL) {
+					IDentifierList->print_py(file);
+				}
 
 			}
+
 		}
 
 
@@ -1655,26 +1697,25 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 
 inline void PostFixExpression::print_py(std::ofstream& file)  {
 
-			if(PostFixExpressionPtr !=NULL) {
-			
+		if(PostFixExpressionPtr !=NULL && PrimaryExpressionPtr==NULL && AssignmentExpressionPtr==NULL && OPERATOR==NULL && IDENTIFIER==NULL && ArgumentExpressionListPtr==NULL) 		{			
+			for( int i(0); i<counter_py; i++) { file << "\t"; }
+			PostFixExpressionPtr->print_py(file);
+			file << "()" << std::endl;
+		}
+		else if( PrimaryExpressionPtr != NULL && PostFixExpressionPtr==NULL && AssignmentExpressionPtr==NULL && OPERATOR==NULL && IDENTIFIER==NULL && ArgumentExpressionListPtr==NULL) 			{		
+				PrimaryExpressionPtr->print_py(file);
+		}
+			//else if( AssignmentExpressionPtr != NULL ) {
+			//	AssignmentExpressionPtr->print_py(file);
+			//}
+		else if( PrimaryExpressionPtr == NULL && PostFixExpressionPtr!=NULL && AssignmentExpressionPtr==NULL && OPERATOR==NULL && IDENTIFIER==NULL && ArgumentExpressionListPtr!=NULL) 			{		
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				PostFixExpressionPtr->print_py(file);
-				file << "()" << std::endl;
-
-			}
-			else if( PrimaryExpressionPtr != NULL ) {
-				PrimaryExpressionPtr->print_py(file);
-			}
-			else if( AssignmentExpressionPtr != NULL ) {
-				AssignmentExpressionPtr->print_py(file);
-			}
-			else if( ArgumentExpressionListPtr != NULL && PostFixExpressionPtr !=NULL ) {
-				
-			
+				file << "(";
 				ArgumentExpressionListPtr->print_py(file);
-		
+				file << ")";
 				
-			}
+		}
 			else if( OPERATOR != NULL && IDENTIFIER != NULL ) {
 				file << " " << OPERATOR << " " << IDENTIFIER << " ";
 			}
@@ -1714,6 +1755,7 @@ inline void ArgumentExpressionList::print_py(std::ofstream& file) {
 
 		if( ArgumentExpressionListPtr != NULL) {
 			ArgumentExpressionListPtr->print_py(file);
+			file << ",";
 		}
 		AssignmentExpressionPtr->print_py(file);
 
@@ -1744,5 +1786,15 @@ inline void PrimaryExpression::print_py(std::ofstream& file) {
 			}
 		
 }
+
+
+inline void ParameterDeclaration::print_py(std::ofstream& file) {
+
+			if( DeclaratorPtr != NULL) {
+				ParameterVariable = true;
+				DeclaratorPtr->print_py(file);
+			}					
+		
+		}
 
 #endif
