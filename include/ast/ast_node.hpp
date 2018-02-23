@@ -32,7 +32,6 @@ static bool is_while = false;				//Identifies loops for indentation manners
 static int parentheses = 0;
 static bool elif = false;
 static bool ParameterVariable = false;
-static std::string temp_ID = "";
 
 
 class Node{
@@ -1637,7 +1636,8 @@ inline void CompoundStatement::print_py(std::ofstream& file, bool initialized, b
 	
 			counter_py++;
 			if( StatementListPtr == NULL && DeclarationListPtr == NULL ) {
-				file << std:: endl;
+				for( int i(0); i<counter_py; i++) { file << "\t"; }
+				file << "pass" << std::endl;
 			}
 			else if( StatementListPtr == NULL && DeclarationListPtr != NULL ) {
 				DeclarationListPtr->print_py(file);
@@ -1676,7 +1676,7 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 		
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				UnaryExpressionPtr->print_py(file);
-				file << *AssignmentOperator;
+				file << "=";
 
 			}
 	
@@ -1697,20 +1697,11 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 }
 
 inline void PostFixExpression::print_py(std::ofstream& file)  {
-		if( OPERATOR != NULL && IDENTIFIER == NULL) {			//THIS DOESNT WORK :(
-			for( int i(0); i<counter_py; i++) { file << "\t"; }
-			PostFixExpressionPtr->print_py(file);
-			if(*OPERATOR == "++") {
-				file << "=" << temp_ID << "+1";
-			}
-			else{
-				file << "=" << temp_ID << "-1";
-			}
-		}
+		
 		if(PostFixExpressionPtr !=NULL && PrimaryExpressionPtr==NULL && AssignmentExpressionPtr==NULL && OPERATOR==NULL && IDENTIFIER==NULL && ArgumentExpressionListPtr==NULL) 		{			
 			for( int i(0); i<counter_py; i++) { file << "\t"; }
 			PostFixExpressionPtr->print_py(file);
-			file << "()" << std::endl;
+			file << "()";
 		}
 		else if( PrimaryExpressionPtr != NULL && PostFixExpressionPtr==NULL && AssignmentExpressionPtr==NULL && OPERATOR==NULL && IDENTIFIER==NULL && ArgumentExpressionListPtr==NULL) 			{		
 				PrimaryExpressionPtr->print_py(file);
@@ -1724,6 +1715,7 @@ inline void PostFixExpression::print_py(std::ofstream& file)  {
 				file << "(";
 				ArgumentExpressionListPtr->print_py(file);
 				file << ")";
+				function = false;
 				
 		}
 		
@@ -1764,11 +1756,13 @@ inline void CastExpression::print_py(std::ofstream& file) {
 
 inline void ArgumentExpressionList::print_py(std::ofstream& file) {
 
+		function = true;
 		if( ArgumentExpressionListPtr != NULL) {
 			ArgumentExpressionListPtr->print_py(file);
 			file << ",";
 		}
 		AssignmentExpressionPtr->print_py(file);
+		
 
 }
 
@@ -1785,7 +1779,7 @@ inline void PrimaryExpression::print_py(std::ofstream& file) {
 			if(IDENTIFIER != NULL) {
 		
 				file << *IDENTIFIER;
-				temp_ID = *IDENTIFIER;
+
 			}
 			else if( CONSTANT != NULL ) {
 				file << *CONSTANT; 
