@@ -32,6 +32,7 @@ static bool is_while = false;				//Identifies loops for indentation manners
 static int parentheses = 0;
 static bool elif = false;
 static bool ParameterVariable = false;
+static std::string temp_ID = "";
 
 
 class Node{
@@ -528,7 +529,7 @@ class AssignmentExpression : public Node {
 
 		~AssignmentExpression() {}
 
-		void print_py(std::ofstream& file) ; 
+		void print_py(std::ofstream& file) ;
 };
 
 
@@ -1675,7 +1676,7 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 		
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				UnaryExpressionPtr->print_py(file);
-				file << "=";
+				file << *AssignmentOperator;
 
 			}
 	
@@ -1696,7 +1697,16 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 }
 
 inline void PostFixExpression::print_py(std::ofstream& file)  {
-
+		if( OPERATOR != NULL && IDENTIFIER == NULL) {			//THIS DOESNT WORK :(
+			for( int i(0); i<counter_py; i++) { file << "\t"; }
+			PostFixExpressionPtr->print_py(file);
+			if(*OPERATOR == "++") {
+				file << "=" << temp_ID << "+1";
+			}
+			else{
+				file << "=" << temp_ID << "-1";
+			}
+		}
 		if(PostFixExpressionPtr !=NULL && PrimaryExpressionPtr==NULL && AssignmentExpressionPtr==NULL && OPERATOR==NULL && IDENTIFIER==NULL && ArgumentExpressionListPtr==NULL) 		{			
 			for( int i(0); i<counter_py; i++) { file << "\t"; }
 			PostFixExpressionPtr->print_py(file);
@@ -1716,6 +1726,7 @@ inline void PostFixExpression::print_py(std::ofstream& file)  {
 				file << ")";
 				
 		}
+		
 			else if( OPERATOR != NULL && IDENTIFIER != NULL ) {
 				file << " " << OPERATOR << " " << IDENTIFIER << " ";
 			}
@@ -1774,6 +1785,7 @@ inline void PrimaryExpression::print_py(std::ofstream& file) {
 			if(IDENTIFIER != NULL) {
 		
 				file << *IDENTIFIER;
+				temp_ID = *IDENTIFIER;
 			}
 			else if( CONSTANT != NULL ) {
 				file << *CONSTANT; 
