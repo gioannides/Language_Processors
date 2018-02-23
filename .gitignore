@@ -1,0 +1,8 @@
+*.o
+bin/*
+*.tab.cpp
+*.yy.cpp
+*.output
+*.tab.hpp
+c_translator/*
+tmp/*
