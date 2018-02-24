@@ -8,10 +8,16 @@ int c = 98;
 
 int main(){
 	
-	int x = 32;
+	int x = 3;
+	int z = 5;
 
-	return f(x) || c;
-	
+	if( x == 23 || z== 5){
+
+		return 45;
+	}
+	else{
+		return 0;
+	}
 
 }
 
