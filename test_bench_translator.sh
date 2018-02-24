@@ -50,9 +50,9 @@ input_dir="c_translator/formative"
 working="tmp/formative"
 mkdir -p ${working}
 
+
 for i in ${input_dir}/*.c ; do
     base=$(echo $i | sed -E -e "s|${input_dir}/([^.]+)[.]c|\1|g");
-    
     # Compile the reference C version
     gcc $i -std=c89 -ansi -o $working/$base
     
@@ -76,6 +76,7 @@ for i in ${input_dir}/*.c ; do
     elif [[ $REF_C_OUT -ne $GOT_P_OUT ]] ; then
         echo -e "${wht}$base.c ${red}[FAIL] ${wht}Expected ${REF_C_OUT} got ${GOT_P_OUT}"
 	echo -e "\033[33;36m" "Navigate to -> c_translator/formative/$base.c"
+        FAIL=$FAIL+1
 	#echo -e "\033[33;36m" "	     -> tmp/formative/$base-got.py"
     else
         echo -e "${wht}$base.c ${grn}[PASS]""${red}"
@@ -86,6 +87,5 @@ for i in ${input_dir}/*.c ; do
 
 done
  rm tmp/formative/*
-echo
 echo -e "\033[33;38m" "***gcc will always output an error if the C file does not compile***"
 echo -e "\033[33;38m" "***Syntax Errors are a fault of the c_compiler, not gcc***"
