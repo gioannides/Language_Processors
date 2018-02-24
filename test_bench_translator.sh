@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+rm tmp/formative/*
 
 if which dos2unix ; then
     DOS2UNIX="dos2unix"
@@ -76,16 +76,18 @@ for i in ${input_dir}/*.c ; do
     elif [[ $REF_C_OUT -ne $GOT_P_OUT ]] ; then
         echo -e "${wht}$base.c ${red}[FAIL] ${wht}Expected ${REF_C_OUT} got ${GOT_P_OUT}"
 	echo -e "\033[33;36m" "Navigate to -> c_translator/formative/$base.c"
-        FAIL=$FAIL+1
-	#echo -e "\033[33;36m" "	     -> tmp/formative/$base-got.py"
+	echo -e "\033[33;36m" "	     -> tmp/formative/$base-got.py"
+	rm tmp/formative/$base
     else
         echo -e "${wht}$base.c ${grn}[PASS]""${red}"
+	rm tmp/formative/$base-got.py
+	rm tmp/formative/$base
     fi
 
    
     
 
 done
- rm tmp/formative/*
+ 
 echo -e "\033[33;38m" "***gcc will always output an error if the C file does not compile***"
 echo -e "\033[33;38m" "***Syntax Errors are a fault of the c_compiler, not gcc***"

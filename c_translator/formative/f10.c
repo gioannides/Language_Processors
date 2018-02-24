@@ -2,7 +2,8 @@ int main()
 {
 	int y;
 	int x=5;
-	y=((x+x-x)/x)*x; 
+	int s;
+	y=((x+s-x)/x)*x;
 	while(y<25) {
 
 		if( y < 15 ) {
