@@ -87,5 +87,5 @@ for i in ${input_dir}/*.c ; do
 done
  rm tmp/formative/*
 echo
-echo -e "\033[33;38m" "***The testbench will always output an error if the C file does not compile***"
+echo -e "\033[33;38m" "***gcc will always output an error if the C file does not compile***"
 echo -e "\033[33;38m" "***Syntax Errors are a fault of the c_compiler, not gcc***"
