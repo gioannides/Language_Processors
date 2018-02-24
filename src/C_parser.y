@@ -77,6 +77,7 @@
 	AbstractDeclarator* AbstractDeclaratorPtr;
 	DirectAbstractDeclarator* DirectAbstractDeclaratorPtr;
 	IdentifierList* IdentifierListPtr;
+	Pointer* PointerPtr;
 }
 
 
@@ -92,6 +93,7 @@
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
+%type <PointerPtr> POINTER
 %type <IdentifierListPtr> IDENTIFIER_LIST
 %type <DirectAbstractDeclaratorPtr> DIRECT_ABSTRACT_DECLARATOR
 %type <AbstractDeclaratorPtr> ABSTRACT_DECLARATOR
@@ -132,7 +134,7 @@
 %type <ExternalDecLaration>  EXTERNAL_DECLARATION
 %type <DecLaration> DECLARATION
 %type <DeclarationSpecifierS> DECLARATION_SPECIFIERS
-%type <TypeQuaLifier> TYPE_QUALIFIER
+%type <TypeQuaLifier> TYPE_QUALIFIER TYPE_QUALIFIER_LIST
 %type <TypeSpeCifier> TYPE_SPECIFIER
 %type <StructOrUnionSpecifieR> STRUCT_OR_UNION_SPECIFIER
 %type <StructDeclarationLisT> STRUCT_DECLARATION_LIST
@@ -249,8 +251,8 @@ DECLARATION_LIST: DECLARATION									{ $$ = new DeclarationList($1,NULL) ; }
 
 
 
-DECLARATOR //POINTER DIRECT_DECLARATOR				//DONE
-	  : DIRECT_DECLARATOR									{ $$ = new Declarator(NULL,$1,NULL);}					//DONE
+DECLARATOR: POINTER DIRECT_DECLARATOR								{ $$ = new Declarator($1,$2,NULL);}	//DONE			
+	  | DIRECT_DECLARATOR									{ $$ = new Declarator(NULL,$1,NULL);}					//DONE
 	  | '(' DECLARATOR ')'									{ $$ = new Declarator(NULL,NULL,$2);}
 	
 
@@ -307,14 +309,14 @@ CONDITIONAL_EXPRESSION: LOGICAL_OR_EXPRESSION							{ $$ = new ConditionalExpres
 
 
 
-POINTER	: '*'
-	| '*' TYPE_QUALIFIER_LIST
-	| '*' POINTER
-	| '*' TYPE_QUALIFIER_LIST POINTER
+POINTER	: '*'						{ $$ = new Pointer(NULL,NULL); }
+	| '*' TYPE_QUALIFIER_LIST			{ $$ = new Pointer(NULL,$2); }
+	| '*' POINTER					{ $$ = new Pointer($2,NULL); }
+	| '*' TYPE_QUALIFIER_LIST POINTER		{ $$ = new Pointer($3,$2); }
 
 
-TYPE_QUALIFIER_LIST: TYPE_QUALIFIER
-		   | TYPE_QUALIFIER_LIST TYPE_QUALIFIER
+TYPE_QUALIFIER_LIST: TYPE_QUALIFIER			{ $$ = $1;}
+		   | TYPE_QUALIFIER_LIST TYPE_QUALIFIER	{ $$ = $2;}
 
 
 

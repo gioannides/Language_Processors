@@ -59,7 +59,7 @@ class ExpressionStatement;
 class CompoundStatement;
 class Declarator;
 
-class Pointer : public Node {};
+class Pointer;
 
 class SpecifierQualifierList : public Node {};
 class Init_Declaration_List : public Node {};
@@ -76,7 +76,18 @@ class ParameterTypeList;
 class IdentifierList;
 
 
+class Pointer : public Node {
 
+	private:
+		Pointer* PointerPtr;
+		TypeQualifier* TypeQualifierPtr;
+
+	public:
+		Pointer( Pointer* PointerPtr , TypeQualifier* TypeQualifierPtr ) : PointerPtr(PointerPtr) , TypeQualifierPtr(TypeQualifierPtr) {}
+
+		~Pointer() {}
+
+};
 
 
 class TypeName : public Node {};
