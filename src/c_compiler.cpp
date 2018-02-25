@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
 
 				else {
 
-					ast->print_C(file_name);
+					//ast->print_mips(file_name);
 					return 0;
 
 				}
