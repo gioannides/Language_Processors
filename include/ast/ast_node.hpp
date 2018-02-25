@@ -712,12 +712,6 @@ class DirectDeclarator : public Node {
 
 				DirectDeclaratorPtr->print_py(file,initialized,function);
 			}
-			
-			//if(ParametrizedFunction) {
-//
-//				file << *IDENTIFIER << ",";
-//				return;
-//			}
 
 			if(!function) {
 
@@ -1389,7 +1383,7 @@ class FunctionDefinition : public Node {
 		void print_py(std::ofstream& file) {
 		
 			if( DeclarationSpecifiersPtr != NULL ) {
-										//do-nothing because it is not significant in our case (only int)
+										//do-nothing because it is not significant in our case (only int/void)
 			}
 
 			if( DeclaratorPtr != NULL ) {				//handles global variables after printing function name
@@ -1554,10 +1548,10 @@ inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) {
 				       	AssignmentExpressionPtr->print_py(file) ;
 					file << "):" << std::endl;
 				}
-				//counter_py++;
+;
 				StatementPtr->print_py(file);
 				file << std:: endl;
-				//counter_py--;
+			
 			}
 
 			else if ( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL && SELECTIVE_ELSE != NULL && SELECTIVE_SWITCH == NULL)			 {
@@ -1718,9 +1712,7 @@ inline void PostFixExpression::print_py(std::ofstream& file)  {
 		else if( PrimaryExpressionPtr != NULL && PostFixExpressionPtr==NULL && AssignmentExpressionPtr==NULL && OPERATOR==NULL && IDENTIFIER==NULL && ArgumentExpressionListPtr==NULL) 			{		
 				PrimaryExpressionPtr->print_py(file);
 		}
-			//else if( AssignmentExpressionPtr != NULL ) {
-			//	AssignmentExpressionPtr->print_py(file);
-			//}
+			
 		else if( PrimaryExpressionPtr == NULL && PostFixExpressionPtr!=NULL && AssignmentExpressionPtr==NULL && OPERATOR==NULL && IDENTIFIER==NULL && ArgumentExpressionListPtr!=NULL) 			{		
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				PostFixExpressionPtr->print_py(file);
