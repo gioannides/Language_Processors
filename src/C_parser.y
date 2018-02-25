@@ -39,7 +39,7 @@
 	InitDeclarator* InitDeclArator;
 	Declarator* DecLarator;
 	DirectDeclarator* DirectDeclaratorPtr;
-	// ConstantExpression* ConstanTExpression;
+	ConstantExpression* ConstanTExpression;
 	DirectDeclarator* DiRectDeclarator;
 	StructOrUnion* StruCtOrUnion;
 	ConditionalExpression* COnditionalExpression;
@@ -54,7 +54,7 @@
 	ShiftExpression* SHiftExpression;
 	AdditiveExpression* ADDitiveExpression;
 	MultiplicativeExpression* MUltiplicativeExpression;
-	// CastExpression* CAstExpression;
+	CastExpression* CAstExpression;
 	Initializer* InitializerPtr;
 	AssignmentExpression* AssignmentExpressionPtr;
 	UnaryExpression* UnaryExpressionPtr;
@@ -117,7 +117,7 @@
 %type <AssignmentExpressionPtr> ASSIGNMENT_EXPRESSION EXPRESSION
 %type <InitializerPtr> INITIALIZER INITIALIZER_LIST
 %type <DirectDeclaratorPtr> DIRECT_DECLARATOR
-// %type <CAstExpression> UNARY_EXPRESSION
+%type <CAstExpression> CAST_EXPRESSION
 %type <MUltiplicativeExpression> MULTIPLICATIVE_EXPRESSION
 %type <ADDitiveExpression> ADDITIVE_EXPRESSION
 %type <SHiftExpression> SHIFT_EXPRESSION
@@ -129,7 +129,7 @@
 %type <LogicalANDexpression> LOGICAL_AND_EXPRESSION
 %type <LOgicalOrExpression> LOGICAL_OR_EXPRESSION
 %type <COnditionalExpression> CONDITIONAL_EXPRESSION
-// %type <ConstanTExpression> CONDITIONAL_EXPRESSION
+%type <ConstanTExpression> CONSTANT_EXPRESSION
 %type <ASTtree> TRANSLATION_UNIT  
 %type <ExternalDecLaration>  EXTERNAL_DECLARATION
 %type <DecLaration> DECLARATION
@@ -263,14 +263,14 @@ DECLARATOR: POINTER DIRECT_DECLARATOR								{ $$ = new Declarator($1,$2,NULL);}
 
 DIRECT_DECLARATOR: IDENTIFIER									{ $$ = new DirectDeclarator($1,NULL,NULL,NULL,NULL,NULL); }
 		| '(' DECLARATOR ')'								{ $$ = new DirectDeclarator(NULL,NULL,NULL,NULL,NULL,$2); }
-		| DIRECT_DECLARATOR '[' CONDITIONAL_EXPRESSION ']'					{ $$ = new DirectDeclarator(NULL,$3,NULL,NULL,$1,NULL);   }//DONE
+		| DIRECT_DECLARATOR '[' CONSTANT_EXPRESSION ']'					{ $$ = new DirectDeclarator(NULL,$3,NULL,NULL,$1,NULL);   }//DONE
 		| DIRECT_DECLARATOR '[' ']'							{ $$ = $1;   }
 		| DIRECT_DECLARATOR '(' PARAMETER_TYPE_LIST ')'					{ $$ = new DirectDeclarator(NULL,NULL,$3,NULL,$1,NULL);   }//DONE 
 		| DIRECT_DECLARATOR '(' IDENTIFIER_LIST ')'					{ $$ = new DirectDeclarator(NULL,NULL,NULL,$3,$1,NULL);   }//DONE
 		| DIRECT_DECLARATOR '(' ')'							{ $$ = $1; }//DONE
 
 
-//CONDITIONAL_EXPRESSION: CONDITIONAL_EXPRESSION							{ $$ = new ConstantExpression($1); }//DONE COMPLETELY
+CONSTANT_EXPRESSION: CONDITIONAL_EXPRESSION							{ $$ = new ConstantExpression($1); }//DONE COMPLETELY
 
 
 
@@ -419,18 +419,18 @@ ADDITIVE_EXPRESSION: MULTIPLICATIVE_EXPRESSION							{ $$ = new AdditiveExpressi
 
 	
 
-MULTIPLICATIVE_EXPRESSION: UNARY_EXPRESSION							{ $$ = new MultiplicativeExpression($1,NULL,NULL); }//DONE 
-			| MULTIPLICATIVE_EXPRESSION MULTIPLY UNARY_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
-			| MULTIPLICATIVE_EXPRESSION DIVIDE UNARY_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
-			| MULTIPLICATIVE_EXPRESSION MODULO UNARY_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
+MULTIPLICATIVE_EXPRESSION: CAST_EXPRESSION							{ $$ = new MultiplicativeExpression($1,NULL,NULL); }//DONE 
+			| MULTIPLICATIVE_EXPRESSION MULTIPLY CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
+			| MULTIPLICATIVE_EXPRESSION DIVIDE CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
+			| MULTIPLICATIVE_EXPRESSION MODULO CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
 
 
 
 
 	
 
-//UNARY_EXPRESSION: UNARY_EXPRESSION								{ $$ = new CastExpression($1,NULL); }//DONE COMPLETELY
-		//| '(' TYPE_NAME ')' UNARY_EXPRESSION						{ $$ = new CastExpression(NULL,$2); }//IMPLEMENT TYPE_NAME
+CAST_EXPRESSION: UNARY_EXPRESSION								{ $$ = new CastExpression($1,NULL); }//DONE COMPLETELY
+		//| '(' TYPE_NAME ')' CAST_EXPRESSION						{ $$ = new CastExpression(NULL,$2); }//IMPLEMENT TYPE_NAME
 
 
 
@@ -441,7 +441,7 @@ MULTIPLICATIVE_EXPRESSION: UNARY_EXPRESSION							{ $$ = new MultiplicativeExpre
 UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,NULL) ; } //DONE
 		| INC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
 		| DEC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
-		| UNARY_OPERATOR UNARY_EXPRESSION						{ $$ = new UnaryExpression(NULL,$1,$2) ; } //DONE COMPLETELY
+		| UNARY_OPERATOR CAST_EXPRESSION						{ $$ = new UnaryExpression(NULL,$1,$2) ; } //DONE COMPLETELY
 		//| SIZEOF UNARY_EXPRESSION
 		//| SIZEOF '(' TYPE_NAME ')'							//IMPLEMENT THIS
 
@@ -517,7 +517,7 @@ STATEMENT: LABELED_STATEMENT 				{ $$ = new Statement($1,NULL,NULL,NULL,NULL,NUL
 
 
 LABELED_STATEMENT: IDENTIFIER ':' STATEMENT			{ $$ = new LabeledStatement($1,NULL,NULL,$3); }
-		| CASE CONDITIONAL_EXPRESSION ':' STATEMENT	{ $$ = new LabeledStatement(NULL,$1,$2,$4); }
+		| CASE CONSTANT_EXPRESSION ':' STATEMENT	{ $$ = new LabeledStatement(NULL,$1,$2,$4); }
 		| DEFAULT ':' STATEMENT				{ $$ = new LabeledStatement(NULL,$1,NULL,$3); }
 
 
@@ -592,9 +592,9 @@ ABSTRACT_DECLARATOR //POINTER 					{ $$ = new AbstractDeclarator($1,NULL) ; }//d
 
 DIRECT_ABSTRACT_DECLARATOR: '(' ABSTRACT_DECLARATOR ')' 				{ $$ = new DirectAbstractDeclarator($2,NULL,NULL,NULL); } //done
 			  | '[' ']'							{ $$ = new DirectAbstractDeclarator(NULL,NULL,NULL,NULL); } 
-			  | '[' CONDITIONAL_EXPRESSION ']'					{ $$ = new DirectAbstractDeclarator(NULL,$2,NULL,NULL); } 
+			  | '[' CONSTANT_EXPRESSION ']'					{ $$ = new DirectAbstractDeclarator(NULL,$2,NULL,NULL); } 
 			  | DIRECT_ABSTRACT_DECLARATOR '[' ']'				{ $$ = new DirectAbstractDeclarator(NULL,NULL,NULL,$1); } 
-			  | DIRECT_ABSTRACT_DECLARATOR '[' CONDITIONAL_EXPRESSION ']'	{ $$ = new DirectAbstractDeclarator(NULL,$3,NULL,$1); } 
+			  | DIRECT_ABSTRACT_DECLARATOR '[' CONSTANT_EXPRESSION ']'	{ $$ = new DirectAbstractDeclarator(NULL,$3,NULL,$1); } 
 			  | '(' ')'						  	{ $$ = new DirectAbstractDeclarator(NULL,NULL,NULL,NULL); } 
 			  | '(' PARAMETER_TYPE_LIST ')'				   	{ $$ = new DirectAbstractDeclarator(NULL,NULL,$2,NULL); } 
 			  | DIRECT_ABSTRACT_DECLARATOR '(' ')'			   	{ $$ = new DirectAbstractDeclarator(NULL,NULL,NULL,$1); } 
@@ -616,7 +616,7 @@ ENUMERATOR_LIST: ENUMERATOR
 
 
 ENUMERATOR: IDENTIFIER
-	  | IDENTIFIER '=' CONDITIONAL_EXPRESSION
+	  | IDENTIFIER '=' CONSTANT_EXPRESSION
 
 
 
@@ -647,8 +647,8 @@ STRUCT_DECLARATOR_LIST: STRUCT_DECLARATOR						//DONE
 
 
 STRUCT_DECLARATOR: DECLARATOR							//HAVE NOT PUT IT IN MEMBER VARIABLES
-		| ':' CONDITIONAL_EXPRESSION					//DONE
-		| DECLARATOR ':' CONDITIONAL_EXPRESSION				//DONE
+		| ':' CONSTANT_EXPRESSION					//DONE
+		| DECLARATOR ':' CONSTANT_EXPRESSION				//DONE
 
 %%
 
