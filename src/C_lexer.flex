@@ -1,5 +1,5 @@
 %option noyywrap
-
+%option yylineno
 
 %{
 
@@ -19,16 +19,19 @@ extern FILE *yyout;
 int token(int T);
 int vtoken(int T);
 
+int LineNo = 1;			//Used for debugging
+
 
 // This is to work around an irritating bug in Flex
 extern "C" int fileno(FILE *stream);
 %}
 
 %%
-#[^\n]*\n		{  return vtoken(PREPROCESSOR);}
-"/*"			{  }
-"//"[^\n]*              { /* consume //-comment */ }
+#[^\n]*\n		{  return vtoken(PREPROCESSOR); LineNo++;}
 
+"/*"			{  }
+
+"//"[^\n]*              { /* consume //-comment */ }
 
 "auto"			{  return token(AUTO);}
 
@@ -210,6 +213,8 @@ extern "C" int fileno(FILE *stream);
 
 "?"			{  return('?'); }
 
+[\n]			{ LineNo++; }
+
 [ \t\v\n\f]		{ /*ignore*/ }
 
 .			{ yyerror (yytext); }
@@ -220,6 +225,7 @@ extern "C" int fileno(FILE *stream);
 void yyerror (char const *s)
 {
   	fprintf (stderr, "Error: %s\n", s); /* s is the text that wasn't matched */
+	std::cerr << "Terminated At line: " << LineNo << " due to Syntax/Lexical error" << std::endl;
   	exit(1);
 }
 
