@@ -25,6 +25,7 @@ extern "C" int fileno(FILE *stream);
 %}
 
 %%
+#[^\n]*\n		{  return vtoken(PREPROCESSOR);}
 "/*"			{  }
 "//"[^\n]*              { /* consume //-comment */ }
 
@@ -141,17 +142,31 @@ int token(int T) {
 		return T;
 }
 
-int vtoken(int T){		
-	std::string temp = yytext;
-	std::string temp2;
-    	temp[temp.find_first_of('"')] = 0;
-    	temp[temp.find_last_of('"')] = 0;
-	for ( unsigned i = 0; i < temp.size(); ++i){
-		if(temp[i] != 0) {
-			temp2 += temp[i];
+int vtoken(int T){
+	if( T == STRING_LITERAL) {	
+		std::string temp = yytext;
+		std::string temp2;
+    		temp[temp.find_first_of('"')] = 0;
+    		temp[temp.find_last_of('"')] = 0;
+		for ( unsigned i = 0; i < temp.size(); ++i){
+			if(temp[i] != 0) {
+				temp2 += temp[i];
+			}
 		}
+		yylval.text = new std::string(temp2);
 	}
-	yylval.text = new std::string(temp2);
+
+	else{
+	        std::string temp = yytext;
+		std::string temp2;
+    		temp[temp.find_first_of('#')] = 0;
+		for ( unsigned i = 0; i < temp.size(); ++i){
+			if(temp[i] != 0) {
+				temp2 += temp[i];
+			}
+		}
+		yylval.text = new std::string(temp2);
+	}	
 	
 	return T;
 }	

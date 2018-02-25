@@ -1431,9 +1431,10 @@ class ExternalDeclaration : public Node {
 	FunctionDefinition* FunctionDef;
 	Declaration* DecLaration;
 	ExternalDeclaration* ExternalDeclarationPtr;
+	std::string* PreprocessorPtr;
 
 	public:
-		ExternalDeclaration(FunctionDefinition* FunctionDef, Declaration* DecLaration, ExternalDeclaration* ExternalDeclarationPtr) : FunctionDef(FunctionDef),  DecLaration(DecLaration) , ExternalDeclarationPtr(ExternalDeclarationPtr){}
+		ExternalDeclaration(FunctionDefinition* FunctionDef, Declaration* DecLaration, ExternalDeclaration* ExternalDeclarationPtr, std::string* PreprocessorPtr) : FunctionDef(FunctionDef),  DecLaration(DecLaration) , ExternalDeclarationPtr(ExternalDeclarationPtr) , PreprocessorPtr(PreprocessorPtr){}
 
 
 		void print_C(std::ofstream& file) {
