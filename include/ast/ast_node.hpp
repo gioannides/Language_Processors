@@ -9,6 +9,10 @@
 #include "class_forward_declarations.hpp"
 
 
+
+static std::string funct_id = "";
+static int parameter_no = 1;
+
 class SpecifierQualifierList : public Node {};
 class Init_Declaration_List : public Node {};
 class InclusiveAndExpression : public Node {};
@@ -558,6 +562,17 @@ class ParameterList : public Node {
 
 		void print_py(std::ofstream& file) ;
 
+		void render_asm(std::ofstream& file) {
+
+			if( ParameterListPtr != NULL) {
+				
+				ParameterListPtr->render_asm(file);
+				parameter_no++;
+			}
+				
+		
+		}
+
 };
 
 
@@ -579,6 +594,15 @@ class ParameterTypeList : public Node {
 		~ParameterTypeList() {}
 
 		void print_py(std::ofstream& file) ;
+
+		void render_asm(std::ofstream& file) {
+
+			if( ParameterListPtr != NULL) {
+				ParameterListPtr->render_asm(file);
+			}
+			 			
+		
+		}
 
 };
 
@@ -608,6 +632,70 @@ class DirectDeclarator : public Node {
 
 		void print_py(std::ofstream& file, bool initialized=false, bool function=false) ;
 
+
+
+		void render_asm(std::ofstream& file, bool initialized=false, bool function=false) {
+
+	
+			if( DirectDeclaratorPtr != NULL) {
+
+				DirectDeclaratorPtr->render_asm(file,initialized,function);
+			}
+
+			/*if(!function) {
+
+				if(counter_py == 0 && !ParameterVariable ){
+					GlobalVars.push_back(*IDENTIFIER);
+				}
+	
+				for( int i(0); i<counter_py; i++) { file << "\t"; }
+				if(!initialized && !ParameterVariable){
+					file << *IDENTIFIER << "=0" << std::endl;
+				}
+
+				else if(!ParameterVariable){
+					file << *IDENTIFIER << "=";
+				}
+				else{
+					file << *IDENTIFIER;
+					ParameterVariable = false;
+				}
+				
+
+			}
+			
+			else{*/
+			if(function){
+				if( IDENTIFIER != NULL ) {
+					
+					file << std::endl;
+					file << "\t.align\t2" << std::endl; 
+					file << "\t.globl\t" << *IDENTIFIER << std::endl;
+					file << "\t.set\t" << "nomips16" << std::endl;
+					file << "\t.set\t" << "nomicromips" << std::endl;
+					file << "\t.ent\t" << *IDENTIFIER << std::endl;
+					file << "\t.type\t" << *IDENTIFIER << "," << " @function" << std::endl;
+					file << *IDENTIFIER << ":" << std::endl;
+					funct_id = *IDENTIFIER;
+
+				}
+			
+				if( ParameterTypeLiSt != NULL) {
+					ParameterTypeLiSt->render_asm(file);
+					file << "\t.set\tnoreorder" << std::endl;
+					file << "\t.set\tnomacro" << std::endl;
+					file << "\taddiu\t$sp,$sp,-"<< (4*parameter_no) << std::endl; 
+					
+				}
+				/*else if( IDentifierList != NULL) {
+					IDentifierList->print_py(file);
+				}*/
+
+			}
+
+		}		
+
+	
 		~DirectDeclarator() {}
 
 };
@@ -629,6 +717,15 @@ class Declarator : public Node {
 		Declarator(Pointer* PoinTer, DirectDeclarator* DirectDecLarator, Declarator* DeclaratorPtr) : PoinTer(PoinTer) , DirectDecLarator(DirectDecLarator)  , DeclaratorPtr(DeclaratorPtr) {}
 
 		void print_py(std::ofstream& file, bool initialized=false, bool function=false) ;
+
+
+		void render_asm(std::ofstream& file, bool initialized=false, bool function=false) {
+
+			if( DeclaratorPtr != NULL) {
+				DeclaratorPtr->render_asm(file,initialized,function);
+			}
+			DirectDecLarator->render_asm(file,initialized,function);
+		}
 
 		~Declarator() {}
 
@@ -1224,10 +1321,10 @@ class CompoundStatement : public Node {
 class FunctionDefinition : public Node {
 
 	private:
-		DeclarationSpecifiers* DeclarationSpecifiersPtr;
-		Declarator* DeclaratorPtr;
-		DeclarationList* DeclarationListPtr;
-		CompoundStatement* CompoundStatementPtr;
+		DeclarationSpecifiers* DeclarationSpecifiersPtr;  //get the return value type to be placed in $2
+		Declarator* DeclaratorPtr;			  //get the label of the function to be written to the asm file
+		DeclarationList* DeclarationListPtr;		 // get the number and type of the parameters to be passed ( so to adjust the stack poinyter)
+		CompoundStatement* CompoundStatementPtr;	 // execute the instructions
 	
 	public:
 		FunctionDefinition( DeclarationSpecifiers* DeclarationSpecifiersPtr, Declarator* DeclaratorPtr, DeclarationList* DeclarationListPtr, CompoundStatement* CompoundStatementPtr) :
@@ -1238,6 +1335,38 @@ class FunctionDefinition : public Node {
 
 
 		void print_py(std::ofstream& file) ;
+
+		void render_asm(std::ofstream& file) {
+
+			if( DeclarationSpecifiersPtr != NULL ) {
+										//do-nothing because it is not significant in our case (only int/void)
+			}
+
+			if( DeclaratorPtr != NULL ) {				//handles printing function name
+				
+				DeclaratorPtr->render_asm(file,false,true);
+			}
+
+			/*if( DeclarationListPtr != NULL ) {   			//( functions having parameters )
+				ParametrizedFunction = true;
+				DeclarationListPtr->print_py(file);
+			}
+
+			if( CompoundStatementPtr != NULL ) {
+			
+				CompoundStatementPtr->print_py(file,false,true);
+			}*/
+			
+			file << "\t.set\t macro" << std::endl;
+			file << "\t.set\t reorder" << std::endl;
+			file << "\t.end\t " << funct_id << std::endl;
+			file << "\t.size\t " << funct_id << ", .-" << funct_id << std::endl;
+			
+				
+		}
+
+
+			
 };
 
 
@@ -1266,6 +1395,28 @@ class ExternalDeclaration : public Node {
 		
 		void print_py(std::ofstream& file) ;
 		
+		void render_asm(std::ofstream& file) {
+
+			if( ExternalDeclarationPtr != NULL ) {
+				ExternalDeclarationPtr->render_asm(file);
+
+			}
+
+			if ( DecLaration  == NULL && FunctionDef != NULL){
+				function = true;
+				file << std::endl;
+				FunctionDef->render_asm(file);
+				file << std::endl;
+				function = false;
+			}
+
+			if ( FunctionDef  == NULL && DecLaration != NULL){
+				file << std::endl;
+				//DecLaration->render_asm(file);
+				file << std::endl;
+			}
+		}
+			
 
 		 virtual ~ExternalDeclaration() {}
 
@@ -1290,6 +1441,33 @@ class TranslationUnit : public Node{
     		TranslationUnit(ExternalDeclaration* ExternalDecl) :  ExternalDecl(ExternalDecl) {}
 
 		virtual void print_py(std::string file_name) const ;
+
+		virtual void render_asm(std::string file_name) const {
+
+			std::ofstream file;
+			file.open(file_name.c_str());
+
+			std::string new_file_name = "";
+
+			for(int i(0); i < file_name.size(); ++i) {
+				if(file_name[i] != '.') {
+					new_file_name += file_name[i];
+				}
+				else{
+					break;
+				}
+			}
+			file << "\t.file 1 " << "\"" << new_file_name << ".c\"" << std::endl;
+			file << "\t.section .mdebug.abi32" << std::endl;
+			file << "\t.previous" <<std::endl;
+			file << "\t.nan legacy" << std::endl;
+			file << "\t.module fp=xx" << std::endl;
+			file << "\t.module nooddspreg" << std::endl;
+			file << "\t.abicalls" << std::endl;
+			file << "\t.text" << std::endl;
+			ExternalDecl->render_asm(file);
+		
+		}
 
 		 virtual ~TranslationUnit() {}
 };

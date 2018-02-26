@@ -23,14 +23,28 @@ int main(int argc, char* argv[]){
 				}
 
 				else {
-
-					//ast->print_mips(file_name);
 					return 0;
 
 				}
 				
 			}
 		}
+
+		else if( argument == "-S" ) {
+
+			argument = argv[3];
+
+			if( argument == "-o" ) {
+		 		const TranslationUnit* ast = parseAST(argv[2],argv[4]);
+				std::string file_name = argv[4];
+				char Last_letter = file_name[file_name.size()-1];
+				if( Last_letter == 's' ){
+					ast->render_asm(file_name);
+					return 0;
+				}
+			}
+		}
+
 	}	
 	return -1;
   
