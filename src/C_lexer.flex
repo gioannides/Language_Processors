@@ -215,7 +215,7 @@ extern "C" int fileno(FILE *stream);
 
 [\n]			{ LineNo++; }
 
-[ \t\v\n\f]		{ /*ignore*/ }
+[ \t\v\n\f\r]		{ /*ignore*/ }
 
 .			{ yyerror (yytext); }
 
