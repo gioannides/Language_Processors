@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm tmp/formative/*
+#rm tmp/formative/*
 
 if which dos2unix ; then
     DOS2UNIX="dos2unix"
@@ -80,7 +80,7 @@ for i in ${input_dir}/*.c ; do
 	rm tmp/formative/$base
     else
         echo -e "${wht}$base.c ${grn}[PASS]""${red}"
-	rm tmp/formative/$base-got.py
+	#rm tmp/formative/$base-got.py
 	rm tmp/formative/$base
     fi
 

@@ -1,6 +1,7 @@
 #include "ast_node.hpp"
 
-
+static bool IterStmntORSelctStmnt = false;
+static int count=0;
 
 inline void MultiplicativeExpression::print_py(std::ofstream& file) {
 
@@ -470,6 +471,7 @@ inline void TranslationUnit::print_py(std::string file_name) const {
 
 inline void IterationStatement::print_py(std::ofstream& file) {
 
+			IterStmntORSelctStmnt = true;
 			if( *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
 				file << std::endl;
 				is_while = true;
@@ -487,22 +489,27 @@ inline void IterationStatement::print_py(std::ofstream& file) {
 
 
 inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) {
+
+			IterStmntORSelctStmnt = true;
 			if( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL && SELECTIVE_ELSE == NULL && SELECTIVE_SWITCH == NULL) {
 				
-				elif = elseif;
-				file << std::endl;
+				
+
+				
+					
+				
 				for( int i(0); i<counter_py; i++) { file << "\t"; } 
 				if(elseif == false){
 					file << "if(";
 					AssignmentExpressionPtr->print_py(file) ;
 					file << "):" << std::endl;
 				}
-				else{
+				/*else{
 					file <<"elif(";
 				       	AssignmentExpressionPtr->print_py(file) ;
 					file << "):" << std::endl;
-				}
-;
+				}*/
+				IterStmntORSelctStmnt = true;
 				StatementPtr->print_py(file);
 				file << std:: endl;
 			
@@ -510,14 +517,15 @@ inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) {
 
 			else if ( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL && SELECTIVE_ELSE != NULL && SELECTIVE_SWITCH == NULL)			 {
 				elif = elseif;
-				file << std::endl;
-				for( int i(0); i<counter_py; i++) { file << "\t"; }				
+				
+				for( int i(0); i<counter_py && !elseif; i++) { file << "\t"; }				
 				if(elseif == false){
 
 					file << "if(";
 					AssignmentExpressionPtr->print_py(file) ;
 					file << "):" << std::endl;
 					file << std::endl;
+					IterStmntORSelctStmnt = true;
 					StatementPtr->print_py(file,true);				
 					file << std::endl;	
 				}
@@ -526,18 +534,20 @@ inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) {
 				       	AssignmentExpressionPtr->print_py(file) ;
 					file << "):" << std::endl;
 					file << std::endl;
+					IterStmntORSelctStmnt = true;
 					StatementPtr->print_py(file,true);				
 					file << std::endl;	
 				}			
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
-				if(StatementPtr2->SelectionStatementPtr != NULL) {
-					file << std::endl;
+				if(StatementPtr2->SelectionStatementPtr != NULL ) {
+					//IterStmntORSelctStmnt = true;
 					StatementPtr2->print_py(file,true);				
 					file << std::endl;	
 				}
 				else{
 					file << "else:";
 					file << std::endl;
+					IterStmntORSelctStmnt = true;
 					StatementPtr2->print_py(file,false);				
 					file << std:: endl;
 				}
@@ -554,9 +564,9 @@ inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) {
 inline void Statement::print_py(std::ofstream& file, bool elseif) {
 
 			
-
+			
 			if( LabeledStatementPtr != NULL ) {
-		
+				
 				LabeledStatementPtr->print_py(file);
 			}
 
@@ -566,24 +576,29 @@ inline void Statement::print_py(std::ofstream& file, bool elseif) {
 			}
 
 			else if( ExpressionStatementPtr != NULL ) {
-
+				if(IterStmntORSelctStmnt ) { counter_py++; IterStmntORSelctStmnt=false; count++;}
 				ExpressionStatementPtr->print_py(file);
+				if(!IterStmntORSelctStmnt ) { counter_py-=count; count=0;}
 			}
 
 			else if( SelectionStatementPtr != NULL ) {
+				if(IterStmntORSelctStmnt ) { counter_py++;IterStmntORSelctStmnt=false; count++;}
 				SelectionStatementPtr->print_py(file,elseif);
+				if(!IterStmntORSelctStmnt ) { counter_py-=count; count=0;}
 
 			}
 
 			else if( IterationStatementPtr != NULL ) {
-
+				if(IterStmntORSelctStmnt ) { counter_py++; IterStmntORSelctStmnt=false; count++;}
 				IterationStatementPtr->print_py(file);
+				if(!IterStmntORSelctStmnt ) { counter_py-=count; count=0;}
 
 			}
 
 			else if( JumpStatementPtr != NULL ) {
-
+				if(IterStmntORSelctStmnt ) { counter_py++; IterStmntORSelctStmnt=false; count++;}
 				JumpStatementPtr->print_py(file);
+				if(!IterStmntORSelctStmnt ) { counter_py-=count; count=0;}
 
 			}
 
@@ -593,6 +608,7 @@ inline void Statement::print_py(std::ofstream& file, bool elseif) {
 
 inline void CompoundStatement::print_py(std::ofstream& file, bool initialized, bool function) {
 			
+			IterStmntORSelctStmnt = false;
 	
 			counter_py++;
 			if( StatementListPtr == NULL && DeclarationListPtr == NULL ) {
@@ -650,9 +666,11 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 
 				AssignmentExpressionPtr->print_py(file);
 			}
-			if(!function && !is_while && !elif && (parentheses==0)){
+			if(!function && !is_while && !elif && (parentheses==0) && !IterStmntORSelctStmnt){
 				file << std::endl;
+				
 			}
+			
 
 }
 
