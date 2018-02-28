@@ -1254,10 +1254,8 @@ class Declaration : public Node {
 			file << std::endl << "\t.type\t" << temp.id << ", @object";
 			file << std::endl << "\t.size\t" << temp.id << ", " << temp.word_size;
 			file << std::endl << temp.id << ":";
-			if( temp.word_size > 4 ){
-				int maxValue = pow(2,32);					//max value that can be stored
-				file << std::endl << "\t.word\t" << (temp.value / maxValue);
-				file << std::endl << "\t.word\t" << (temp.value % maxValue);
+			if( temp.word_size > 4 ){					
+				file << std::endl << "\t.double\t" << temp.value  	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
 			}
 			else if(temp.word_size==4){
 				file << std::endl << "\t.word\t" << temp.value;
@@ -1273,7 +1271,7 @@ class Declaration : public Node {
 
 			temp.word_size = 0;
 			temp.id = "";
-			//temp.value = 0;
+			temp.value = 0;
 
 		}
 
