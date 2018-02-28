@@ -151,7 +151,7 @@ class UnaryExpression : public Node {
 		void render_asm(std::ofstream& file) {
 		
 			if(PostFixExpressionPtr != NULL) {
-				PostFixExpressionPtr->print_py(file);		// This is for getting identifier name, constant value	
+				PostFixExpressionPtr->render_asm(file);		// This is for getting identifier name, constant value	
 			}
 			/*else if ( CastExpressionPtr != NULL) {
 				file << " " << *OPERATOR << " ";		//TODO: THIS IS FOR ++ and -- operators
@@ -1577,15 +1577,6 @@ class FunctionDefinition : public Node {
 };
 
 
-
-
-
-
-
-
-
-
-
 class ExternalDeclaration : public Node {
 	
 	private:
@@ -1810,7 +1801,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file)  {
 
 			}
 	
-			if(ConditionalExpressionPtr != NULL) {
+			else if(ConditionalExpressionPtr != NULL) {
 
 				ConditionalExpressionPtr->render_asm(file);		//THIS IS FOR IF STATEMENTS/ LOGICAL / ARITHMETIC OPERATIONS / ASSIGNEMENTS
 
