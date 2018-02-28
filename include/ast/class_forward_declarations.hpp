@@ -33,7 +33,7 @@ class Declaration;
 class TranslationalUnit;
 class Declaration;
 class DeclarationList;
-
+class DirectDeclarator;
 
 class DeclarationSpecifiers;
 class TypeQualifier;
@@ -57,8 +57,8 @@ class CompoundStatement;
 class Declarator;
 
 class Pointer;
-
-
+class PrimaryExpression;
+class PostFixExpression;
 class AssignmentExpression;
 class CastExpression;
 
