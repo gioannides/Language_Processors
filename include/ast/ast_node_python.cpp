@@ -1,7 +1,7 @@
 #include "ast_node.hpp"
 
-static bool IterStmntORSelctStmnt = false;
-static int count=0;
+static bool IterStmntORSelctStmnt = false;	//Is needed for the same reason as count;
+static int count=0;				//Is needed in order to print statements within loops/if/else that have no curcly braces
 
 inline void MultiplicativeExpression::print_py(std::ofstream& file) {
 
@@ -204,8 +204,8 @@ inline void DirectDeclarator::print_py(std::ofstream& file, bool initialized, bo
 				DirectDeclaratorPtr->print_py(file,initialized,function);
 			}
 
-			if(!function) {
-
+			if(!function) {							//This handles initializing variables, and identifying the global ones by the level of indentation of
+											// counter_py
 				if(counter_py == 0 && !ParameterVariable ){
 					GlobalVars.push_back(*IDENTIFIER);
 				}
@@ -226,7 +226,7 @@ inline void DirectDeclarator::print_py(std::ofstream& file, bool initialized, bo
 
 			}
 			
-			else{
+			else{								//This is handling functions and printing the main part of a standard python program
 
 				if( IDENTIFIER != NULL ) {
 					if( *IDENTIFIER == "main") { main_ = true; }
@@ -325,7 +325,7 @@ inline void JumpStatement::print_py(std::ofstream& file) {
 
 
 
-inline std::string* SelectionStatement::get_info() {
+inline std::string* SelectionStatement::get_info() {				//can be used for else if = elif
 			return SELECTIVE_IF;
 		}		 
 		
@@ -396,7 +396,7 @@ inline void FunctionDefinition::print_py(std::ofstream& file) {
 				}
 			}
 
-			if( DeclarationListPtr != NULL ) {   			//have not done this yet ( functions having parameters )
+			if( DeclarationListPtr != NULL ) {   			//( functions having parameters )
 				ParametrizedFunction = true;
 				DeclarationListPtr->print_py(file);
 			}

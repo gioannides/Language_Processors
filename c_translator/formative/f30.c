@@ -1,20 +1,18 @@
+int z=9;
 
-int r=1;
 
-int main(){
-	
-	
+int main() {
 
-int i = 0;
-while (i < 10) {
-    int j = 0;
-    while (j < 10) {
-        j = j+1;
-	r = r * j * i;
-    }
-    i = i +1;
-}
+	int x = 0;
 
-return r;
+	if(0) {}
+
+	else{
+
+		if(1){
+			return z+1;
+		}
+	}
+return -1;
 
 }
