@@ -8,10 +8,18 @@
 #include <vector>
 #include "class_forward_declarations.hpp"
 
+struct bindings {
+	int word_size = 0;
+	std::string id = "";
+	std::string value = "";
+}
 
+
+vector<bindings> Variables;
 
 static std::string funct_id = "";
 static int parameter_no = 1;
+
 
 class SpecifierQualifierList : public Node {};
 class Init_Declaration_List : public Node {};
@@ -774,6 +782,10 @@ class InitDeclarator : public Node {
 
 		~InitDeclarator() {}
 
+
+		void render_asm(std::oftsream file) {
+			
+			
 };
 
 
@@ -796,6 +808,14 @@ class InitDeclaratorList : public Node {
 		~InitDeclaratorList() {}
 
 		void print_py(std::ofstream& file) ;
+
+		void render_asm(std::ofstream& file) {				//Traversing through all of the declarations in the program sequentially as they appear in source code
+
+			if( InitDeclaratorListPtr != NULL) {
+				InitDeclaratorListPtr->render_asm(file);
+			}
+			InitDeclarator->render_asm(file);
+		}
 
 };
 
@@ -820,6 +840,39 @@ class StorageClassSpecifiers : public Node {
 		void print_py(std::ofstream& file) ;
 
 		~StorageClassSpecifiers() {}
+
+
+		void render_asm(std::ofstream& file) {
+
+			switch(*TYPES) {
+
+				case "char":
+					word_size = 1;
+					break;
+				case "short":
+					word_size = 2;
+					break;
+				case "int":
+					word_size = 4;
+					break;
+				case "long":
+					word_size = 4;
+					break;
+				case "float":
+					word_size = 4;
+					break;
+				case "double":
+					word_size = 8;
+					break;
+				case "signed":
+					word_size = 4;
+					break;
+				case "unsigned":
+					word_size = 4;
+					break;
+			}
+					 
+					
 
 };
 
@@ -1044,6 +1097,19 @@ class DeclarationSpecifiers : public Node{
 
 		~DeclarationSpecifiers() {}
 
+
+		void render_asm(std::ofstream& file) {
+
+			if(StorageClassSpec != NULL) {
+				StorageClassSpec->render_asm(file);
+			}
+			else if(TypeSpec != NULL) {
+				TypeSpec->render_asm(file);
+			}
+			else if(TypeQuaLifier != NULL) {
+				TypeQuaLifier->render_asm(file);
+			}
+
 };
 
 
@@ -1069,6 +1135,14 @@ class Declaration : public Node {
 
 
 		void print_py(std::ofstream& file);
+
+	
+		void render_asm(std::ofstream& file) {
+
+			DeclSpec->render_asm(file);  // The size of the data type has been saved in 'word_size'
+			DeclList->render_asm(file);
+
+		}
 
 
 		virtual ~Declaration() {}
@@ -1412,7 +1486,7 @@ class ExternalDeclaration : public Node {
 
 			if ( FunctionDef  == NULL && DecLaration != NULL){
 				file << std::endl;
-				//DecLaration->render_asm(file);
+				DecLaration->render_asm(file);
 				file << std::endl;
 			}
 		}
@@ -1464,7 +1538,7 @@ class TranslationUnit : public Node{
 			file << "\t.module fp=xx" << std::endl;
 			file << "\t.module nooddspreg" << std::endl;
 			file << "\t.abicalls" << std::endl;
-			file << "\t.text" << std::endl;
+			file << "\t.text" << std::endl; // this may cause problems
 			ExternalDecl->render_asm(file);
 		
 		}
