@@ -23,7 +23,8 @@ static std::vector<bindings> Variables;
 static bindings temp;
 
 static std::string funct_id = "";
-static int parameter_no = 1;
+static int parameter_no = 0;
+
 
 
 class SpecifierQualifierList : public Node {};
@@ -695,6 +696,8 @@ class ParameterDeclaration : public Node {
 
 		void print_py(std::ofstream& file) ;
 
+		void render_asm(std::ofstream& file) ; 
+
 };
 
 
@@ -723,10 +726,11 @@ class ParameterList : public Node {
 			if( ParameterListPtr != NULL) {
 				
 				ParameterListPtr->render_asm(file);
-				parameter_no++;
-			}
 				
-		
+			}
+			ParameterDeclarationPtr->render_asm(file);
+			parameter_no++;
+			
 		}
 
 };
@@ -915,8 +919,10 @@ class InitDeclaratorList : public Node {
 
 			if( InitDeclaratorListPtr != NULL) {
 				InitDeclaratorListPtr->render_asm(file);
+				
 			}
 			InitDecLarator->render_asm(file);
+			parameter_no++;
 		}
 
 };
@@ -1244,30 +1250,37 @@ class Declaration : public Node {
 		void render_asm(std::ofstream& file) {
 
 			DeclSpec->render_asm(file);  // Obtain size of the data type of the variable
-			DeclList->render_asm(file);  // Obtain name and value of the variable
 
-			file << std::endl << "\t.data";
-			file << std::endl << "\t.globl\t" << temp.id;
-			if( log2(temp.word_size) ){
-				file << std::endl << "\t.align\t" << log2(temp.word_size);
-			}
-			file << std::endl << "\t.type\t" << temp.id << ", @object";
-			file << std::endl << "\t.size\t" << temp.id << ", " << temp.word_size;
-			file << std::endl << temp.id << ":";
-			if( temp.word_size > 4 ){					
-				file << std::endl << "\t.double\t" << temp.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
-			}
-			else if(temp.word_size==4){
-				file << std::endl << "\t.word\t" << temp.value;
-			}
-			else if(temp.word_size==2){
-				file << std::endl << "\t.half\t" << temp.value;
-			}
-			else if(temp.word_size==1){
-				file << std::endl << "\t.byte\t" << temp.value;
+			if( DeclList != NULL) {
+				DeclList->render_asm(file);  // Obtain name and value of the variable
 			}
 
-			Variables.push_back(temp);
+			if(!function) {
+
+				file << std::endl << "\t.data";
+				file << std::endl << "\t.globl\t" << temp.id;
+				if( log2(temp.word_size) ){
+					file << std::endl << "\t.align\t" << log2(temp.word_size);
+				}
+				file << std::endl << "\t.type\t" << temp.id << ", @object";
+				file << std::endl << "\t.size\t" << temp.id << ", " << temp.word_size;
+				file << std::endl << temp.id << ":";
+				if( temp.word_size > 4 ){					
+					file << std::endl << "\t.double\t" << temp.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
+				}
+				else if(temp.word_size==4){
+					file << std::endl << "\t.word\t" << temp.value;
+				}
+				else if(temp.word_size==2){
+					file << std::endl << "\t.half\t" << temp.value;
+				}
+				else if(temp.word_size==1){
+					file << std::endl << "\t.byte\t" << temp.value;
+				}
+
+			}
+
+			Variables.push_back(temp);  // all variables
 
 			temp.word_size = 0;
 			temp.id = "";
@@ -1403,6 +1416,14 @@ class DeclarationList : public Node {
 
 		void print_py(std::ofstream& file) ;
 
+		void render_asm(std::ofstream& file) {
+				
+			if(DeclarationListPtr != NULL) {
+				DeclarationListPtr->render_asm(file);
+			}
+			DeclarationPtr->render_asm(file);
+		}
+
 };
 	
 
@@ -1513,6 +1534,14 @@ class CompoundStatement : public Node {
 
 		void print_py(std::ofstream& file, bool initialized=false, bool function=true) ;
 
+		void render_asm(std::ofstream& file, bool initialized=false, bool function=true) {
+
+			if(DeclarationListPtr != NULL) {
+
+				DeclarationListPtr->render_asm(file);
+			}
+		}
+
 };
 
 
@@ -1544,24 +1573,47 @@ class FunctionDefinition : public Node {
 		void render_asm(std::ofstream& file) {
 
 			if( DeclarationSpecifiersPtr != NULL ) {
-										//do-nothing because it is not significant in our case (only int/void)
+										//check the return type
 			}
 
 			if( DeclaratorPtr != NULL ) {				//handles printing function name
 				
 				DeclaratorPtr->render_asm(file,false,true);
+				file << std::endl;
+				file << "\t.align\t2" << std::endl; 
+				file << "\t.globl\t" << funct_id << std::endl;
+				file << "\t.set\t" << "nomips16" << std::endl;
+				file << "\t.set\t" << "nomicromips" << std::endl;
+				file << "\t.ent\t" << funct_id << std::endl;
+				file << "\t.type\t" << funct_id << "," << " @function" << std::endl;
+				file << funct_id << ":" << std::endl;
 			}
 
-			/*if( DeclarationListPtr != NULL ) {   			//( functions having parameters )
-				ParametrizedFunction = true;
-				DeclarationListPtr->print_py(file);
+			if( DeclarationListPtr != NULL ) {   			//( functions having const-correctness for example )
+				//DeclarationListPtr->render_asm(file);
 			}
 
 			if( CompoundStatementPtr != NULL ) {
 			
-				CompoundStatementPtr->print_py(file,false,true);
-			}*/
+				CompoundStatementPtr->render_asm(file,false,true);  // ...(file,initialized,function)
+			}
+
+			file << "\t.set\tnoreorder" << std::endl;
+			file << "\t.set\tnomacro" << std::endl;
+			file << "\taddiu\t$sp,$sp,-"<< (4*parameter_no);
+			file << std::endl << "\tsw\t$fp," << (parameter_no-1)*4 << "($sp)";
+			file << std::endl << "\tmove\t$fp,$sp";
+
+			static int MemoryStack = parameter_no;
+			if( CompoundStatementPtr != NULL ) {
 			
+				CompoundStatementPtr->render_asm(file,false,true);
+			}
+
+			file << std::endl << "\tmove\t$sp,$fp";
+			file << std::endl << "\tlw\t$fp," << (MemoryStack-1)*4 << "($sp)";
+			file << std::endl << "\taddiu\t$sp,$sp," << MemoryStack*4;
+			file << std::endl << "\tj\t$31" << std::endl;
 			file << "\t.set\t macro" << std::endl;
 			file << "\t.set\t reorder" << std::endl;
 			file << "\t.end\t " << funct_id << std::endl;
@@ -1696,25 +1748,18 @@ inline void DirectDeclarator::render_asm(std::ofstream& file, bool initialized, 
 			if(function){
 				if( IDENTIFIER != NULL ) {
 					
-					file << std::endl;
-					file << "\t.align\t2" << std::endl; 
-					file << "\t.globl\t" << *IDENTIFIER << std::endl;
-					file << "\t.set\t" << "nomips16" << std::endl;
-					file << "\t.set\t" << "nomicromips" << std::endl;
-					file << "\t.ent\t" << *IDENTIFIER << std::endl;
-					file << "\t.type\t" << *IDENTIFIER << "," << " @function" << std::endl;
-					file << *IDENTIFIER << ":" << std::endl;
 					funct_id = *IDENTIFIER;
 
 				}
 			
 				if( ParameterTypeLiSt != NULL) {
 					ParameterTypeLiSt->render_asm(file);
-					file << "\t.set\tnoreorder" << std::endl;
-					file << "\t.set\tnomacro" << std::endl;
-					file << "\taddiu\t$sp,$sp,-"<< (4*parameter_no) << std::endl; 
 					
 				}
+
+				
+				
+					
 				/*else if( IDentifierList != NULL) {
 					IDentifierList->print_py(file);
 				}*/
@@ -1722,7 +1767,23 @@ inline void DirectDeclarator::render_asm(std::ofstream& file, bool initialized, 
 			}
 
 		}
-}		
+}
+
+inline void ParameterDeclaration::render_asm(std::ofstream& file)  {
+
+			if( DeclarationSpecifiersPtr != NULL) {
+				
+				DeclarationSpecifiersPtr->render_asm(file);
+				
+			}
+
+			if( DeclaratorPtr != NULL) {
+				
+				DeclaratorPtr->render_asm(file);
+				
+			}
+			
+		}	
 
 
 
