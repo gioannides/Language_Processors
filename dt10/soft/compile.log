@@ -1,0 +1,12 @@
+g++  -std=c++11 -W -Wall -g -Wno-unused-parameter -Wno-reorder -w   -I include  -c -o src/c_compiler.o src/c_compiler.cpp
+bison -v -d src/C_parser.y -o src/C_parser.tab.cpp -Wno-other -Wconflicts-sr 
+src/C_parser.y: warning: 466 shift/reduce conflicts [-Wconflicts-sr]
+src/C_parser.y: warning: 83 reduce/reduce conflicts [-Wconflicts-rr]
+g++  -std=c++11 -W -Wall -g -Wno-unused-parameter -Wno-reorder -w   -I include  -c -o src/C_parser.tab.o src/C_parser.tab.cpp
+bison -v -d src/C_parser.y -o src/C_parser.tab.cpp -Wno-other -Wconflicts-sr 
+src/C_parser.y: warning: 466 shift/reduce conflicts [-Wconflicts-sr]
+src/C_parser.y: warning: 83 reduce/reduce conflicts [-Wconflicts-rr]
+flex -o src/C_lexer.yy.cpp  src/C_lexer.flex
+g++  -std=c++11 -W -Wall -g -Wno-unused-parameter -Wno-reorder -w   -I include  -c -o src/C_lexer.yy.o src/C_lexer.yy.cpp
+mkdir -p bin
+g++ -std=c++11 -W -Wall -g -Wno-unused-parameter -Wno-reorder -w   -I include -o bin/c_compiler src/c_compiler.o src/C_parser.tab.o src/C_lexer.yy.o

@@ -1,0 +1,36 @@
+f00, translate, Pass
+f00, compile,   Fail,   Expected 10, got 139
+f01, translate, Pass
+f01, compile,   Fail,   Expected 11, got 139
+f02, translate, Pass
+f02, compile,   Fail,   Expected 10, got 139
+f03, translate, Pass
+f03, compile,   Fail,   Expected 17, got 139
+f04, translate, Pass
+f04, compile,   Fail,   Expected 100, got 139
+f05, translate, Pass
+f05, compile,   Fail,   Expected 7, got 139
+f06, translate, Pass
+f06, compile,   Fail,   Expected 25, got 139
+f07, translate, Pass
+f07, compile,   Fail,   Expected 1, got 139
+f08, translate, Pass
+f08, compile,   Fail,   Expected 3, got 139
+f09, translate, Pass
+f09, compile,   Fail,   Expected 35, got 139
+f10, translate, Pass
+f10, compile,   Fail,   Expected 1, got 139
+f11, translate, Pass
+f11, compile,   Fail,   Expected 0, got 139
+f12, translate, Pass
+f12, compile,   Fail,   Expected 10, got 139
+f13, translate, Pass
+f13, compile,   Fail,   Expected 11, got 139
+f14, translate, Pass
+f14, compile,   Fail,   Expected 10, got 139
+f15, translate, FAIL,   Expected 13, got 11
+f15, compile,   Fail,   Expected 13, got 139
+f16, translate, FAIL,   Expected 11, got 13
+f16, compile,   Fail,   Expected 11, got 139
+f17, translate, Pass
+f17, compile,   Fail,   Expected 255, got 139
