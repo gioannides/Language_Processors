@@ -63,10 +63,12 @@ for i in ${input_dir}/*.c ; do
     
     if [[ ${have_compiler} -eq 0 ]] ; then
         
-        # Create the DUT python version by invoking the compiler with translation flags
+        # Create the DUT mips version by invoking the compiler with compilation flags
         $compiler -S $i -o ${working}/$base-got.s
         
-	mips-linux-gnu-gcc -static -o ${working}/$base-got ${working}/$base-got.s 
+
+	mips-linux-gnu-gcc -march=mips1 -mfp32 -O0 -static  ${working}/$base-got.s -o ${working}/$base-got	
+
         # Run the DUT assembly version
         qemu-mips ${working}/$base-got
         GOT_P_OUT=$?

@@ -15,7 +15,7 @@
 struct bindings {
 	int word_size = 0;
 	std::string id = "";
-	int value = 0;
+	double value = 0;
 };
 
 
@@ -1255,7 +1255,7 @@ class Declaration : public Node {
 			file << std::endl << "\t.size\t" << temp.id << ", " << temp.word_size;
 			file << std::endl << temp.id << ":";
 			if( temp.word_size > 4 ){					
-				file << std::endl << "\t.double\t" << temp.value  	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
+				file << std::endl << "\t.double\t" << temp.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
 			}
 			else if(temp.word_size==4){
 				file << std::endl << "\t.word\t" << temp.value;
