@@ -545,9 +545,9 @@ inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) { 	//t
 
 		if(elseif == true) {					//If the elseif was detected from the previous iteration, then the body of it is in the next
 									//therefore will be printed here
-			 elseif = false;
-			 Indent_Generator(StatementPtr,file,elseif); 
 			
+			 Indent_Generator(StatementPtr,file,elseif); 
+			 elseif = false;
 		}
 
 		if( (StatementPtr2->SelectionStatementPtr != NULL && (StatementPtr2->SelectionStatementPtr)->SELECTIVE_IF) != NULL) { //check for else-if scenario
