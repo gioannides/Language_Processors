@@ -1610,7 +1610,7 @@ class FunctionDefinition : public Node {
 			file << std::endl << "\tmove\t$fp,$sp";
 
 			MemoryStack = parameter_no;
-			file << std::endl << "\t" <<  MemoryStack << "\t" << parameter_no;
+
 			if( CompoundStatementPtr != NULL ) {
 			
 				CompoundStatementPtr->render_asm(file,false,true);
@@ -1836,12 +1836,22 @@ inline void PrimaryExpression::render_asm(std::ofstream& file)  {
 			}
 
 			if( CONSTANT != NULL ) {
-				std::string constant = *CONSTANT;
-				temp.value = std::stod(constant);
 				
-			}
+				std::string tmp = *CONSTANT;
+				char tmp2;
+				if(tmp.find_first_of("'")==0) {
+					tmp2 = tmp[1];
+					temp.value = int(tmp2);
+				}			
+				else{
+					temp.value = std::stod(tmp);
+				}
 
-		}
+			}
+		}				
+	
+
+		
 inline void ConditionalExpression::render_asm(std::ofstream& file) {
 			if( ExpressioN != NULL ) {
 				ExpressioN->render_asm(file);
