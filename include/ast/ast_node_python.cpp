@@ -6,6 +6,12 @@ static bool is_Selective = false;		//Is needed for avoiding printing new lines i
 
 inline void Indent_Generator(Statement* StatementPointer, std::ofstream& file,bool elseif=false) {
 
+
+	if( StatementPointer == NULL ) {
+	
+		file << "pass" << std::endl;
+	}
+
 	if(StatementPointer->CompoundStatementPtr == NULL) {	//if the next thing is not a compound statement since we are in an if/elif/while then indent
 		counter_py++;
 		StatementPointer->print_py(file,elseif);
@@ -18,6 +24,8 @@ inline void Indent_Generator(Statement* StatementPointer, std::ofstream& file,bo
 		file << std:: endl;
 					
 	}
+		
+	
 }
 
 
@@ -496,18 +504,12 @@ inline void IterationStatement::print_py(std::ofstream& file) {
 				file << "while(";
 				AssignmentExpressionPtr->print_py(file);
 				file << "):" << std::endl;
-				if(StatementPtr == NULL) {
-					for( int i(0); i<counter_py; i++) { file << "\t"; }
-					file << "pass" << std::endl;
-				}
-				else{
-					Indent_Generator(StatementPtr,file);
-				}
+				
+				Indent_Generator(StatementPtr,file);
 					
-				}
 				is_while = false;			
+			}			
 }
-
 
 inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) { 	//the elseif flag is initially set to false when the program starts for the first time
 	
