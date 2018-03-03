@@ -21,7 +21,7 @@ struct bindings {
 
 static std::vector<bindings> Variables;
 static bindings temp;
-
+static bool float_ = false;
 static std::string funct_id = "";
 static int parameter_no = 0;
 
@@ -1147,6 +1147,7 @@ class TypeSpecifier : public Node {
 				}
 				else if (types=="float"){
 					temp.word_size = 4;
+					float_ = true;
 				}
 				else if (types=="double"){
 					temp.word_size = 8;
@@ -1268,8 +1269,12 @@ class Declaration : public Node {
 				if( temp.word_size > 4 ){					
 					file << std::endl << "\t.double\t" << temp.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
 				}
-				else if(temp.word_size==4){
+				else if( (temp.word_size==4) && !float_){
 					file << std::endl << "\t.word\t" << temp.value;
+				}
+				else if( (temp.word_size==4) && float_){
+					file << std::endl << "\t.float\t" << temp.value;
+					float_ = false;
 				}
 				else if(temp.word_size==2){
 					file << std::endl << "\t.half\t" << temp.value;
