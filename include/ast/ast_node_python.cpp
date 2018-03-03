@@ -1,7 +1,25 @@
 #include "ast_node.hpp"
 
-static bool IterStmntORSelctStmnt = false;	//Is needed for the same reason as count;
-static int count=0;				//Is needed in order to print statements within loops/if/else that have no curcly braces
+static bool is_Selective = false;		//Is needed for avoiding printing new lines inside an if() / elif()
+
+
+
+inline void Indent_Generator(Statement* StatementPointer, std::ofstream& file,bool elseif=false) {
+
+	if(StatementPointer->CompoundStatementPtr == NULL) {	//if the next thing is not a compound statement since we are in an if/elif/while then indent
+		counter_py++;
+		StatementPointer->print_py(file,elseif);
+		counter_py--;
+		file << std:: endl;
+	}
+
+	else{
+		StatementPointer->print_py(file,elseif);		//if the next thing is a compound statement then dont indent yet
+		file << std:: endl;
+					
+	}
+}
+
 
 inline void MultiplicativeExpression::print_py(std::ofstream& file) {
 
@@ -471,89 +489,91 @@ inline void TranslationUnit::print_py(std::string file_name) const {
 
 inline void IterationStatement::print_py(std::ofstream& file) {
 
-			IterStmntORSelctStmnt = true;
 			if( *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
 				file << std::endl;
-				is_while = true;
+				is_while = true;				// This is to not print an endline in function assignmentExpression
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				file << "while(";
 				AssignmentExpressionPtr->print_py(file);
 				file << "):" << std::endl;
-				counter_py++;
-				StatementPtr->print_py(file);
-				file << std:: endl;
-				counter_py--;
-				is_while = false;
-			}
-		 }
 
-
-inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) {
-
-			IterStmntORSelctStmnt = true;
-			if( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL && SELECTIVE_ELSE == NULL && SELECTIVE_SWITCH == NULL) {
-				
-				
-
-				
+				Indent_Generator(StatementPtr,file);
 					
-				
-				for( int i(0); i<counter_py; i++) { file << "\t"; } 
-				if(elseif == false){
-					file << "if(";
-					AssignmentExpressionPtr->print_py(file) ;
-					file << "):" << std::endl;
 				}
-				/*else{
-					file <<"elif(";
-				       	AssignmentExpressionPtr->print_py(file) ;
-					file << "):" << std::endl;
-				}*/
-				IterStmntORSelctStmnt = true;
-				StatementPtr->print_py(file);
-				file << std:: endl;
+				is_while = false;			
+}
+
+
+inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) { 	//the elseif flag is initially set to false when the program starts for the first time
+	
+	if( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL && SELECTIVE_ELSE == NULL && SELECTIVE_SWITCH == NULL) {
+				
+								
+		if(elseif == false){						//if the elseif flag is on, then this has already been printed as elif, from below, so skip (looked ahead)
 			
-			}
+			for( int i(0); i<counter_py; i++) { file << "\t"; } 	// the elseif flag cannot be ON if this is the first time we execute, so the check here is fine to do
+				file << "if(";					//always ident when entering a new scope
+				is_Selective = true;
+				AssignmentExpressionPtr->print_py(file) ;
+				is_Selective = false;
+				file << "):" << std::endl;
+			
+		}
+			Indent_Generator(StatementPtr,file,elseif);
+	}
 
-			else if ( SELECTIVE_IF != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL && SELECTIVE_ELSE != NULL && SELECTIVE_SWITCH == NULL)			 {
-				elif = elseif;
-				
-				for( int i(0); i<counter_py && !elseif; i++) { file << "\t"; }				
-				if(elseif == false){
+	else if (SELECTIVE_IF!=NULL&&AssignmentExpressionPtr!=NULL&&StatementPtr!=NULL&&StatementPtr2!=NULL&&SELECTIVE_ELSE!=NULL&&SELECTIVE_SWITCH==NULL) {
 
-					file << "if(";
-					AssignmentExpressionPtr->print_py(file) ;
-					file << "):" << std::endl;
-					file << std::endl;
-					IterStmntORSelctStmnt = true;
-					StatementPtr->print_py(file,true);				
-					file << std::endl;	
-				}
-				else{
-					file <<"elif(";
-				       	AssignmentExpressionPtr->print_py(file) ;
-					file << "):" << std::endl;
-					file << std::endl;
-					IterStmntORSelctStmnt = true;
-					StatementPtr->print_py(file,true);				
-					file << std::endl;	
-				}			
-				for( int i(0); i<counter_py; i++) { file << "\t"; }
-				if(StatementPtr2->SelectionStatementPtr != NULL ) {
-					//IterStmntORSelctStmnt = true;
-					StatementPtr2->print_py(file,true);				
-					file << std::endl;	
-				}
-				else{
-					file << "else:";
-					file << std::endl;
-					IterStmntORSelctStmnt = true;
-					StatementPtr2->print_py(file,false);				
-					file << std:: endl;
-				}
+
+		if(elseif == false) {						//modification of elseif variable has not been made on first entry so is ok (ie. the elseif is still 											//initialized to false)
+			for( int i(0); i<counter_py; i++) { file << "\t"; } 
+			file << "if(";
+			is_Selective = true;
+			AssignmentExpressionPtr->print_py(file) ;
+			is_Selective = false;
+			file << "):" << std::endl;
+			Indent_Generator(StatementPtr,file,elseif);  
+				
+		}
+
+		if(elseif == true) {					//If the elseif was detected from the previous iteration, then the body of it is in the next
+									//therefore will be printed here
+			 elseif = false;
+			 Indent_Generator(StatementPtr,file,elseif); 
+			
+		}
+
+		if( (StatementPtr2->SelectionStatementPtr != NULL && (StatementPtr2->SelectionStatementPtr)->SELECTIVE_IF) != NULL) { //check for else-if scenario
+
+			elseif = true;
+		}
+
+		if(elseif == false) {
+		
+			for( int i(0); i<counter_py; i++) { file << "\t"; } 
+			file << "else:";
+			file << std::endl;
+			is_Selective = true;
+			Indent_Generator(StatementPtr2,file,elseif);
+			is_Selective = false;
+		}
+
+		else if (elseif == true){
+
+			for( int i(0); i<counter_py; i++) { file << "\t"; }	
+			file <<"elif(";
+			is_Selective = true;
+	       		((StatementPtr2->SelectionStatementPtr)->AssignmentExpressionPtr)->print_py(file) ;
+			elseif = true;
+			is_Selective = false;
+			file << "):" << std::endl;		
+			StatementPtr2->print_py(file,elseif); 
+					
+		}				
 				
 				
-			}
+	}
+	
 
 
 }
@@ -563,54 +583,56 @@ inline void SelectionStatement::print_py(std::ofstream& file,bool elseif) {
 
 inline void Statement::print_py(std::ofstream& file, bool elseif) {
 
-			
-			
-			if( LabeledStatementPtr != NULL ) {
+			if( CompoundStatementPtr != NULL ) { 
 				
+				CompoundStatementPtr->print_py(file);
+				
+
+			}
+
+			
+			else if( LabeledStatementPtr != NULL ) { 
+			
 				LabeledStatementPtr->print_py(file);
 			}
 
-			else if( CompoundStatementPtr != NULL ) {
-				CompoundStatementPtr->print_py(file);
-
-			}
-
-			else if( ExpressionStatementPtr != NULL ) {
-				if(IterStmntORSelctStmnt ) { counter_py++; IterStmntORSelctStmnt=false; count++;}
+			else if( ExpressionStatementPtr != NULL ) { 
+					
 				ExpressionStatementPtr->print_py(file);
-				if(!IterStmntORSelctStmnt ) { counter_py-=count; count=0;}
+				
 			}
 
 			else if( SelectionStatementPtr != NULL ) {
-				if(IterStmntORSelctStmnt ) { counter_py++;IterStmntORSelctStmnt=false; count++;}
+					
 				SelectionStatementPtr->print_py(file,elseif);
-				if(!IterStmntORSelctStmnt ) { counter_py-=count; count=0;}
+					
 
 			}
 
 			else if( IterationStatementPtr != NULL ) {
-				if(IterStmntORSelctStmnt ) { counter_py++; IterStmntORSelctStmnt=false; count++;}
+					
 				IterationStatementPtr->print_py(file);
-				if(!IterStmntORSelctStmnt ) { counter_py-=count; count=0;}
+					
 
 			}
 
 			else if( JumpStatementPtr != NULL ) {
-				if(IterStmntORSelctStmnt ) { counter_py++; IterStmntORSelctStmnt=false; count++;}
+				
 				JumpStatementPtr->print_py(file);
-				if(!IterStmntORSelctStmnt ) { counter_py-=count; count=0;}
+					
 
-			}
+			}		
 
-		}				 
+			
+	}				 
 
 
 
 inline void CompoundStatement::print_py(std::ofstream& file, bool initialized, bool function) {
 			
-			IterStmntORSelctStmnt = false;
-	
 			counter_py++;
+	
+			
 			if( StatementListPtr == NULL && DeclarationListPtr == NULL ) {
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				file << "pass" << std::endl;
@@ -626,7 +648,9 @@ inline void CompoundStatement::print_py(std::ofstream& file, bool initialized, b
 				StatementListPtr->print_py(file);
 				
 			}
+
 			counter_py--;
+			
 		
 			
 }
@@ -647,7 +671,6 @@ inline void ConditionalExpression::print_py(std::ofstream& file) {
 inline void AssignmentExpression::print_py(std::ofstream& file)  {
 
 			
-
 			if(UnaryExpressionPtr != NULL) {
 		
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
@@ -666,7 +689,10 @@ inline void AssignmentExpression::print_py(std::ofstream& file)  {
 
 				AssignmentExpressionPtr->print_py(file);
 			}
-			if(!function && !is_while && !elif && (parentheses==0) && !IterStmntORSelctStmnt){
+
+
+			
+			if(!function && !is_while && !is_Selective && (parentheses==0) ){		//In the case we are inside a condition for one of the precedings then dont endline
 				file << std::endl;
 				
 			}
@@ -778,4 +804,6 @@ inline void ParameterDeclaration::print_py(std::ofstream& file) {
 			}					
 		
 		}
+
+
 

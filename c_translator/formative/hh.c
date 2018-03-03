@@ -6,15 +6,18 @@ int main()
 	y=((x+s-x)/x)*x;
 	while(y<25) {
 
-		if( y < 15 ) {
-
+		if( 0 ) {
+		
 		y = y +1;
-		}
-		else if( y ==15) {
+
+		} 
+
+		else if(0) {
 
 			y = y+5;
 		}
- 	
+
+		
 		else{
 
 			y = y+5;

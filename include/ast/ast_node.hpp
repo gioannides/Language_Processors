@@ -1351,7 +1351,7 @@ class IterationStatement : public Node {
 
 class SelectionStatement : public Node {
 
-	private:
+	public:
 		AssignmentExpression* AssignmentExpressionPtr;
 		Statement* StatementPtr;
 		Statement* StatementPtr2;
@@ -1464,14 +1464,14 @@ class LabeledStatement : public Node {
 
 class Statement : public Node {
 	
-	private:
+	public:
 		LabeledStatement*  LabeledStatementPtr;
 		CompoundStatement* CompoundStatementPtr;
 		ExpressionStatement* ExpressionStatementPtr;
 		
 		IterationStatement* IterationStatementPtr;
 		JumpStatement* JumpStatementPtr;
-	public:
+	
 		SelectionStatement* SelectionStatementPtr;
 
 	public:
@@ -1849,16 +1849,18 @@ inline void ConditionalExpression::render_asm(std::ofstream& file) {
 inline void AssignmentExpression::render_asm(std::ofstream& file)  {
 
 
-			if(AssignmentExpressionPtr != NULL) {
-
-				AssignmentExpressionPtr->render_asm(file);
-			}
-
 			if(UnaryExpressionPtr != NULL) {
 		
 				UnaryExpressionPtr->render_asm(file);			//TODO: This is for identifier names and values
 
 			}
+
+			
+			if(AssignmentExpressionPtr != NULL) {
+
+				AssignmentExpressionPtr->render_asm(file);
+			}
+
 	
 			else if(ConditionalExpressionPtr != NULL) {
 
