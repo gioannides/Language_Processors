@@ -496,8 +496,13 @@ inline void IterationStatement::print_py(std::ofstream& file) {
 				file << "while(";
 				AssignmentExpressionPtr->print_py(file);
 				file << "):" << std::endl;
-
-				Indent_Generator(StatementPtr,file);
+				if(StatementPtr == NULL) {
+					for( int i(0); i<counter_py; i++) { file << "\t"; }
+					file << "pass" << std::endl;
+				}
+				else{
+					Indent_Generator(StatementPtr,file);
+				}
 					
 				}
 				is_while = false;			
