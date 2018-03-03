@@ -25,7 +25,8 @@ static bool float_ = false;
 static std::string funct_id = "";
 static int parameter_no = 0;
 static int MemoryStack = 0;
-
+static int StackOffset = 0;
+static bool reading = false;
 
 class SpecifierQualifierList : public Node {};
 class Init_Declaration_List : public Node {};
@@ -431,6 +432,7 @@ class ExclusiveOrExpression : public Node {
 			}
 
 			if( ANDexpression != NULL ) {
+
 				ANDexpression->render_asm(file);
 			}
 		}
@@ -1256,6 +1258,9 @@ class Declaration : public Node {
 				DeclList->render_asm(file);  // Obtain name and value of the variable
 			}
 
+			Variables.push_back(temp);  // all variables
+
+
 			if(!function) {
 
 				file << std::endl << "\t.data";
@@ -1285,13 +1290,29 @@ class Declaration : public Node {
 
 			}
 
-			Variables.push_back(temp);  // all variables
+
+			if(function && !reading) {
+					if((parameter_no-1)*4 != StackOffset) {
+						if(temp.word_size <= 4) {
+							file << std::endl << "\tli\t" << "$s0,\t" << temp.value;
+							file << std::endl << "\tsw\t" << "$s0," << StackOffset << "($sp)";
+							StackOffset += temp.word_size;
+						}
+						else{									//this is for doubles, it not working yet
+							file << std::endl << "\tli\t" << "$2,\t" << temp.value;
+							file << std::endl << "\tsw\t" << "$2," << StackOffset << "($sp)" << std::endl;
+							StackOffset += temp.word_size;
+						}
+			}
+				
+			
 
 			temp.word_size = 0;
 			temp.id = "";
 			temp.value = 0;
 
 		}
+	}
 
 
 		virtual ~Declaration() {}
@@ -1421,10 +1442,10 @@ class DeclarationList : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file) {
+		void render_asm(std::ofstream& file, bool initialized=false, bool function=true) {
 				
 			if(DeclarationListPtr != NULL) {
-				DeclarationListPtr->render_asm(file);
+				DeclarationListPtr->render_asm(file,initialized,function);
 			}
 			DeclarationPtr->render_asm(file);
 		}
@@ -1541,10 +1562,22 @@ class CompoundStatement : public Node {
 
 		void render_asm(std::ofstream& file, bool initialized=false, bool function=true) {
 
-			if(DeclarationListPtr != NULL) {
+			if(DeclarationListPtr != NULL && StatementListPtr == NULL) {
 
-				DeclarationListPtr->render_asm(file);
+				DeclarationListPtr->render_asm(file,initialized,function);
 			}
+
+			if(StatementListPtr != NULL && DeclarationListPtr == NULL ) {
+
+				//StatementListPtr->render_asm(file,initialized,function);
+			}
+
+			if(StatementListPtr != NULL && DeclarationListPtr != NULL ) {
+
+				DeclarationListPtr->render_asm(file,initialized,function);
+				//StatementListPtr->render_asm(file,initialized,function);
+			}
+			
 		}
 
 };
@@ -1599,8 +1632,9 @@ class FunctionDefinition : public Node {
 			}
 
 			if( CompoundStatementPtr != NULL ) {
-			
+				reading = true;						// this flag is used to prevent writing asm while reading ahead
 				CompoundStatementPtr->render_asm(file,false,true);  // ...(file,initialized,function)
+				reading = false;
 			}
 
 			file << "\t.set\tnoreorder" << std::endl;
@@ -1615,7 +1649,6 @@ class FunctionDefinition : public Node {
 			
 				CompoundStatementPtr->render_asm(file,false,true);
 			}
-			file << std::endl << "\t\t" << parameter_no;
 			file << std::endl << "\tmove\t$sp,$fp";
 			file << std::endl << "\tlw\t$fp," << (MemoryStack-1)*4 << "($sp)";
 			file << std::endl << "\taddiu\t$sp,$sp," << MemoryStack*4;
