@@ -14,16 +14,19 @@ inline void Indent_Generator(Statement* StatementPointer, std::ofstream& file,bo
 
 	if(StatementPointer->CompoundStatementPtr == NULL) {	//if the next thing is not a compound statement since we are in an if/elif/while then indent
 		counter_py++;
+		elseif = false;
 		StatementPointer->print_py(file,elseif);
 		counter_py--;
 		file << std:: endl;
 	}
 
 	else{
+		elseif = false;
 		StatementPointer->print_py(file,elseif);		//if the next thing is a compound statement then dont indent yet
 		file << std:: endl;
 					
 	}
+	
 		
 	
 }
