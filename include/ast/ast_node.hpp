@@ -24,7 +24,7 @@ static bindings temp;
 static bool float_ = false;
 static std::string funct_id = "";
 static int parameter_no = 0;
-
+static int MemoryStack = 0;
 
 
 class SpecifierQualifierList : public Node {};
@@ -1609,12 +1609,13 @@ class FunctionDefinition : public Node {
 			file << std::endl << "\tsw\t$fp," << (parameter_no-1)*4 << "($sp)";
 			file << std::endl << "\tmove\t$fp,$sp";
 
-			static int MemoryStack = parameter_no;
+			MemoryStack = parameter_no;
+			file << std::endl << "\t" <<  MemoryStack << "\t" << parameter_no;
 			if( CompoundStatementPtr != NULL ) {
 			
 				CompoundStatementPtr->render_asm(file,false,true);
 			}
-
+			file << std::endl << "\t\t" << parameter_no;
 			file << std::endl << "\tmove\t$sp,$fp";
 			file << std::endl << "\tlw\t$fp," << (MemoryStack-1)*4 << "($sp)";
 			file << std::endl << "\taddiu\t$sp,$sp," << MemoryStack*4;
