@@ -8,7 +8,7 @@ inline void Indent_Generator(Statement* StatementPointer, std::ofstream& file,bo
 
 
 	if( StatementPointer == NULL ) {
-	
+		elseif = false;
 		file << "pass" << std::endl;
 	}
 
