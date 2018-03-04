@@ -461,6 +461,7 @@ class InclusiveOrExpression : public Node {
 		void render_asm(std::ofstream& file) {
 
 			if( InclusiveOrExpressionPtr != NULL){
+
 				InclusiveOrExpressionPtr->render_asm(file);
 			}
 
@@ -1837,6 +1838,11 @@ inline void PrimaryExpression::render_asm(std::ofstream& file)  {
 
 			if( CONSTANT != NULL ) {
 				std::string constant = *CONSTANT;
+				if(!constant.find_first_of("'")){
+					int len = constant.length()-1;
+					std::string cons = constant.substr(1,len);
+					temp.value = std::stod(cons);
+				}
 				temp.value = std::stod(constant);
 				
 			}
