@@ -5,18 +5,31 @@
 	.module fp=xx
 	.module nooddspreg
 	.abicalls
-	.text
 
 
+	.data
+	.globl	a
 	.align	2
-	.globl	main
-	.set	nomips16
-	.set	nomicromips
-	.ent	main
-	.type	main, @function
-main:
-	.set	 macro
-	.set	 reorder
-	.end	 main
-	.size	 main, .-main
+	.type	a, @object
+	.size	a, 4
+a:
+	.word	0
+
+
+	.data
+	.globl	b
+	.align	2
+	.type	b, @object
+	.size	b, 4
+b:
+	.float	9.56
+
+
+	.data
+	.globl	c
+	.align	3
+	.type	c, @object
+	.size	c, 8
+c:
+	.double	20.4
 
