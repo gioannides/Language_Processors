@@ -7,15 +7,33 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
-
 #include "class_forward_declarations.hpp"
 
 
 
+
+struct bindings {
+	int word_size = 0;
+	std::string id = "";		//name of variable
+	double value = 0;
+	std::string scope = "";		//name of scope the variable is in
+	int offset = 0;			//the stack offset saved on the stack to load it from
+};
+
+
+static std::vector<bindings> Variables;
+static bindings temp;
+static bool float_ = false;
+static std::string funct_id = "";
+static int totalStackArea = 0;
+
+static int StackOffset = 0;
+static bool reading = false;
+
 class SpecifierQualifierList : public Node {};
 class Init_Declaration_List : public Node {};
 class InclusiveAndExpression : public Node {};
-class TypeName : public Node {};
+
 
 
 
@@ -35,6 +53,11 @@ class Pointer : public Node {
 
 
 
+
+
+class TypeName : public Node {};
+
+
 class PrimaryExpression : public Node {
 	
 	private:
@@ -51,11 +74,15 @@ class PrimaryExpression : public Node {
 
 		void print_py(std::ofstream& file);
 
-		void render_asm(std::ofstream& file,Context& contxt) ; 
+		void render_asm(std::ofstream& file) ; 
 		
 		
 
 };
+
+
+
+
 
 class ArgumentExpressionList : public Node {
 	
@@ -72,6 +99,12 @@ class ArgumentExpressionList : public Node {
 		void print_py(std::ofstream& file);
 
 };
+
+
+
+
+
+
 
 class PostFixExpression : public Node {
 
@@ -93,9 +126,14 @@ class PostFixExpression : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt); 
+		void render_asm(std::ofstream& file); 
 
 };
+
+
+
+
+		
 
 		
 
@@ -114,10 +152,25 @@ class UnaryExpression : public Node {
 		void print_py(std::ofstream& file); 
 
 
-		void render_asm(std::ofstream& file,Context& contxt) ; 
+		void render_asm(std::ofstream& file) {
+		
+			if(PostFixExpressionPtr != NULL) {
+				PostFixExpressionPtr->render_asm(file);		// This is for getting identifier name, constant value	
+			}
+			/*else if ( CastExpressionPtr != NULL) {
+				file << " " << *OPERATOR << " ";		//TODO: THIS IS FOR ++ and -- operators
+				CastExpressionPtr->print_py(file);
+			}*/
+		}
 
 
 };
+
+
+
+
+
+
 
 class CastExpression : public Node {
 
@@ -132,8 +185,20 @@ class CastExpression : public Node {
 
 		void print_py(std::ofstream& file);
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file) {
+
+			if( UNaryExpression != NULL){
+				UNaryExpression->render_asm(file);
+			}
+
+		}
+
 };
+
+
+
+
+
 
 class MultiplicativeExpression : public Node {
 
@@ -149,8 +214,23 @@ class MultiplicativeExpression : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
-};	
+		void render_asm(std::ofstream& file) {
+
+			if( MultiplicativeExpressionPtr != NULL){
+				MultiplicativeExpressionPtr->render_asm(file);
+			}
+
+			if( CaStExpression != NULL ) {
+				CaStExpression->render_asm(file);
+			}
+		}
+
+};
+
+
+
+
+		
 
 
 class AdditiveExpression : public Node {
@@ -170,9 +250,25 @@ class AdditiveExpression : public Node {
 
 		void print_py(std::ofstream& file);
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file) {
+
+			if( AdditiveExpressionPtr != NULL){
+				AdditiveExpressionPtr->render_asm(file);
+			}
+
+			if( MultiplicativeExpressioN != NULL ) {
+				MultiplicativeExpressioN->render_asm(file);
+			}
+		}
 
 };
+
+
+
+
+
+
+
 
 class ShiftExpression : public Node {
 
@@ -188,10 +284,28 @@ class ShiftExpression : public Node {
 
 		void print_py(std::ofstream& file);
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file) {
+
+			if( ShiftExpressionPtr != NULL){
+				ShiftExpressionPtr->render_asm(file);
+			}
+
+			if( AdditiVeExpression != NULL ) {
+				AdditiVeExpression->render_asm(file);
+			}
+		}
 
 
 };
+
+
+
+
+
+
+
+
+
 
 class RelationalExpression : public Node {
 	
@@ -207,10 +321,26 @@ class RelationalExpression : public Node {
 
 		void print_py(std::ofstream& file);
 
-		void render_asm(std::ofstream& file,Context& contxt);
+		void render_asm(std::ofstream& file) {
+
+			if( RelationalExpressionPtr != NULL){
+				RelationalExpressionPtr->render_asm(file);
+			}
+
+			if( SHiftExpression != NULL ) {
+				SHiftExpression->render_asm(file);
+			}
+		}
 
 
 };
+
+
+
+
+
+
+
 
 class EqualityExpression : public Node {
 
@@ -226,9 +356,26 @@ class EqualityExpression : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file) {
+
+			if( EqualityExpressionPtr != NULL){
+				EqualityExpressionPtr->render_asm(file);
+			}
+
+			if( RElationalExpression != NULL ) {
+				RElationalExpression->render_asm(file);
+			}
+		}
 
 };
+
+
+
+
+
+
+
+
 
 class AndExpression : public Node {
 	
@@ -245,10 +392,25 @@ class AndExpression : public Node {
 		void print_py(std::ofstream& file);
 
 		
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file) {
 
+			if( AndExpressionPtr != NULL){
+				AndExpressionPtr->render_asm(file);
+			}
+
+			if( EqualitYExpression != NULL ) {
+				EqualitYExpression->render_asm(file);
+			}
+		}
 
 };
+
+
+
+
+
+
+
 
 class ExclusiveOrExpression : public Node {
 
@@ -265,9 +427,26 @@ class ExclusiveOrExpression : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file) {
+
+			if( ExclusiveOrExpressionPtr != NULL){
+				ExclusiveOrExpressionPtr->render_asm(file);
+			}
+
+			if( ANDexpression != NULL ) {
+
+				ANDexpression->render_asm(file);
+			}
+		}
 
 };
+
+
+
+
+
+
+
 
 class InclusiveOrExpression : public Node {
 
@@ -283,8 +462,23 @@ class InclusiveOrExpression : public Node {
 
 		void print_py(std::ofstream& file);
 
-		void render_asm(std::ofstream& file,Context& contxt);
+		void render_asm(std::ofstream& file) {
+
+			if( InclusiveOrExpressionPtr != NULL){
+				InclusiveOrExpressionPtr->render_asm(file);
+			}
+
+			if( EXclusiveOrExpression != NULL ) {
+				EXclusiveOrExpression->render_asm(file);
+			}
+		}
 };
+
+
+
+
+
+
 
 
 class LogicalAndExpression : public Node {
@@ -300,8 +494,24 @@ class LogicalAndExpression : public Node {
 
 		void print_py(std::ofstream& file);
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file) {
+
+			if( LogicalAndExpressionPtr != NULL){
+				LogicalAndExpressionPtr->render_asm(file);
+			}
+
+			if( INclusiveOrExpression != NULL ) {
+				INclusiveOrExpression->render_asm(file);
+			}
+		}
 };
+
+
+
+
+
+
+		
 
 
 class LogicalOrExpression : public Node {
@@ -318,16 +528,33 @@ class LogicalOrExpression : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file) {
+
+			if( LogicalOrExpressionPtr != NULL){
+				LogicalOrExpressionPtr->render_asm(file);
+			}
+
+			if( LogicalAndExpressionPtr != NULL ) {
+				LogicalAndExpressionPtr->render_asm(file);
+			}
+
+		}
 			
 			
 };
+
+
+
+
+
+
 
 class ConditionalExpression : public Node {
 
 	private:
 		LogicalOrExpression* LogicalORExpression;
-		AssignmentExpression* ExpressioN;
+		AssignmentExpression*  ExpressioN
+		;
 
 	public:
 
@@ -337,10 +564,18 @@ class ConditionalExpression : public Node {
 
 		void print_py(std::ofstream& file);
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file) ;
 			
 
 };
+
+
+
+
+
+
+
+
 
 
 class AssignmentExpression : public Node {
@@ -360,7 +595,26 @@ class AssignmentExpression : public Node {
 		void print_py(std::ofstream& file) ;
 
 
-		void render_asm(std::ofstream& file,Context& contxt) ; 
+		void render_asm(std::ofstream& file) ; 
+};
+
+
+
+
+
+
+
+class IdentifierList : public Node {
+
+	private:
+		std::string* IDENTIFIER;
+		IdentifierList* IdentifierListPtr;
+	public:
+		IdentifierList(std::string* IDENTIFIER , IdentifierList* IdentifierListPtr) : IDENTIFIER(IDENTIFIER) , IdentifierListPtr(IdentifierListPtr) {}
+
+		void print_py(std::ofstream& file) ;
+
+
 };
 
 
@@ -377,22 +631,6 @@ class ConstantExpression : public Node {
 		ConstantExpression( ConditionalExpression* ConditionalExpressionPtr ) : ConditionalExpressionPtr(ConditionalExpressionPtr) {}
 
 		~ConstantExpression() {}
-
-};
-
-
-
-
-class IdentifierList : public Node {
-
-	private:
-		std::string* IDENTIFIER;
-		IdentifierList* IdentifierListPtr;
-	public:
-		IdentifierList(std::string* IDENTIFIER , IdentifierList* IdentifierListPtr) : IDENTIFIER(IDENTIFIER) , IdentifierListPtr(IdentifierListPtr) {}
-
-		void print_py(std::ofstream& file) ;
-
 
 };
 
@@ -463,7 +701,7 @@ class ParameterDeclaration : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) ; 
+		void render_asm(std::ofstream& file) ; 
 
 };
 
@@ -488,14 +726,14 @@ class ParameterList : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) {
+		void render_asm(std::ofstream& file) {
 
 			if( ParameterListPtr != NULL) {
 				
-				ParameterListPtr->render_asm(file,contxt);
+				ParameterListPtr->render_asm(file);
 				
 			}
-			ParameterDeclarationPtr->render_asm(file,contxt);
+			ParameterDeclarationPtr->render_asm(file);
 			
 			
 		}
@@ -522,10 +760,10 @@ class ParameterTypeList : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) {
+		void render_asm(std::ofstream& file) {
 
 			if( ParameterListPtr != NULL) {
-				ParameterListPtr->render_asm(file,contxt);
+				ParameterListPtr->render_asm(file);
 			}
 			 			
 		
@@ -534,22 +772,7 @@ class ParameterTypeList : public Node {
 };
 
 
-class DeclarationList : public Node {
 
-	private:
-		Declaration* DeclarationPtr;
-		DeclarationList* DeclarationListPtr;
-
-	public:
-		DeclarationList(Declaration* DeclarationPtr, DeclarationList* DeclarationListPtr) : 	DeclarationPtr(DeclarationPtr) , DeclarationListPtr(DeclarationListPtr) {}
-
-		~DeclarationList() {}
-
-		void print_py(std::ofstream& file) ;
-
-		void render_asm(std::ofstream& file,Context& contxt); 
-
-};
 
 
 
@@ -576,7 +799,7 @@ class DirectDeclarator : public Node {
 
 
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file, bool initialized=false, bool function=false) ;
 	
 		~DirectDeclarator() {}
 
@@ -601,7 +824,7 @@ class Declarator : public Node {
 		void print_py(std::ofstream& file, bool initialized=false, bool function=false) ;
 
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file, bool initialized=false, bool function=false) ;
 
 		~Declarator() {}
 
@@ -630,16 +853,12 @@ class Initializer : public Node {
 		void print_py(std::ofstream& file) ;
 
 	
-		void render_asm(std::ofstream& file,Context& contxt) {
+		void render_asm(std::ofstream& file) {
 
 			if(InitializerListPtr != NULL ) {
-				InitializerListPtr->render_asm(file,contxt);
+				InitializerListPtr->render_asm(file);
 			}
-
-			if( AssignmentExpressionPtr != NULL) {
-				
-				AssignmentExpressionPtr->render_asm(file,contxt);
-			}
+			AssignmentExpressionPtr->render_asm(file);
 		}
 			
 
@@ -666,18 +885,15 @@ class InitDeclarator : public Node {
 		~InitDeclarator() {}
 
 
-		void render_asm(std::ofstream& file,Context& contxt) {
+		void render_asm(std::ofstream& file) {
 
 			
-			if( InitiaLizer != NULL && DecLarator != NULL) {
-				contxt.initialized = true;
-				DecLarator->render_asm(file,contxt);	// The boolean variable was 'initialized' set to false by default
-				InitiaLizer->render_asm(file,contxt);
-				contxt.initialized = false;
+			if( InitiaLizer != NULL ) {
+				DecLarator->render_asm(file,true,function);	// The boolean variable was 'initialized' set to false by default
+				InitiaLizer->render_asm(file);
 			}
-			else if(DecLarator != NULL &&  InitiaLizer == NULL){
-				contxt.initialized = false;
-				DecLarator->render_asm(file,contxt);
+			else{
+				DecLarator->render_asm(file,false,function);
 			
 			}
 		}
@@ -704,13 +920,13 @@ class InitDeclaratorList : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) {				//Traversing through all of the declarations in the program sequentially as they appear in source code
+		void render_asm(std::ofstream& file) {				//Traversing through all of the declarations in the program sequentially as they appear in source code
 
 			if( InitDeclaratorListPtr != NULL) {
-				InitDeclaratorListPtr->render_asm(file,contxt);
+				InitDeclaratorListPtr->render_asm(file);
 				
 			}
-			InitDecLarator->render_asm(file,contxt);
+			InitDecLarator->render_asm(file);
 
 		}
 
@@ -739,7 +955,7 @@ class StorageClassSpecifiers : public Node {
 		~StorageClassSpecifiers() {}
 
 
-		void render_asm(std::ofstream& file,Context& contxt) {}
+		void render_asm(std::ofstream& file) {}
 					 
 					
 
@@ -919,44 +1135,44 @@ class TypeSpecifier : public Node {
 		TypeSpecifier(EnumSpecifier* EnumSpec) : EnumSpec(EnumSpec) {}
 
 
-		void render_asm(std::ofstream& file,Context& contxt) {
+		void render_asm(std::ofstream& file) {
 			std::string types = *TYPES;			// Require conversion to be used
 
 				if (types=="char"){
-					contxt.variable.word_size = 1;
+					temp.word_size = 1;
 				}
 				else if (types=="short"){
-					contxt.variable.word_size = 2;
+					temp.word_size = 2;
 				}
 				else if (types=="int"){
-					contxt.variable.word_size = 4;
+					temp.word_size = 4;
 				}	
 				else if (types=="long"){
-					contxt.variable.word_size = 4;
+					temp.word_size = 4;
 				}
 				else if (types=="float"){
-					contxt.variable.word_size = 4;
-					contxt.float_ = true;
+					temp.word_size = 4;
+					float_ = true;
 				}
 				else if (types=="double"){
-					contxt.variable.word_size = 8;
+					temp.word_size = 8;
 				}	
 				else if (types=="signed"){
-					contxt.variable.word_size = 4;
+					temp.word_size = 4;
 				}	
 				else if (types=="unsigned"){
-					contxt.variable.word_size = 4;
+					temp.word_size = 4;
 				}
 
-				if(contxt.reading) { //this is predicting total stack frame for all paramters/local declarations in function body
+				if(reading) { //this is predicting total stack frame for all paramters/local declarations in function body
 
-					contxt.totalStackArea += contxt.variable.word_size;
+					totalStackArea += temp.word_size;
 
 				}
 
-				if(!contxt.reading){ //this is execution
-					contxt.StackOffset += contxt.variable.word_size;
-					contxt.variable.offset = contxt.StackOffset-contxt.variable.word_size;
+				if(!reading){ //this is execution
+					StackOffset += temp.word_size;
+					temp.offset = StackOffset-temp.word_size;
 				}
 		}
 
@@ -1008,16 +1224,16 @@ class DeclarationSpecifiers : public Node{
 		~DeclarationSpecifiers() {}
 
 
-		void render_asm(std::ofstream& file,Context& contxt) {
+		void render_asm(std::ofstream& file) {
 
 			if(StorageClassSpec != NULL) {
-				//StorageClassSpec->render_asm(file,contxt);	 //TODO: may have to implement this
+				//StorageClassSpec->render_asm(file);	 //TODO: may have to implement this
 			}
 			else if(TypeSpec != NULL) {
-				TypeSpec->render_asm(file,contxt); 
+				TypeSpec->render_asm(file); 
 			}
 			else if(TypeQuaLifier != NULL) {
-				//TypeQuaLifier->render_asm(file,contxt); //TODO: may have to implement this
+				//TypeQuaLifier->render_asm(file); //TODO: may have to implement this
 			}
 		}
 
@@ -1048,26 +1264,32 @@ class Declaration : public Node {
 		void print_py(std::ofstream& file);
 
 	
-		void render_asm(std::ofstream& file,Context& contxt) {
+		void render_asm(std::ofstream& file) {
 
 
 
 
-			DeclSpec->render_asm(file,contxt);  // Obtain size of the data type of the variable
+			DeclSpec->render_asm(file);  // Obtain size of the data type of the variable
 
 			if( DeclList != NULL) {
-				DeclList->render_asm(file,contxt);  // Obtain name and value of the variable
+				DeclList->render_asm(file);  // Obtain name and value of the variable
 			}
 			
 
-			if(!contxt.function) {
-				contxt.variable.scope = "global";
-				contxt.variable.offset = 0;			//because it is not on the stack
+
+
+
+
+			
+
+			if(!function) {
+				temp.scope = "global";
+				temp.offset = 0;			//because it is not on the stack
 			}
 			else{
-				contxt.variable.scope = contxt.funct_id;
+				temp.scope = funct_id;
 			}
-				contxt.Variables.push_back(contxt.variable);  // all variables
+				Variables.push_back(temp);  // all variables
 
 
 
@@ -1075,54 +1297,54 @@ class Declaration : public Node {
 
 
 
-			if(!contxt.function) {
+			if(!function) {
 
 				file << std::endl << "\t.data";
-				file << std::endl << "\t.globl\t" << contxt.variable.id;
-				if( log2(contxt.variable.word_size) ){
-					file << std::endl << "\t.align\t" << log2(contxt.variable.word_size);
+				file << std::endl << "\t.globl\t" << temp.id;
+				if( log2(temp.word_size) ){
+					file << std::endl << "\t.align\t" << log2(temp.word_size);
 				}
-				file << std::endl << "\t.type\t" << contxt.variable.id << ", @object";
-				file << std::endl << "\t.size\t" << contxt.variable.id << ", " << contxt.variable.word_size;
-				file << std::endl << contxt.variable.id << ":";
-				if( contxt.variable.word_size > 4 ){					
-					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
+				file << std::endl << "\t.type\t" << temp.id << ", @object";
+				file << std::endl << "\t.size\t" << temp.id << ", " << temp.word_size;
+				file << std::endl << temp.id << ":";
+				if( temp.word_size > 4 ){					
+					file << std::endl << "\t.double\t" << temp.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
 				}
-				else if( (contxt.variable.word_size==4) && !contxt.float_){
-					file << std::endl << "\t.word\t" << contxt.variable.value;
+				else if( (temp.word_size==4) && !float_){
+					file << std::endl << "\t.word\t" << temp.value;
 				}
-				else if( (contxt.variable.word_size==4) && contxt.float_){
-					file << std::endl << "\t.float\t" << contxt.variable.value;
-					contxt.float_ = false;
+				else if( (temp.word_size==4) && float_){
+					file << std::endl << "\t.float\t" << temp.value;
+					float_ = false;
 				}
-				else if(contxt.variable.word_size==2){
-					file << std::endl << "\t.half\t" << contxt.variable.value;
+				else if(temp.word_size==2){
+					file << std::endl << "\t.half\t" << temp.value;
 				}
-				else if(contxt.variable.word_size==1){
-					file << std::endl << "\t.byte\t" << contxt.variable.value;
+				else if(temp.word_size==1){
+					file << std::endl << "\t.byte\t" << temp.value;
 				}
 
 			}
 
 
-			if(contxt.function && !contxt.reading) {
+			if(function && !reading) {
 					
-						if(contxt.variable.word_size <= 4) {
-							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
-							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset << "($fp)";
+						if(temp.word_size <= 4) {
+							file << std::endl << "\tli\t" << "$2,\t" << temp.value;
+							file << std::endl << "\tsw\t" << "$2," << temp.offset << "($fp)";
 							
 						}
 						else{									//this is for doubles, it not working yet
-							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
-							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset << "($fp)" << std::endl;
+							file << std::endl << "\tli\t" << "$2,\t" << temp.value;
+							file << std::endl << "\tsw\t" << "$2," << temp.offset << "($fp)" << std::endl;
 						}
 			}
 				
 			
 
-			contxt.variable.word_size = 0;
-			contxt.variable.id = "";
-			contxt.variable.value = 0;
+			temp.word_size = 0;
+			temp.id = "";
+			temp.value = 0;
 
 		}
 	
@@ -1154,11 +1376,10 @@ class JumpStatement : public Node {
 		void print_py(std::ofstream& file) ;
 
 
-		void render_asm(std::ofstream& file,Context& contxt) {
+		void render_asm(std::ofstream& file) {
 
-			
-
-		}
+			//
+			}
 							
 
 };
@@ -1186,10 +1407,6 @@ class IterationStatement : public Node {
 		~IterationStatement() {}
 
 		void print_py(std::ofstream& file) ;
-
-		void render_asm(std::ofstream& file, Context& contxt){
-			file << "\nIterationStatement ~line1420\n";
-		}
 
 };
 	
@@ -1223,6 +1440,14 @@ class SelectionStatement : public Node {
 };
 
 
+
+
+
+
+
+
+
+
 class ExpressionStatement : public Node {
 
 	private:
@@ -1235,10 +1460,45 @@ class ExpressionStatement : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+};
 
+
+
+
+
+
+
+
+
+
+class DeclarationList : public Node {
+
+	private:
+		Declaration* DeclarationPtr;
+		DeclarationList* DeclarationListPtr;
+
+	public:
+		DeclarationList(Declaration* DeclarationPtr, DeclarationList* DeclarationListPtr) : 	DeclarationPtr(DeclarationPtr) , DeclarationListPtr(DeclarationListPtr) {}
+
+		~DeclarationList() {}
+
+		void print_py(std::ofstream& file) ;
+
+		void render_asm(std::ofstream& file, bool initialized=false, bool function=true) {
+				
+			if(DeclarationListPtr != NULL) {
+				DeclarationListPtr->render_asm(file,initialized,function);
+			}
+			DeclarationPtr->render_asm(file);
+		}
 
 };
+	
+
+
+
+
+
 
 
 
@@ -1260,6 +1520,14 @@ class LabeledStatement : public Node {
 		void print_py(std::ofstream& file) {}
 };
 
+
+
+
+
+
+
+
+		
 
 
 class Statement : public Node {
@@ -1286,7 +1554,7 @@ class Statement : public Node {
 	
 		std::string* get_info() ;
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file,bool elseif=false) ;
 
 };
 
@@ -1310,12 +1578,12 @@ class StatementList : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) {
+		void render_asm(std::ofstream& file,bool initialized=false, bool function=false) {
 
 			if( StatementListPtr != NULL){
-				StatementListPtr->render_asm(file,contxt);
+				StatementListPtr->render_asm(file,initialized,function);
 			}
-			StatementPtr->render_asm(file,contxt);
+			StatementPtr->render_asm(file);
 		}
 				
 
@@ -1343,30 +1611,27 @@ class CompoundStatement : public Node {
 
 		void print_py(std::ofstream& file, bool initialized=false, bool function=true) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) {
+		void render_asm(std::ofstream& file, bool initialized=false, bool function=true) {
 
 			if(DeclarationListPtr != NULL && StatementListPtr == NULL) {
 
-				DeclarationListPtr->render_asm(file,contxt);
+				DeclarationListPtr->render_asm(file,initialized,function);
 			}
 
 			if(StatementListPtr != NULL && DeclarationListPtr == NULL ) {
 
-				StatementListPtr->render_asm(file,contxt);
+				StatementListPtr->render_asm(file,initialized,function);
 			}
 
 			if(StatementListPtr != NULL && DeclarationListPtr != NULL ) {
 				
-				DeclarationListPtr->render_asm(file,contxt);
-				if(!contxt.reading){
-					StatementListPtr->render_asm(file,contxt);
-				}
+				DeclarationListPtr->render_asm(file,initialized,function);
+				StatementListPtr->render_asm(file,initialized,function);
 			}
 			
 		}
 
 };
-
 
 
 
@@ -1394,7 +1659,7 @@ class FunctionDefinition : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file, Context& contxt) {
+		void render_asm(std::ofstream& file) {
 
 			if( DeclarationSpecifiersPtr != NULL ) {
 										//check the return type
@@ -1402,52 +1667,49 @@ class FunctionDefinition : public Node {
 
 			if( DeclaratorPtr != NULL ) {				//handles printing function name
 				
-				contxt.protect = false; //protect overwriting currennt scope global/function
-				
-				DeclaratorPtr->render_asm(file,contxt);
+				DeclaratorPtr->render_asm(file,false,true);
 				file << std::endl;
 				file << "\t.align\t2" << std::endl; 
-				file << "\t.globl\t" << contxt.funct_id << std::endl;
+				file << "\t.globl\t" << funct_id << std::endl;
 				file << "\t.set\t" << "nomips16" << std::endl;
 				file << "\t.set\t" << "nomicromips" << std::endl;
-				file << "\t.ent\t" << contxt.funct_id << std::endl;
-				file << "\t.type\t" << contxt.funct_id << "," << " @function" << std::endl;
-				file << contxt.funct_id << ":" << std::endl;
-				contxt.protect = true;
+				file << "\t.ent\t" << funct_id << std::endl;
+				file << "\t.type\t" << funct_id << "," << " @function" << std::endl;
+				file << funct_id << ":" << std::endl;
 			}
 
 			if( DeclarationListPtr != NULL ) {   			//( functions having const-correctness for example )
-				//DeclarationListPtr->render_asm(file,contxt);
+				//DeclarationListPtr->render_asm(file);
 			}
 
 			if( CompoundStatementPtr != NULL ) {
-				contxt.reading = true;						// this flag is used to prevent writing asm on file<< while reading ahead
-				CompoundStatementPtr->render_asm(file,contxt);  // ...(file,initialized,function)
-				contxt.reading = false;
+				reading = true;						// this flag is used to prevent writing asm while reading ahead
+				CompoundStatementPtr->render_asm(file,false,function);  // ...(file,initialized,function)
+				reading = false;
 			}
 
 			file << "\t.set\tnoreorder" << std::endl;
 			file << "\t.set\tnomacro" << std::endl;
 			
-			file << "\taddiu\t$sp,$sp,-"<< contxt.totalStackArea+4;
-			file << std::endl << "\tsw\t$fp," << contxt.totalStackArea << "($sp)";
+			file << "\taddiu\t$sp,$sp,-"<< totalStackArea+4;
+			file << std::endl << "\tsw\t$fp," << totalStackArea << "($sp)";
 			file << std::endl << "\tmove\t$fp,$sp";
 
 			
 
 			if( CompoundStatementPtr != NULL ) {
 			
-				CompoundStatementPtr->render_asm(file,contxt);
+				CompoundStatementPtr->render_asm(file,false,function);
 			}
 
 			file << std::endl << "\tmove\t$sp,$fp";
-			file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
-			file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
+			file << std::endl << "\tlw\t$fp," << totalStackArea << "($sp)";
+			file << std::endl << "\taddiu\t$sp,$sp," << totalStackArea + 4;
 			file << std::endl << "\tj\t$31" << std::endl;
 			file << "\t.set\t macro" << std::endl;
 			file << "\t.set\t reorder" << std::endl;
-			file << "\t.end\t " << contxt.funct_id << std::endl;
-			file << "\t.size\t " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;
+			file << "\t.end\t " << funct_id << std::endl;
+			file << "\t.size\t " << funct_id << ", .-" << funct_id << std::endl;
 			
 				
 		}
@@ -1455,9 +1717,6 @@ class FunctionDefinition : public Node {
 
 			
 };
-
-
-
 
 
 class ExternalDeclaration : public Node {
@@ -1476,27 +1735,27 @@ class ExternalDeclaration : public Node {
 		
 		void print_py(std::ofstream& file) ;
 		
-		void render_asm(std::ofstream& file,Context& contxt) {
+		void render_asm(std::ofstream& file) {
 
 			if( ExternalDeclarationPtr != NULL ) {
-				ExternalDeclarationPtr->render_asm(file,contxt);
+				ExternalDeclarationPtr->render_asm(file);
 
 			}
 
 			if ( DecLaration  == NULL && FunctionDef != NULL){
-				contxt.function = true;
+				function = true;
 				file << std::endl;
-				contxt.StackOffset = 0; 
-				FunctionDef->render_asm(file,contxt);
-				contxt.StackOffset = 0; 				//reset the stack offset for other functions
+				StackOffset = 0; 
+				FunctionDef->render_asm(file);
+				StackOffset = 0; 			//reset the stack offset for other functions
 				file << std::endl;
-				contxt.function = false;
+				function = false;
 			}
 
 			if ( FunctionDef  == NULL && DecLaration != NULL){
-				contxt.function = false;
+				function = false;
 				file << std::endl;
-				DecLaration->render_asm(file,contxt);			// This path is taken for global declarations that are not functions
+				DecLaration->render_asm(file);			// This path is taken for global declarations that are not functions
 				file << std::endl;
 			}
 		}
@@ -1528,7 +1787,6 @@ class TranslationUnit : public Node{
 
 		virtual void render_asm(std::string file_name) const {
 
-			Context contxt;
 			std::ofstream file;
 			file.open(file_name.c_str());
 
@@ -1537,6 +1795,8 @@ class TranslationUnit : public Node{
 			for(int i(0); i < file_name.size(); ++i) {
 				if(file_name[i] != '.') {
 					new_file_name += file_name[i];
+				}
+				else{
 					break;
 				}
 			}
@@ -1547,8 +1807,8 @@ class TranslationUnit : public Node{
 			file << "\t.module fp=xx" << std::endl;
 			file << "\t.module nooddspreg" << std::endl;
 			file << "\t.abicalls" << std::endl;
-			
-			ExternalDecl->render_asm(file,contxt);
+			//file << "\t.text" << std::endl; // this may cause problems
+			ExternalDecl->render_asm(file);
 		
 		}
 
@@ -1557,104 +1817,74 @@ class TranslationUnit : public Node{
 
 
 
-
-
-
-
-inline void DeclarationList::render_asm(std::ofstream& file,Context& contxt) {
-				
-			if(DeclarationListPtr != NULL) {
-				DeclarationListPtr->render_asm(file,contxt);
-			}
-			DeclarationPtr->render_asm(file,contxt);
-}
-
-
-inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
+inline void Statement::render_asm(std::ofstream& file,bool elseif) {
 
 			if( JumpStatementPtr != NULL) {
-				JumpStatementPtr->render_asm(file,contxt);
-			}
-			if( IterationStatementPtr != NULL){
-				IterationStatementPtr->render_asm(file,contxt);
-			}
-			if( CompoundStatementPtr != NULL){
-				CompoundStatementPtr->render_asm(file,contxt);
-			}
-			if( ExpressionStatementPtr != NULL){
-				ExpressionStatementPtr->render_asm(file,contxt);
+				JumpStatementPtr->render_asm(file);
 			}
 
 		}
 
-inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
+inline void DirectDeclarator::render_asm(std::ofstream& file, bool initialized, bool function) {
 
 	
 			if( DirectDeclaratorPtr != NULL) {
 
-				DirectDeclaratorPtr->render_asm(file,contxt);
+				DirectDeclaratorPtr->render_asm(file,initialized,function);
 			}
 
-			if(!contxt.function) {						//if we are not in a function then this must be a global declaration
+			if(!function) {
 
 				if(IDENTIFIER != NULL){
-					contxt.variable.id = *IDENTIFIER;
-					
-					if( !contxt.initialized ) {			//if it is not initialized then set it to 0
+					temp.id = *IDENTIFIER;
+
+					if( !initialized ) {
 	
-						contxt.variable.value = 0;
+						temp.value = 0;
 					}
 				}
-				contxt.funct_id = "global";				//set the variable's scope as global to be saved in the bindings struct
+				funct_id = "global";
 	
 				
 
 			}
 			
-			else if(contxt.function && IDENTIFIER != NULL){		//if we are in a function and the identifier is not null and protect flag is off
-
-					if( !contxt.protect) {				//then this is a function name we are reading
+			else{
+			if(function){
+				if( IDENTIFIER != NULL ) {
 					
-						contxt.funct_id = *IDENTIFIER;
-					}
+					funct_id = *IDENTIFIER;
 
-
-					contxt.variable.id = *IDENTIFIER;			//if the portect flag is on then we are inside the function , not reading the function name
-
-					if( !contxt.initialized ) {			//if the local declaration is not initialized, set it to 0
-	
-						contxt.variable.value = 0;
-					}
-				
+				}
 			
-					if( ParameterTypeLiSt != NULL) {
-						ParameterTypeLiSt->render_asm(file,contxt);
+				if( ParameterTypeLiSt != NULL) {
+					ParameterTypeLiSt->render_asm(file);
 					
-					}
+				}
 
 				
 				
 					
-					/*else if( IDentifierList != NULL) {
-						IDentifierList->print_py(file);
-					}*/
+				/*else if( IDentifierList != NULL) {
+					IDentifierList->print_py(file);
+				}*/
 
 			}
 
-	}
+		}
+}
 
-
-inline void ParameterDeclaration::render_asm(std::ofstream& file, Context& contxt)  {
+inline void ParameterDeclaration::render_asm(std::ofstream& file)  {
 
 			if( DeclarationSpecifiersPtr != NULL) {
 				
-				DeclarationSpecifiersPtr->render_asm(file,contxt);
+				DeclarationSpecifiersPtr->render_asm(file);
 				
 			}
 
 			if( DeclaratorPtr != NULL) {
 				
-				DeclaratorPtr->render_asm(file,contxt);
+				DeclaratorPtr->render_asm(file);
 				
 			}
 			
@@ -1662,12 +1892,99 @@ inline void ParameterDeclaration::render_asm(std::ofstream& file, Context& contx
 
 
 
-inline void Declarator::render_asm(std::ofstream& file,Context& contxt) {
+inline void Declarator::render_asm(std::ofstream& file, bool initialized, bool function) {
 
 			if( DeclaratorPtr != NULL) {
-				DeclaratorPtr->render_asm(file,contxt);
+				DeclaratorPtr->render_asm(file,initialized,function);
 			}
-			DirectDecLarator->render_asm(file,contxt);
+			DirectDecLarator->render_asm(file,initialized,function);
 		}
+
+
+
+
+
+inline void PostFixExpression::render_asm(std::ofstream& file) {
+
+			if(PostFixExpressionPtr != NULL) {
+
+				PostFixExpressionPtr->render_asm(file);
+			}
+
+			if( PrimaryExpressionPtr != NULL ) {
+
+				PrimaryExpressionPtr->render_asm(file);
+			}
+}
+
+
+inline void PrimaryExpression::render_asm(std::ofstream& file)  {
+			if( AssignmentExpressionPtr != NULL ) {
+
+				AssignmentExpressionPtr->render_asm(file);
+			}
+
+			if( IDENTIFIER != NULL ) {
+
+				for( int i(Variables.size()-1); i >= 0; i--){
+					if(*IDENTIFIER == Variables[i].id){
+						temp.value = Variables[i].value;
+					}
+
+				}
+			}
+
+			if( CONSTANT != NULL ) {
+				
+				std::string tmp = *CONSTANT;
+				char tmp2;
+				if(tmp.find_first_of("'")==0) {
+					tmp2 = tmp[1];
+					temp.value = int(tmp2);
+				}			
+				else{
+					temp.value = std::stod(tmp);
+				}
+
+			}
+		}				
+	
+
+		
+inline void ConditionalExpression::render_asm(std::ofstream& file) {
+			if( ExpressioN != NULL ) {
+				ExpressioN->render_asm(file);
+			}
+
+			if( LogicalORExpression != NULL ) {
+				LogicalORExpression->render_asm(file);
+			}
+		}
+
+inline void AssignmentExpression::render_asm(std::ofstream& file)  {
+
+
+			if(UnaryExpressionPtr != NULL) {
+		
+				UnaryExpressionPtr->render_asm(file);			//TODO: This is for identifier names and values
+
+			}
+
+			
+			if(AssignmentExpressionPtr != NULL) {
+
+				AssignmentExpressionPtr->render_asm(file);
+			}
+
+	
+			else if(ConditionalExpressionPtr != NULL) {
+
+				ConditionalExpressionPtr->render_asm(file);		//THIS IS FOR IF STATEMENTS/ LOGICAL / ARITHMETIC OPERATIONS / ASSIGNEMENTS
+
+			}
+
+		}
+
+
 
 #endif

@@ -1,3 +1,7 @@
+#ifndef CLASS_FORWARD
+#define CLASS_FORWARD
+
+
 class Node;
 
 
@@ -26,6 +30,38 @@ class Node{
 		 virtual ~Node()  {}
 };
 
+struct Context;
+
+struct Context{
+
+
+	struct bindings {
+		int word_size = 0;
+		std::string id = "";		//name of variable
+		double value = 0;
+		std::string scope = "";		//name of scope the variable is in
+		int offset = 0;			//the stack offset saved on the stack to load it from
+	};
+
+
+	bool rhs_of_expression=0;
+	bool lhs_of_assignment=0;
+	bool value_in_R2=0;
+	std::string op_name="";
+
+
+	bool initialized = false;
+	bool function = false;
+	bool negative = false; 	//is value a negative number?
+	bool float_ = false;   //is value a floating point?
+	bool protect = false; // to not overwrite function_id
+	bool reading = false; // are we reading for stack allocation or are we executing?
+	std::string funct_id = "";
+	std::vector<bindings> Variables;
+	bindings variable;
+	int totalStackArea = 0; //For the whole stack
+	int StackOffset = 0;	//the offset from $sp for each variable 
+};
 
 
 class ExternalDeclaration;
@@ -55,6 +91,8 @@ class JumpStatement;
 class ExpressionStatement;
 class CompoundStatement;
 class Declarator;
+class ConstantExpression;
+class ExpressionStatement;
 
 class Pointer;
 class PrimaryExpression;
@@ -68,3 +106,14 @@ class ParameterDeclaration;
 class ParameterList;
 class ParameterTypeList;
 class IdentifierList;
+
+
+class SpecifierQualifierList ;
+class Init_Declaration_List ;
+class InclusiveAndExpression ;
+class TypeName ;
+
+
+
+
+#endif
