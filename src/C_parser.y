@@ -175,17 +175,17 @@ EXTERNAL_DECLARATION: FUNCTION_DEFINITION							{ $$ = new ExternalDeclaration($
 
 
 
-FUNCTION_DEFINITION: DECLARATION_SPECIFIERS DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT 	{ $$ = new FunctionDefinition($1,$2,$3,$4); } 
+FUNCTION_DEFINITION: DECLARATION_SPECIFIERS DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT 	{ $$ = new FunctionDefinition($1,$2,$3,$4); } //parameters
 		   | DECLARATION_SPECIFIERS DECLARATOR COMPOUND_STATEMENT			{ $$ = new FunctionDefinition($1,$2,NULL,$3); } //DONE definition with no param
-		   | DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT				{ $$ = new FunctionDefinition(NULL,$1,$2,$3); } 
-		   | DECLARATOR COMPOUND_STATEMENT						{ $$ = new FunctionDefinition(NULL,$1,NULL,$2); } 
+		   | DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT				{ $$ = new FunctionDefinition(NULL,$1,$2,$3); } //call with parameters
+		   | DECLARATOR COMPOUND_STATEMENT						{ $$ = new FunctionDefinition(NULL,$1,NULL,$2); } // DONE call with no parameters
 
 
 
 
 
-DECLARATION : DECLARATION_SPECIFIERS SEMICOLON 							{ $$ = new Declaration($1,NULL);  } //DONE COMPLETELY
-	    | DECLARATION_SPECIFIERS INIT_DECLARATOR_LIST SEMICOLON				{ $$ = new Declaration($1,$2); } //DONE
+DECLARATION : DECLARATION_SPECIFIERS SEMICOLON							{ $$ = new Declaration($1,NULL);  } //DONE COMPLETELY
+	    | DECLARATION_SPECIFIERS INIT_DECLARATOR_LIST SEMICOLON					{ $$ = new Declaration($1,$2); } //DONE
 
 
 
@@ -450,14 +450,14 @@ UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,N
 
 
 
-POSTFIX_EXPRESSION: PRIMARY_EXPRESSION				      				{ $$ = new PostFixExpression(NULL,$1,NULL,NULL,NULL,NULL); }
-		  | POSTFIX_EXPRESSION '[' EXPRESSION ']'		     			{ $$ = new PostFixExpression($1,NULL,$3,NULL,NULL,NULL); }
-		  | POSTFIX_EXPRESSION '(' ')'			      				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,NULL,NULL); }
-		  | POSTFIX_EXPRESSION '(' ARGUMENT_EXPRESSION_LIST ')' 			{ $$ = new PostFixExpression($1,NULL,NULL,$3,NULL,NULL);}
-		  | POSTFIX_EXPRESSION '.' IDENTIFIER		     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$3,$2); }
-		  | POSTFIX_EXPRESSION PTR_OP IDENTIFIER		      			{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$3,$2); }
-		  | POSTFIX_EXPRESSION INC_OP			     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$2,NULL); }
-		  | POSTFIX_EXPRESSION DEC_OP			     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$2,NULL); }
+POSTFIX_EXPRESSION: PRIMARY_EXPRESSION		{ $$ = new PostFixExpression(NULL,$1,NULL,NULL,NULL,NULL); }
+		| POSTFIX_EXPRESSION '[' EXPRESSION ']' {$$ = new PostFixExpression($1,NULL,$3,NULL,NULL,NULL);}
+		| POSTFIX_EXPRESSION '(' ')'		{ $$ = new PostFixExpression($1,NULL,NULL,NULL,NULL,NULL); }
+		| POSTFIX_EXPRESSION '(' ARGUMENT_EXPRESSION_LIST ')' {$$=new PostFixExpression($1,NULL,NULL,$3,NULL,NULL);}
+		| POSTFIX_EXPRESSION '.' IDENTIFIER		{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$3,$2); }
+		| POSTFIX_EXPRESSION PTR_OP IDENTIFIER	{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$3,$2); }
+		| POSTFIX_EXPRESSION INC_OP			{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$2,NULL); }
+		| POSTFIX_EXPRESSION DEC_OP			{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$2,NULL); }
 
 
 
