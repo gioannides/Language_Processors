@@ -14,17 +14,20 @@
 
 struct bindings {
 	int word_size = 0;
-	std::string id = "";
+	std::string id = "";		//name of variable
 	double value = 0;
+	std::string scope = "";		//name of scope the variable is in
+	int offset = 0;			//the stack offset saved on the stack to load it from
 };
 
-
+static std::string placeholder = "";
 static std::vector<bindings> Variables;
 static bindings temp;
 static bool float_ = false;
 static std::string funct_id = "";
-static int parameter_no = 0;
-static int MemoryStack = 0;
+static bool protect = false; // to not overwrite function_id
+static int totalStackArea = 0;
+
 static int StackOffset = 0;
 static bool reading = false;
 
@@ -731,7 +734,7 @@ class ParameterList : public Node {
 				
 			}
 			ParameterDeclarationPtr->render_asm(file);
-			parameter_no++;
+			
 			
 		}
 
@@ -924,7 +927,7 @@ class InitDeclaratorList : public Node {
 				
 			}
 			InitDecLarator->render_asm(file);
-			parameter_no++;
+
 		}
 
 };
@@ -1160,6 +1163,17 @@ class TypeSpecifier : public Node {
 				else if (types=="unsigned"){
 					temp.word_size = 4;
 				}
+
+				if(reading) { //this is predicting total stack frame for all paramters/local declarations in function body
+
+					totalStackArea += temp.word_size;
+
+				}
+
+				if(!reading){ //this is execution
+					StackOffset += temp.word_size;
+					temp.offset = StackOffset-temp.word_size;
+				}
 		}
 
 		~TypeSpecifier() {}
@@ -1252,13 +1266,29 @@ class Declaration : public Node {
 	
 		void render_asm(std::ofstream& file) {
 
+
+
+
 			DeclSpec->render_asm(file);  // Obtain size of the data type of the variable
 
 			if( DeclList != NULL) {
 				DeclList->render_asm(file);  // Obtain name and value of the variable
 			}
+			
 
-			Variables.push_back(temp);  // all variables
+			if(!function) {
+				temp.scope = "global";
+				temp.offset = 0;			//because it is not on the stack
+			}
+			else{
+				temp.scope = funct_id;
+			}
+				Variables.push_back(temp);  // all variables
+
+
+
+
+
 
 
 			if(!function) {
@@ -1292,16 +1322,15 @@ class Declaration : public Node {
 
 
 			if(function && !reading) {
-					if((parameter_no-1)*4 != StackOffset) {
+					
 						if(temp.word_size <= 4) {
-							file << std::endl << "\tli\t" << "$s0,\t" << temp.value;
-							file << std::endl << "\tsw\t" << "$s0," << StackOffset << "($sp)";
-							StackOffset += temp.word_size;
+							file << std::endl << "\tli\t" << "$2,\t" << temp.value;
+							file << std::endl << "\tsw\t" << "$2," << temp.offset << "($fp)";
+							
 						}
 						else{									//this is for doubles, it not working yet
 							file << std::endl << "\tli\t" << "$2,\t" << temp.value;
-							file << std::endl << "\tsw\t" << "$2," << StackOffset << "($sp)" << std::endl;
-							StackOffset += temp.word_size;
+							file << std::endl << "\tsw\t" << "$2," << temp.offset << "($fp)" << std::endl;
 						}
 			}
 				
@@ -1312,7 +1341,7 @@ class Declaration : public Node {
 			temp.value = 0;
 
 		}
-	}
+	
 
 
 		virtual ~Declaration() {}
@@ -1339,6 +1368,14 @@ class JumpStatement : public Node {
 		~JumpStatement() {}
 
 		void print_py(std::ofstream& file) ;
+
+
+		void render_asm(std::ofstream& file) {
+
+			
+
+		}
+							
 
 };
 
@@ -1511,7 +1548,8 @@ class Statement : public Node {
 		void print_py(std::ofstream& file,bool elseif=false);	
 	
 		std::string* get_info() ;
-				
+
+		void render_asm(std::ofstream& file,bool elseif=false) ;
 
 };
 
@@ -1534,6 +1572,14 @@ class StatementList : public Node {
 		~StatementList() {}
 
 		void print_py(std::ofstream& file) ;
+
+		void render_asm(std::ofstream& file,bool initialized=false, bool function=false) {
+
+			if( StatementListPtr != NULL){
+				StatementListPtr->render_asm(file,initialized,function);
+			}
+			StatementPtr->render_asm(file);
+		}
 				
 
 };
@@ -1569,13 +1615,13 @@ class CompoundStatement : public Node {
 
 			if(StatementListPtr != NULL && DeclarationListPtr == NULL ) {
 
-				//StatementListPtr->render_asm(file,initialized,function);
+				StatementListPtr->render_asm(file,initialized,function);
 			}
 
 			if(StatementListPtr != NULL && DeclarationListPtr != NULL ) {
-
+				
 				DeclarationListPtr->render_asm(file,initialized,function);
-				//StatementListPtr->render_asm(file,initialized,function);
+				StatementListPtr->render_asm(file,initialized,function);
 			}
 			
 		}
@@ -1616,6 +1662,7 @@ class FunctionDefinition : public Node {
 
 			if( DeclaratorPtr != NULL ) {				//handles printing function name
 				
+				protect = false; //protect overwriting currennt scope global/function
 				DeclaratorPtr->render_asm(file,false,true);
 				file << std::endl;
 				file << "\t.align\t2" << std::endl; 
@@ -1625,6 +1672,7 @@ class FunctionDefinition : public Node {
 				file << "\t.ent\t" << funct_id << std::endl;
 				file << "\t.type\t" << funct_id << "," << " @function" << std::endl;
 				file << funct_id << ":" << std::endl;
+				protect = true;
 			}
 
 			if( DeclarationListPtr != NULL ) {   			//( functions having const-correctness for example )
@@ -1633,25 +1681,27 @@ class FunctionDefinition : public Node {
 
 			if( CompoundStatementPtr != NULL ) {
 				reading = true;						// this flag is used to prevent writing asm while reading ahead
-				CompoundStatementPtr->render_asm(file,false,true);  // ...(file,initialized,function)
+				CompoundStatementPtr->render_asm(file,false,function);  // ...(file,initialized,function)
 				reading = false;
 			}
 
 			file << "\t.set\tnoreorder" << std::endl;
 			file << "\t.set\tnomacro" << std::endl;
-			file << "\taddiu\t$sp,$sp,-"<< (4*parameter_no);
-			file << std::endl << "\tsw\t$fp," << (parameter_no-1)*4 << "($sp)";
+			
+			file << "\taddiu\t$sp,$sp,-"<< totalStackArea+4;
+			file << std::endl << "\tsw\t$fp," << totalStackArea << "($sp)";
 			file << std::endl << "\tmove\t$fp,$sp";
 
-			MemoryStack = parameter_no;
+			
 
 			if( CompoundStatementPtr != NULL ) {
 			
-				CompoundStatementPtr->render_asm(file,false,true);
+				CompoundStatementPtr->render_asm(file,false,function);
 			}
+
 			file << std::endl << "\tmove\t$sp,$fp";
-			file << std::endl << "\tlw\t$fp," << (MemoryStack-1)*4 << "($sp)";
-			file << std::endl << "\taddiu\t$sp,$sp," << MemoryStack*4;
+			file << std::endl << "\tlw\t$fp," << totalStackArea << "($sp)";
+			file << std::endl << "\taddiu\t$sp,$sp," << totalStackArea + 4;
 			file << std::endl << "\tj\t$31" << std::endl;
 			file << "\t.set\t macro" << std::endl;
 			file << "\t.set\t reorder" << std::endl;
@@ -1692,7 +1742,9 @@ class ExternalDeclaration : public Node {
 			if ( DecLaration  == NULL && FunctionDef != NULL){
 				function = true;
 				file << std::endl;
+				StackOffset = 0; 
 				FunctionDef->render_asm(file);
+				StackOffset = 0; 			//reset the stack offset for other functions
 				file << std::endl;
 				function = false;
 			}
@@ -1760,6 +1812,16 @@ class TranslationUnit : public Node{
 		 virtual ~TranslationUnit() {}
 };
 
+
+
+inline void Statement::render_asm(std::ofstream& file,bool elseif) {
+
+			if( JumpStatementPtr != NULL) {
+				JumpStatementPtr->render_asm(file);
+			}
+
+		}
+
 inline void DirectDeclarator::render_asm(std::ofstream& file, bool initialized, bool function) {
 
 	
@@ -1778,35 +1840,43 @@ inline void DirectDeclarator::render_asm(std::ofstream& file, bool initialized, 
 						temp.value = 0;
 					}
 				}
+				funct_id = "global";
 	
 				
 
 			}
 			
-			else{
-			if(function){
-				if( IDENTIFIER != NULL ) {
+			else if(function && IDENTIFIER != NULL){
+					if( !protect) {
 					
-					funct_id = *IDENTIFIER;
+						funct_id = *IDENTIFIER;
+					}
 
-				}
+
+					temp.id = *IDENTIFIER;
+
+					if( !initialized ) {
+	
+						temp.value = 0;
+					}
+				
 			
-				if( ParameterTypeLiSt != NULL) {
-					ParameterTypeLiSt->render_asm(file);
+					if( ParameterTypeLiSt != NULL) {
+						ParameterTypeLiSt->render_asm(file);
 					
-				}
+					}
 
 				
 				
 					
-				/*else if( IDentifierList != NULL) {
-					IDentifierList->print_py(file);
-				}*/
+					/*else if( IDentifierList != NULL) {
+						IDentifierList->print_py(file);
+					}*/
 
 			}
 
-		}
-}
+	}
+
 
 inline void ParameterDeclaration::render_asm(std::ofstream& file)  {
 
@@ -1860,12 +1930,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file)  {
 
 			if( IDENTIFIER != NULL ) {
 
-				for( int i(Variables.size()-1); i >= 0; i--){
-					if(*IDENTIFIER == Variables[i].id){
-						temp.value = Variables[i].value;
-					}
-
-				}
+				placeholder = *IDENTIFIER;
 			}
 
 			if( CONSTANT != NULL ) {
@@ -1886,14 +1951,20 @@ inline void PrimaryExpression::render_asm(std::ofstream& file)  {
 
 		
 inline void ConditionalExpression::render_asm(std::ofstream& file) {
-			if( ExpressioN != NULL ) {
+			
+
+			if (ExpressioN != NULL) {
+
 				ExpressioN->render_asm(file);
 			}
 
-			if( LogicalORExpression != NULL ) {
+			if( LogicalORExpression != NULL) {
+
 				LogicalORExpression->render_asm(file);
 			}
-		}
+
+}
+				
 
 inline void AssignmentExpression::render_asm(std::ofstream& file)  {
 
