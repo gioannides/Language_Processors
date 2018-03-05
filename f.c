@@ -3,6 +3,7 @@ int main() {
 
 	int x = 8;
 	int y = 88;
-	int o = x + y ;
+int d = 99;
+	 x = x + y + d;
 	
 }

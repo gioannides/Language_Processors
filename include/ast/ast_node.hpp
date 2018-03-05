@@ -1105,13 +1105,18 @@ class Declaration : public Node {
 			if(contxt.function && !contxt.reading) {
 					
 						if(contxt.variable.word_size <= 4) {
+
+							useReg(file,"start",2);  // you  are now free to use the register but the SP has been decremented by further 4!
 							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
-							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset << "($sp)";
+							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset + biasedOffset << "($sp)"; //look in the function definiton for why
+							useReg(file,"done",2); // bring the value back
 							
 						}
-						else{									//this is for doubles, it not working yet
+						else{	
+							useReg(file,"start",2);								//this is for doubles, it not working yet
 							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
-							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset << "($sp)" << std::endl;
+							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset + biasedOffset << "($sp)" << std::endl;
+							useReg(file,"done",2);
 						}
 			}
 				
@@ -1127,14 +1132,6 @@ class Declaration : public Node {
 
 		virtual ~Declaration() {}
  };
-
-
-
-
-
-
-
-
 
 
 class JumpStatement : public Node {
@@ -1442,6 +1439,7 @@ class FunctionDefinition : public Node {
 			file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
 			file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
 			file << std::endl << "\tj\t$31" << std::endl;
+			file << std::endl << "\tnop" << std::endl;
 			file << "\t.set\t macro" << std::endl;
 			file << "\t.set\t reorder" << std::endl;
 			file << "\t.end\t " << contxt.funct_id << std::endl;
@@ -1669,5 +1667,7 @@ inline void Declarator::render_asm(std::ofstream& file,Context& contxt) {
 			}
 			DirectDecLarator->render_asm(file,contxt);
 		}
+
+
 
 #endif

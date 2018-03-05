@@ -16,10 +16,10 @@ inline void CastExpression::render_asm(std::ofstream& file,Context& contxt) {
 inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 			
-			if(OPERATOR==NULL && CaStExpression != NULL){
+			if(OPERATOR==NULL && !contxt.reading && CaStExpression != NULL){
 				CaStExpression->render_asm(file,contxt);
 			}
-			else if(MultiplicativeExpressionPtr != NULL && CaStExpression != NULL && OPERATOR != NULL){ 
+			else if(MultiplicativeExpressionPtr != NULL && !contxt.reading && CaStExpression != NULL && OPERATOR != NULL){ 
 				MultiplicativeExpressionPtr->render_asm(file,contxt);
 				
 				CaStExpression->render_asm(file,contxt);
@@ -35,7 +35,7 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 
-			if(!contxt.reading){
+			/*if(!contxt.reading){
 				if( AdditiveExpressionPtr != NULL){
 					contxt.op_name="add";
 					AdditiveExpressionPtr->render_asm(file,contxt);
@@ -48,15 +48,17 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 				if(AdditiveExpressionPtr!=NULL){
 					file << std::endl << "\tadd\t $2, $2, $3\n";
 				}
-			}
+			}*/
 
-			if(OPERATOR==NULL && contxt.reading && MultiplicativeExpressioN != NULL){
+			if(OPERATOR==NULL && !contxt.reading && MultiplicativeExpressioN != NULL){
 				MultiplicativeExpressioN->render_asm(file,contxt);
 			}
-			else if(AdditiveExpressionPtr != NULL && contxt.reading  && MultiplicativeExpressioN != NULL && OPERATOR != NULL) { 
-				AdditiveExpressionPtr->render_asm(file,contxt);
+			else if(AdditiveExpressionPtr != NULL && !contxt.reading  && MultiplicativeExpressioN != NULL && OPERATOR != NULL) { 
+				contxt.op_name="add";
 				
+				AdditiveExpressionPtr->render_asm(file,contxt);				
 				MultiplicativeExpressioN->render_asm(file,contxt);
+				file << std::endl << "\tadd\t $2, $2, $3\n";
 				
 			}
 
@@ -210,12 +212,13 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  {
 
 		
-			if( AssignmentExpressionPtr != NULL ) {
+			if( AssignmentExpressionPtr != NULL && !contxt.reading ) {
 
 				AssignmentExpressionPtr->render_asm(file,contxt);
 			}
 
-			if( IDENTIFIER != NULL && !contxt.reading ) {			//this identifier is involved in expressions		
+			else if( IDENTIFIER != NULL && !contxt.reading ) {			//this identifier is involved in expressions
+				std:: cout << "i execute" << std::endl;		
 				bool found = false;			//this will determine whether the variable wanted is a global or a local
 				int i(0);				//must initialize the index i outside so it is accessible throughout here
 				for(i; i<contxt.Variables.size(); i++) {
@@ -223,50 +226,54 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 					if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
 						found = true;		//means that we found a local variable in the function of that name					
 						contxt.value_in_R2=0;
-						contxt.lhs_of_assignment=0;						
+						contxt.lhs_of_assignment=false;						
 						break;
 					}
 					if(!found) {
 						for(i; i<contxt.Variables.size(); i++) {
 							if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
 								contxt.value_in_R2=0;
-								contxt.lhs_of_assignment=0;
+								contxt.lhs_of_assignment=false;
 								break;
 							}
 						
 						}
 					} 
 				}   							
-				if(contxt.lhs_of_assignment){
+				/*if(contxt.lhs_of_assignment){
 					if(found) {
 						file << std::endl << "\tsw $2," << contxt.Variables[i].offset << "($sp)";
 					}
 					else if(!found) {
 						file << std::endl << "\tla $2," << contxt.Variables[i].id; //this is how globals are accessed
 					}					
-				}
-				if(contxt.rhs_of_expression){
-					if(contxt.value_in_R2){
+				}*/
+				//if(contxt.rhs_of_expression){
+					//if(contxt.value_in_R2){
 						if(found) {
-							file << std::endl << "\tlw $3," << contxt.Variables[i].offset << "($sp)";
+							useReg(file,"start",2);
+							file << std::endl << "\tlw\t $2," << contxt.Variables[i].offset << "($sp)";
+							useReg(file,"done",2);
 						}
 						else if(!found) {
-							file << std::endl << "\tla $3," << contxt.Variables[i].id;
+							useReg(file,"start",3);
+							file << std::endl << "\tla\t $3," << contxt.Variables[i].id;
+							useReg(file,"done",3);
 						}
 					}
-					else{
-						contxt.value_in_R2=1; 
+					/*else{
+						//contxt.value_in_R2=true; 
 						if(found) {
 							file << std::endl << "\tlw $2," << contxt.Variables[i].offset << "($sp)";
 						}
 						else if(!found) {
 							file << std::endl << "\tla $2," << contxt.Variables[i].id;
 						}
-					}
-				}
-			}
+					}*/
+				//}
+			
 
-			if( CONSTANT != NULL && !contxt.reading ) {				//this constant is involved in expressions
+			else if( CONSTANT != NULL && !contxt.reading ) {				//this constant is involved in expressions
 				std::string tmp ;
 				if(contxt.negative) {				
 					tmp = "-" + *CONSTANT;
@@ -276,7 +283,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 					tmp = *CONSTANT;
 				}				
 				char tmp2;
-				if(tmp.find_first_of("'")==0) {
+				if(tmp.find_first_of("'")==0 && contxt.variable.word_size == 1) {
 					tmp2 = tmp[1];
 					contxt.variable.value = int(tmp2);
 				}			
@@ -285,14 +292,10 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 				}
 
 				//file << std::endl << rhs_of_expression;	//we might need to reverse the order of the if statements
-				if(contxt.rhs_of_expression){
-					file <<  std::endl << "\tli ";
-					if(contxt.value_in_R2)
-						file << "$3, " << *CONSTANT;
-					else {
-						contxt.value_in_R2=1;
-						file << "$2, " << *CONSTANT; 
-					}
+				if(contxt.rhs_of_expression && !contxt.reading){
+					useReg(file,"start");
+					file <<  std::endl << "\tli\t "<< "$2," << *CONSTANT;
+					useReg(file,"done");
 				}
 			}
 		}				
@@ -319,13 +322,14 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 			//file << "\n" << "reading : "  << contxt.reading << "\n";
 			if(AssignmentExpressionPtr != NULL) {
 				//file << "what is going on here?\n";
-				contxt.rhs_of_expression=1;
+				contxt.rhs_of_expression = true;
 				AssignmentExpressionPtr->render_asm(file,contxt);
-				contxt.rhs_of_expression=0;
+				contxt.rhs_of_expression = false;
 			}
 			if(UnaryExpressionPtr != NULL) {
-				contxt.lhs_of_assignment=1;
+				contxt.lhs_of_assignment = true;
 				UnaryExpressionPtr->render_asm(file,contxt);			//TODO: This is for identifier names and values
+				contxt.lhs_of_assignment = false;
 
 			}				
 			else if(ConditionalExpressionPtr != NULL) {
@@ -342,9 +346,11 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 			if(OPERATOR == NULL) {
 				PostFixExpressionPtr->render_asm(file,contxt);
 			}
-			else if ( CastExpressionPtr != NULL) {
+			else if ( CastExpressionPtr != NULL) {  //assigning meaning eg. & , - , + 
 				
-				contxt.negative = true;
+				if( *OPERATOR == "-"){
+					contxt.negative = true;  
+				}
 				CastExpressionPtr->render_asm(file,contxt);
 			}
 		}

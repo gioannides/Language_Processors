@@ -55,10 +55,22 @@ static bool ParameterVariable = false;
 
 
 
+static int biasedOffset = 0;
 
 
+inline void useReg(std::ofstream& file,std::string operation, int register_no=2) {				//USE THIS FOR USING REGISTERS, HAVE TO RECALL AFTER YOU ARE DONE.
 
-
+	if(operation == "start") {	
+		file << std::endl << "\taddiu\t $sp,$sp,-4";
+		file << std::endl << "\tsw\t" << "$" << register_no << ",0($sp)";
+		biasedOffset += 4;
+	}
+	else{
+		file << std::endl << "\tlw\t" << "$" << register_no << ",0($sp)";
+		file << std::endl << "\taddiu\t $sp,$sp,4";
+		biasedOffset -= 4;		
+	}
+}
 
 
 
