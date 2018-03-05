@@ -8,7 +8,7 @@ CompleteCParser,TestBasicCparser,7,ap4116,,Be confident that the C parser is at 
 LearnBasicPython,None,5,ap4116,88816aa3f3b8e084e6f315ea5787b28a9101004a,Need to learn basic Python syntax in order to be able to write a C to Python Translator
 ConstructCtoPythonTranslator,CompletedCParser,8,ap4116,64964bea93c74708217064ca007c718ce1a192c1,"Using the Lexer and the Parser implemented, create an Abstract Syntax Tree to Python from C"
 TestCtoPythonParser,ConstructedCtoPythonParser,8,gi316,59b0bfd6f1749c6837ea81f614d7eda96d306949,Test C to python Translator
-StartCodeGen,CompletedCodeGenLab,6,gi316,,"Using principles learned from the CodeGen lab, structure the implementation of the Abstract Syntax Tree to MIPS I assembly"
+StartCodeGen,CompletedCodeGenLab,6,gi316,e19a8b7f4f75cc816b67328eaaaad57b0f7846cc,"Using principles learned from the CodeGen lab, structure the implementation of the Abstract Syntax Tree to MIPS I assembly"
 AbasicCodegenVersion,StartedCodeGen,8,ap4116,,The CodeGen at least works for all of the basic cases and hopefully even more
 A_workingCodegen,AbasicCodegenVersion,8,gi316,,Verify the CodeGen works for most of the cases and hopefully (near) all
 TestBenchDesign,WorkingCompilerAndCodeGen,8,ap4116,,Make up a formal TestBench to test extensively the Compiler and Translator

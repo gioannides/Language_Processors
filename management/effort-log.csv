@@ -1,7 +1,7 @@
 Date,Effort,Developers,Milestones
 2018-01-31,5,gi316,BasicCLexer
 2018-01-31,1.5,gi316,MakeAPlan
-2018-02-04,3,gi316,BasicCLexer
+2018-02-05,3,gi316,BasicCLexer
 2018-02-10,4,gi316,BasicCParser
 2018-02-16,6,gi316,BasicCParser
 2018-02-17,10,gi316,BasicCParser
@@ -11,5 +11,8 @@ Date,Effort,Developers,Milestones
 2018-02-22,4,gi316,ConstructCtoPythonTranslator
 2018-01-25,6,ap4116,ConstructCtoPythonTranslator
 2018-01-01,5,ap4116,StartCodeGen
+2018-01-01,4,gi316,StartCodeGen
+2018-03-02,7,gi316,CompleteCParser
 2018-03-03,3,ap4116,CompleteCParser
 2018-03-04,5,ap4116,AbasicCodegenVersion
+2018-03-05,8,gi316,AbasicCodegenVersion
