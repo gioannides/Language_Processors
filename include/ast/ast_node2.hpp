@@ -671,15 +671,12 @@ class InitDeclarator : public Node {
 			
 			if( InitiaLizer != NULL && DecLarator != NULL) {
 				contxt.initialized = true;
-				
-				contxt.rhs_of_expression = true;
-				InitiaLizer->render_asm(file,contxt);
-				contxt.rhs_of_expression = false;
-
 				contxt.lhs_of_assignment = true;
 				DecLarator->render_asm(file,contxt);	// The boolean variable was 'initialized' set to false by default
 				contxt.lhs_of_assignment = false;
-				
+				contxt.rhs_of_expression = true;
+				InitiaLizer->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
 				contxt.initialized = false;
 			}
 			else if(DecLarator != NULL &&  InitiaLizer == NULL){
@@ -1603,15 +1600,14 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					contxt.funct_id=*IDENTIFIER;
 			}
 
-			 if(!contxt.function && IDENTIFIER != NULL && !contxt.reading && !contxt.protect) 			//if we are not in a function then this must be a global declaration
-			{
+			if(!contxt.function && IDENTIFIER != NULL && !contxt.reading && !contxt.protect) {			//if we are not in a function then this must be a global declaration
+				
 				contxt.variable.id = *IDENTIFIER;
 				
 				if( !contxt.initialized ) {				//if it is not initialized then set it to 0
 					contxt.variable.value = 0;
 				}
 				contxt.variable.scope = "global";			//set the variable's scope as global to be saved in the bindings struct
-				
 				if(contxt.Variables.size()==0){
 					contxt.Variables.push_back(contxt.variable);				
 				}
@@ -1624,7 +1620,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 			
 			
 			
-			else if(contxt.function && IDENTIFIER != NULL && contxt.reading){			//if we are in a function and the identifier is not null and protect flag is off
+			else if(contxt.function && IDENTIFIER != NULL && !contxt.reading){			//if we are in a function and the identifier is not null and protect flag is off
 
 					if( !contxt.protect) {				//then this is a function name we are reading
 					

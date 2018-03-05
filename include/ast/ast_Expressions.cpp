@@ -242,22 +242,26 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 							}
 						
 						}
-				}   							
+				}   			
+				std::cout << "\n\nlhs " << contxt.lhs_of_assignment ;				
 				if(contxt.lhs_of_assignment){
 					if(found_0nothing_1local_2globl==1) {
+						contxt.value_in_R2=false;
 						file << std::endl << "\tsw\t$2," << contxt.Variables[good_index].offset << "($sp)";
 					}
 					else if(found_0nothing_1local_2globl==2) {
+						contxt.value_in_R2=false;
 						file << std::endl << "\tla\t$4," << contxt.Variables[good_index].id; //this is how globals are accessed
 						file << std::endl << "\tsw\t$2, 0($4)";
+						//file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].id; 
 					}			
 					else{
 						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 					}
-					contxt.value_in_R2=false;
+					//contxt.value_in_R2=false;
 					contxt.lhs_of_assignment=false;		
 				}
-				if(contxt.rhs_of_expression){
+				else if(contxt.rhs_of_expression){
 					if(contxt.value_in_R2){
 						if(found_0nothing_1local_2globl==1) {
 							//useReg(file,"start",2);
@@ -268,17 +272,20 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 							//useReg(file,"start",3);
 							file << std::endl << "\tla\t$3," << contxt.Variables[good_index].id;
 							file << std::endl << "\tlw\t$3, 0($3)";
+							//file << std::endl << "\tlw\t$2, " << contxt.Variables[good_index].id;
 							//useReg(file,"done",3);
 						}
 					}
-					else{
-						contxt.value_in_R2=true; 
+					else{ 
 						if(found_0nothing_1local_2globl==1) {
+							contxt.value_in_R2=true; 
 							file << std::endl << "\tlw\t$2," << contxt.Variables[good_index].offset << "($sp)";
 						}
 						else if(found_0nothing_1local_2globl==2) {
+							contxt.value_in_R2=true; 
 							file << std::endl << "\tla\t$2," << contxt.Variables[good_index].id;
 							file << std::endl << "\tlw\t$2, 0($2)";
+							//file << std::endl << "\tlw\t$2, " << contxt.Variables[good_index].id;
 						}
 						else{
 						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
