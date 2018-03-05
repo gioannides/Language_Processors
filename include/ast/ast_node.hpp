@@ -671,8 +671,12 @@ class InitDeclarator : public Node {
 			
 			if( InitiaLizer != NULL && DecLarator != NULL) {
 				contxt.initialized = true;
+				contxt.lhs_of_assignment = true;
 				DecLarator->render_asm(file,contxt);	// The boolean variable was 'initialized' set to false by default
+				contxt.lhs_of_assignment = false;
+				contxt.rhs_of_expression = true;
 				InitiaLizer->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
 				contxt.initialized = false;
 			}
 			else if(DecLarator != NULL &&  InitiaLizer == NULL){
@@ -1106,17 +1110,17 @@ class Declaration : public Node {
 					
 						if(contxt.variable.word_size <= 4) {
 
-							useReg(file,"start",2);  // you  are now free to use the register but the SP has been decremented by further 4!
+							//useReg(file,"start",2);  // you  are now free to use the register but the SP has been decremented by further 4!
 							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
 							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset + biasedOffset << "($sp)"; //look in the function definiton for why
-							useReg(file,"done",2); // bring the value back
+							//useReg(file,"done",2); // bring the value back
 							
 						}
 						else{	
-							useReg(file,"start",2);								//this is for doubles, it not working yet
+							//useReg(file,"start",2);								//this is for doubles, it not working yet
 							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
 							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset + biasedOffset << "($sp)" << std::endl;
-							useReg(file,"done",2);
+							//useReg(file,"done",2);
 						}
 			}
 				
@@ -1590,8 +1594,11 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 
 				DirectDeclaratorPtr->render_asm(file,contxt);
 			}
+			if(contxt.function && IDENTIFIER !=NULL && !contxt.reading && !contxt.protect){
+					contxt.funct_id=*IDENTIFIER;
+			}
 
-			if(!contxt.function && IDENTIFIER != NULL) {			//if we are not in a function then this must be a global declaration
+			if(!contxt.function && IDENTIFIER != NULL && !contxt.reading && !contxt.protect) {			//if we are not in a function then this must be a global declaration
 				
 				contxt.variable.id = *IDENTIFIER;
 				
@@ -1599,18 +1606,24 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					contxt.variable.value = 0;
 				}
 				contxt.variable.scope = "global";			//set the variable's scope as global to be saved in the bindings struct
-				contxt.Variables.push_back(contxt.variable);
-				
+				if(contxt.Variables.size()==0){
+					contxt.Variables.push_back(contxt.variable);				
+				}
+				else if(contxt.Variables[contxt.Variables.size()-1].id!=*IDENTIFIER)
+					{	//std::cout << " P ";
+						contxt.Variables.push_back(contxt.variable);
+					}
 			}
 
 			
 			
-			else if(contxt.function && IDENTIFIER != NULL){			//if we are in a function and the identifier is not null and protect flag is off
+			
+			else if(contxt.function && IDENTIFIER != NULL && !contxt.reading){			//if we are in a function and the identifier is not null and protect flag is off
 
 					if( !contxt.protect) {				//then this is a function name we are reading
 					
 						contxt.funct_id = *IDENTIFIER;		//obtain the scope we are currently in
-						contxt.variable.scope = *IDENTIFIER;	//assign this information to the local variable
+						//contxt.variable.scope = *IDENTIFIER;	//assign this information to the local variable
 					}
 
 					else{
@@ -1622,22 +1635,25 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 	
 						contxt.variable.value = 0;
 					}
-				
 					contxt.Variables.push_back(contxt.variable);
+					//std::cout << " L ";
+				}
+					
+					
 
 					if( ParameterTypeLiSt != NULL) {
 						ParameterTypeLiSt->render_asm(file,contxt);
 					
 					}
 
-				std::cout << contxt.variable.id;
+				//std::cout << contxt.variable.id << " " << contxt.funct_id << " " << contxt.variable.scope << std::endl;
 				
 					
 					/*else if( IDentifierList != NULL) {
 						IDentifierList->print_py(file);
 					}*/
 
-			}
+			
 
 	}
 
