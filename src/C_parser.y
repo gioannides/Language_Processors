@@ -175,17 +175,17 @@ EXTERNAL_DECLARATION: FUNCTION_DEFINITION							{ $$ = new ExternalDeclaration($
 
 
 
-FUNCTION_DEFINITION: DECLARATION_SPECIFIERS DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT 	{ $$ = new FunctionDefinition($1,$2,$3,$4); } //parameters
+FUNCTION_DEFINITION: DECLARATION_SPECIFIERS DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT 	{ $$ = new FunctionDefinition($1,$2,$3,$4); } 
 		   | DECLARATION_SPECIFIERS DECLARATOR COMPOUND_STATEMENT			{ $$ = new FunctionDefinition($1,$2,NULL,$3); } //DONE definition with no param
-		   | DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT				{ $$ = new FunctionDefinition(NULL,$1,$2,$3); } //call with parameters
-		   | DECLARATOR COMPOUND_STATEMENT						{ $$ = new FunctionDefinition(NULL,$1,NULL,$2); } // DONE call with no parameters
+		   | DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT				{ $$ = new FunctionDefinition(NULL,$1,$2,$3); } 
+		   | DECLARATOR COMPOUND_STATEMENT						{ $$ = new FunctionDefinition(NULL,$1,NULL,$2); } 
 
 
 
 
 
-DECLARATION : DECLARATION_SPECIFIERS SEMICOLON							{ $$ = new Declaration($1,NULL);  } //DONE COMPLETELY
-	    | DECLARATION_SPECIFIERS INIT_DECLARATOR_LIST SEMICOLON					{ $$ = new Declaration($1,$2); } //DONE
+DECLARATION : DECLARATION_SPECIFIERS SEMICOLON 							{ $$ = new Declaration($1,NULL);  } //DONE COMPLETELY
+	    | DECLARATION_SPECIFIERS INIT_DECLARATOR_LIST SEMICOLON				{ $$ = new Declaration($1,$2); } //DONE
 
 
 
@@ -274,6 +274,9 @@ CONSTANT_EXPRESSION: CONDITIONAL_EXPRESSION							{ $$ = new ConstantExpression(
 
 
 
+EXPRESSION: ASSIGNMENT_EXPRESSION								{ $$ = $1; }
+	| EXPRESSION ',' ASSIGNMENT_EXPRESSION							{ $$ = $3; }
+
 
 
 	
@@ -284,9 +287,15 @@ ASSIGNMENT_EXPRESSION:CONDITIONAL_EXPRESSION							{ $$ = new AssignmentExpressi
 
 
 
+UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,NULL) ; } //DONE
+		| INC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
+		| DEC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
+		| UNARY_OPERATOR CAST_EXPRESSION						{ $$ = new UnaryExpression(NULL,$1,$2) ; } //DONE COMPLETELY
+		//| SIZEOF UNARY_EXPRESSION
+		//| SIZEOF '(' TYPE_NAME ')'							//IMPLEMENT THIS
 
-EXPRESSION: ASSIGNMENT_EXPRESSION								{ $$ = $1; }
-	| EXPRESSION ',' ASSIGNMENT_EXPRESSION							{ $$ = $3; }
+
+
 
 
 
@@ -308,17 +317,6 @@ ASSIGNMENT_OPERATOR: '='     {$$ = $1;}//DONE COMPLETELY
 
 CONDITIONAL_EXPRESSION: LOGICAL_OR_EXPRESSION							{ $$ = new ConditionalExpression($1,NULL); }//DONE COMPLETELY
 		      | LOGICAL_OR_EXPRESSION '?' EXPRESSION ':' CONDITIONAL_EXPRESSION		{ $$ = new ConditionalExpression($1,$3); }//DONE COMPLETELY
-
-
-
-POINTER	: '*'						{ $$ = new Pointer(NULL,NULL); }
-	| '*' TYPE_QUALIFIER_LIST			{ $$ = new Pointer(NULL,$2); }
-	| '*' POINTER					{ $$ = new Pointer($2,NULL); }
-	| '*' TYPE_QUALIFIER_LIST POINTER		{ $$ = new Pointer($3,$2); }
-
-
-TYPE_QUALIFIER_LIST: TYPE_QUALIFIER			{ $$ = $1;}
-		   | TYPE_QUALIFIER_LIST TYPE_QUALIFIER	{ $$ = $2;}
 
 
 
@@ -434,30 +432,18 @@ CAST_EXPRESSION: UNARY_EXPRESSION								{ $$ = new CastExpression($1,NULL); }//
 
 
 
-	
-
-
-
-UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,NULL) ; } //DONE
-		| INC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
-		| DEC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
-		| UNARY_OPERATOR CAST_EXPRESSION						{ $$ = new UnaryExpression(NULL,$1,$2) ; } //DONE COMPLETELY
-		//| SIZEOF UNARY_EXPRESSION
-		//| SIZEOF '(' TYPE_NAME ')'							//IMPLEMENT THIS
 
 
 
 
-
-
-POSTFIX_EXPRESSION: PRIMARY_EXPRESSION		{ $$ = new PostFixExpression(NULL,$1,NULL,NULL,NULL,NULL); }
-		| POSTFIX_EXPRESSION '[' EXPRESSION ']' {$$ = new PostFixExpression($1,NULL,$3,NULL,NULL,NULL);}
-		| POSTFIX_EXPRESSION '(' ')'		{ $$ = new PostFixExpression($1,NULL,NULL,NULL,NULL,NULL); }
-		| POSTFIX_EXPRESSION '(' ARGUMENT_EXPRESSION_LIST ')' {$$=new PostFixExpression($1,NULL,NULL,$3,NULL,NULL);}
-		| POSTFIX_EXPRESSION '.' IDENTIFIER		{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$3,$2); }
-		| POSTFIX_EXPRESSION PTR_OP IDENTIFIER	{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$3,$2); }
-		| POSTFIX_EXPRESSION INC_OP			{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$2,NULL); }
-		| POSTFIX_EXPRESSION DEC_OP			{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$2,NULL); }
+POSTFIX_EXPRESSION: PRIMARY_EXPRESSION				      				{ $$ = new PostFixExpression(NULL,$1,NULL,NULL,NULL,NULL); }
+		  | POSTFIX_EXPRESSION '[' EXPRESSION ']'		     			{ $$ = new PostFixExpression($1,NULL,$3,NULL,NULL,NULL); }
+		  | POSTFIX_EXPRESSION '(' ')'			      				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,NULL,NULL); }
+		  | POSTFIX_EXPRESSION '(' ARGUMENT_EXPRESSION_LIST ')' 			{ $$ = new PostFixExpression($1,NULL,NULL,$3,NULL,NULL);}
+		  | POSTFIX_EXPRESSION '.' IDENTIFIER		     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$3,$2); }
+		  | POSTFIX_EXPRESSION PTR_OP IDENTIFIER		      			{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$3,$2); }
+		  | POSTFIX_EXPRESSION INC_OP			     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$2,NULL); }
+		  | POSTFIX_EXPRESSION DEC_OP			     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$2,NULL); }
 
 
 
@@ -574,6 +560,17 @@ IDENTIFIER_LIST: IDENTIFIER				{ $$ = new IdentifierList($1,NULL); }
 	       | IDENTIFIER_LIST ',' IDENTIFIER		{ $$ = new IdentifierList($3,$1); }
 
 
+
+
+
+POINTER	: '*'						{ $$ = new Pointer(NULL,NULL); }
+	| '*' TYPE_QUALIFIER_LIST			{ $$ = new Pointer(NULL,$2); }
+	| '*' POINTER					{ $$ = new Pointer($2,NULL); }
+	| '*' TYPE_QUALIFIER_LIST POINTER		{ $$ = new Pointer($3,$2); }
+
+
+TYPE_QUALIFIER_LIST: TYPE_QUALIFIER			{ $$ = $1;}
+		   | TYPE_QUALIFIER_LIST TYPE_QUALIFIER	{ $$ = $2;}
 
 
 

@@ -10,7 +10,7 @@
 
 #include "class_forward_declarations.hpp"
 
-
+static Context contxt;
 
 class SpecifierQualifierList : public Node {};
 class Init_Declaration_List : public Node {};
@@ -1060,14 +1060,11 @@ class Declaration : public Node {
 			}
 			
 
-			if(!contxt.function) {
+			/*if(!contxt.function) {
 				contxt.variable.scope = "global";
 				contxt.variable.offset = 0;			//because it is not on the stack
 			}
-			else{
-				contxt.variable.scope = contxt.funct_id;
-			}
-				contxt.Variables.push_back(contxt.variable);  // all variables
+								  		// all variables*/
 
 
 
@@ -1076,7 +1073,7 @@ class Declaration : public Node {
 
 
 			if(!contxt.function) {
-
+				 	 // save the global on the vector for future reference
 				file << std::endl << "\t.data";
 				file << std::endl << "\t.globl\t" << contxt.variable.id;
 				if( log2(contxt.variable.word_size) ){
@@ -1101,7 +1098,7 @@ class Declaration : public Node {
 				else if(contxt.variable.word_size==1){
 					file << std::endl << "\t.byte\t" << contxt.variable.value;
 				}
-
+				
 			}
 
 
@@ -1109,20 +1106,20 @@ class Declaration : public Node {
 					
 						if(contxt.variable.word_size <= 4) {
 							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
-							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset << "($fp)";
+							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset << "($sp)";
 							
 						}
 						else{									//this is for doubles, it not working yet
 							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
-							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset << "($fp)" << std::endl;
+							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset << "($sp)" << std::endl;
 						}
 			}
 				
 			
 
-			contxt.variable.word_size = 0;
+			/*contxt.variable.word_size = 0;
 			contxt.variable.id = "";
-			contxt.variable.value = 0;
+			contxt.variable.value = 0;*/
 
 		}
 	
@@ -1436,8 +1433,9 @@ class FunctionDefinition : public Node {
 			
 
 			if( CompoundStatementPtr != NULL ) {
-			
+				contxt.reading = false;
 				CompoundStatementPtr->render_asm(file,contxt);
+				contxt.reading = false;
 			}
 
 			file << std::endl << "\tmove\t$sp,$fp";
@@ -1528,7 +1526,7 @@ class TranslationUnit : public Node{
 
 		virtual void render_asm(std::string file_name) const {
 
-			Context contxt;
+			
 			std::ofstream file;
 			file.open(file_name.c_str());
 
@@ -1595,44 +1593,46 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				DirectDeclaratorPtr->render_asm(file,contxt);
 			}
 
-			if(!contxt.function) {						//if we are not in a function then this must be a global declaration
-
-				if(IDENTIFIER != NULL){
-					contxt.variable.id = *IDENTIFIER;
-					
-					if( !contxt.initialized ) {			//if it is not initialized then set it to 0
-	
-						contxt.variable.value = 0;
-					}
-				}
-				contxt.funct_id = "global";				//set the variable's scope as global to be saved in the bindings struct
-	
+			if(!contxt.function && IDENTIFIER != NULL) {			//if we are not in a function then this must be a global declaration
 				
-
+				contxt.variable.id = *IDENTIFIER;
+				
+				if( !contxt.initialized ) {				//if it is not initialized then set it to 0
+					contxt.variable.value = 0;
+				}
+				contxt.variable.scope = "global";			//set the variable's scope as global to be saved in the bindings struct
+				contxt.Variables.push_back(contxt.variable);
+				
 			}
+
 			
-			else if(contxt.function && IDENTIFIER != NULL){		//if we are in a function and the identifier is not null and protect flag is off
+			
+			else if(contxt.function && IDENTIFIER != NULL){			//if we are in a function and the identifier is not null and protect flag is off
 
 					if( !contxt.protect) {				//then this is a function name we are reading
 					
-						contxt.funct_id = *IDENTIFIER;
+						contxt.funct_id = *IDENTIFIER;		//obtain the scope we are currently in
+						contxt.variable.scope = *IDENTIFIER;	//assign this information to the local variable
 					}
 
-
-					contxt.variable.id = *IDENTIFIER;			//if the portect flag is on then we are inside the function , not reading the function name
-
+					else{
+						contxt.variable.scope = contxt.funct_id; //assign the variable the scope it is in
+						contxt.variable.id = *IDENTIFIER;	//if the portect flag is on then we are already inside the function , not reading the function name
+					}
+	
 					if( !contxt.initialized ) {			//if the local declaration is not initialized, set it to 0
 	
 						contxt.variable.value = 0;
 					}
 				
-			
+					contxt.Variables.push_back(contxt.variable);
+
 					if( ParameterTypeLiSt != NULL) {
 						ParameterTypeLiSt->render_asm(file,contxt);
 					
 					}
 
-				
+				std::cout << contxt.variable.id;
 				
 					
 					/*else if( IDentifierList != NULL) {

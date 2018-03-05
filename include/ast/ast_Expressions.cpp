@@ -53,7 +53,7 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 			if(OPERATOR==NULL && contxt.reading && MultiplicativeExpressioN != NULL){
 				MultiplicativeExpressioN->render_asm(file,contxt);
 			}
-			else if(AdditiveExpressionPtr != NULL && MultiplicativeExpressioN != NULL && OPERATOR != NULL) { 
+			else if(AdditiveExpressionPtr != NULL && contxt.reading  && MultiplicativeExpressioN != NULL && OPERATOR != NULL) { 
 				AdditiveExpressionPtr->render_asm(file,contxt);
 				
 				MultiplicativeExpressioN->render_asm(file,contxt);
@@ -215,39 +215,65 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 				AssignmentExpressionPtr->render_asm(file,contxt);
 			}
 
-			
-
-			if( IDENTIFIER != NULL ) {				//this identifier is involved in expressions
-				
-				int offset=0;           //this will contain the offset of var *IDENTIFIER
-							//process offset here
+			if( IDENTIFIER != NULL && !contxt.reading ) {			//this identifier is involved in expressions		
+				bool found = false;			//this will determine whether the variable wanted is a global or a local
+				int i(0);				//must initialize the index i outside so it is accessible throughout here
+				for(i; i<contxt.Variables.size(); i++) {
+					
+					if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
+						found = true;		//means that we found a local variable in the function of that name					
+						contxt.value_in_R2=0;
+						contxt.lhs_of_assignment=0;						
+						break;
+					}
+					if(!found) {
+						for(i; i<contxt.Variables.size(); i++) {
+							if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
+								contxt.value_in_R2=0;
+								contxt.lhs_of_assignment=0;
+								break;
+							}
+						
+						}
+					} 
+				}   							
 				if(contxt.lhs_of_assignment){
-
-					file << std::endl << "\tsw\t $2, " << offset << "($sp)";
-					contxt.value_in_R2=0;
-					contxt.lhs_of_assignment=0;
+					if(found) {
+						file << std::endl << "\tsw $2," << contxt.Variables[i].offset << "($sp)";
+					}
+					else if(!found) {
+						file << std::endl << "\tla $2," << contxt.Variables[i].id; //this is how globals are accessed
+					}					
 				}
 				if(contxt.rhs_of_expression){
-
-					file <<  std::endl << "\tlw\t";
 					if(contxt.value_in_R2){
-						file << "$3, " << offset << "($sp)";
+						if(found) {
+							file << std::endl << "\tlw $3," << contxt.Variables[i].offset << "($sp)";
+						}
+						else if(!found) {
+							file << std::endl << "\tla $3," << contxt.Variables[i].id;
+						}
 					}
 					else{
 						contxt.value_in_R2=1; 
-						file << "$2, " << offset << "($sp)"; 
+						if(found) {
+							file << std::endl << "\tlw $2," << contxt.Variables[i].offset << "($sp)";
+						}
+						else if(!found) {
+							file << std::endl << "\tla $2," << contxt.Variables[i].id;
+						}
 					}
 				}
 			}
 
-			if( CONSTANT != NULL ) {				//this constant is involved in expressions
+			if( CONSTANT != NULL && !contxt.reading ) {				//this constant is involved in expressions
 				std::string tmp ;
 				if(contxt.negative) {				
 					tmp = "-" + *CONSTANT;
 					contxt.negative = false;
 				}
 				else {
-					tmp = "-" + *CONSTANT;
+					tmp = *CONSTANT;
 				}				
 				char tmp2;
 				if(tmp.find_first_of("'")==0) {
@@ -260,7 +286,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 
 				//file << std::endl << rhs_of_expression;	//we might need to reverse the order of the if statements
 				if(contxt.rhs_of_expression){
-					file <<  std::endl << "\tli\t";
+					file <<  std::endl << "\tli ";
 					if(contxt.value_in_R2)
 						file << "$3, " << *CONSTANT;
 					else {
@@ -268,7 +294,6 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 						file << "$2, " << *CONSTANT; 
 					}
 				}
-
 			}
 		}				
 	
@@ -291,9 +316,9 @@ inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contx
 
 inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contxt)  {
 
-			file << "\n" << "reading : "  << contxt.reading << "\n";
+			//file << "\n" << "reading : "  << contxt.reading << "\n";
 			if(AssignmentExpressionPtr != NULL) {
-				file << "what is going on here?\n";
+				//file << "what is going on here?\n";
 				contxt.rhs_of_expression=1;
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression=0;
@@ -304,7 +329,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 
 			}				
 			else if(ConditionalExpressionPtr != NULL) {
-				file << "what is going on here?\n";
+				//file << "what is going on here?\n";
 				ConditionalExpressionPtr->render_asm(file,contxt);		//THIS IS FOR IF STATEMENTS/ LOGICAL / ARITHMETIC OPERATIONS / ASSIGNEMENTS
 
 			}

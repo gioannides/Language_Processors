@@ -2,40 +2,8 @@
 #define CLASS_FORWARD
 
 
-class Node;
 
-
-
-static int count_globals = 0;				//Will count the number of global variables
-static int counter_py(0);				//Will be used for indentation
-static bool function = false;				//Are we inside a function?
-static bool ParametrizedFunction = false;
-static bool main_ = false;				//Will be used for emitting the main python code
-static std::vector<std::string> GlobalVars; 		//Will be used to store the globals variables
-static bool is_while = false;				//Identifies loops for indentation manners
-static int parentheses = 0;
-static bool elif = false;
-static bool ParameterVariable = false;
-
-
-
-class Node{
-
-	public:
-
-
-    		virtual  void print_C(std::ofstream& file) const  {
-		}
-
-		 virtual ~Node()  {}
-};
-
-struct Context;
-
-struct Context{
-
-
-	struct bindings {
+struct bindings {
 		int word_size = 0;
 		std::string id = "";		//name of variable
 		double value = 0;
@@ -43,7 +11,7 @@ struct Context{
 		int offset = 0;			//the stack offset saved on the stack to load it from
 	};
 
-
+struct Context{
 	bool rhs_of_expression=0;
 	bool lhs_of_assignment=0;
 	bool value_in_R2=0;
@@ -62,6 +30,53 @@ struct Context{
 	int totalStackArea = 0; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable 
 };
+
+class Node;
+
+
+
+static int count_globals = 0;				//Will count the number of global variables
+static int counter_py(0);				//Will be used for indentation
+static bool function = false;				//Are we inside a function?
+static bool ParametrizedFunction = false;
+static bool main_ = false;				//Will be used for emitting the main python code
+static std::vector<std::string> GlobalVars; 		//Will be used to store the globals variables
+static bool is_while = false;				//Identifies loops for indentation manners
+static int parentheses = 0;
+static bool elif = false;
+static bool ParameterVariable = false;
+
+
+
+
+
+
+//// ************************************* 			ANSI C-89
+
+
+
+
+
+
+
+
+
+
+class Node{
+
+	public:
+
+		
+    		virtual  void print_C(std::ofstream& file) const  {
+		}
+
+		 virtual ~Node()  {}
+};
+
+
+
+
+
 
 
 class ExternalDeclaration;
