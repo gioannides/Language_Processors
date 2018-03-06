@@ -1157,21 +1157,8 @@ class JumpStatement : public Node {
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {
-
-			
-
 		}
-							
-
 };
-
-
-
-
-
-
-
-
 
 class IterationStatement : public Node {
 
@@ -1192,16 +1179,8 @@ class IterationStatement : public Node {
 		void render_asm(std::ofstream& file, Context& contxt){
 			file << "\nIterationStatement ~line1420\n";
 		}
-
 };
 	
-
-
-
-	
-
-
-
 class SelectionStatement : public Node {
 
 	public:
@@ -1220,8 +1199,6 @@ class SelectionStatement : public Node {
 		void print_py(std::ofstream& file,bool elseif=false) ;
 
 		std::string* get_info() ;
-		
-
 };
 
 
@@ -1238,11 +1215,7 @@ class ExpressionStatement : public Node {
 		void print_py(std::ofstream& file) ;
 
 		void render_asm(std::ofstream& file,Context& contxt) ;
-
-
 };
-
-
 
 class LabeledStatement : public Node {
 	
@@ -1261,8 +1234,6 @@ class LabeledStatement : public Node {
 
 		void print_py(std::ofstream& file) {}
 };
-
-
 
 class Statement : public Node {
 	
@@ -1292,13 +1263,6 @@ class Statement : public Node {
 
 };
 
-
-
-
-
-
-
-
 class StatementList : public Node {
 
 	private:
@@ -1319,17 +1283,7 @@ class StatementList : public Node {
 			}
 			StatementPtr->render_asm(file,contxt);
 		}
-				
-
 };
-
-
-
-
-
-
-
-
 
 class CompoundStatement : public Node {
 	
@@ -1351,33 +1305,20 @@ class CompoundStatement : public Node {
 
 				DeclarationListPtr->render_asm(file,contxt);
 			}
-
 			if(StatementListPtr != NULL && DeclarationListPtr == NULL ) {
 				if(!contxt.reading){
 					StatementListPtr->render_asm(file,contxt);
 				}
 			}
-
 			if(StatementListPtr != NULL && DeclarationListPtr != NULL ) {
 				
 				DeclarationListPtr->render_asm(file,contxt);
 				if(!contxt.reading){
 					StatementListPtr->render_asm(file,contxt);
 				}
-			}
-			
+			}	
 		}
-
 };
-
-
-
-
-
-
-
-
-
 
 class FunctionDefinition : public Node {
 
@@ -1434,9 +1375,7 @@ class FunctionDefinition : public Node {
 			
 			file << "\taddiu\t$sp,$sp,-"<< contxt.totalStackArea+4;
 			file << std::endl << "\tsw\t$fp," << contxt.totalStackArea << "($sp)";
-			file << std::endl << "\tmove\t$fp,$sp";
-
-			
+			file << std::endl << "\tmove\t$fp,$sp\n";
 
 			if( CompoundStatementPtr != NULL ) {
 				contxt.reading = false;
@@ -1452,13 +1391,8 @@ class FunctionDefinition : public Node {
 			file << "\t.set\t macro" << std::endl;
 			file << "\t.set\t reorder" << std::endl;
 			file << "\t.end\t " << contxt.funct_id << std::endl;
-			file << "\t.size\t " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;
-			
-				
-		}
-
-
-			
+			file << "\t.size\t " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;		
+		}	
 };
 
 
@@ -1684,13 +1618,11 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 						//file << std::endl << "\tla\t$4, " << contxt.Variables[good_index].id; //this is how globals are accessed
 						//file << std::endl << "\tsw\t$2, 0($4)\n"; 
 						file << std::endl << "\tsw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
-						//file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].id; 
 					}			
 					else{
 						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 					}
 					//contxt.value_in_R2=false;
-					//std::cout<< "lhs_of_assignment should be true: " << contxt.lhs_of_assignment << "\n";
 					//contxt.lhs_of_assignment=false;		
 				}
 					
@@ -1700,11 +1632,11 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					
 					}
 
-				//std::cout << contxt.variable.id << " " << contxt.funct_id << " " << contxt.variable.scope << std::endl;
+				
 				
 					
 					/*else if( IDentifierList != NULL) {
-						IDentifierList->print_py(file);
+						IDentifierList->render_asm(file);
 					}*/
 
 			

@@ -59,7 +59,7 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 				AdditiveExpressionPtr->render_asm(file,contxt);				
 				MultiplicativeExpressioN->render_asm(file,contxt);
 				if (contxt.function){
-					file << std::endl << "\tadd\t $2, $2, $3\n";
+					file << std::endl << "\tadd\t$2, $2, $3";
 				}
 				
 			}
@@ -79,6 +79,7 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 				ShiftExpressionPtr->render_asm(file,contxt);
 				
 				AdditiVeExpression->render_asm(file,contxt);
+
 				
 			}
 
@@ -125,7 +126,9 @@ inline void AndExpression::render_asm(std::ofstream& file,Context& contxt) {
 				AndExpressionPtr->render_asm(file,contxt);
 				
 				EqualitYExpression->render_asm(file,contxt);
-				
+				if (contxt.function){
+					file << std::endl << "\tand\t$2, $2, $3";
+				}
 			}
 
 		}
@@ -141,7 +144,9 @@ inline void ExclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 				ExclusiveOrExpressionPtr->render_asm(file,contxt);
 				
 				ANDexpression->render_asm(file,contxt);
-				
+				if (contxt.function && !contxt.reading){
+					file << std::endl << "\txor\t$2, $2, $3";
+				}
 			}
 
 		}
