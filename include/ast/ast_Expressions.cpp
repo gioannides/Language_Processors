@@ -20,10 +20,43 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 				CaStExpression->render_asm(file,contxt);
 			}
 			else if(MultiplicativeExpressionPtr != NULL && !contxt.reading && CaStExpression != NULL && OPERATOR != NULL){ 
-				MultiplicativeExpressionPtr->render_asm(file,contxt);
-				
+				MultiplicativeExpressionPtr->render_asm(file,contxt);				
 				CaStExpression->render_asm(file,contxt);
-				
+				if (contxt.function){
+					if( *OPERATOR == "*" ){
+						if(contxt.is_unsigned){
+							file << std::endl << "\tmultu\t$2, $3";
+						}
+						else{
+							file << std::endl << "\tmult\t$2, $3";
+						}
+						file << std::endl << "\tmfhi\t$3";
+						file << std::endl << "\tmflo\t$2";
+						contxt.is_unsigned = false;
+					}
+					else if(  *OPERATOR == "/" ){
+						if(contxt.is_unsigned){
+							file << std::endl << "\tdivu\t$2, $3";
+						}
+						else{
+							file << std::endl << "\tdiv\t$2, $3";
+						}
+						file << std::endl << "\tdiv\t$2, $3";
+						file << std::endl << "\tmflo\t$2";
+						contxt.is_unsigned = false;
+					}
+					else if(  *OPERATOR == "%" ){
+						if(contxt.is_unsigned) {
+							file << std::endl << "\tdivu\t$2, $3";
+						}
+						else{
+							file << std::endl << "\tdiv\t$2, $3";
+						}
+						file << std::endl << "\tdiv\t$2, $3";
+						file << std::endl << "\tmfhi\t$2";
+						contxt.is_unsigned = false;
+					}
+				}
 			}
 
 		}
@@ -35,21 +68,6 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 
-			/*if(!contxt.reading){
-				if( AdditiveExpressionPtr != NULL){
-					contxt.op_name="add";
-					AdditiveExpressionPtr->render_asm(file,contxt);
-				}
-
-				if( MultiplicativeExpressioN != NULL ) {
-					MultiplicativeExpressioN->render_asm(file,contxt);
-				}
-
-				if(AdditiveExpressionPtr!=NULL){
-					file << std::endl << "\tadd\t $2, $2, $3\n";
-				}
-			}*/
-
 			if(OPERATOR==NULL && !contxt.reading && MultiplicativeExpressioN != NULL){
 				MultiplicativeExpressioN->render_asm(file,contxt);
 			}
@@ -58,7 +76,26 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 				
 				AdditiveExpressionPtr->render_asm(file,contxt);				
 				MultiplicativeExpressioN->render_asm(file,contxt);
-				file << std::endl << "\tadd\t $2, $2, $3\n";
+				if (contxt.function){
+					if( *OPERATOR == "+" ){
+						if(contxt.is_unsigned){
+							file << std::endl << "\taddu\t$2, $2, $3";
+						}
+						else{
+							file << std::endl << "\tadd\t$2, $2, $3";
+						}
+						contxt.is_unsigned = false;
+					}
+					else if(  *OPERATOR == "-" ){
+						if(contxt.is_unsigned) {
+							file << std::endl << "\tsubu\t$2, $2, $3";
+						}
+						else{
+							file << std::endl << "\tsub\t$2, $2, $3";
+						}
+						contxt.is_unsigned = false;
+					}
+				}
 				
 			}
 
@@ -70,29 +107,78 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 
 inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 
-			if(OPERATOR==NULL && AdditiVeExpression != NULL){
+			if(OPERATOR==NULL && !contxt.reading && AdditiVeExpression != NULL){
 				AdditiVeExpression->render_asm(file,contxt);
 			}
-			else if(ShiftExpressionPtr != NULL && AdditiVeExpression != NULL && OPERATOR != NULL){ 
-				ShiftExpressionPtr->render_asm(file,contxt);
-				
+			else if(ShiftExpressionPtr != NULL && !contxt.reading && AdditiVeExpression != NULL && OPERATOR != NULL){ 
+				ShiftExpressionPtr->render_asm(file,contxt);				
 				AdditiVeExpression->render_asm(file,contxt);
-				
-			}
+				if (contxt.function){
+					if( *OPERATOR == "<<" ){
+						file << std::endl << "\tsllv\t$2, $2, $3";
+					}
+					else if(  *OPERATOR == ">>" ){
+						if(contxt.is_unsigned){
+							file << std::endl << "\tsrlv\t$2, $2, $3";
+						}
+						else{
+							file << std::endl << "\tsrav\t$2, $2, $3";
+						}
+						contxt.is_unsigned = false;
+					}
 
-		}
+				
+				}
+
+			}
+	}
 
 
 
 inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt) {
 
-			if(OPERATOR==NULL && SHiftExpression != NULL){
+			if(OPERATOR==NULL && !contxt.reading && SHiftExpression != NULL){
 				SHiftExpression->render_asm(file,contxt);
 			}
-			else if(RelationalExpressionPtr != NULL && SHiftExpression != NULL && OPERATOR != NULL){ 
+			else if(RelationalExpressionPtr != NULL && !contxt.reading && SHiftExpression != NULL && OPERATOR != NULL){ 
 				RelationalExpressionPtr->render_asm(file,contxt);
 				
 				SHiftExpression->render_asm(file,contxt);
+				if (contxt.function){
+					if( *OPERATOR == "<" ){
+						if(contxt.is_unsigned){
+							file << std::endl << "\tsltu\t$2, $2, $3";
+						}
+						else{
+							file << std::endl << "\tslt\t$2, $2, $3";
+						}
+					}
+					else if(  *OPERATOR == ">" ){
+						if(contxt.is_unsigned){
+							file << std::endl << "\tsgtu\t$2, $2, $3";
+						}
+						else{
+							file << std::endl << "\tsgt\t$2, $2, $3";
+						}
+					}
+					else if( *OPERATOR == "<=" ){
+						if(contxt.is_unsigned) {
+							file << std::endl << "\tsleu\t$2, $2, $3";
+						}
+						else{
+							file << std::endl << "\tsle\t$2, $2, $3";
+						}
+					}
+					else if(  *OPERATOR == ">=" ){
+						if(contxt.is_unsigned){
+							file << std::endl << "\tsgeu\t$2, $2, $3";
+						}
+						else{
+							file << std::endl << "\tsge\t$2, $2, $3";
+						}
+					}
+					contxt.is_unsigned = false;
+				}
 				
 			}
 
@@ -102,13 +188,24 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 
 inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) {
 
-			if(OPERATOR==NULL && RElationalExpression != NULL){
+			if(OPERATOR==NULL && !contxt.reading && RElationalExpression != NULL){
 				RElationalExpression->render_asm(file,contxt);
 			}
-			else if(EqualityExpressionPtr != NULL && RElationalExpression != NULL && OPERATOR != NULL){ 
+			else if(EqualityExpressionPtr != NULL && !contxt.reading && RElationalExpression != NULL && OPERATOR != NULL){ 
 				EqualityExpressionPtr->render_asm(file,contxt);
 				
 				RElationalExpression->render_asm(file,contxt);
+				if (contxt.function){
+					if( *OPERATOR == "==" ){
+						file << std::endl << "\txor\t$2, $2, $3";						
+						file << std::endl << "\tsltu\t$2, $2,$3";
+					}
+					else if(  *OPERATOR == "!=" ){
+						file << std::endl << "\txor\t$2, $2, $3";						
+						file << std::endl << "\tsltu\t$2, $0, $2";
+					}
+					contxt.is_unsigned = false;
+				}
 				
 			}
 
@@ -116,14 +213,17 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 
 inline void AndExpression::render_asm(std::ofstream& file,Context& contxt) {
 
-			if(BIT_AND==NULL && EqualitYExpression != NULL){
+			if(BIT_AND==NULL && !contxt.reading && EqualitYExpression != NULL){
 				EqualitYExpression->render_asm(file,contxt);
 			}
-			else if(AndExpressionPtr != NULL && EqualitYExpression != NULL && BIT_AND != NULL){ 
+			else if(AndExpressionPtr != NULL && !contxt.reading && EqualitYExpression != NULL && BIT_AND != NULL){ 
 				AndExpressionPtr->render_asm(file,contxt);
 				
 				EqualitYExpression->render_asm(file,contxt);
-				
+				if (contxt.function){
+					file << std::endl << "\tand\t$2, $2, $3";
+					contxt.is_unsigned = false;
+				}
 			}
 
 		}
@@ -132,14 +232,17 @@ inline void AndExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 inline void ExclusiveOrExpression::render_asm(std::ofstream& file,Context& contxt) {
 
-			if(EXCL_OR==NULL && ANDexpression != NULL){
+			if(EXCL_OR==NULL && !contxt.reading && ANDexpression != NULL){
 				ANDexpression->render_asm(file,contxt);
 			}
-			else if(ExclusiveOrExpressionPtr != NULL && ANDexpression != NULL && EXCL_OR != NULL) { 
+			else if(ExclusiveOrExpressionPtr != NULL && !contxt.reading && ANDexpression != NULL && EXCL_OR != NULL) { 
 				ExclusiveOrExpressionPtr->render_asm(file,contxt);
 				
 				ANDexpression->render_asm(file,contxt);
-				
+				if (contxt.function && !contxt.reading){
+					file << std::endl << "\txor\t$2, $2, $3";
+					contxt.is_unsigned = false;
+				}
 			}
 
 		}
@@ -147,13 +250,17 @@ inline void ExclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 
 inline void InclusiveOrExpression::render_asm(std::ofstream& file,Context& contxt) {
 
-			if(INC_OR==NULL && EXclusiveOrExpression != NULL){
+			if(INC_OR==NULL && !contxt.reading && EXclusiveOrExpression != NULL){
 				EXclusiveOrExpression->render_asm(file,contxt);
 			}
-			else if(InclusiveOrExpressionPtr != NULL && EXclusiveOrExpression != NULL && INC_OR != NULL) { 
+			else if(InclusiveOrExpressionPtr != NULL && !contxt.reading && EXclusiveOrExpression != NULL && INC_OR != NULL) { 
 				InclusiveOrExpressionPtr->render_asm(file,contxt);
 				
 				EXclusiveOrExpression->render_asm(file,contxt);
+				if (contxt.function){
+					file << std::endl << "\tor\t$2, $2, $3";
+					contxt.is_unsigned = false;
+				}
 				
 			}
 
@@ -161,13 +268,16 @@ inline void InclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 
 inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt) {
 
-			if(AND_OP==NULL && INclusiveOrExpression != NULL){
+			if(AND_OP==NULL && !contxt.reading && INclusiveOrExpression != NULL){
 				INclusiveOrExpression->render_asm(file,contxt);
 			}
-			else if(LogicalAndExpressionPtr != NULL && INclusiveOrExpression != NULL && AND_OP != NULL) { 
+			else if(LogicalAndExpressionPtr != NULL && !contxt.reading && INclusiveOrExpression != NULL && AND_OP != NULL) { 
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 				
 				INclusiveOrExpression->render_asm(file,contxt);
+				if (contxt.function){
+					// NOT IMPLEMENTED
+				}
 				
 			}
 
@@ -177,13 +287,16 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 
 inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt) {
 
-			if(OR_OP==NULL && LogicalAndExpressionPtr != NULL){
+			if(OR_OP==NULL && !contxt.reading && LogicalAndExpressionPtr != NULL){
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 			}
-			else if( LogicalAndExpressionPtr != NULL && LogicalAndExpressionPtr != NULL && OR_OP != NULL){ 
+			else if( LogicalAndExpressionPtr != NULL && !contxt.reading && LogicalAndExpressionPtr != NULL && OR_OP != NULL){ 
 				LogicalOrExpressionPtr->render_asm(file,contxt);
 				
 				LogicalAndExpressionPtr->render_asm(file,contxt);
+				if (contxt.function){
+					// NOT IMPLEMENTED
+				}
 				
 			}
 		}
@@ -217,67 +330,110 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 				AssignmentExpressionPtr->render_asm(file,contxt);
 			}
 
-			else if( IDENTIFIER != NULL && !contxt.reading ) {			//this identifier is involved in expressions
-				std:: cout << "i execute" << std::endl;		
-				bool found = false;			//this will determine whether the variable wanted is a global or a local
+			else if( IDENTIFIER != NULL && !contxt.reading && contxt.function) {			//this identifier is involved in expressions
+			
+				int found_0nothing_1local_2globl = 0;	
+				int good_index=0;			//this will determine whether the variable wanted is a global or a local
 				int i(0);				//must initialize the index i outside so it is accessible throughout here
-				for(i; i<contxt.Variables.size(); i++) {
+				
+				for(i=0; i<contxt.Variables.size(); i++) {
 					
 					if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
-						found = true;		//means that we found a local variable in the function of that name					
-						contxt.value_in_R2=0;
-						contxt.lhs_of_assignment=false;						
-						break;
+						found_0nothing_1local_2globl = 1;	//means that we found a local variable in the function of that name					
+						good_index=i;
+						i = contxt.Variables.size();
+						if(contxt.Variables[good_index].DataType == "unsigned") {
+							contxt.is_unsigned = true;
+						}						
 					}
-					if(!found) {
-						for(i; i<contxt.Variables.size(); i++) {
+				}
+				if(!found_0nothing_1local_2globl) {
+						for(i=0; i<contxt.Variables.size(); i++) {
 							if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
-								contxt.value_in_R2=0;
-								contxt.lhs_of_assignment=false;
-								break;
+								found_0nothing_1local_2globl=2;
+								good_index = i;
+								i = contxt.Variables.size();
+								if(contxt.Variables[good_index].DataType == "unsigned") {
+									contxt.is_unsigned = true;
+								}
 							}
 						
 						}
-					} 
-				}   							
-				/*if(contxt.lhs_of_assignment){
-					if(found) {
-						file << std::endl << "\tsw $2," << contxt.Variables[i].offset << "($sp)";
-					}
-					else if(!found) {
-						file << std::endl << "\tla $2," << contxt.Variables[i].id; //this is how globals are accessed
-					}					
-				}*/
-				//if(contxt.rhs_of_expression){
-					//if(contxt.value_in_R2){
-						if(found) {
-							useReg(file,"start",2);
-							file << std::endl << "\tlw\t $2," << contxt.Variables[i].offset << "($sp)";
-							useReg(file,"done",2);
-						}
-						else if(!found) {
-							useReg(file,"start",3);
-							file << std::endl << "\tla\t $3," << contxt.Variables[i].id;
-							useReg(file,"done",3);
+				}   			
+					
+				if(contxt.lhs_of_assignment){
+					if(found_0nothing_1local_2globl==1) {
+						contxt.value_in_R2=false;
+						file << std::endl << "\tsw\t$2," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+						if(contxt.Variables[good_index].DataType == "unsigned") {
+							contxt.is_unsigned = true;
 						}
 					}
-					/*else{
-						//contxt.value_in_R2=true; 
-						if(found) {
-							file << std::endl << "\tlw $2," << contxt.Variables[i].offset << "($sp)";
+					else if(found_0nothing_1local_2globl==2) {
+						contxt.value_in_R2=false;
+						
+						file << std::endl << "\tsw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
+						if(contxt.Variables[good_index].DataType == "unsigned") {
+							contxt.is_unsigned = true;
 						}
-						else if(!found) {
-							file << std::endl << "\tla $2," << contxt.Variables[i].id;
+					}			
+					else{
+						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
+					}
+						
+				}
+				else if(contxt.rhs_of_expression){
+					if(contxt.value_in_R2){
+						if(found_0nothing_1local_2globl==1) {
+							file << std::endl << "\tlw\t$3, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+							
+							if(contxt.Variables[good_index].DataType == "unsigned") {
+								contxt.is_unsigned = true;
+								
+							}
 						}
-					}*/
-				//}
+						else if(found_0nothing_1local_2globl==2) {
+							
+							file << std::endl << "\tlw\t$3, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
+							if(contxt.Variables[good_index].DataType == "unsigned") {
+								contxt.is_unsigned = true;
+	
+							}
 			
+						}
+					}
+					else{ 
+						if(found_0nothing_1local_2globl==1) {
+							
+							contxt.value_in_R2=true; 
+							file << std::endl << "\tlw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+							if(contxt.Variables[good_index].DataType == "unsigned") {
+								contxt.is_unsigned = true;
+
+							}
+						}
+						else if(found_0nothing_1local_2globl==2) {
+							contxt.value_in_R2=true; 
+							
+							file << std::endl << "\tlw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
+							if(contxt.Variables[good_index].DataType == "unsigned") {
+								contxt.is_unsigned = true;
+
+							}
+							
+						}
+						else{
+							file << std::endl << "VARIABLE : " << *IDENTIFIER << " NOT DECLARED!!!\n";
+						}
+					}
+				}
+			}
 
 			else if( CONSTANT != NULL && !contxt.reading ) {				//this constant is involved in expressions
 				std::string tmp ;
 				if(contxt.negative) {				
 					tmp = "-" + *CONSTANT;
-					contxt.negative = false;
+					contxt.negative = false;					
 				}
 				else {
 					tmp = *CONSTANT;
@@ -291,11 +447,15 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 					contxt.variable.value = std::stol(tmp);
 				}
 
-				//file << std::endl << rhs_of_expression;	//we might need to reverse the order of the if statements
-				if(contxt.rhs_of_expression && !contxt.reading){
-					useReg(file,"start");
-					file <<  std::endl << "\tli\t "<< "$2," << *CONSTANT;
-					useReg(file,"done");
+				
+				if(contxt.rhs_of_expression && !contxt.reading && contxt.function){
+					file <<  std::endl << "\tli\t";
+					if(contxt.value_in_R2)
+						file << "$3, " << *CONSTANT;
+					else {
+						contxt.value_in_R2=true;
+						file << "$2, " << *CONSTANT; 
+					}
 				}
 			}
 		}				
@@ -319,21 +479,23 @@ inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contx
 
 inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contxt)  {
 
-			//file << "\n" << "reading : "  << contxt.reading << "\n";
+			
 			if(AssignmentExpressionPtr != NULL) {
-				//file << "what is going on here?\n";
+				
 				contxt.rhs_of_expression = true;
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 			}
 			if(UnaryExpressionPtr != NULL) {
+				std::cout << "\nlhs_of_assignment should be 0, it is:" << contxt.lhs_of_assignment <<"\n"  ;
 				contxt.lhs_of_assignment = true;
 				UnaryExpressionPtr->render_asm(file,contxt);			//TODO: This is for identifier names and values
+				std::cout << "\nlhs_of_assignment should be 1, it is:" << contxt.lhs_of_assignment <<"\n"  ;
 				contxt.lhs_of_assignment = false;
 
 			}				
 			else if(ConditionalExpressionPtr != NULL) {
-				//file << "what is going on here?\n";
+				
 				ConditionalExpressionPtr->render_asm(file,contxt);		//THIS IS FOR IF STATEMENTS/ LOGICAL / ARITHMETIC OPERATIONS / ASSIGNEMENTS
 
 			}
