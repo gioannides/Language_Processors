@@ -58,9 +58,7 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 				
 				AdditiveExpressionPtr->render_asm(file,contxt);				
 				MultiplicativeExpressioN->render_asm(file,contxt);
-				if (contxt.function){
-					file << std::endl << "\tadd\t$2, $2, $3";
-				}
+				file << std::endl << "\tadd\t $2, $2, $3\n";
 				
 			}
 
@@ -79,7 +77,6 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 				ShiftExpressionPtr->render_asm(file,contxt);
 				
 				AdditiVeExpression->render_asm(file,contxt);
-
 				
 			}
 
@@ -126,9 +123,7 @@ inline void AndExpression::render_asm(std::ofstream& file,Context& contxt) {
 				AndExpressionPtr->render_asm(file,contxt);
 				
 				EqualitYExpression->render_asm(file,contxt);
-				if (contxt.function){
-					file << std::endl << "\tand\t$2, $2, $3";
-				}
+				
 			}
 
 		}
@@ -144,9 +139,7 @@ inline void ExclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 				ExclusiveOrExpressionPtr->render_asm(file,contxt);
 				
 				ANDexpression->render_asm(file,contxt);
-				if (contxt.function && !contxt.reading){
-					file << std::endl << "\txor\t$2, $2, $3";
-				}
+				
 			}
 
 		}
@@ -224,81 +217,61 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 				AssignmentExpressionPtr->render_asm(file,contxt);
 			}
 
-			else if( IDENTIFIER != NULL && !contxt.reading && contxt.function) {			//this identifier is involved in expressions
+			else if( IDENTIFIER != NULL && !contxt.reading ) {			//this identifier is involved in expressions
 				std:: cout << "i execute" << std::endl;		
-				int found_0nothing_1local_2globl = 0;	
-				int good_index=0;		//this will determine whether the variable wanted is a global or a local
+				bool found = false;			//this will determine whether the variable wanted is a global or a local
 				int i(0);				//must initialize the index i outside so it is accessible throughout here
-				for(i=0; i<contxt.Variables.size(); i++)
-				{std::cout << contxt.Variables[i].id << " " << contxt.Variables[i].scope << " " <<  contxt.Variables.size() << std::endl;}
-				for(i=0; i<contxt.Variables.size(); i++) {
+				for(i; i<contxt.Variables.size(); i++) {
 					
 					if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
-						found_0nothing_1local_2globl = 1;		//means that we found a local variable in the function of that name					
-						good_index=i;
-						i = contxt.Variables.size();						
+						found = true;		//means that we found a local variable in the function of that name					
+						contxt.value_in_R2=0;
+						contxt.lhs_of_assignment=false;						
+						break;
 					}
-				}
-				if(!found_0nothing_1local_2globl) {
-						for(i=0; i<contxt.Variables.size(); i++) {
+					if(!found) {
+						for(i; i<contxt.Variables.size(); i++) {
 							if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
-								found_0nothing_1local_2globl=2;
-								good_index = i;
-								i = contxt.Variables.size();
-
+								contxt.value_in_R2=0;
+								contxt.lhs_of_assignment=false;
+								break;
 							}
 						
 						}
-				}   			
-				std::cout << "\n\nlhs " << contxt.lhs_of_assignment ;				
-				if(contxt.lhs_of_assignment){
-					if(found_0nothing_1local_2globl==1) {
-						contxt.value_in_R2=false;
-						file << std::endl << "\tsw\t$2," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+					} 
+				}   							
+				/*if(contxt.lhs_of_assignment){
+					if(found) {
+						file << std::endl << "\tsw $2," << contxt.Variables[i].offset << "($sp)";
 					}
-					else if(found_0nothing_1local_2globl==2) {
-						contxt.value_in_R2=false;
-						//file << std::endl << "\tla\t$4," << contxt.Variables[good_index].id; //this is how globals are accessed
-						//file << std::endl << "\tsw\t$2, 0($4)\n";
-						file << std::endl << "\tsw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)"; 
-					}			
-					else{
-						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
-					}
-					//contxt.value_in_R2=false;
-					//std::cout<< "lhs_of_assignment should be true: " << contxt.lhs_of_assignment << "\n";
-					//contxt.lhs_of_assignment=false;		
-				}
-				else if(contxt.rhs_of_expression){
-					if(contxt.value_in_R2){
-						if(found_0nothing_1local_2globl==1) {
-							file << std::endl << "\tlw\t$3, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id; // can we do la all the time if we know the exact addresses?
+					else if(!found) {
+						file << std::endl << "\tla $2," << contxt.Variables[i].id; //this is how globals are accessed
+					}					
+				}*/
+				//if(contxt.rhs_of_expression){
+					//if(contxt.value_in_R2){
+						if(found) {
+							useReg(file,"start",2);
+							file << std::endl << "\tlw\t $2," << contxt.Variables[i].offset << "($sp)";
+							useReg(file,"done",2);
 						}
-						else if(found_0nothing_1local_2globl==2) {
-							//file << std::endl << "\tla\t$3, " << contxt.Variables[good_index].id;
-							//file << std::endl << "\tlw\t$3, 0($3)";
-							file << std::endl << "\tlw\t$3, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
-							//file << std::endl << "\tlw\t$2, " << contxt.Variables[good_index].id;
+						else if(!found) {
+							useReg(file,"start",3);
+							file << std::endl << "\tla\t $3," << contxt.Variables[i].id;
+							useReg(file,"done",3);
 						}
 					}
-					else{ 
-						if(found_0nothing_1local_2globl==1) {
-							contxt.value_in_R2=true; 
-							file << std::endl << "\tlw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+					/*else{
+						//contxt.value_in_R2=true; 
+						if(found) {
+							file << std::endl << "\tlw $2," << contxt.Variables[i].offset << "($sp)";
 						}
-						else if(found_0nothing_1local_2globl==2) {
-							contxt.value_in_R2=true; 
-							//file << std::endl << "\tla\t$2, " << contxt.Variables[good_index].id;
-							//file << std::endl << "\tlw\t$2, 0($2)";
-							file << std::endl << "\tlw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
-							//file << std::endl << "\tlw\t$2, " << contxt.Variables[good_index].id;
+						else if(!found) {
+							file << std::endl << "\tla $2," << contxt.Variables[i].id;
 						}
-						else{
-						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
-						}
-					}
-				}
-			}
+					}*/
+				//}
+			
 
 			else if( CONSTANT != NULL && !contxt.reading ) {				//this constant is involved in expressions
 				std::string tmp ;
@@ -319,14 +292,10 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 				}
 
 				//file << std::endl << rhs_of_expression;	//we might need to reverse the order of the if statements
-				if(contxt.rhs_of_expression && !contxt.reading && contxt.function){
-					file <<  std::endl << "\tli\t";
-					if(contxt.value_in_R2)
-						file << "$3, " << *CONSTANT;
-					else {
-						contxt.value_in_R2=true;
-						file << "$2, " << *CONSTANT; 
-					}
+				if(contxt.rhs_of_expression && !contxt.reading){
+					useReg(file,"start");
+					file <<  std::endl << "\tli\t "<< "$2," << *CONSTANT;
+					useReg(file,"done");
 				}
 			}
 		}				
@@ -358,10 +327,8 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 				contxt.rhs_of_expression = false;
 			}
 			if(UnaryExpressionPtr != NULL) {
-				std::cout << "\nlhs_of_assignment should be 0, it is:" << contxt.lhs_of_assignment <<"\n"  ;
 				contxt.lhs_of_assignment = true;
 				UnaryExpressionPtr->render_asm(file,contxt);			//TODO: This is for identifier names and values
-				std::cout << "\nlhs_of_assignment should be 1, it is:" << contxt.lhs_of_assignment <<"\n"  ;
 				contxt.lhs_of_assignment = false;
 
 			}				

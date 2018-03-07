@@ -9,7 +9,6 @@ struct bindings {
 		double value = 0;
 		std::string scope = "";		//name of scope the variable is in
 		int offset = 0;			//the stack offset saved on the stack to load it from
-		std::string DataType;
 	};
 
 struct Context{
@@ -23,15 +22,13 @@ struct Context{
 	bool function = false;
 	bool negative = false; 	//is value a negative number?
 	bool float_ = false;   //is value a floating point?
-	bool is_unsigned = false;
 	bool protect = false; // to not overwrite function_id
 	bool reading = false; // are we reading for stack allocation or are we executing?
 	std::string funct_id = "";
 	std::vector<bindings> Variables;
 	bindings variable;
 	int totalStackArea = 0; //For the whole stack
-	int StackOffset = 0;	//the offset from $sp for each variable
-	
+	int StackOffset = 0;	//the offset from $sp for each variable 
 };
 
 class Node;

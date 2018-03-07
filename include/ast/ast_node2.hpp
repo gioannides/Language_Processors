@@ -671,22 +671,17 @@ class InitDeclarator : public Node {
 			
 			if( InitiaLizer != NULL && DecLarator != NULL) {
 				contxt.initialized = true;
-				
-				contxt.rhs_of_expression = true;
-				InitiaLizer->render_asm(file,contxt);
-				contxt.rhs_of_expression = false;
-
 				contxt.lhs_of_assignment = true;
 				DecLarator->render_asm(file,contxt);	// The boolean variable was 'initialized' set to false by default
 				contxt.lhs_of_assignment = false;
-				
+				contxt.rhs_of_expression = true;
+				InitiaLizer->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
 				contxt.initialized = false;
 			}
 			else if(DecLarator != NULL &&  InitiaLizer == NULL){
 				contxt.initialized = false;
-				contxt.lhs_of_assignment=true;
 				DecLarator->render_asm(file,contxt);
-				contxt.lhs_of_assignment=false;
 			
 			}
 		}
@@ -749,6 +744,9 @@ class StorageClassSpecifiers : public Node {
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {}
+					 
+					
+
 };
 
 
@@ -955,14 +953,12 @@ class TypeSpecifier : public Node {
 				}
 
 				if(contxt.reading) { //this is predicting total stack frame for all paramters/local declarations in function body
-					contxt.variable.offset = contxt.totalStackArea;
+
 					contxt.totalStackArea += contxt.variable.word_size;
-					//file << "\nonly golbals get here " << contxt.totalStackArea << "\n";
 
 				}
 
 				if(!contxt.reading){ //this is execution
-
 					contxt.StackOffset += contxt.variable.word_size;
 					contxt.variable.offset = contxt.StackOffset-contxt.variable.word_size;
 				}
@@ -1112,20 +1108,20 @@ class Declaration : public Node {
 
 			if(contxt.function && !contxt.reading) {
 					
-						if(contxt.variable.word_size <= 4 && !contxt.variable.value) {
+						if(contxt.variable.word_size <= 4) {
 
 							//useReg(file,"start",2);  // you  are now free to use the register but the SP has been decremented by further 4!
-							//file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
-							//file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset + biasedOffset << "($sp)"; //look in the function definiton for why
+							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
+							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset + biasedOffset << "($sp)"; //look in the function definiton for why
 							//useReg(file,"done",2); // bring the value back
-							//file << std::endl << "\tsw\t $0, " << contxt.variable.offset + biasedOffset << "($sp)";
+							
 						}
-						/*else{	
+						else{	
 							//useReg(file,"start",2);								//this is for doubles, it not working yet
 							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
 							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset + biasedOffset << "($sp)" << std::endl;
 							//useReg(file,"done",2);
-						}*/
+						}
 			}
 				
 			
@@ -1157,8 +1153,21 @@ class JumpStatement : public Node {
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {
+
+			
+
 		}
+							
+
 };
+
+
+
+
+
+
+
+
 
 class IterationStatement : public Node {
 
@@ -1179,8 +1188,16 @@ class IterationStatement : public Node {
 		void render_asm(std::ofstream& file, Context& contxt){
 			file << "\nIterationStatement ~line1420\n";
 		}
+
 };
 	
+
+
+
+	
+
+
+
 class SelectionStatement : public Node {
 
 	public:
@@ -1199,6 +1216,8 @@ class SelectionStatement : public Node {
 		void print_py(std::ofstream& file,bool elseif=false) ;
 
 		std::string* get_info() ;
+		
+
 };
 
 
@@ -1215,7 +1234,11 @@ class ExpressionStatement : public Node {
 		void print_py(std::ofstream& file) ;
 
 		void render_asm(std::ofstream& file,Context& contxt) ;
+
+
 };
+
+
 
 class LabeledStatement : public Node {
 	
@@ -1234,6 +1257,8 @@ class LabeledStatement : public Node {
 
 		void print_py(std::ofstream& file) {}
 };
+
+
 
 class Statement : public Node {
 	
@@ -1263,6 +1288,13 @@ class Statement : public Node {
 
 };
 
+
+
+
+
+
+
+
 class StatementList : public Node {
 
 	private:
@@ -1283,7 +1315,17 @@ class StatementList : public Node {
 			}
 			StatementPtr->render_asm(file,contxt);
 		}
+				
+
 };
+
+
+
+
+
+
+
+
 
 class CompoundStatement : public Node {
 	
@@ -1305,20 +1347,32 @@ class CompoundStatement : public Node {
 
 				DeclarationListPtr->render_asm(file,contxt);
 			}
+
 			if(StatementListPtr != NULL && DeclarationListPtr == NULL ) {
-				if(!contxt.reading){
-					StatementListPtr->render_asm(file,contxt);
-				}
+
+				StatementListPtr->render_asm(file,contxt);
 			}
+
 			if(StatementListPtr != NULL && DeclarationListPtr != NULL ) {
 				
 				DeclarationListPtr->render_asm(file,contxt);
 				if(!contxt.reading){
 					StatementListPtr->render_asm(file,contxt);
 				}
-			}	
+			}
+			
 		}
+
 };
+
+
+
+
+
+
+
+
+
 
 class FunctionDefinition : public Node {
 
@@ -1375,7 +1429,9 @@ class FunctionDefinition : public Node {
 			
 			file << "\taddiu\t$sp,$sp,-"<< contxt.totalStackArea+4;
 			file << std::endl << "\tsw\t$fp," << contxt.totalStackArea << "($sp)";
-			file << std::endl << "\tmove\t$fp,$sp\n";
+			file << std::endl << "\tmove\t$fp,$sp";
+
+			
 
 			if( CompoundStatementPtr != NULL ) {
 				contxt.reading = false;
@@ -1391,8 +1447,13 @@ class FunctionDefinition : public Node {
 			file << "\t.set\t macro" << std::endl;
 			file << "\t.set\t reorder" << std::endl;
 			file << "\t.end\t " << contxt.funct_id << std::endl;
-			file << "\t.size\t " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;		
-		}	
+			file << "\t.size\t " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;
+			
+				
+		}
+
+
+			
 };
 
 
@@ -1539,15 +1600,14 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					contxt.funct_id=*IDENTIFIER;
 			}
 
-			 if(!contxt.function && IDENTIFIER != NULL && !contxt.reading && !contxt.protect) 			//if we are not in a function then this must be a global declaration
-			{
+			if(!contxt.function && IDENTIFIER != NULL && !contxt.reading && !contxt.protect) {			//if we are not in a function then this must be a global declaration
+				
 				contxt.variable.id = *IDENTIFIER;
 				
 				if( !contxt.initialized ) {				//if it is not initialized then set it to 0
 					contxt.variable.value = 0;
 				}
 				contxt.variable.scope = "global";			//set the variable's scope as global to be saved in the bindings struct
-				
 				if(contxt.Variables.size()==0){
 					contxt.Variables.push_back(contxt.variable);				
 				}
@@ -1560,7 +1620,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 			
 			
 			
-			else if(contxt.function && IDENTIFIER != NULL && contxt.reading){			//if we are in a function and the identifier is not null and protect flag is off
+			else if(contxt.function && IDENTIFIER != NULL && !contxt.reading){			//if we are in a function and the identifier is not null and protect flag is off
 
 					if( !contxt.protect) {				//then this is a function name we are reading
 					
@@ -1580,51 +1640,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					contxt.Variables.push_back(contxt.variable);
 					//std::cout << " L ";
 				}
-				int found_local= 0;	
-				int good_index=0;		//this will determine whether the variable wanted is a global or a local
-				int i;				//must initialize the index i outside so it is accessible throughout here
-				//for(i=0; i<contxt.Variables.size(); i++)
-				//{file << contxt.Variables[i].id << " " << contxt.Variables[i].scope << " " << contxt.Variables[i].offset  << " " <<  contxt.Variables.size() << std::endl;}
-				for(i=0; i<contxt.Variables.size(); i++) {
 					
-					if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
-						found_local = 1;		//means that we found a local variable in the function of that name					
-						good_index=i;
-						i = contxt.Variables.size();						
-					}
-				}
-				if(!found_local) {
-						for(i=0; i<contxt.Variables.size(); i++) {
-							if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
-								found_local=2;
-								good_index = i;
-								i = contxt.Variables.size();
-							}
-						}
-				}   	
-				if(contxt.lhs_of_assignment  && !contxt.reading && contxt.function){
-					if(found_local==1) {
-						contxt.value_in_R2=false;
-						if(contxt.Variables[good_index].value != 0){
-							file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-						}
-						else {
-							file << std::endl << "\tsw\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
-						}
-					}
-
-					else if(found_local==2) {
-						contxt.value_in_R2=false;
-						//file << std::endl << "\tla\t$4, " << contxt.Variables[good_index].id; //this is how globals are accessed
-						//file << std::endl << "\tsw\t$2, 0($4)\n"; 
-						file << std::endl << "\tsw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
-					}			
-					else{
-						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
-					}
-					//contxt.value_in_R2=false;
-					//contxt.lhs_of_assignment=false;		
-				}
 					
 
 					if( ParameterTypeLiSt != NULL) {
@@ -1632,11 +1648,11 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					
 					}
 
-				
+				//std::cout << contxt.variable.id << " " << contxt.funct_id << " " << contxt.variable.scope << std::endl;
 				
 					
 					/*else if( IDentifierList != NULL) {
-						IDentifierList->render_asm(file);
+						IDentifierList->print_py(file);
 					}*/
 
 			
