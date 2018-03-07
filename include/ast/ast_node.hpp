@@ -556,7 +556,7 @@ class DeclarationList : public Node {
 class DirectDeclarator : public Node {
 
 	private:
-		std::string* IDENTIFIER;
+		
 		ConstantExpression* ConstantExpRession;
 		ParameterTypeList* ParameterTypeLiSt;
 		IdentifierList* IDentifierList;
@@ -564,6 +564,7 @@ class DirectDeclarator : public Node {
 		Declarator* DeclaratorPtr;
 
 	public:
+		std::string* IDENTIFIER;
 
 		DirectDeclarator( std::string* IDENTIFIER, ConstantExpression* ConstantExpRession, ParameterTypeList* ParameterTypeLiSt, IdentifierList* IDentifierList, DirectDeclarator* DirectDeclaratorPtr, Declarator* DeclaratorPtr) :
 	
@@ -589,7 +590,7 @@ class DirectDeclarator : public Node {
 
 class Declarator : public Node {
 
-	private:
+	public:
 		Pointer* PoinTer;
 		DirectDeclarator* DirectDecLarator;
 		Declarator* DeclaratorPtr;
@@ -672,6 +673,16 @@ class InitDeclarator : public Node {
 			if( InitiaLizer != NULL && DecLarator != NULL) {
 				contxt.initialized = true;
 				
+				/*for(int i=0; i<contxt.Variables.size(); i++) {	//Predict the signedness of LHS, made DirectDeclarator members public...
+					std::cout << contxt.Variables[i].id << contxt.Variables[i].DataType << std::endl;				
+					if(*(DecLarator->DirectDecLarator->IDENTIFIER) == contxt.Variables[i].id) {
+						if(contxt.Variables[i].DataType == "unsigned") {
+							contxt.is_unsigned = true;
+						}
+					}
+				}*/
+
+				
 				contxt.rhs_of_expression = true;
 				InitiaLizer->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
@@ -681,15 +692,18 @@ class InitDeclarator : public Node {
 				contxt.lhs_of_assignment = false;
 				
 				contxt.initialized = false;
+				
 			}
 			else if(DecLarator != NULL &&  InitiaLizer == NULL){
 				contxt.initialized = false;
 				contxt.lhs_of_assignment=true;
 				DecLarator->render_asm(file,contxt);
 				contxt.lhs_of_assignment=false;
-			
+				//contxt.is_unsigned = false;
 			}
+			contxt.is_unsigned = false;
 		}
+	
 };
 
 
@@ -713,7 +727,7 @@ class InitDeclaratorList : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) {				//Traversing through all of the declarations in the program sequentially as they appear in source code
+		void render_asm(std::ofstream& file,Context& contxt) {		//Traversing through all of the declarations in the program sequentially as they appear in source code
 
 			if( InitDeclaratorListPtr != NULL) {
 				InitDeclaratorListPtr->render_asm(file,contxt);
@@ -930,28 +944,37 @@ class TypeSpecifier : public Node {
 
 				if (types=="char"){
 					contxt.variable.word_size = 1;
+					contxt.variable.DataType = "char";
 				}
 				else if (types=="short"){
 					contxt.variable.word_size = 2;
+					contxt.variable.DataType = "short";
 				}
 				else if (types=="int"){
 					contxt.variable.word_size = 4;
+					contxt.variable.DataType = "int";
 				}	
 				else if (types=="long"){
 					contxt.variable.word_size = 4;
+					contxt.variable.DataType = "long";
 				}
 				else if (types=="float"){
 					contxt.variable.word_size = 4;
+					contxt.variable.DataType = "float";
 					contxt.float_ = true;
 				}
 				else if (types=="double"){
 					contxt.variable.word_size = 8;
+					contxt.variable.DataType = "double";
 				}	
 				else if (types=="signed"){
 					contxt.variable.word_size = 4;
+					contxt.variable.DataType = "signed";
 				}	
 				else if (types=="unsigned"){
 					contxt.variable.word_size = 4;
+					contxt.variable.DataType = "unsigned";
+					contxt.is_unsigned = true;
 				}
 
 				if(contxt.reading) { //this is predicting total stack frame for all paramters/local declarations in function body
@@ -1058,30 +1081,14 @@ class Declaration : public Node {
 	
 		void render_asm(std::ofstream& file,Context& contxt) {
 
-
-
-
 			DeclSpec->render_asm(file,contxt);  // Obtain size of the data type of the variable
 
 			if( DeclList != NULL) {
 				DeclList->render_asm(file,contxt);  // Obtain name and value of the variable
 			}
 			
-
-			/*if(!contxt.function) {
-				contxt.variable.scope = "global";
-				contxt.variable.offset = 0;			//because it is not on the stack
-			}
-								  		// all variables*/
-
-
-
-
-
-
-
 			if(!contxt.function) {
-				 	 // save the global on the vector for future reference
+				 	
 				file << std::endl << "\t.data";
 				file << std::endl << "\t.globl\t" << contxt.variable.id;
 				if( log2(contxt.variable.word_size) ){
@@ -1110,29 +1117,31 @@ class Declaration : public Node {
 			}
 
 
-			if(contxt.function && !contxt.reading) {
+
+			//if(contxt.function && !contxt.reading) {
 					
-						if(contxt.variable.word_size <= 4 && !contxt.variable.value) {
+						//if(contxt.variable.word_size <= 4 && !contxt.variable.value) {
 
 							//useReg(file,"start",2);  // you  are now free to use the register but the SP has been decremented by further 4!
 							//file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
 							//file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset + biasedOffset << "($sp)"; //look in the function definiton for why
 							//useReg(file,"done",2); // bring the value back
 							//file << std::endl << "\tsw\t $0, " << contxt.variable.offset + biasedOffset << "($sp)";
-						}
+						//}
 						/*else{	
 							//useReg(file,"start",2);								//this is for doubles, it not working yet
 							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
 							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset + biasedOffset << "($sp)" << std::endl;
 							//useReg(file,"done",2);
 						}*/
-			}
+			//}
 				
 			
 
 			/*contxt.variable.word_size = 0;
 			contxt.variable.id = "";
 			contxt.variable.value = 0;*/
+
 
 		}
 	
@@ -1350,6 +1359,7 @@ class FunctionDefinition : public Node {
 				
 				DeclaratorPtr->render_asm(file,contxt);
 				file << std::endl;
+				file << "\t.text" << std::endl;
 				file << "\t.align\t2" << std::endl; 
 				file << "\t.globl\t" << contxt.funct_id << std::endl;
 				file << "\t.set\t" << "nomips16" << std::endl;
@@ -1530,8 +1540,7 @@ inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 
 inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 
-		if(!contxt.reading) 
-		{
+	
 			if( DirectDeclaratorPtr != NULL) {
 
 				DirectDeclaratorPtr->render_asm(file,contxt);
@@ -1552,19 +1561,23 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				if(contxt.Variables.size()==0){
 					contxt.Variables.push_back(contxt.variable);				
 				}
-				else if(contxt.Variables[contxt.Variables.size()-2].id!=*IDENTIFIER && contxt.Variables[contxt.Variables.size()-1].id!=*IDENTIFIER)
-					{	//std::cout << " P ";
+				else if(contxt.Variables[contxt.Variables.size()-1].id!=*IDENTIFIER)
+					{	
 						contxt.Variables.push_back(contxt.variable);
 					}
 			}
 
-			else if(contxt.function && IDENTIFIER != NULL){// && !contxt.reading){			//if we are in a function and the identifier is not null and protect flag is off
+			
+			
+			
+			else if(contxt.function && IDENTIFIER != NULL && !contxt.reading){		//if we are in a function and the identifier is not null and protect flag is off
 
 					if( !contxt.protect) {				//then this is a function name we are reading
 					
 						contxt.funct_id = *IDENTIFIER;		//obtain the scope we are currently in
-						//contxt.variable.scope = *IDENTIFIER;	//assign this information to the local variable
+						
 					}
+
 					else{
 						contxt.variable.scope = contxt.funct_id; //assign the variable the scope it is in
 						contxt.variable.id = *IDENTIFIER;	//if the portect flag is on then we are already inside the function , not reading the function name
@@ -1574,20 +1587,13 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 	
 						contxt.variable.value = 0;
 					}
-					if(contxt.Variables.size()==0){
-						contxt.Variables.push_back(contxt.variable);				
-					}
-					else if(contxt.Variables[contxt.Variables.size()-2].id!=*IDENTIFIER && contxt.Variables[contxt.Variables.size()-1].id!=*IDENTIFIER)
-					{	//std::cout << " P ";
-						contxt.Variables.push_back(contxt.variable);
-					}
-					//std::cout << " L ";
+					contxt.Variables.push_back(contxt.variable);  
+					
 				}
 				int found_local= 0;	
 				int good_index=0;		//this will determine whether the variable wanted is a global or a local
 				int i;				//must initialize the index i outside so it is accessible throughout here
-				for(i=0; i<contxt.Variables.size(); i++)
-				{file << contxt.Variables[i].id << " " << contxt.Variables[i].scope << " " << contxt.Variables[i].offset  << " " <<  contxt.Variables[i].value << std::endl;}
+				
 				for(i=0; i<contxt.Variables.size(); i++) {
 					
 					if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
@@ -1602,12 +1608,17 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 								found_local=2;
 								good_index = i;
 								i = contxt.Variables.size();
+
+
 							}
 						}
 				}   	
 				if(contxt.lhs_of_assignment  && !contxt.reading && contxt.function){
 					if(found_local==1) {
 						contxt.value_in_R2=false;
+
+						
+
 						if(contxt.Variables[good_index].value != 0){
 							file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 						}
@@ -1617,16 +1628,18 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					}
 
 					else if(found_local==2) {
+
+						
 						contxt.value_in_R2=false;
-						//file << std::endl << "\tla\t$4, " << contxt.Variables[good_index].id; //this is how globals are accessed
-						//file << std::endl << "\tsw\t$2, 0($4)\n"; 
+						
+
 						file << std::endl << "\tsw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
 					}			
 					else{
 						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 					}
-					//contxt.value_in_R2=false;
-					//contxt.lhs_of_assignment=false;		
+
+							
 				}
 					
 
@@ -1642,7 +1655,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 						IDentifierList->render_asm(file);
 					}*/
 
-			}
+			
 
 	}
 
