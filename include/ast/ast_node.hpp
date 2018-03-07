@@ -973,6 +973,7 @@ class TypeSpecifier : public Node {
 				if (types=="char"){
 					contxt.variable.word_size = 4;				///it should be size=1, you need lb and sb
 					contxt.variable.DataType = "char";
+					contxt.is_char = true;
 				}
 				else if (types=="short"){
 					contxt.variable.word_size = 2;
@@ -1115,62 +1116,6 @@ class Declaration : public Node {
 				DeclList->render_asm(file,contxt);  // Obtain name and value of the variable
 			}
 			
-			// if(!contxt.function) {
-				 	
-			// 	file << std::endl << "\t.data";
-			// 	file << std::endl << "\t.globl\t" << contxt.variable.id;
-			// 	if( log2(contxt.variable.word_size) ){
-			// 		file << std::endl << "\t.align\t" << log2(contxt.variable.word_size);
-			// 	}
-			// 	file << std::endl << "\t.type\t" << contxt.variable.id << ", @object";
-			// 	file << std::endl << "\t.size\t" << contxt.variable.id << ", " << contxt.variable.word_size;
-			// 	file << std::endl << contxt.variable.id << ":";
-			// 	if( contxt.variable.word_size > 4 ){					
-			// 		file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
-			// 	}
-			// 	else if( (contxt.variable.word_size==4) && !contxt.float_){
-			// 		file << std::endl << "\t.word\t" << contxt.variable.value;
-			// 	}
-			// 	else if( (contxt.variable.word_size==4) && contxt.float_){
-			// 		file << std::endl << "\t.float\t" << contxt.variable.value;
-			// 		contxt.float_ = false;
-			// 	}
-			// 	else if(contxt.variable.word_size==2){
-			// 		file << std::endl << "\t.half\t" << contxt.variable.value;
-			// 	}
-			// 	else if(contxt.variable.word_size==1){
-			// 		file << std::endl << "\t.byte\t" << contxt.variable.value;
-			// 	}
-				
-			// }
-
-
-
-			//if(contxt.function && !contxt.reading) {
-					
-						//if(contxt.variable.word_size <= 4 && !contxt.variable.value) {
-
-							//useReg(file,"start",2);  // you  are now free to use the register but the SP has been decremented by further 4!
-							//file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
-							//file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset + biasedOffset << "($sp)"; //look in the function definiton for why
-							//useReg(file,"done",2); // bring the value back
-							//file << std::endl << "\tsw\t $0, " << contxt.variable.offset + biasedOffset << "($sp)";
-						//}
-						/*else{	
-							//useReg(file,"start",2);								//this is for doubles, it not working yet
-							file << std::endl << "\tli\t" << "$2,\t" << contxt.variable.value;
-							file << std::endl << "\tsw\t" << "$2," << contxt.variable.offset + biasedOffset << "($sp)" << std::endl;
-							//useReg(file,"done",2);
-						}*/
-			//}
-				
-			
-
-			/*contxt.variable.word_size = 0;
-			contxt.variable.id = "";
-			contxt.variable.value = 0;*/
-
-
 		}
 	
 
@@ -1610,10 +1555,6 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					{	
 						contxt.Variables.push_back(contxt.variable);
 					}
-				for(int i=0; i<contxt.Variables.size(); i++)
-				{
-					std::cout << contxt.Variables[i].id << " " << contxt.Variables[i].value << "\n";
-				}
 			}
 
 			
@@ -1666,21 +1607,42 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					if(found_local==1) {
 						//contxt.value_in_R2=false;
 						if(contxt.Variables[good_index].value != 0){
-							file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+							/*if(contxt.is_char){
+								file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+contxt.is_char = false;
+							}
+							else{*/
+								file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+							
 						}
 						else {
-							file << std::endl << "\tsw\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
+							/*if(contxt.is_char){
+								file << std::endl << "\tsb\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+contxt.is_char = false;
+							}
+							else{*/
+								file << std::endl << "\tsw\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
+							
 						}
 					}
 
+				
 					else if(found_local==2) {
-						//contxt.value_in_R2=false;
-						file << std::endl << "\tsw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
-					}			
+						file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
+						/*if(contxt.is_char) {
+							file << std::endl << "\tsb\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+							contxt.is_char = false;
+						}
+						else{*/
+							file << std::endl << "\tsw\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+							
+					}	
+								
 					else{
 						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
-					}		
-				}
+					}
+			}		
+				
 
 					if( ParameterTypeLiSt != NULL) {
 						ParameterTypeLiSt->render_asm(file,contxt);

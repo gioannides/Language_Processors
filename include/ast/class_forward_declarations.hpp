@@ -18,7 +18,7 @@ struct Context{
 	bool value_in_R2=0;
 	std::string op_name="";
 
-
+	bool is_char = false;
 	bool initialized = false;
 	bool function = false;
 	bool negative = false; 	//is value a negative number?

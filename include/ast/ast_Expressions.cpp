@@ -380,15 +380,29 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 
 				if(contxt.lhs_of_assignment){
 					if(found_0nothing_1local_2globl==1) {
-						file << std::endl << "\tsw\t$2," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+						/*if(contxt.is_char) {
+							file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+							contxt.is_char = false;
+						}				
+						else{*/
+							file << std::endl << "\tsw\t$2," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+						
 
 						if(contxt.Variables[good_index].DataType == "unsigned") {
 							contxt.is_unsigned = true;
 						}
 					}
+					
+					
 					else if(found_0nothing_1local_2globl==2) {
-        				file << std::endl << "\tlui\t$" << contxt.Regs+2 << ", %hi(" << contxt.Variables[good_index].id << ")";
-						file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+        					file << std::endl << "\tlui\t$" << contxt.Regs+2 << ", %hi(" << contxt.Variables[good_index].id << ")";
+						//if(contxt.is_char) {
+						//	file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+						//	contxt.is_char = false;
+						//}
+						//else{
+							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+						
 						if(contxt.Variables[good_index].DataType == "unsigned") {
 							contxt.is_unsigned = true;
 						}
@@ -396,24 +410,36 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 					else{
 						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 					}
+				
 						
 				}
 				else if(contxt.rhs_of_expression){
-						if(found_0nothing_1local_2globl==1) {
-							file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+				   if(found_0nothing_1local_2globl==1) {
+					/*if(contxt.is_char) {
+						file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+						contxt.is_char = false;
+					}
+					else{*/
+						file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+					
 							
-							if(contxt.Variables[good_index].DataType == "unsigned") {
-								contxt.is_unsigned = true;
+					if(contxt.Variables[good_index].DataType == "unsigned") {
+							contxt.is_unsigned = true;
 								
-							}
-						}
-						else if(found_0nothing_1local_2globl==2) {
-							file << std::endl << "\tlui\t$" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
-							file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                                       
-       						if(contxt.Variables[good_index].DataType == "unsigned") {
-								contxt.is_unsigned = true;
-							}
-						}
+					}
+				   }
+				else if(found_0nothing_1local_2globl==2) {
+					file << std::endl << "\tlui\t$" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
+					/*if(contxt.is_char) {
+						file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
+						contxt.is_char = false;
+					}
+					else{*/
+						file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
+       					if(contxt.Variables[good_index].DataType == "unsigned") {
+						contxt.is_unsigned = true;
+					}
+				}
 					//}		
 					
 				
