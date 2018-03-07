@@ -556,7 +556,7 @@ class DeclarationList : public Node {
 class DirectDeclarator : public Node {
 
 	private:
-		std::string* IDENTIFIER;
+		
 		ConstantExpression* ConstantExpRession;
 		ParameterTypeList* ParameterTypeLiSt;
 		IdentifierList* IDentifierList;
@@ -564,6 +564,7 @@ class DirectDeclarator : public Node {
 		Declarator* DeclaratorPtr;
 
 	public:
+		std::string* IDENTIFIER;
 
 		DirectDeclarator( std::string* IDENTIFIER, ConstantExpression* ConstantExpRession, ParameterTypeList* ParameterTypeLiSt, IdentifierList* IDentifierList, DirectDeclarator* DirectDeclaratorPtr, Declarator* DeclaratorPtr) :
 	
@@ -589,7 +590,7 @@ class DirectDeclarator : public Node {
 
 class Declarator : public Node {
 
-	private:
+	public:
 		Pointer* PoinTer;
 		DirectDeclarator* DirectDecLarator;
 		Declarator* DeclaratorPtr;
@@ -671,6 +672,22 @@ class InitDeclarator : public Node {
 			
 			if( InitiaLizer != NULL && DecLarator != NULL) {
 				contxt.initialized = true;
+<<<<<<< HEAD
+
+				int good_index=0;		
+				
+				for(int i=0; i<contxt.Variables.size(); i++) {	//Predict the signedness of LHS, made DirectDeclarator members public...				
+					if((contxt.Variables[i].scope == contxt.funct_id || contxt.Variables[i].scope == "global") && *(DecLarator->DirectDecLarator->IDENTIFIER) == contxt.Variables[i].id) {
+						if(contxt.Variables[i].DataType == "unsigned") {
+							contxt.is_unsigned = true;
+						}
+						else{
+							contxt.is_unsigned = false;
+						}
+					}
+				}
+=======
+>>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
 				
 				contxt.rhs_of_expression = true;
 				InitiaLizer->render_asm(file,contxt);
@@ -690,6 +707,7 @@ class InitDeclarator : public Node {
 			
 			}
 		}
+	
 };
 
 
@@ -713,7 +731,7 @@ class InitDeclaratorList : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file,Context& contxt) {				//Traversing through all of the declarations in the program sequentially as they appear in source code
+		void render_asm(std::ofstream& file,Context& contxt) {		//Traversing through all of the declarations in the program sequentially as they appear in source code
 
 			if( InitDeclaratorListPtr != NULL) {
 				InitDeclaratorListPtr->render_asm(file,contxt);
@@ -930,28 +948,36 @@ class TypeSpecifier : public Node {
 
 				if (types=="char"){
 					contxt.variable.word_size = 1;
+					contxt.variable.DataType = "char";
 				}
 				else if (types=="short"){
 					contxt.variable.word_size = 2;
+					contxt.variable.DataType = "short";
 				}
 				else if (types=="int"){
 					contxt.variable.word_size = 4;
+					contxt.variable.DataType = "int";
 				}	
 				else if (types=="long"){
 					contxt.variable.word_size = 4;
+					contxt.variable.DataType = "long";
 				}
 				else if (types=="float"){
 					contxt.variable.word_size = 4;
+					contxt.variable.DataType = "float";
 					contxt.float_ = true;
 				}
 				else if (types=="double"){
 					contxt.variable.word_size = 8;
+					contxt.variable.DataType = "double";
 				}	
 				else if (types=="signed"){
 					contxt.variable.word_size = 4;
+					contxt.variable.DataType = "signed";
 				}	
 				else if (types=="unsigned"){
 					contxt.variable.word_size = 4;
+					contxt.variable.DataType = "unsigned";
 				}
 
 				if(contxt.reading) { //this is predicting total stack frame for all paramters/local declarations in function body
@@ -1058,30 +1084,14 @@ class Declaration : public Node {
 	
 		void render_asm(std::ofstream& file,Context& contxt) {
 
-
-
-
 			DeclSpec->render_asm(file,contxt);  // Obtain size of the data type of the variable
 
 			if( DeclList != NULL) {
 				DeclList->render_asm(file,contxt);  // Obtain name and value of the variable
 			}
 			
-
-			/*if(!contxt.function) {
-				contxt.variable.scope = "global";
-				contxt.variable.offset = 0;			//because it is not on the stack
-			}
-								  		// all variables*/
-
-
-
-
-
-
-
 			if(!contxt.function) {
-				 	 // save the global on the vector for future reference
+				 	
 				file << std::endl << "\t.data";
 				file << std::endl << "\t.globl\t" << contxt.variable.id;
 				if( log2(contxt.variable.word_size) ){
@@ -1109,6 +1119,8 @@ class Declaration : public Node {
 				
 			}
 
+<<<<<<< HEAD
+=======
 
 			if(contxt.function && !contxt.reading) {
 					
@@ -1134,6 +1146,7 @@ class Declaration : public Node {
 			contxt.variable.id = "";
 			contxt.variable.value = 0;*/
 
+>>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
 		}
 	
 
@@ -1350,6 +1363,7 @@ class FunctionDefinition : public Node {
 				
 				DeclaratorPtr->render_asm(file,contxt);
 				file << std::endl;
+				file << "\t.text" << std::endl;
 				file << "\t.align\t2" << std::endl; 
 				file << "\t.globl\t" << contxt.funct_id << std::endl;
 				file << "\t.set\t" << "nomips16" << std::endl;
@@ -1599,12 +1613,24 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 								found_local=2;
 								good_index = i;
 								i = contxt.Variables.size();
+<<<<<<< HEAD
+								if(contxt.Variables[good_index].DataType == "unsigned") {
+									contxt.is_unsigned = true;
+								}
+=======
+>>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
 							}
 						}
 				}   	
 				if(contxt.lhs_of_assignment  && !contxt.reading && contxt.function){
 					if(found_local==1) {
 						contxt.value_in_R2=false;
+<<<<<<< HEAD
+						if(contxt.Variables[good_index].DataType == "unsigned") {
+									contxt.is_unsigned = true;
+								}
+=======
+>>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
 						if(contxt.Variables[good_index].value != 0){
 							file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 						}
@@ -1614,16 +1640,28 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					}
 
 					else if(found_local==2) {
+<<<<<<< HEAD
+						if(contxt.Variables[good_index].DataType == "unsigned") {
+									contxt.is_unsigned = true;
+								}
+						contxt.value_in_R2=false;
+						 
+=======
 						contxt.value_in_R2=false;
 						//file << std::endl << "\tla\t$4, " << contxt.Variables[good_index].id; //this is how globals are accessed
 						//file << std::endl << "\tsw\t$2, 0($4)\n"; 
+>>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
 						file << std::endl << "\tsw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
 					}			
 					else{
 						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 					}
+<<<<<<< HEAD
+							
+=======
 					//contxt.value_in_R2=false;
 					//contxt.lhs_of_assignment=false;		
+>>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
 				}
 					
 
