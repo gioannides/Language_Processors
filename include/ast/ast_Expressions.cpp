@@ -30,9 +30,9 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 						else{
 							file << std::endl << "\tmult\t$2, $3";
 						}
-						file << std::endl << "\tmfhi\t$3";
+						//file << std::endl << "\tmfhi\t$3";
 						file << std::endl << "\tmflo\t$2";
-						contxt.is_unsigned = false;
+						//contxt.is_unsigned = false;
 					}
 					else if(  *OPERATOR == "/" ){
 						if(contxt.is_unsigned){
@@ -41,9 +41,9 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 						else{
 							file << std::endl << "\tdiv\t$2, $3";
 						}
-						file << std::endl << "\tdiv\t$2, $3";
+						
 						file << std::endl << "\tmflo\t$2";
-						contxt.is_unsigned = false;
+						//contxt.is_unsigned = false;
 					}
 					else if(  *OPERATOR == "%" ){
 						if(contxt.is_unsigned) {
@@ -52,9 +52,9 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 						else{
 							file << std::endl << "\tdiv\t$2, $3";
 						}
-						file << std::endl << "\tdiv\t$2, $3";
+						
 						file << std::endl << "\tmfhi\t$2";
-						contxt.is_unsigned = false;
+						//contxt.is_unsigned = false;
 					}
 				}
 			}
@@ -77,7 +77,7 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 				AdditiveExpressionPtr->render_asm(file,contxt);				
 				MultiplicativeExpressioN->render_asm(file,contxt);
 				if (contxt.function){
-<<<<<<< HEAD
+
 					if( *OPERATOR == "+" ){
 						if(contxt.is_unsigned){
 							file << std::endl << "\taddu\t$2, $2, $3";
@@ -85,7 +85,7 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 						else{
 							file << std::endl << "\tadd\t$2, $2, $3";
 						}
-						contxt.is_unsigned = false;
+						//contxt.is_unsigned = false;
 					}
 					else if(  *OPERATOR == "-" ){
 						if(contxt.is_unsigned) {
@@ -94,11 +94,11 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 						else{
 							file << std::endl << "\tsub\t$2, $2, $3";
 						}
-						contxt.is_unsigned = false;
+						//contxt.is_unsigned = false;
 					}
-=======
-					file << std::endl << "\tadd\t$2, $2, $3";
->>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
+
+				
+
 				}
 				
 			}
@@ -117,7 +117,7 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 			else if(ShiftExpressionPtr != NULL && !contxt.reading && AdditiVeExpression != NULL && OPERATOR != NULL){ 
 				ShiftExpressionPtr->render_asm(file,contxt);				
 				AdditiVeExpression->render_asm(file,contxt);
-<<<<<<< HEAD
+
 				if (contxt.function){
 					if( *OPERATOR == "<<" ){
 						file << std::endl << "\tsllv\t$2, $2, $3";
@@ -129,10 +129,9 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 						else{
 							file << std::endl << "\tsrav\t$2, $2, $3";
 						}
-						contxt.is_unsigned = false;
+						//contxt.is_unsigned = false;
 					}
-=======
->>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
+
 
 				
 				}
@@ -184,7 +183,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							file << std::endl << "\tsge\t$2, $2, $3";
 						}
 					}
-					contxt.is_unsigned = false;
+					//contxt.is_unsigned = false;
 				}
 				
 			}
@@ -211,7 +210,7 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 						file << std::endl << "\txor\t$2, $2, $3";						
 						file << std::endl << "\tsltu\t$2, $0, $2";
 					}
-					contxt.is_unsigned = false;
+					//contxt.is_unsigned = false;
 				}
 				
 			}
@@ -229,10 +228,9 @@ inline void AndExpression::render_asm(std::ofstream& file,Context& contxt) {
 				EqualitYExpression->render_asm(file,contxt);
 				if (contxt.function){
 					file << std::endl << "\tand\t$2, $2, $3";
-<<<<<<< HEAD
-					contxt.is_unsigned = false;
-=======
->>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
+
+					//contxt.is_unsigned = false;
+
 				}
 			}
 
@@ -251,10 +249,9 @@ inline void ExclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 				ANDexpression->render_asm(file,contxt);
 				if (contxt.function && !contxt.reading){
 					file << std::endl << "\txor\t$2, $2, $3";
-<<<<<<< HEAD
-					contxt.is_unsigned = false;
-=======
->>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
+
+					//contxt.is_unsigned = false;
+
 				}
 			}
 
@@ -272,7 +269,7 @@ inline void InclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 				EXclusiveOrExpression->render_asm(file,contxt);
 				if (contxt.function){
 					file << std::endl << "\tor\t$2, $2, $3";
-					contxt.is_unsigned = false;
+					//contxt.is_unsigned = false;
 				}
 				
 			}
@@ -344,7 +341,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 			}
 
 			else if( IDENTIFIER != NULL && !contxt.reading && contxt.function) {			//this identifier is involved in expressions
-<<<<<<< HEAD
+
 			
 				int found_0nothing_1local_2globl = 0;	
 				int good_index=0;			//this will determine whether the variable wanted is a global or a local
@@ -358,21 +355,8 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 						i = contxt.Variables.size();
 						if(contxt.Variables[good_index].DataType == "unsigned") {
 							contxt.is_unsigned = true;
-						}						
-=======
-				std:: cout << "i execute" << std::endl;		
-				int found_0nothing_1local_2globl = 0;	
-				int good_index=0;		//this will determine whether the variable wanted is a global or a local
-				int i(0);				//must initialize the index i outside so it is accessible throughout here
-				for(i=0; i<contxt.Variables.size(); i++)
-				{std::cout << contxt.Variables[i].id << " " << contxt.Variables[i].scope << " " <<  contxt.Variables.size() << std::endl;}
-				for(i=0; i<contxt.Variables.size(); i++) {
-					
-					if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
-						found_0nothing_1local_2globl = 1;		//means that we found a local variable in the function of that name					
-						good_index=i;
-						i = contxt.Variables.size();						
->>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
+						}										
+
 					}
 				}
 				if(!found_0nothing_1local_2globl) {
@@ -381,27 +365,23 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 								found_0nothing_1local_2globl=2;
 								good_index = i;
 								i = contxt.Variables.size();
-<<<<<<< HEAD
+
 								if(contxt.Variables[good_index].DataType == "unsigned") {
 									contxt.is_unsigned = true;
 								}
-=======
 
->>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
 							}
 						
 						}
 				}   			
-<<<<<<< HEAD
-					
-=======
-				std::cout << "\n\nlhs " << contxt.lhs_of_assignment ;				
->>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
+
+							
+
 				if(contxt.lhs_of_assignment){
 					if(found_0nothing_1local_2globl==1) {
 						contxt.value_in_R2=false;
 						file << std::endl << "\tsw\t$2," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-<<<<<<< HEAD
+
 						if(contxt.Variables[good_index].DataType == "unsigned") {
 							contxt.is_unsigned = true;
 						}
@@ -437,37 +417,14 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 	
 							}
 			
-=======
-					}
-					else if(found_0nothing_1local_2globl==2) {
-						contxt.value_in_R2=false;
-						//file << std::endl << "\tla\t$4," << contxt.Variables[good_index].id; //this is how globals are accessed
-						//file << std::endl << "\tsw\t$2, 0($4)\n";
-						file << std::endl << "\tsw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)"; 
-					}			
-					else{
-						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
-					}
-					//contxt.value_in_R2=false;
-					//std::cout<< "lhs_of_assignment should be true: " << contxt.lhs_of_assignment << "\n";
-					//contxt.lhs_of_assignment=false;		
-				}
-				else if(contxt.rhs_of_expression){
-					if(contxt.value_in_R2){
-						if(found_0nothing_1local_2globl==1) {
-							file << std::endl << "\tlw\t$3, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id; // can we do la all the time if we know the exact addresses?
+
 						}
-						else if(found_0nothing_1local_2globl==2) {
-							//file << std::endl << "\tla\t$3, " << contxt.Variables[good_index].id;
-							//file << std::endl << "\tlw\t$3, 0($3)";
-							file << std::endl << "\tlw\t$3, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
-							//file << std::endl << "\tlw\t$2, " << contxt.Variables[good_index].id;
->>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
-						}
-					}
+					}		
+					
+				
 					else{ 
 						if(found_0nothing_1local_2globl==1) {
-<<<<<<< HEAD
+
 							
 							contxt.value_in_R2=true; 
 							file << std::endl << "\tlw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
@@ -487,21 +444,8 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 							
 						}
 						else{
-							file << std::endl << "VARIABLE : " << *IDENTIFIER << " NOT DECLARED!!!\n";
-=======
-							contxt.value_in_R2=true; 
-							file << std::endl << "\tlw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
-						}
-						else if(found_0nothing_1local_2globl==2) {
-							contxt.value_in_R2=true; 
-							//file << std::endl << "\tla\t$2, " << contxt.Variables[good_index].id;
-							//file << std::endl << "\tlw\t$2, 0($2)";
-							file << std::endl << "\tlw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
-							//file << std::endl << "\tlw\t$2, " << contxt.Variables[good_index].id;
-						}
-						else{
-						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
->>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
+							file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
+
 						}
 					}
 				}
@@ -525,22 +469,22 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 					contxt.variable.value = std::stol(tmp);
 				}
 
-<<<<<<< HEAD
-				
-=======
+
 				//file << std::endl << rhs_of_expression;	//we might need to reverse the order of the if statements
->>>>>>> c8f3565cfcd9b6e82858166b3492ae20080ec8de
+
 				if(contxt.rhs_of_expression && !contxt.reading && contxt.function){
 					file <<  std::endl << "\tli\t";
-					if(contxt.value_in_R2)
+					if(contxt.value_in_R2){
 						file << "$3, " << *CONSTANT;
+					}
 					else {
 						contxt.value_in_R2=true;
 						file << "$2, " << *CONSTANT; 
 					}
 				}
 			}
-		}				
+		}
+					
 	
 
 		
