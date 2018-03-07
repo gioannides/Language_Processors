@@ -67,7 +67,7 @@ for i in ${input_dir}/*.c ; do
         $compiler -S $i -o ${working}/$base-got.s
         
 
-	mips-linux-gnu-gcc -march=mips1 -mfp32 -O0 -static  ${working}/$base-got.s -o ${working}/$base-got	
+	mips-linux-gnu-gcc -march=mips1 -mfp32 -w -O0 -static  ${working}/$base-got.s -o ${working}/$base-got	
 
         # Run the DUT assembly version
         qemu-mips ${working}/$base-got
@@ -83,7 +83,7 @@ for i in ${input_dir}/*.c ; do
 	#rm tmp/compiler/$base
     else
         echo -e "${wht}$base.c ${grn}[PASS]""${red}"
-	#rm tmp/compiler/$base-got.s
+	rm tmp/compiler/$base-got.s
 	rm tmp/compiler/$base
     fi
 

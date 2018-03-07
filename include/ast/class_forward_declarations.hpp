@@ -31,7 +31,7 @@ struct Context{
 	bindings variable;
 	int totalStackArea = 0; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable
-	
+	int Regs=1;
 };
 
 class Node;

@@ -734,6 +734,34 @@ class InitDeclaratorList : public Node {
 				
 			}
 			InitDecLarator->render_asm(file,contxt);
+			if(!contxt.function) {
+				 	
+				file << std::endl << "\t.data";
+				file << std::endl << "\t.globl\t" << contxt.variable.id;
+				if( log2(contxt.variable.word_size) ){
+					file << std::endl << "\t.align\t" << log2(contxt.variable.word_size);
+				}
+				file << std::endl << "\t.type\t" << contxt.variable.id << ", @object";
+				file << std::endl << "\t.size\t" << contxt.variable.id << ", " << contxt.variable.word_size;
+				file << std::endl << contxt.variable.id << ":";
+				if( contxt.variable.word_size > 4 ){					
+					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
+				}
+				else if( (contxt.variable.word_size==4) && !contxt.float_){
+					file << std::endl << "\t.word\t" << contxt.variable.value;
+				}
+				else if( (contxt.variable.word_size==4) && contxt.float_){
+					file << std::endl << "\t.float\t" << contxt.variable.value;
+					contxt.float_ = false;
+				}
+				else if(contxt.variable.word_size==2){
+					file << std::endl << "\t.half\t" << contxt.variable.value;
+				}
+				else if(contxt.variable.word_size==1){
+					file << std::endl << "\t.byte\t" << contxt.variable.value;
+				}
+				
+			}
 
 		}
 
@@ -943,7 +971,7 @@ class TypeSpecifier : public Node {
 			std::string types = *TYPES;			// Require conversion to be used
 
 				if (types=="char"){
-					contxt.variable.word_size = 1;
+					contxt.variable.word_size = 4;				///it should be size=1, you need lb and sb
 					contxt.variable.DataType = "char";
 				}
 				else if (types=="short"){
@@ -1087,34 +1115,34 @@ class Declaration : public Node {
 				DeclList->render_asm(file,contxt);  // Obtain name and value of the variable
 			}
 			
-			if(!contxt.function) {
+			// if(!contxt.function) {
 				 	
-				file << std::endl << "\t.data";
-				file << std::endl << "\t.globl\t" << contxt.variable.id;
-				if( log2(contxt.variable.word_size) ){
-					file << std::endl << "\t.align\t" << log2(contxt.variable.word_size);
-				}
-				file << std::endl << "\t.type\t" << contxt.variable.id << ", @object";
-				file << std::endl << "\t.size\t" << contxt.variable.id << ", " << contxt.variable.word_size;
-				file << std::endl << contxt.variable.id << ":";
-				if( contxt.variable.word_size > 4 ){					
-					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
-				}
-				else if( (contxt.variable.word_size==4) && !contxt.float_){
-					file << std::endl << "\t.word\t" << contxt.variable.value;
-				}
-				else if( (contxt.variable.word_size==4) && contxt.float_){
-					file << std::endl << "\t.float\t" << contxt.variable.value;
-					contxt.float_ = false;
-				}
-				else if(contxt.variable.word_size==2){
-					file << std::endl << "\t.half\t" << contxt.variable.value;
-				}
-				else if(contxt.variable.word_size==1){
-					file << std::endl << "\t.byte\t" << contxt.variable.value;
-				}
+			// 	file << std::endl << "\t.data";
+			// 	file << std::endl << "\t.globl\t" << contxt.variable.id;
+			// 	if( log2(contxt.variable.word_size) ){
+			// 		file << std::endl << "\t.align\t" << log2(contxt.variable.word_size);
+			// 	}
+			// 	file << std::endl << "\t.type\t" << contxt.variable.id << ", @object";
+			// 	file << std::endl << "\t.size\t" << contxt.variable.id << ", " << contxt.variable.word_size;
+			// 	file << std::endl << contxt.variable.id << ":";
+			// 	if( contxt.variable.word_size > 4 ){					
+			// 		file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
+			// 	}
+			// 	else if( (contxt.variable.word_size==4) && !contxt.float_){
+			// 		file << std::endl << "\t.word\t" << contxt.variable.value;
+			// 	}
+			// 	else if( (contxt.variable.word_size==4) && contxt.float_){
+			// 		file << std::endl << "\t.float\t" << contxt.variable.value;
+			// 		contxt.float_ = false;
+			// 	}
+			// 	else if(contxt.variable.word_size==2){
+			// 		file << std::endl << "\t.half\t" << contxt.variable.value;
+			// 	}
+			// 	else if(contxt.variable.word_size==1){
+			// 		file << std::endl << "\t.byte\t" << contxt.variable.value;
+			// 	}
 				
-			}
+			// }
 
 
 
@@ -1166,7 +1194,24 @@ class JumpStatement : public Node {
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {
+			if( IDENTIFIER != NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "goto" && AssignmentExpressionPtr == NULL) {
+				file << std::endl << "\tj\t" << *IDENTIFIER;
+				file << std::endl << "\tnop";
+			}
+			/*else if( IDENTIFIER != NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "continue") {
+				file << std::endl << "\tj\t"  << //The label of the loop
+				file << std::endl << "\tnop";
+			}*/
+			/*else if( IDENTIFIER != NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "break") {
+				file << std::endl << "\tj\t" << //The label of the loopend
+				file << std::endl << "\tnop";
+			}*/
+			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "return" && AssignmentExpressionPtr != NULL) {
+				contxt.rhs_of_expression = true;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
 		}
+	}
 };
 
 class IterationStatement : public Node {
@@ -1495,7 +1540,7 @@ class TranslationUnit : public Node{
 			file << "\t.section .mdebug.abi32" << std::endl;
 			file << "\t.previous" <<std::endl;
 			file << "\t.nan legacy" << std::endl;
-			file << "\t.module fp=xx" << std::endl;
+			file << "\t.module fp=32" << std::endl;
 			file << "\t.module nooddspreg" << std::endl;
 			file << "\t.abicalls" << std::endl;
 			
@@ -1565,6 +1610,10 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					{	
 						contxt.Variables.push_back(contxt.variable);
 					}
+				for(int i=0; i<contxt.Variables.size(); i++)
+				{
+					std::cout << contxt.Variables[i].id << " " << contxt.Variables[i].value << "\n";
+				}
 			}
 
 			
@@ -1615,10 +1664,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				}   	
 				if(contxt.lhs_of_assignment  && !contxt.reading && contxt.function){
 					if(found_local==1) {
-						contxt.value_in_R2=false;
-
-						
-
+						//contxt.value_in_R2=false;
 						if(contxt.Variables[good_index].value != 0){
 							file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 						}
@@ -1628,20 +1674,13 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					}
 
 					else if(found_local==2) {
-
-						
-						contxt.value_in_R2=false;
-						
-
+						//contxt.value_in_R2=false;
 						file << std::endl << "\tsw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
 					}			
 					else{
 						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
-					}
-
-							
+					}		
 				}
-					
 
 					if( ParameterTypeLiSt != NULL) {
 						ParameterTypeLiSt->render_asm(file,contxt);
