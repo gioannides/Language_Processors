@@ -971,9 +971,8 @@ class TypeSpecifier : public Node {
 			std::string types = *TYPES;			// Require conversion to be used
 
 				if (types=="char"){
-					contxt.variable.word_size = 4;				///it should be size=1, you need lb and sb
+					contxt.variable.word_size = 1;				///it should be size=1, you need lb and sb
 					contxt.variable.DataType = "char";
-					contxt.is_char = true;
 				}
 				else if (types=="short"){
 					contxt.variable.word_size = 2;
@@ -1598,44 +1597,38 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 								found_local=2;
 								good_index = i;
 								i = contxt.Variables.size();
-
-
 							}
 						}
 				}   	
 				if(contxt.lhs_of_assignment  && !contxt.reading && contxt.function){
 					if(found_local==1) {
-						//contxt.value_in_R2=false;
 						if(contxt.Variables[good_index].value != 0){
-							/*if(contxt.is_char){
+							if(contxt.Variables[good_index].word_size==1){
 								file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-contxt.is_char = false;
 							}
-							else{*/
+							else{
 								file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-							
+							}
 						}
 						else {
-							/*if(contxt.is_char){
+							if(contxt.Variables[good_index].word_size==1){
 								file << std::endl << "\tsb\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-contxt.is_char = false;
 							}
-							else{*/
+							else{
 								file << std::endl << "\tsw\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
-							
+							}
 						}
 					}
 
 				
 					else if(found_local==2) {
 						file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
-						/*if(contxt.is_char) {
+						if(contxt.Variables[good_index].word_size==1) {
 							file << std::endl << "\tsb\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
-							contxt.is_char = false;
 						}
-						else{*/
+						else{
 							file << std::endl << "\tsw\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
-							
+						}	
 					}	
 								
 					else{

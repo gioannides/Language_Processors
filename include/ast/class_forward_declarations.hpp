@@ -13,12 +13,10 @@ struct bindings {
 	};
 
 struct Context{
-	bool rhs_of_expression=0;
-	bool lhs_of_assignment=0;
-	bool value_in_R2=0;
+	bool rhs_of_expression=false;
+	bool lhs_of_assignment=false;
 	std::string op_name="";
 
-	bool is_char = false;
 	bool initialized = false;
 	bool function = false;
 	bool negative = false; 	//is value a negative number?
