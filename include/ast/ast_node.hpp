@@ -1530,7 +1530,8 @@ inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 
 inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 
-	
+		if(!contxt.reading) 
+		{
 			if( DirectDeclaratorPtr != NULL) {
 
 				DirectDeclaratorPtr->render_asm(file,contxt);
@@ -1551,23 +1552,19 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				if(contxt.Variables.size()==0){
 					contxt.Variables.push_back(contxt.variable);				
 				}
-				else if(contxt.Variables[contxt.Variables.size()-1].id!=*IDENTIFIER)
+				else if(contxt.Variables[contxt.Variables.size()-2].id!=*IDENTIFIER && contxt.Variables[contxt.Variables.size()-1].id!=*IDENTIFIER)
 					{	//std::cout << " P ";
 						contxt.Variables.push_back(contxt.variable);
 					}
 			}
 
-			
-			
-			
-			else if(contxt.function && IDENTIFIER != NULL && contxt.reading){			//if we are in a function and the identifier is not null and protect flag is off
+			else if(contxt.function && IDENTIFIER != NULL){// && !contxt.reading){			//if we are in a function and the identifier is not null and protect flag is off
 
 					if( !contxt.protect) {				//then this is a function name we are reading
 					
 						contxt.funct_id = *IDENTIFIER;		//obtain the scope we are currently in
 						//contxt.variable.scope = *IDENTIFIER;	//assign this information to the local variable
 					}
-
 					else{
 						contxt.variable.scope = contxt.funct_id; //assign the variable the scope it is in
 						contxt.variable.id = *IDENTIFIER;	//if the portect flag is on then we are already inside the function , not reading the function name
@@ -1577,14 +1574,20 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 	
 						contxt.variable.value = 0;
 					}
-					contxt.Variables.push_back(contxt.variable);
+					if(contxt.Variables.size()==0){
+						contxt.Variables.push_back(contxt.variable);				
+					}
+					else if(contxt.Variables[contxt.Variables.size()-2].id!=*IDENTIFIER && contxt.Variables[contxt.Variables.size()-1].id!=*IDENTIFIER)
+					{	//std::cout << " P ";
+						contxt.Variables.push_back(contxt.variable);
+					}
 					//std::cout << " L ";
 				}
 				int found_local= 0;	
 				int good_index=0;		//this will determine whether the variable wanted is a global or a local
 				int i;				//must initialize the index i outside so it is accessible throughout here
-				//for(i=0; i<contxt.Variables.size(); i++)
-				//{file << contxt.Variables[i].id << " " << contxt.Variables[i].scope << " " << contxt.Variables[i].offset  << " " <<  contxt.Variables.size() << std::endl;}
+				for(i=0; i<contxt.Variables.size(); i++)
+				{file << contxt.Variables[i].id << " " << contxt.Variables[i].scope << " " << contxt.Variables[i].offset  << " " <<  contxt.Variables[i].value << std::endl;}
 				for(i=0; i<contxt.Variables.size(); i++) {
 					
 					if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
@@ -1639,7 +1642,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 						IDentifierList->render_asm(file);
 					}*/
 
-			
+			}
 
 	}
 
