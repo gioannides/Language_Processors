@@ -19,6 +19,8 @@ struct Context{
 	bool lhs_of_assignment=false;
 	std::string op_name="";
 
+	bool is_Selective = false;
+	bool elseif = false;
 	bool initialized = false;
 	bool function = false;
 	bool negative = false; 	//is value a negative number?
@@ -44,7 +46,7 @@ struct Context{
 
 inline std::string labelGen(Context& contxt) {
 
-	contxt.Labels.push_back("$L" + std::to_string(contxt.Labels.size()) + ":");
+	contxt.Labels.push_back(std::to_string(contxt.Labels.size()));
 	return contxt.Labels[contxt.Labels.size()-1];
 		
 }
