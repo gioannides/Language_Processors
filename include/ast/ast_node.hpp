@@ -736,7 +736,7 @@ class InitDeclaratorList : public Node {
 			InitDecLarator->render_asm(file,contxt);
 			if(!contxt.function) {
 				 	
-				file << std::endl << "\t.data";
+				file << std::endl << "\n\t.data";
 				file << std::endl << "\t.globl\t" << contxt.variable.id;
 				if( log2(contxt.variable.word_size) ){
 					file << std::endl << "\t.align\t" << log2(contxt.variable.word_size);
@@ -748,7 +748,7 @@ class InitDeclaratorList : public Node {
 					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
 				}
 				else if( (contxt.variable.word_size==4) && !contxt.float_){
-					file << std::endl << "\t.word\t" << contxt.variable.value;
+					file << std::endl << "\t.word\t" << contxt.global_value; //contxt.variable.value;
 				}
 				else if( (contxt.variable.word_size==4) && contxt.float_){
 					file << std::endl << "\t.float\t" << contxt.variable.value;
@@ -760,6 +760,7 @@ class InitDeclaratorList : public Node {
 				else if(contxt.variable.word_size==1){
 					file << std::endl << "\t.byte\t" << contxt.variable.value;
 				}
+				contxt.global_value=0;         // reset the value of the global
 				
 			}
 
@@ -971,9 +972,8 @@ class TypeSpecifier : public Node {
 			std::string types = *TYPES;			// Require conversion to be used
 
 				if (types=="char"){
-					contxt.variable.word_size = 4;				///it should be size=1, you need lb and sb
+					contxt.variable.word_size = 1;				///it should be size=1, you need lb and sb
 					contxt.variable.DataType = "char";
-					contxt.is_char = true;
 				}
 				else if (types=="short"){
 					contxt.variable.word_size = 2;
@@ -1598,44 +1598,38 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 								found_local=2;
 								good_index = i;
 								i = contxt.Variables.size();
-
-
 							}
 						}
 				}   	
 				if(contxt.lhs_of_assignment  && !contxt.reading && contxt.function){
 					if(found_local==1) {
-						//contxt.value_in_R2=false;
 						if(contxt.Variables[good_index].value != 0){
-							/*if(contxt.is_char){
+							if(contxt.Variables[good_index].word_size==1){
 								file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-contxt.is_char = false;
 							}
-							else{*/
+							else{
 								file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-							
+							}
 						}
 						else {
-							/*if(contxt.is_char){
+							if(contxt.Variables[good_index].word_size==1){
 								file << std::endl << "\tsb\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-contxt.is_char = false;
 							}
-							else{*/
+							else{
 								file << std::endl << "\tsw\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
-							
+							}
 						}
 					}
 
 				
 					else if(found_local==2) {
 						file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
-						/*if(contxt.is_char) {
+						if(contxt.Variables[good_index].word_size==1) {
 							file << std::endl << "\tsb\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
-							contxt.is_char = false;
 						}
-						else{*/
+						else{
 							file << std::endl << "\tsw\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
-							
+						}	
 					}	
 								
 					else{

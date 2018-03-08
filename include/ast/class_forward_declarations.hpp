@@ -3,6 +3,8 @@
 
 
 
+
+
 struct bindings {
 		int word_size = 0;
 		std::string id = "";		//name of variable
@@ -13,12 +15,10 @@ struct bindings {
 	};
 
 struct Context{
-	bool rhs_of_expression=0;
-	bool lhs_of_assignment=0;
-	bool value_in_R2=0;
+	bool rhs_of_expression=false;
+	bool lhs_of_assignment=false;
 	std::string op_name="";
 
-	bool is_char = false;
 	bool initialized = false;
 	bool function = false;
 	bool negative = false; 	//is value a negative number?
@@ -32,7 +32,18 @@ struct Context{
 	int totalStackArea = 0; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
+
+	int global_value=0;
+	int current_value=0;
+	std::vector<std::string> Labels;
 };
+
+
+std::string labelGen(Context& contxt) {
+	contxt.Labels.push_back("$L" + std::to_string(contxt.Labels.size()) + ":");
+	return contxt.Labels[contxt.Labels.size()-1];
+}
+		
 
 class Node;
 

@@ -1,17 +1,12 @@
 #include "ast_node.hpp"
 
 
-
-
 inline void CastExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 			if( UNaryExpression != NULL){
-				
 				UNaryExpression->render_asm(file,contxt);
 			}
-
 		}
-
 
 inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& contxt) {
 
@@ -23,7 +18,21 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 				MultiplicativeExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;			
 				CaStExpression->render_asm(file,contxt);
-				
+				if(!contxt.function){
+					if( *OPERATOR == "*" ){
+						contxt.global_value = contxt.global_value*contxt.current_value;
+						contxt.current_value = 0;
+					}
+					else if(*OPERATOR == "/"){
+						contxt.global_value = contxt.global_value/contxt.current_value;
+						contxt.current_value = 0;
+					}
+					else if (*OPERATOR == "%")
+					{
+						contxt.global_value = contxt.global_value%contxt.current_value;
+						contxt.current_value = 0;
+					}
+				}
 				if (contxt.function){
 					if( *OPERATOR == "*" ){
 						if(contxt.is_unsigned){
@@ -80,6 +89,16 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 				AdditiveExpressionPtr->render_asm(file,contxt);				
 				contxt.Regs++;
 				MultiplicativeExpressioN->render_asm(file,contxt);
+				if(!contxt.function){
+					if( *OPERATOR == "+" ){
+						contxt.global_value+=contxt.current_value;
+						contxt.current_value=0;
+					}
+					else if(*OPERATOR == "-"){
+						contxt.global_value-=contxt.current_value;
+						contxt.current_value=0;
+					}
+				}
 				if (contxt.function){
 
 					if( *OPERATOR == "+" ){
@@ -89,7 +108,6 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 						else{
 							file << std::endl << "\tadd\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 						}
-						//contxt.is_unsigned = false;
 					}
 					else if(  *OPERATOR == "-" ){
 						if(contxt.is_unsigned) {
@@ -98,12 +116,10 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 						else{
 							file << std::endl << "\tsub\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 						}
-						//contxt.is_unsigned = false;
 					}
 
 				}
 				contxt.Regs--;
-				
 			}
 
 		}
@@ -121,7 +137,17 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 				ShiftExpressionPtr->render_asm(file,contxt);				
 				contxt.Regs++;
 				AdditiVeExpression->render_asm(file,contxt);
-
+				
+				if(!contxt.function){
+					if( *OPERATOR == "<<" ){
+						contxt.global_value = contxt.global_value << contxt.current_value;
+						contxt.current_value=0;
+					}
+					else if(*OPERATOR == ">>"){
+						contxt.global_value = contxt.global_value >> contxt.current_value;
+						contxt.current_value=0;
+					}
+				}
 				if (contxt.function){
 					if( *OPERATOR == "<<" ){
 						file << std::endl << "\tsllv\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
@@ -136,7 +162,6 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 					}
 				}
 				contxt.Regs--;
-
 			}
 	}
 
@@ -185,6 +210,24 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 						}
 					}
 				}
+				if(!contxt.function){
+					if( *OPERATOR == "<" ){
+						contxt.global_value = contxt.global_value < contxt.current_value;
+					}
+					else if(*OPERATOR == ">"){
+						contxt.global_value = contxt.global_value > contxt.current_value;
+					}
+					else if(*OPERATOR == "<=")
+					{
+						contxt.global_value = contxt.global_value <= contxt.current_value;
+					}
+					else if(*OPERATOR == ">=")
+					{
+						contxt.global_value = contxt.global_value >= contxt.current_value;
+					}
+					contxt.current_value =0;
+				}
+
 				contxt.Regs--;
 				
 			}
@@ -211,7 +254,17 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 						file << std::endl << "\txor\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;						
 						file << std::endl << "\tsltu\t$" << contxt.Regs << ", $0, $" << contxt.Regs;
 						//file << std::endl << "\tsltu\t$2, $0, $2";
-
+					}
+				}
+				else 
+				{
+					if(*OPERATOR == "==")
+					{
+						contxt.global_value = contxt.global_value == contxt.current_value;
+					}
+					else if(*OPERATOR == "!=")
+					{
+						contxt.global_value = contxt.global_value != contxt.current_value;  
 					}
 				}
 				contxt.Regs--;
@@ -232,6 +285,11 @@ inline void AndExpression::render_asm(std::ofstream& file,Context& contxt) {
 				if (contxt.function){
 					file << std::endl << "\tand\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 				}
+				else 
+				{
+					contxt.global_value = contxt.global_value & contxt.current_value;
+					contxt.current_value = 0;
+				}
 				contxt.Regs--;
 			}
 		}
@@ -247,9 +305,14 @@ inline void ExclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 				ExclusiveOrExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;
 				ANDexpression->render_asm(file,contxt);
-				if (contxt.function && !contxt.reading){
+				if (contxt.function){
 					file << std::endl << "\txor\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 
+				}
+				else 
+				{
+					contxt.global_value = contxt.global_value ^ contxt.current_value;
+					contxt.current_value = 0;
 				}
 				contxt.Regs--;
 			}
@@ -270,7 +333,11 @@ inline void InclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 					file << std::endl << "\tor\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 					//contxt.is_unsigned = false;
 				}
-				
+				else 
+				{
+					contxt.global_value = contxt.global_value | contxt.current_value;
+					contxt.current_value = 0;
+				}
 			}
 
 		}
@@ -285,7 +352,12 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 				
 				INclusiveOrExpression->render_asm(file,contxt);
 				if (contxt.function){
-					// NOT IMPLEMENTED
+					//not implemnetd
+				}
+				else 
+				{
+					contxt.global_value = contxt.global_value && contxt.current_value;
+					contxt.current_value = 0;
 				}
 				
 			}
@@ -305,6 +377,11 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 				if (contxt.function){
 					// NOT IMPLEMENTED
+				}
+				else 
+				{
+					contxt.global_value = contxt.global_value || contxt.current_value;
+					contxt.current_value = 0;
 				}
 				
 			}
@@ -333,221 +410,174 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 }
 
 
-inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  {
-
+inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
+{
+	if( AssignmentExpressionPtr != NULL && !contxt.reading ) 
+	{
+		AssignmentExpressionPtr->render_asm(file,contxt);
+	}
+	else if( IDENTIFIER != NULL && !contxt.reading && contxt.function)			//this identifier is involved in expressions
+	{
+		int found_0nothing_1local_2globl = 0;	
+		int good_index=0;			//this will determine whether the variable wanted is a global or a local
+		int i(0);				//must initialize the index i outside so it is accessible throughout here
 		
-			if( AssignmentExpressionPtr != NULL && !contxt.reading ) {
-
-				AssignmentExpressionPtr->render_asm(file,contxt);
+		for(i=0; i<contxt.Variables.size(); i++) {
+			if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
+				found_0nothing_1local_2globl = 1;	//means that we found a local variable in the function of that name					
+				good_index=i;
+				i = contxt.Variables.size();
+				if(contxt.Variables[good_index].DataType == "unsigned") {
+					contxt.is_unsigned = true;
+				}										
 			}
-
-			else if( IDENTIFIER != NULL && !contxt.reading && contxt.function) {			//this identifier is involved in expressions
-
-			
-				int found_0nothing_1local_2globl = 0;	
-				int good_index=0;			//this will determine whether the variable wanted is a global or a local
-				int i(0);				//must initialize the index i outside so it is accessible throughout here
-				
-				for(i=0; i<contxt.Variables.size(); i++) {
-					
-					if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
-						found_0nothing_1local_2globl = 1;	//means that we found a local variable in the function of that name					
-						good_index=i;
-						i = contxt.Variables.size();
-						if(contxt.Variables[good_index].DataType == "unsigned") {
-							contxt.is_unsigned = true;
-						}										
-
-					}
-				}
-				if(!found_0nothing_1local_2globl) {
-						for(i=0; i<contxt.Variables.size(); i++) {
-							if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
-								found_0nothing_1local_2globl=2;
-								good_index = i;
-								i = contxt.Variables.size();
-
-								if(contxt.Variables[good_index].DataType == "unsigned") {
-									contxt.is_unsigned = true;
-								}
-
-							}
-						
-						}
-				}   			
-
-							
-
-				if(contxt.lhs_of_assignment){
-					if(found_0nothing_1local_2globl==1) {
-						/*if(contxt.is_char) {
-							file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
-							contxt.is_char = false;
-						}				
-						else{*/
-							file << std::endl << "\tsw\t$2," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-						
-
-						if(contxt.Variables[good_index].DataType == "unsigned") {
-							contxt.is_unsigned = true;
-						}
-					}
-					
-					
-					else if(found_0nothing_1local_2globl==2) {
-        					file << std::endl << "\tlui\t$" << contxt.Regs+2 << ", %hi(" << contxt.Variables[good_index].id << ")";
-						//if(contxt.is_char) {
-						//	file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
-						//	contxt.is_char = false;
-						//}
-						//else{
-							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
-						
-						if(contxt.Variables[good_index].DataType == "unsigned") {
-							contxt.is_unsigned = true;
-						}
-					}			
-					else{
-						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
-					}
-				
-						
-				}
-				else if(contxt.rhs_of_expression){
-				   if(found_0nothing_1local_2globl==1) {
-					/*if(contxt.is_char) {
-						file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
-						contxt.is_char = false;
-					}
-					else{*/
-						file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
-					
-							
+		}
+		if(!found_0nothing_1local_2globl) {
+			for(i=0; i<contxt.Variables.size(); i++) {
+				if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
+					found_0nothing_1local_2globl=2;
+					good_index = i;
+					i = contxt.Variables.size();
 					if(contxt.Variables[good_index].DataType == "unsigned") {
-							contxt.is_unsigned = true;
-								
-					}
-				   }
-				else if(found_0nothing_1local_2globl==2) {
-					file << std::endl << "\tlui\t$" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
-					/*if(contxt.is_char) {
-						file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
-						contxt.is_char = false;
-					}
-					else{*/
-						file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
-       					if(contxt.Variables[good_index].DataType == "unsigned") {
 						contxt.is_unsigned = true;
 					}
 				}
-					//}		
-					
-				
-					/*else{ 
-						if(found_0nothing_1local_2globl==1) {
-							
-							contxt.value_in_R2=true; 
-							file << std::endl << "\tlw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
-							if(contxt.Variables[good_index].DataType == "unsigned") {
-								contxt.is_unsigned = true;
+			}
+		}   			
 
-							}
-						}
-						else if(found_0nothing_1local_2globl==2) {
-							contxt.value_in_R2=true; 
-							
-							file << std::endl << "\tlw\t$2, " << "%" << "got(" << contxt.Variables[good_index].id << ")($gp)";
-							if(contxt.Variables[good_index].DataType == "unsigned") {
-								contxt.is_unsigned = true;
-
-							}
-							
-						}*/
-						else{
-							file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
-
-						}
-					}
-				}
-		
-
-			else if( CONSTANT != NULL && !contxt.reading ) {				//this constant is involved in expressions
-				std::string tmp ;
-				if(contxt.negative) {				
-					tmp = "-" + *CONSTANT;
-					contxt.negative = false;					
-				}
-				else {
-					tmp = *CONSTANT;
+		if(contxt.lhs_of_assignment){
+			if(found_0nothing_1local_2globl==1)  
+			{
+				if(contxt.Variables[good_index].word_size==1) 
+				{
+					file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
 				}				
-				char tmp2;
-				if(tmp.find_first_of("'")==0 && contxt.variable.word_size == 1) {
-					tmp2 = tmp[1];
-					contxt.variable.value = int(tmp2);
-				}			
+				else
+				{
+					file << std::endl << "\tsw\t$2," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+				}
+
+				if(contxt.Variables[good_index].DataType == "unsigned") {
+					contxt.is_unsigned = true;
+				}
+			}					
+			else if(found_0nothing_1local_2globl==2) {
+				file << std::endl << "\tlui\t$" << contxt.Regs+2 << ", %hi(" << contxt.Variables[good_index].id << ")";
+				if(contxt.Variables[good_index].word_size==1) {
+					file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+				}
 				else{
-					contxt.variable.value = std::stol(tmp);
+					file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 				}
-
-
-				//file << std::endl << rhs_of_expression;	//we might need to reverse the order of the if statements
-
-				if(contxt.rhs_of_expression && !contxt.reading && contxt.function){
-					file <<  std::endl << "\tli\t";
-				//	if(contxt.value_in_R2){
-						file << "$" << contxt.Regs+1 << ", " << tmp;
-				//	}
-				//	else {
-				//		contxt.value_in_R2=true;
-				//		file << "$2, " << *CONSTANT; 
-				//	}
+				if(contxt.Variables[good_index].DataType == "unsigned") {
+					contxt.is_unsigned = true;
 				}
+			}			
+			else{
+				file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 			}
 		}
+		else if(contxt.rhs_of_expression)
+		{
+		 	if(found_0nothing_1local_2globl==1) 
+		 	{
+				if(contxt.Variables[good_index].word_size==1)  
+				{
+					file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+				}
+				else
+				{
+					file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+				}		
+				if(contxt.Variables[good_index].DataType == "unsigned") 
+				{
+					contxt.is_unsigned = true;			
+				}
+		    }
+     	    else if(found_0nothing_1local_2globl==2) 
+			{
+				file << std::endl << "\tlui\t$" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
+				if(contxt.Variables[good_index].word_size==1) 
+				{
+					file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
+				}
+				else
+				{
+					file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
+   				}
+    			if(contxt.Variables[good_index].DataType == "unsigned") 
+       			{
+					contxt.is_unsigned = true;
+				}
+			}		
+			else
+			{
+				file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
+			}
+		}
+	}
+	else if( CONSTANT != NULL && !contxt.reading ) 
+	{				//this constant is involved in expressions
+		std::string tmp ;
+		if(contxt.negative) 
+		{				
+			tmp = "-" + *CONSTANT;
+			contxt.negative = false;					
+		}
+		else 
+		{
+			tmp = *CONSTANT;
+		}				
+		char tmp2;
+		if(tmp.find_first_of("'")==0 && contxt.variable.word_size == 1) 
+		{
+			tmp2 = tmp[1];
+			contxt.variable.value = int(tmp2);
+		}			
+		else
+		{
+			contxt.variable.value = std::stol(tmp);
+		}
+		if(contxt.rhs_of_expression && !contxt.reading && contxt.function)
+		{
+			file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << tmp;
+		}
+		else if (contxt.rhs_of_expression && !contxt.reading && !contxt.function)
+		{
+			if(contxt.global_value==0)
+				contxt.global_value=std::stod(tmp);
+			else 
+				contxt.current_value=std::stod(tmp);
+		}
+	}
+}
 					
-	
-
-		
 inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contxt) {
 			
-
 			if (ExpressioN != NULL) {
-
 				ExpressioN->render_asm(file,contxt);
 			}
-
 			if( LogicalORExpression != NULL) {
 				LogicalORExpression->render_asm(file,contxt);
 			}
-
 }
 				
-
 inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contxt)  {
-
 			
 			if(AssignmentExpressionPtr != NULL) {
-				
 				contxt.rhs_of_expression = true;
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 			}
 			if(UnaryExpressionPtr != NULL) {
-				//std::cout << "\nlhs_of_assignment should be 0, it is:" << contxt.lhs_of_assignment <<"\n"  ;
 				contxt.lhs_of_assignment = true;
 				UnaryExpressionPtr->render_asm(file,contxt);			//TODO: This is for identifier names and values
-				//std::cout << "\nlhs_of_assignment should be 1, it is:" << contxt.lhs_of_assignment <<"\n"  ;
 				contxt.lhs_of_assignment = false;
-
 			}				
 			else if(ConditionalExpressionPtr != NULL) {
-				
 				ConditionalExpressionPtr->render_asm(file,contxt);		//THIS IS FOR IF STATEMENTS/ LOGICAL / ARITHMETIC OPERATIONS / ASSIGNEMENTS
-
 			}
-
 		}
-
 
 inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 		
