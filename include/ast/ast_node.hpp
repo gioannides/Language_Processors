@@ -13,9 +13,11 @@
 static Context contxt;
 
 class SpecifierQualifierList : public Node {};
-class Init_Declaration_List : public Node {};
+
 class InclusiveAndExpression : public Node {};
 class TypeName : public Node {};
+
+
 
 
 
@@ -684,7 +686,7 @@ class InitDeclarator : public Node {
 					}
 				}*/
 
-				
+			
 				contxt.rhs_of_expression = true;
 				InitiaLizer->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
@@ -707,6 +709,35 @@ class InitDeclarator : public Node {
 		}
 	
 };
+
+
+
+class InitDeclarationList : public Node {
+
+	private:
+		InitDeclarationList* InitDeclarationListPtr;
+		InitDeclarator* InitDeclaratorPtr;
+
+	public:
+		InitDeclarationList( InitDeclarationList* InitDeclarationListPtr, InitDeclarator* InitDeclaratorPtr) : InitDeclarationListPtr(InitDeclarationListPtr) , InitDeclaratorPtr(InitDeclaratorPtr) {}
+
+		~InitDeclarationList() {}
+
+
+
+		void render_asm(std::ofstream& file, Context& contxt) {
+
+			if( InitDeclarationListPtr != NULL ) {
+
+				InitDeclarationListPtr->render_asm(file,contxt);
+			}
+
+			InitDeclaratorPtr->render_asm(file,contxt);
+		}
+		
+
+};
+
 
 
 
@@ -1597,7 +1628,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				}   	
 				if(contxt.lhs_of_assignment  && !contxt.reading && contxt.function){
 					if(found_local==1) {
-						if(contxt.Variables[good_index].value != 0){
+						if(contxt.initialized){
 							if(contxt.Variables[good_index].word_size==1){
 								file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 							}
