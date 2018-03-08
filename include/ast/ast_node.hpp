@@ -1177,25 +1177,7 @@ class IterationStatement : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file, Context& contxt) {
-
-			if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
-
-			}
-
-			else if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && AssignmentExpressionPtr != NULL && StatementPtr != NULL){
-			
-			}
-
-			else if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "do" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr == NULL && StatementPtr != NULL){
-			
-			}
-
-			else if(ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "do" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL){
-			
-			}
-		
-		}
+		void render_asm(std::ofstream& file, Context& contxt) ;
 };
 
 
@@ -1695,13 +1677,13 @@ inline void Declarator::render_asm(std::ofstream& file,Context& contxt) {
 
 inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 
-			if( LabeledStatementPtr != NULL ) {
+			if( LabeledStatementPtr != NULL ) {				//TODO: DO IT
 				LabeledStatementPtr->render_asm(file,contxt);
 			}
 			else if( CompoundStatementPtr != NULL ) {
 				CompoundStatementPtr->render_asm(file,contxt);
 			}
-			else if( ExpressionStatementPtr != NULL ) {
+			else if( ExpressionStatementPtr != NULL ) {		
 				ExpressionStatementPtr->render_asm(file,contxt);
 			}
 			else if( IterationStatementPtr != NULL ) {
@@ -1710,12 +1692,89 @@ inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 			else if( JumpStatementPtr != NULL ) {
 				JumpStatementPtr->render_asm(file,contxt);
 			}
-			else if( SelectionStatementPtr != NULL ) {
+			else if( SelectionStatementPtr != NULL ) {			//TODO: SWITCH / CASE
 				SelectionStatementPtr->render_asm(file,contxt);
 			}
 		}
 
 
+inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt) {
+			
+			std::string label_id = labelGen(contxt);
+			std::string WHILE = "$WHILE" + label_id;
+			std::string DO = "$DO" + label_id;
+			std::string END = "$END" + label_id;
+			std::string FOR = "$FOR" + label_id;
+			std::string BEGIN_ = "$BEGIN" + label_id;
+
+
+			if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
+					
+				file << std::endl << BEGIN_ << ":";
+				contxt.rhs_of_expression = true;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << END;
+				file << std::endl << "\tnop";
+				file << std::endl << WHILE << ":";
+				StatementPtr->render_asm(file,contxt);
+				file << "\n\tb " << BEGIN_;
+				file << std::endl << "\tnop";
+			
+
+			}
+
+			else if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "do" && AssignmentExpressionPtr != NULL && StatementPtr != NULL){
+
+					
+				file << std::endl << DO << ":";
+				StatementPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = true;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << END;
+				file << std::endl << "\tnop";				
+				file << "\n\tb " << DO;
+				file << std::endl << "\tnop";
+			
+			}
+
+			else if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr == NULL && StatementPtr != NULL){
+				
+				ExpressionStatementPtr->render_asm(file,contxt);
+				file << std::endl << FOR << ":";
+				contxt.rhs_of_expression = true;
+				ExpressionStatementPtr2->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << END;
+				file << std::endl << "\tnop";
+				StatementPtr->render_asm(file,contxt);				
+				file << "\n\tb " << FOR;
+				file << std::endl << "\tnop";				
+
+			
+			}
+
+			else if(ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL){
+
+				ExpressionStatementPtr->render_asm(file,contxt);
+				file << std::endl << FOR << ":";
+				contxt.rhs_of_expression = true;
+				ExpressionStatementPtr2->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << END;
+				file << std::endl << "\tnop";
+				contxt.rhs_of_expression = true;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;				
+				StatementPtr->render_asm(file,contxt);				
+				file << "\n\tb " << FOR;
+				file << std::endl << "\tnop";
+			
+			}
+			file << std::endl << END << ":"; 
+		
+		}
 
 
 
@@ -1728,6 +1787,8 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 			std::string ELSE = "$ELSE" + label_id;
 			std::string IF = "$IF" + label_id;
 			std::string END = "$END" + label_id;
+			std::string SWITCH = "$SWITCH" + label_id;
+			std::string CASE = "$CASE" + label_id;
 
 			if( SELECTIVE_IF != NULL && SELECTIVE_SWITCH == NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {
 				
@@ -1758,7 +1819,13 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 						
 
 			else if( SELECTIVE_IF == NULL && SELECTIVE_SWITCH != NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {
-			// NOT DONE	
+				contxt.rhs_of_expression = true;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << CASE;
+				file << std::endl << "\tnop";
+				file << std::endl << SWITCH << ":";
+				StatementPtr->render_asm(file,contxt);
 			}
 			file << std::endl << END << ":"; 
 		
