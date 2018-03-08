@@ -33,15 +33,20 @@ struct Context{
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
 
+	
 	int global_value=0;
 	int current_value=0;
+
 	std::vector<std::string> Labels;
+
 };
 
 
-std::string labelGen(Context& contxt) {
+inline std::string labelGen(Context& contxt) {
+
 	contxt.Labels.push_back("$L" + std::to_string(contxt.Labels.size()) + ":");
 	return contxt.Labels[contxt.Labels.size()-1];
+		
 }
 		
 

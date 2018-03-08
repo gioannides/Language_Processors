@@ -349,16 +349,21 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 			}
 			else if(LogicalAndExpressionPtr != NULL && !contxt.reading && INclusiveOrExpression != NULL && AND_OP != NULL) { 
 				LogicalAndExpressionPtr->render_asm(file,contxt);
-				
+				contxt.Regs++;
 				INclusiveOrExpression->render_asm(file,contxt);
 				if (contxt.function){
-					//not implemnetd
+
+					file <<  std::endl << "\tsne\t$"  << contxt.Regs  << ",$0,$" << contxt.Regs;
+					file<<   std::endl << "\tsne\t$" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
+					file<<   std::endl << "\tand\t$" << contxt.Regs <<  ",$" << contxt.Regs << ",$" << contxt.Regs+1;
+					
 				}
 				else 
 				{
 					contxt.global_value = contxt.global_value && contxt.current_value;
 					contxt.current_value = 0;
 				}
+				contxt.Regs--;
 				
 			}
 
@@ -373,16 +378,21 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 			}
 			else if( LogicalAndExpressionPtr != NULL && !contxt.reading && LogicalAndExpressionPtr != NULL && OR_OP != NULL){ 
 				LogicalOrExpressionPtr->render_asm(file,contxt);
-				
+				contxt.Regs++;
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 				if (contxt.function){
-					// NOT IMPLEMENTED
+					
+					file <<  std::endl << "\tsne\t$"  << contxt.Regs  << ",$0,$" << contxt.Regs;
+					file<<   std::endl << "\tsne\t$" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
+					file<<   std::endl << "\tor\t$" << contxt.Regs <<  ",$" << contxt.Regs << ",$" << contxt.Regs+1;
+					
 				}
 				else 
 				{
 					contxt.global_value = contxt.global_value || contxt.current_value;
 					contxt.current_value = 0;
 				}
+				contxt.Regs--;
 				
 			}
 		}
@@ -533,6 +543,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		{
 			tmp2 = tmp[1];
 			contxt.variable.value = int(tmp2);
+			tmp = std::to_string(int(tmp2));
 		}			
 		else
 		{
@@ -545,9 +556,11 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		else if (contxt.rhs_of_expression && !contxt.reading && !contxt.function)
 		{
 			if(contxt.global_value==0)
+
 				contxt.global_value=std::stod(tmp);
 			else 
 				contxt.current_value=std::stod(tmp);
+
 		}
 	}
 }
