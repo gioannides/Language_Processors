@@ -736,7 +736,7 @@ class InitDeclaratorList : public Node {
 			InitDecLarator->render_asm(file,contxt);
 			if(!contxt.function) {
 				 	
-				file << std::endl << "\t.data";
+				file << std::endl << "\n\t.data";
 				file << std::endl << "\t.globl\t" << contxt.variable.id;
 				if( log2(contxt.variable.word_size) ){
 					file << std::endl << "\t.align\t" << log2(contxt.variable.word_size);
@@ -748,7 +748,7 @@ class InitDeclaratorList : public Node {
 					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
 				}
 				else if( (contxt.variable.word_size==4) && !contxt.float_){
-					file << std::endl << "\t.word\t" << contxt.variable.value;
+					file << std::endl << "\t.word\t" << contxt.global_value; //contxt.variable.value;
 				}
 				else if( (contxt.variable.word_size==4) && contxt.float_){
 					file << std::endl << "\t.float\t" << contxt.variable.value;
@@ -760,6 +760,7 @@ class InitDeclaratorList : public Node {
 				else if(contxt.variable.word_size==1){
 					file << std::endl << "\t.byte\t" << contxt.variable.value;
 				}
+				contxt.global_value=0;         // reset the value of the global
 				
 			}
 

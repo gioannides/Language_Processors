@@ -1,17 +1,12 @@
 #include "ast_node.hpp"
 
 
-
-
 inline void CastExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 			if( UNaryExpression != NULL){
-				
 				UNaryExpression->render_asm(file,contxt);
 			}
-
 		}
-
 
 inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& contxt) {
 
@@ -23,7 +18,21 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 				MultiplicativeExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;			
 				CaStExpression->render_asm(file,contxt);
-				
+				if(!contxt.function){
+					if( *OPERATOR == "*" ){
+						contxt.global_value = contxt.global_value*contxt.current_value;
+						contxt.current_value = 0;
+					}
+					else if(*OPERATOR == "/"){
+						contxt.global_value = contxt.global_value/contxt.current_value;
+						contxt.current_value = 0;
+					}
+					else if (*OPERATOR == "%")
+					{
+						contxt.global_value = contxt.global_value%contxt.current_value;
+						contxt.current_value = 0;
+					}
+				}
 				if (contxt.function){
 					if( *OPERATOR == "*" ){
 						if(contxt.is_unsigned){
@@ -80,6 +89,16 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 				AdditiveExpressionPtr->render_asm(file,contxt);				
 				contxt.Regs++;
 				MultiplicativeExpressioN->render_asm(file,contxt);
+				if(!contxt.function){
+					if( *OPERATOR == "+" ){
+						contxt.global_value+=contxt.current_value;
+						contxt.current_value=0;
+					}
+					else if(*OPERATOR == "-"){
+						contxt.global_value-=contxt.current_value;
+						contxt.current_value=0;
+					}
+				}
 				if (contxt.function){
 
 					if( *OPERATOR == "+" ){
@@ -89,7 +108,6 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 						else{
 							file << std::endl << "\tadd\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 						}
-						//contxt.is_unsigned = false;
 					}
 					else if(  *OPERATOR == "-" ){
 						if(contxt.is_unsigned) {
@@ -98,12 +116,10 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 						else{
 							file << std::endl << "\tsub\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 						}
-						//contxt.is_unsigned = false;
 					}
 
 				}
 				contxt.Regs--;
-				
 			}
 
 		}
@@ -121,7 +137,17 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 				ShiftExpressionPtr->render_asm(file,contxt);				
 				contxt.Regs++;
 				AdditiVeExpression->render_asm(file,contxt);
-
+				
+				if(!contxt.function){
+					if( *OPERATOR == "<<" ){
+						contxt.global_value = contxt.global_value << contxt.current_value;
+						contxt.current_value=0;
+					}
+					else if(*OPERATOR == ">>"){
+						contxt.global_value = contxt.global_value >> contxt.current_value;
+						contxt.current_value=0;
+					}
+				}
 				if (contxt.function){
 					if( *OPERATOR == "<<" ){
 						file << std::endl << "\tsllv\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
@@ -136,7 +162,6 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 					}
 				}
 				contxt.Regs--;
-
 			}
 	}
 
@@ -185,6 +210,24 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 						}
 					}
 				}
+				if(!contxt.function){
+					if( *OPERATOR == "<" ){
+						contxt.global_value = contxt.global_value < contxt.current_value;
+					}
+					else if(*OPERATOR == ">"){
+						contxt.global_value = contxt.global_value > contxt.current_value;
+					}
+					else if(*OPERATOR == "<=")
+					{
+						contxt.global_value = contxt.global_value <= contxt.current_value;
+					}
+					else if(*OPERATOR == ">=")
+					{
+						contxt.global_value = contxt.global_value >= contxt.current_value;
+					}
+					contxt.current_value =0;
+				}
+
 				contxt.Regs--;
 				
 			}
@@ -211,7 +254,17 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 						file << std::endl << "\txor\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;						
 						file << std::endl << "\tsltu\t$" << contxt.Regs << ", $0, $" << contxt.Regs;
 						//file << std::endl << "\tsltu\t$2, $0, $2";
-
+					}
+				}
+				else 
+				{
+					if(*OPERATOR == "==")
+					{
+						contxt.global_value = contxt.global_value == contxt.current_value;
+					}
+					else if(*OPERATOR == "!=")
+					{
+						contxt.global_value = contxt.global_value != contxt.current_value;  
 					}
 				}
 				contxt.Regs--;
@@ -232,6 +285,11 @@ inline void AndExpression::render_asm(std::ofstream& file,Context& contxt) {
 				if (contxt.function){
 					file << std::endl << "\tand\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 				}
+				else 
+				{
+					contxt.global_value = contxt.global_value & contxt.current_value;
+					contxt.current_value = 0;
+				}
 				contxt.Regs--;
 			}
 		}
@@ -247,9 +305,14 @@ inline void ExclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 				ExclusiveOrExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;
 				ANDexpression->render_asm(file,contxt);
-				if (contxt.function && !contxt.reading){
+				if (contxt.function){
 					file << std::endl << "\txor\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 
+				}
+				else 
+				{
+					contxt.global_value = contxt.global_value ^ contxt.current_value;
+					contxt.current_value = 0;
 				}
 				contxt.Regs--;
 			}
@@ -270,7 +333,11 @@ inline void InclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 					file << std::endl << "\tor\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 					//contxt.is_unsigned = false;
 				}
-				
+				else 
+				{
+					contxt.global_value = contxt.global_value | contxt.current_value;
+					contxt.current_value = 0;
+				}
 			}
 
 		}
@@ -286,6 +353,11 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 				INclusiveOrExpression->render_asm(file,contxt);
 				if (contxt.function){
 					// NOT IMPLEMENTED
+				}
+				else 
+				{
+					contxt.global_value = contxt.global_value && contxt.current_value;
+					contxt.current_value = 0;
 				}
 				
 			}
@@ -305,6 +377,11 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 				if (contxt.function){
 					// NOT IMPLEMENTED
+				}
+				else 
+				{
+					contxt.global_value = contxt.global_value || contxt.current_value;
+					contxt.current_value = 0;
 				}
 				
 			}
@@ -464,6 +541,13 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		if(contxt.rhs_of_expression && !contxt.reading && contxt.function)
 		{
 			file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << tmp;
+		}
+		else if (contxt.rhs_of_expression && !contxt.reading && !contxt.function)
+		{
+			if(contxt.global_value==0)
+				contxt.global_value=std::stoi(tmp);
+			else 
+				contxt.current_value=std::stoi(tmp);
 		}
 	}
 }
