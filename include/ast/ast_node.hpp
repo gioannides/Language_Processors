@@ -52,6 +52,8 @@ class PrimaryExpression : public Node {
 		void print_py(std::ofstream& file);
 
 		void render_asm(std::ofstream& file,Context& contxt) ; 
+
+		void AssignmentOperator(std::ofstream& file, int good_index, Context& contxt) ; //For CodeGen
 		
 		
 
@@ -1196,6 +1198,12 @@ class SelectionStatement : public Node {
 		~SelectionStatement() {}
 
 		void print_py(std::ofstream& file,bool elseif=false) ;
+
+		void render_asm(std::ofstream& file, Context& contxt) {
+			
+			
+
+		}
 
 		std::string* get_info() ;
 };
