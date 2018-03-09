@@ -24,6 +24,8 @@ struct Context{
 	bool lhs_of_assignment=false;
 	std::string op_name="";
 
+	bool increment = false;
+	bool decrement = false;
 	bool is_Selective = false;
 	bool elseif = false;
 	bool initialized = false;

@@ -109,9 +109,10 @@ class UnaryExpression : public Node {
 		PostFixExpression* PostFixExpressionPtr;
 		std::string* OPERATOR;
 		CastExpression* CastExpressionPtr;
+		UnaryExpression* UnaryExpressionPtr;
 	public:
-		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, CastExpression* CastExpressionPtr) :
-			PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr) {}
+		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, CastExpression* CastExpressionPtr, UnaryExpression* UnaryExpressionPtr) :
+			PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr) {}
 
 		~UnaryExpression() {}
 

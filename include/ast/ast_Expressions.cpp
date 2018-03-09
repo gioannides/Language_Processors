@@ -410,7 +410,13 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 			if(PostFixExpressionPtr != NULL) {
 
+				if(OPERATOR != NULL) {
+					contxt.AssignmentOperator = *OPERATOR;
+				}
 				PostFixExpressionPtr->render_asm(file,contxt);
+
+				
+				
 			}
 
 			if( PrimaryExpressionPtr != NULL ) {
@@ -459,7 +465,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			if(found_0nothing_1local_2globl==1)  
 			{
 
-				if(contxt.AssignmentOperator != "="){
+				if(contxt.AssignmentOperator != "=" && contxt.AssignmentOperator != "++" && contxt.AssignmentOperator != "--"  && contxt.AssignmentOperator != "~"  && contxt.AssignmentOperator != "!" ){
 
 					AssignmentOperator(file,good_index,contxt);				
 				}
@@ -504,7 +510,11 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				else
 				{
 					file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
-				}		
+					
+				}
+				if(contxt.AssignmentOperator == "++" || contxt.AssignmentOperator == "--"){
+						AssignmentOperator(file,good_index,contxt);			
+					}		
 				if(contxt.Variables[good_index].DataType == "unsigned") 
 				{
 					contxt.is_unsigned = true;			
@@ -521,6 +531,9 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				{
 					file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
    				}
+				if(contxt.AssignmentOperator == "++" || contxt.AssignmentOperator == "--"){
+						AssignmentOperator(file,good_index,contxt);			
+					}
     			if(contxt.Variables[good_index].DataType == "unsigned") 
        			{
 					contxt.is_unsigned = true;
@@ -607,13 +620,30 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 			if(OPERATOR == NULL) {
 				PostFixExpressionPtr->render_asm(file,contxt);
 			}
-			else if ( CastExpressionPtr != NULL) {  //assigning meaning eg. & , - , + 
+			else if( UnaryExpressionPtr != NULL){
+				 if( *OPERATOR == "--"){
+					contxt.AssignmentOperator = "--";
+					UnaryExpressionPtr->render_asm(file,contxt);
 				
-				if( *OPERATOR == "-"){
-					contxt.negative = true;  
+				
 				}
-				CastExpressionPtr->render_asm(file,contxt);
+				else if( *OPERATOR == "++"){
+					contxt.AssignmentOperator = "++";
+					
+					UnaryExpressionPtr->render_asm(file,contxt);
+					
+				}
+				
 			}
+			else if ( CastExpressionPtr != NULL) {  //assigning meaning eg. & , - , + 
+			
+				if( *OPERATOR == "-"){
+					contxt.negative = true;
+				}
+					CastExpressionPtr->render_asm(file,contxt);  
+			
+			}
+			
 		}
 
 
@@ -699,6 +729,29 @@ inline void PrimaryExpression::AssignmentOperator(std::ofstream& file, int good_
 							file << std::endl << "\tor\t$2,$3,$2";
 					
 						}
+					else if(contxt.AssignmentOperator == "++"){
+						
+						file << std::endl << "\taddiu\t$2,$3,1";
+						
+					}
+					else if(contxt.AssignmentOperator == "--"){
+						
+						file << std::endl << "\taddiu\t$2,$3,-1";
+						
+					}
+					else if(contxt.AssignmentOperator == "~"){
+						if(contxt.is_unsigned){
+							file << std::endl << "\tnegu\t$2,$3";
+						}
+						else{
+							file << std::endl << "\tneg\t$2,$3";
+						}						
+					}
+					else if(contxt.AssignmentOperator == "!"){
+						
+						file << std::endl << "\tnot\t$2,$3";
+						
+					}
 			}
 
 	

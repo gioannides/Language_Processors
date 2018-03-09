@@ -287,16 +287,28 @@ ASSIGNMENT_EXPRESSION:CONDITIONAL_EXPRESSION							{ $$ = new AssignmentExpressi
 
 
 
-UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,NULL) ; } //DONE
-		| INC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
-		| DEC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL) ; } //DONE COMPLETELY
-		| UNARY_OPERATOR CAST_EXPRESSION						{ $$ = new UnaryExpression(NULL,$1,$2) ; } //DONE COMPLETELY
+UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,NULL,NULL) ; } //DONE
+		| INC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,$2) ; } //DONE COMPLETELY
+		| DEC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,$2) ; } //DONE COMPLETELY
+		| UNARY_OPERATOR CAST_EXPRESSION						{ $$ = new UnaryExpression(NULL,$1,$2,NULL) ; } //DONE COMPLETELY
 		//| SIZEOF UNARY_EXPRESSION
 		//| SIZEOF '(' TYPE_NAME ')'							//IMPLEMENT THIS
 
 
 
+CAST_EXPRESSION: UNARY_EXPRESSION								{ $$ = new CastExpression($1,NULL); }//DONE COMPLETELY
+		//| '(' TYPE_NAME ')' CAST_EXPRESSION						{ $$ = new CastExpression(NULL,$2); }//IMPLEMENT TYPE_NAME
 
+
+
+
+UNARY_OPERATOR:   '&'		{ $$ = $1;}								//DONE COMPLETELY
+		| MULTIPLY	{ $$ = $1;}								//DONE COMPLETELY
+		| PLUS		{ $$ = $1;}								//DONE COMPLETELY
+		| MINUS		{ $$ = $1;}								//DONE COMPLETELY
+		| '~'		{ $$ = $1;}								//DONE COMPLETELY
+		| '!'		{ $$ = $1;}								//DONE COMPLETELY
+	
 
 
 
@@ -427,8 +439,6 @@ MULTIPLICATIVE_EXPRESSION: CAST_EXPRESSION							{ $$ = new MultiplicativeExpres
 
 	
 
-CAST_EXPRESSION: UNARY_EXPRESSION								{ $$ = new CastExpression($1,NULL); }//DONE COMPLETELY
-		//| '(' TYPE_NAME ')' CAST_EXPRESSION						{ $$ = new CastExpression(NULL,$2); }//IMPLEMENT TYPE_NAME
 
 
 
@@ -442,8 +452,8 @@ POSTFIX_EXPRESSION: PRIMARY_EXPRESSION				      				{ $$ = new PostFixExpression
 		  | POSTFIX_EXPRESSION '(' ARGUMENT_EXPRESSION_LIST ')' 			{ $$ = new PostFixExpression($1,NULL,NULL,$3,NULL,NULL);}
 		  | POSTFIX_EXPRESSION '.' IDENTIFIER		     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$3,$2); }
 		  | POSTFIX_EXPRESSION PTR_OP IDENTIFIER		      			{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$3,$2); }
-		  | POSTFIX_EXPRESSION INC_OP			     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$2,NULL); }
-		  | POSTFIX_EXPRESSION DEC_OP			     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$2,NULL); }
+		  | POSTFIX_EXPRESSION INC_OP			     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,NULL,$2); }
+		  | POSTFIX_EXPRESSION DEC_OP			     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,NULL,$2); }
 
 
 
@@ -459,14 +469,6 @@ PRIMARY_EXPRESSION: IDENTIFIER				      					{ $$ = new PrimaryExpression($1,NUL
 
 
 
-
-UNARY_OPERATOR:   '&'		{ $$ = $1;}								//DONE COMPLETELY
-		| MULTIPLY	{ $$ = $1;}								//DONE COMPLETELY
-		| PLUS		{ $$ = $1;}								//DONE COMPLETELY
-		| MINUS		{ $$ = $1;}								//DONE COMPLETELY
-		| '~'		{ $$ = $1;}								//DONE COMPLETELY
-		| '!'		{ $$ = $1;}								//DONE COMPLETELY
-	
 
 
 ARGUMENT_EXPRESSION_LIST: ASSIGNMENT_EXPRESSION							{ $$ = new ArgumentExpressionList(NULL,$1); }
