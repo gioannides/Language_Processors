@@ -333,10 +333,11 @@ class ConditionalExpression : public Node {
 	private:
 		LogicalOrExpression* LogicalORExpression;
 		AssignmentExpression* ExpressioN;
-
+		ConditionalExpression* ConditionalExpressionPtr;
 	public:
 
-		ConditionalExpression( LogicalOrExpression* LogicalORExpression, AssignmentExpression* ExpressioN) : LogicalORExpression(LogicalORExpression),  ExpressioN(ExpressioN) {}
+		ConditionalExpression( LogicalOrExpression* LogicalORExpression, AssignmentExpression* ExpressioN, ConditionalExpression* ConditionalExpressionPtr) 
+		: LogicalORExpression(LogicalORExpression),  ExpressioN(ExpressioN), ConditionalExpressionPtr(ConditionalExpressionPtr) {}
 
 		~ConditionalExpression() {}
 
