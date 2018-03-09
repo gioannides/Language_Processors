@@ -1190,6 +1190,12 @@ class JumpStatement : public Node {
 				contxt.rhs_of_expression = true;
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
+				file << std::endl << "\tmove\t$sp,$fp";
+			file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
+			file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
+			file << std::endl << "\tj\t$31" << std::endl;
+			file << std::endl << "\tnop" << std::endl;
+
 		}
 	}
 };
