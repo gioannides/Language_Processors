@@ -585,13 +585,30 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 }
 					
 inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contxt) {
+
+			std::string label_id = labelGen(contxt);
+			std::string ELSE = "$ELSE" + label_id;
+			std::string IF = "$IF" + label_id;
+			std::string END = "$END" + label_id;
 			
-			if (ExpressioN != NULL) {
-				ExpressioN->render_asm(file,contxt);
-			}
-			if( LogicalORExpression != NULL) {
+			if( LogicalORExpression != NULL && ExpressioN == NULL && ConditionalExpressionPtr == NULL) {
 				LogicalORExpression->render_asm(file,contxt);
 			}
+			else if (LogicalORExpression != NULL && ExpressioN != NULL && ConditionalExpressionPtr != NULL) {
+				
+				contxt.rhs_of_expression = true;
+				LogicalORExpression->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;				
+				file << std::endl << "\tbeq\t$2,$0," << END;
+				file << std::endl << "\tnop";
+				file << std::endl << IF << ":";
+				ExpressioN->render_asm(file,contxt);
+				file << "\n\tb " << END;
+				file << std::endl << "\tnop";
+				file << std::endl << ELSE << ":";
+				ConditionalExpressionPtr->render_asm(file,contxt);
+			}
+			file << std::endl << END << ":";
 }
 				
 inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contxt)  {
