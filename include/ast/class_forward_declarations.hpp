@@ -47,6 +47,7 @@ struct Context{
 	int current_value=0;
 
 	std::vector<std::string> Labels;
+	bool no_return = true;
 
 };
 

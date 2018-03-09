@@ -1189,6 +1189,11 @@ class JumpStatement : public Node {
 				contxt.rhs_of_expression = true;
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
+			file << std::endl << "\tmove\t$sp,$fp";
+			file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
+			file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
+			file << std::endl << "\tj\t$31" << std::endl;
+			file << std::endl << "\tnop" << std::endl;
 		}
 	}
 };
@@ -1400,6 +1405,7 @@ class FunctionDefinition : public Node {
 				file << "\t.ent\t" << contxt.funct_id << std::endl;
 				file << "\t.type\t" << contxt.funct_id << "," << " @function" << std::endl;
 				file << contxt.funct_id << ":" << std::endl;
+				//contxt.no_return = true;
 				contxt.protect = true;
 			}
 
@@ -1425,7 +1431,7 @@ class FunctionDefinition : public Node {
 				CompoundStatementPtr->render_asm(file,contxt);
 				contxt.reading = false;
 			}
-
+			//if( contxt.no_return ){
 			file << std::endl << "\tmove\t$sp,$fp";
 			file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
 			file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
@@ -1435,7 +1441,8 @@ class FunctionDefinition : public Node {
 			file << "\t.set\t reorder" << std::endl;
 			file << "\t.end\t " << contxt.funct_id << std::endl;
 			file << "\t.size\t " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;		
-		}	
+			//}
+		}		
 };
 
 
@@ -1805,7 +1812,6 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 			
 			}
 			file << std::endl << END << ":"; 
-		
 		}
 
 
@@ -1829,7 +1835,7 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = false;
 				file << std::endl << "\tbeq\t$2,$0," << END;
 				file << std::endl << "\tnop";
-				file << std::endl << IF << ":";
+				//file << std::endl << IF << ":";
 				StatementPtr->render_asm(file,contxt);
 			}
 			
@@ -1840,7 +1846,7 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = false;
 				file << std::endl << "\tbeq\t$2,$0," << ELSE;
 				file << std::endl << "\tnop";
-				file << std::endl << IF << ":";
+				//file << std::endl << IF << ":";
 				StatementPtr->render_asm(file,contxt);
 				file << "\n\tb " << END;
 				file << std::endl << "\tnop";

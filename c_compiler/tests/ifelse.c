@@ -4,7 +4,7 @@ int main() {
 
 	
 
-	if(a == 8) {
+	if(a != 8) {
 		if( a < 8){
 			return a*a/2;
 		}
@@ -18,5 +18,5 @@ int main() {
 	else{
 		return 8;
 	}
-
+return 1;
 }
