@@ -98,7 +98,6 @@ class PostFixExpression : public Node {
 		void print_py(std::ofstream& file) ;
 
 		void render_asm(std::ofstream& file,Context& contxt); 
-
 };
 
 		
@@ -118,9 +117,7 @@ class UnaryExpression : public Node {
 
 		void print_py(std::ofstream& file); 
 
-
 		void render_asm(std::ofstream& file,Context& contxt) ; 
-
 
 };
 
@@ -375,6 +372,8 @@ class AssignmentExpression : public Node {
 
 
 class ConstantExpression : public Node {
+
+
 
 	private:
 		ConditionalExpression* ConditionalExpressionPtr;
@@ -1759,7 +1758,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				StatementPtr->render_asm(file,contxt);
 				file << "\n\tb " << BEGIN_;
 				file << std::endl << "\tnop";
-			
+				file << std::endl << END << ":";
 
 			}
 
@@ -1775,7 +1774,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				file << std::endl << "\tnop";				
 				file << "\n\tb " << DO;
 				file << std::endl << "\tnop";
-			
+				file << std::endl << END << ":";
 			}
 
 			else if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr == NULL && StatementPtr != NULL){
@@ -1790,7 +1789,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				StatementPtr->render_asm(file,contxt);				
 				file << "\n\tb " << FOR;
 				file << std::endl << "\tnop";				
-
+				file << std::endl << END << ":";
 			
 			}
 
@@ -1809,9 +1808,9 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				StatementPtr->render_asm(file,contxt);				
 				file << "\n\tb " << FOR;
 				file << std::endl << "\tnop";
-			
+				file << std::endl << END << ":";
 			}
-			file << std::endl << END << ":"; 
+			//file << std::endl << END << ":"; 
 		
 		}
 
@@ -1838,6 +1837,7 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				file << std::endl << "\tnop";
 				file << std::endl << IF << ":";
 				StatementPtr->render_asm(file,contxt);
+			    file << std::endl << END << ":"; 
 			}
 			
 			
@@ -1853,7 +1853,7 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				file << std::endl << "\tnop";
 				file << std::endl << ELSE << ":";
 				StatementPtr2->render_asm(file,contxt);
-
+				file << std::endl << END << ":"; 
 			}
 						
 
@@ -1865,8 +1865,9 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				file << std::endl << "\tnop";
 				file << std::endl << SWITCH << ":";
 				StatementPtr->render_asm(file,contxt);
+				file << std::endl << END << ":"; 
 			}
-			file << std::endl << END << ":"; 
+			//file << std::endl << END << ":"; 
 		
 		}
 

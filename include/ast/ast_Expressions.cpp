@@ -410,19 +410,22 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 			if(PostFixExpressionPtr != NULL) {
 
-				if(OPERATOR != NULL) {
+				if(OPERATOR != NULL && IDENTIFIER == NULL) {
+
 					contxt.AssignmentOperator = *OPERATOR;
 				}
+				contxt.lhs_of_assignment=true;
+				contxt.Regs++;
 				PostFixExpressionPtr->render_asm(file,contxt);
-
-				
-				
+				contxt.Regs--;
+				contxt.lhs_of_assignment=false;
 			}
 
 			if( PrimaryExpressionPtr != NULL ) {
 
 				PrimaryExpressionPtr->render_asm(file,contxt);
 			}
+
 }
 
 
@@ -465,7 +468,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			if(found_0nothing_1local_2globl==1)  
 			{
 
-				if(contxt.AssignmentOperator != "=" && contxt.AssignmentOperator != "++" && contxt.AssignmentOperator != "--"  && contxt.AssignmentOperator != "~"  && contxt.AssignmentOperator != "!" ){
+				if(contxt.AssignmentOperator != "=" /*&& contxt.AssignmentOperator != "++" && contxt.AssignmentOperator != "--"*/  && contxt.AssignmentOperator != "~"  && contxt.AssignmentOperator != "!" ){
 
 					AssignmentOperator(file,good_index,contxt);				
 				}
@@ -512,9 +515,9 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 					file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
 					
 				}
-				if(contxt.AssignmentOperator == "++" || contxt.AssignmentOperator == "--"){
-						AssignmentOperator(file,good_index,contxt);			
-					}		
+				// if(contxt.AssignmentOperator == "++" || contxt.AssignmentOperator == "--"){
+				// 		AssignmentOperator(file,good_index,contxt);			
+				// 	}		
 				if(contxt.Variables[good_index].DataType == "unsigned") 
 				{
 					contxt.is_unsigned = true;			
@@ -531,9 +534,9 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				{
 					file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
    				}
-				if(contxt.AssignmentOperator == "++" || contxt.AssignmentOperator == "--"){
-						AssignmentOperator(file,good_index,contxt);			
-					}
+				// if(contxt.AssignmentOperator == "++" || contxt.AssignmentOperator == "--"){
+				// 		AssignmentOperator(file,good_index,contxt);			
+				// 	}
     			if(contxt.Variables[good_index].DataType == "unsigned") 
        			{
 					contxt.is_unsigned = true;
@@ -640,15 +643,19 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 			else if( UnaryExpressionPtr != NULL){
 				 if( *OPERATOR == "--"){
 					contxt.AssignmentOperator = "--";
+					contxt.Regs++;
+					contxt.lhs_of_assignment = true;
 					UnaryExpressionPtr->render_asm(file,contxt);
-				
-				
+					contxt.lhs_of_assignment = false;
+					contxt.Regs--;
 				}
 				else if( *OPERATOR == "++"){
 					contxt.AssignmentOperator = "++";
-					
+					contxt.Regs++;
+					contxt.lhs_of_assignment = true;
 					UnaryExpressionPtr->render_asm(file,contxt);
-					
+					contxt.lhs_of_assignment = false;					
+					contxt.Regs--;
 				}
 				
 			}
