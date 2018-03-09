@@ -13,9 +13,11 @@
 static Context contxt;
 
 class SpecifierQualifierList : public Node {};
-class Init_Declaration_List : public Node {};
+
 class InclusiveAndExpression : public Node {};
 class TypeName : public Node {};
+
+
 
 
 
@@ -52,6 +54,8 @@ class PrimaryExpression : public Node {
 		void print_py(std::ofstream& file);
 
 		void render_asm(std::ofstream& file,Context& contxt) ; 
+
+		void AssignmentOperator(std::ofstream& file, int good_index, Context& contxt) ; //For CodeGen
 		
 		
 
@@ -105,9 +109,10 @@ class UnaryExpression : public Node {
 		PostFixExpression* PostFixExpressionPtr;
 		std::string* OPERATOR;
 		CastExpression* CastExpressionPtr;
+		UnaryExpression* UnaryExpressionPtr;
 	public:
-		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, CastExpression* CastExpressionPtr) :
-			PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr) {}
+		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, CastExpression* CastExpressionPtr, UnaryExpression* UnaryExpressionPtr) :
+			PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr) {}
 
 		~UnaryExpression() {}
 
@@ -682,7 +687,7 @@ class InitDeclarator : public Node {
 					}
 				}*/
 
-				
+			
 				contxt.rhs_of_expression = true;
 				InitiaLizer->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
@@ -705,6 +710,35 @@ class InitDeclarator : public Node {
 		}
 	
 };
+
+
+
+class InitDeclarationList : public Node {
+
+	private:
+		InitDeclarationList* InitDeclarationListPtr;
+		InitDeclarator* InitDeclaratorPtr;
+
+	public:
+		InitDeclarationList( InitDeclarationList* InitDeclarationListPtr, InitDeclarator* InitDeclaratorPtr) : InitDeclarationListPtr(InitDeclarationListPtr) , InitDeclaratorPtr(InitDeclaratorPtr) {}
+
+		~InitDeclarationList() {}
+
+
+
+		void render_asm(std::ofstream& file, Context& contxt) {
+
+			if( InitDeclarationListPtr != NULL ) {
+
+				InitDeclarationListPtr->render_asm(file,contxt);
+			}
+
+			InitDeclaratorPtr->render_asm(file,contxt);
+		}
+		
+
+};
+
 
 
 
@@ -1080,7 +1114,18 @@ class DeclarationSpecifiers : public Node{
 				//TypeQuaLifier->render_asm(file,contxt); //TODO: may have to implement this
 			}
 		}
+
 };
+
+
+
+
+
+
+
+
+
+
 class Declaration : public Node {
 
 	private:
@@ -1151,7 +1196,7 @@ class JumpStatement : public Node {
 class IterationStatement : public Node {
 
 	private:
-		AssignmentExpression* AssignmentExpressionPtr;
+		AssignmentExpression* AssignmentExpressionPtr; //EXPRESSION = ASSIGNMENT_EXPRESSION
 		Statement* StatementPtr;
 		ExpressionStatement* ExpressionStatementPtr;
 		ExpressionStatement* ExpressionStatementPtr2;
@@ -1164,10 +1209,11 @@ class IterationStatement : public Node {
 
 		void print_py(std::ofstream& file) ;
 
-		void render_asm(std::ofstream& file, Context& contxt){
-			file << "\nIterationStatement ~line1420\n";
-		}
+		void render_asm(std::ofstream& file, Context& contxt) ;
 };
+
+
+
 	
 class SelectionStatement : public Node {
 
@@ -1186,9 +1232,14 @@ class SelectionStatement : public Node {
 
 		void print_py(std::ofstream& file,bool elseif=false) ;
 
-		void render_asm(std::ofstream& file, Context &contxt);
+		void render_asm(std::ofstream& file, Context& contxt) ;
+
 		std::string* get_info() ;
 };
+
+
+
+
 
 
 class ExpressionStatement : public Node {
@@ -1222,6 +1273,8 @@ class LabeledStatement : public Node {
 		~LabeledStatement() {}
 
 		void print_py(std::ofstream& file) {}
+
+		void render_asm(std::ofstream& file,Context& contxt) {}
 };
 
 class Statement : public Node {
@@ -1248,7 +1301,7 @@ class Statement : public Node {
 	
 		std::string* get_info() ;
 
-		void render_asm(std::ofstream& file,Context& contxt) ;
+		void render_asm(std::ofstream& file,Context& contxt);
 
 };
 
@@ -1500,44 +1553,7 @@ inline void DeclarationList::render_asm(std::ofstream& file,Context& contxt) {
 			DeclarationPtr->render_asm(file,contxt);
 }
 
-inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 
-			if( JumpStatementPtr != NULL) {
-				JumpStatementPtr->render_asm(file,contxt);
-			}
-			if( IterationStatementPtr != NULL){
-				IterationStatementPtr->render_asm(file,contxt);
-			}
-			if( CompoundStatementPtr != NULL){
-				CompoundStatementPtr->render_asm(file,contxt);
-			}
-			if( ExpressionStatementPtr != NULL){
-				ExpressionStatementPtr->render_asm(file,contxt);
-			}
-			if( SelectionStatementPtr !=NULL)
-			{
-			//	SelectionStatementPtr->render_asm(file,contxt);
-			}
-}
-
-inline void SelectionStatement::render_asm(std::ofstream& file,Context& contxt){
-	if(AssignmentExpressionPtr != NULL)
-	{
-		AssignmentExpressionPtr->render_asm(file,contxt);
-	}
-	//make label
-	//file << "\n\tbeq\t$2, $0," << label << "start";
-	if(StatementPtr != NULL)
-	{
-		StatementPtr->render_asm(file,contxt);
-	}
-	//file << "\n\tb\t" << label << "finish";
-	if(StatementPtr2 !=NULL)
-	{
-		StatementPtr2->render_asm(file,contxt);
-	}
-
-}
 inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 
 	
@@ -1613,7 +1629,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				}   	
 				if(contxt.lhs_of_assignment  && !contxt.reading && contxt.function){
 					if(found_local==1) {
-						if(contxt.Variables[good_index].value != 0){
+						if(contxt.initialized){
 							if(contxt.Variables[good_index].word_size==1){
 								file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 							}
@@ -1691,6 +1707,160 @@ inline void Declarator::render_asm(std::ofstream& file,Context& contxt) {
 			DirectDecLarator->render_asm(file,contxt);
 		}
 
+inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 
+			if( LabeledStatementPtr != NULL ) {				//TODO: DO IT
+				LabeledStatementPtr->render_asm(file,contxt);
+			}
+			else if( CompoundStatementPtr != NULL ) {
+				CompoundStatementPtr->render_asm(file,contxt);
+			}
+			else if( ExpressionStatementPtr != NULL ) {		
+				ExpressionStatementPtr->render_asm(file,contxt);
+			}
+			else if( IterationStatementPtr != NULL ) {
+				IterationStatementPtr->render_asm(file,contxt);
+			}
+			else if( JumpStatementPtr != NULL ) {
+				JumpStatementPtr->render_asm(file,contxt);
+			}
+			else if( SelectionStatementPtr != NULL ) {			//TODO: SWITCH / CASE
+				SelectionStatementPtr->render_asm(file,contxt);
+			}
+		}
+
+
+inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt) {
+			
+			std::string label_id = labelGen(contxt);
+			std::string WHILE = "$WHILE" + label_id;
+			std::string DO = "$DO" + label_id;
+			std::string END = "$END" + label_id;
+			std::string FOR = "$FOR" + label_id;
+			std::string BEGIN_ = "$BEGIN" + label_id;
+
+
+			if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
+					
+				file << std::endl << BEGIN_ << ":";
+				contxt.rhs_of_expression = true;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << END;
+				file << std::endl << "\tnop";
+				file << std::endl << WHILE << ":";
+				StatementPtr->render_asm(file,contxt);
+				file << "\n\tb " << BEGIN_;
+				file << std::endl << "\tnop";
+			
+
+			}
+
+			else if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "do" && AssignmentExpressionPtr != NULL && StatementPtr != NULL){
+
+					
+				file << std::endl << DO << ":";
+				StatementPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = true;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << END;
+				file << std::endl << "\tnop";				
+				file << "\n\tb " << DO;
+				file << std::endl << "\tnop";
+			
+			}
+
+			else if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr == NULL && StatementPtr != NULL){
+				
+				ExpressionStatementPtr->render_asm(file,contxt);
+				file << std::endl << FOR << ":";
+				contxt.rhs_of_expression = true;
+				ExpressionStatementPtr2->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << END;
+				file << std::endl << "\tnop";
+				StatementPtr->render_asm(file,contxt);				
+				file << "\n\tb " << FOR;
+				file << std::endl << "\tnop";				
+
+			
+			}
+
+			else if(ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL){
+
+				ExpressionStatementPtr->render_asm(file,contxt);
+				file << std::endl << FOR << ":";
+				contxt.rhs_of_expression = true;
+				ExpressionStatementPtr2->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << END;
+				file << std::endl << "\tnop";
+				contxt.rhs_of_expression = true;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;				
+				StatementPtr->render_asm(file,contxt);				
+				file << "\n\tb " << FOR;
+				file << std::endl << "\tnop";
+			
+			}
+			file << std::endl << END << ":"; 
+		
+		}
+
+
+
+
+
+
+inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt) {
+		
+			std::string label_id = labelGen(contxt);
+			std::string ELSE = "$ELSE" + label_id;
+			std::string IF = "$IF" + label_id;
+			std::string END = "$END" + label_id;
+			std::string SWITCH = "$SWITCH" + label_id;
+			std::string CASE = "$CASE" + label_id;
+
+			if( SELECTIVE_IF != NULL && SELECTIVE_SWITCH == NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {
+				
+				contxt.rhs_of_expression = true;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << END;
+				file << std::endl << "\tnop";
+				file << std::endl << IF << ":";
+				StatementPtr->render_asm(file,contxt);
+			}
+			
+			
+			else if( SELECTIVE_IF != NULL && SELECTIVE_SWITCH == NULL && SELECTIVE_ELSE != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 != NULL) {
+				contxt.rhs_of_expression = true;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << ELSE;
+				file << std::endl << "\tnop";
+				file << std::endl << IF << ":";
+				StatementPtr->render_asm(file,contxt);
+				file << "\n\tb " << END;
+				file << std::endl << "\tnop";
+				file << std::endl << ELSE << ":";
+				StatementPtr2->render_asm(file,contxt);
+
+			}
+						
+
+			else if( SELECTIVE_IF == NULL && SELECTIVE_SWITCH != NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {
+				contxt.rhs_of_expression = true;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.rhs_of_expression = false;
+				file << std::endl << "\tbeq\t$2,$0," << CASE;
+				file << std::endl << "\tnop";
+				file << std::endl << SWITCH << ":";
+				StatementPtr->render_asm(file,contxt);
+			}
+			file << std::endl << END << ":"; 
+		
+		}
 
 #endif

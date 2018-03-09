@@ -1,5 +1,12 @@
 #ifndef CLASS_FORWARD
 #define CLASS_FORWARD
+#include <limits.h>
+#include <math.h>
+#include <bitset>
+#include <memory>
+#include <stdio.h>
+#include <string.h>
+
 
 
 
@@ -17,6 +24,10 @@ struct Context{
 	bool lhs_of_assignment=false;
 	std::string op_name="";
 
+	bool increment = false;
+	bool decrement = false;
+	bool is_Selective = false;
+	bool elseif = false;
 	bool initialized = false;
 	bool function = false;
 	bool negative = false; 	//is value a negative number?
@@ -30,10 +41,38 @@ struct Context{
 	int totalStackArea = 0; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
-
+	std::string AssignmentOperator;
+	
 	int global_value=0;
 	int current_value=0;
+
+	std::vector<std::string> Labels;
+
 };
+
+
+inline std::string labelGen(Context& contxt) {
+
+	contxt.Labels.push_back(std::to_string(contxt.Labels.size()));
+	return contxt.Labels[contxt.Labels.size()-1];
+		
+}
+
+inline std::string GetBinary32( float value )
+{
+    union
+    {
+         float input;   // assumes sizeof(float) == sizeof(int)
+         int   output;
+    }    data;
+ 
+    data.input = value;
+ 
+    std::bitset<sizeof(float) * CHAR_BIT>   bits(data.output);
+ 
+    return bits.to_string<char,std::char_traits<char>,std::allocator<char> >();
+}
+		
 
 class Node;
 

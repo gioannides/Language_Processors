@@ -2,6 +2,11 @@
 
 int main() {
 
-	return 1;
+	int x = 88;
+	unsigned y = 98;
+	int z;
+	z += y;
+	z -= y;
+	return z;
 
 }
