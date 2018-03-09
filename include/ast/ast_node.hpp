@@ -1080,18 +1080,7 @@ class DeclarationSpecifiers : public Node{
 				//TypeQuaLifier->render_asm(file,contxt); //TODO: may have to implement this
 			}
 		}
-
 };
-
-
-
-
-
-
-
-
-
-
 class Declaration : public Node {
 
 	private:
@@ -1197,6 +1186,7 @@ class SelectionStatement : public Node {
 
 		void print_py(std::ofstream& file,bool elseif=false) ;
 
+		void render_asm(std::ofstream& file, Context &contxt);
 		std::string* get_info() ;
 };
 
@@ -1510,7 +1500,6 @@ inline void DeclarationList::render_asm(std::ofstream& file,Context& contxt) {
 			DeclarationPtr->render_asm(file,contxt);
 }
 
-
 inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 
 			if( JumpStatementPtr != NULL) {
@@ -1525,9 +1514,30 @@ inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 			if( ExpressionStatementPtr != NULL){
 				ExpressionStatementPtr->render_asm(file,contxt);
 			}
+			if( SelectionStatementPtr !=NULL)
+			{
+			//	SelectionStatementPtr->render_asm(file,contxt);
+			}
+}
 
-		}
+inline void SelectionStatement::render_asm(std::ofstream& file,Context& contxt){
+	if(AssignmentExpressionPtr != NULL)
+	{
+		AssignmentExpressionPtr->render_asm(file,contxt);
+	}
+	//make label
+	//file << "\n\tbeq\t$2, $0," << label << "start";
+	if(StatementPtr != NULL)
+	{
+		StatementPtr->render_asm(file,contxt);
+	}
+	//file << "\n\tb\t" << label << "finish";
+	if(StatementPtr2 !=NULL)
+	{
+		StatementPtr2->render_asm(file,contxt);
+	}
 
+}
 inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 
 	
