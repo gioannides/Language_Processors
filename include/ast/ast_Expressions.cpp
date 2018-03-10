@@ -591,6 +591,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		if(contxt.rhs_of_expression && !contxt.reading && contxt.function)
 		{
 			file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << tmp;
+			//contxt.Case = tmp;
 		}
 		else if (contxt.rhs_of_expression && !contxt.reading && !contxt.function)
 		{

@@ -6,7 +6,7 @@
 #include <memory>
 #include <stdio.h>
 #include <string.h>
-
+class AssignmentExpression;
 
 
 
@@ -48,9 +48,14 @@ struct Context{
 	
 	int global_value=0;
 	int current_value=0;
-
+	std::vector<std::string> EndSwitchLoop;
 	std::vector<std::string> Labels;
+	
 	bool no_return = true;
+
+	std::vector<std::string> LoopHeader;
+	bool continue_for = false;
+	AssignmentExpression* TestConditionContinue = NULL;
 
 };
 
@@ -171,7 +176,7 @@ class ExpressionStatement;
 class Pointer;
 class PrimaryExpression;
 class PostFixExpression;
-class AssignmentExpression;
+
 class CastExpression;
 
 class DirectAbstractDeclarator;
