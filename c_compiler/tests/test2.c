@@ -6,6 +6,6 @@ int main() {
 	int b =8;
 	a -= b+=9;
 	
-	return (a/=b+=8);
+	return (b&=a*=b+=8);
 
 }

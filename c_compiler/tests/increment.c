@@ -6,13 +6,13 @@ int main() {
 	int k = 0;
 	int x = 100;
 	int i = 0;
-	for(i; i < 89; i=i+1) {
-		for(j;j<89; j=j+1){
-			for(k;k<90;k=k+1){
+	for(i; i < 89; i++) {
+		for(j;j<89; ++j){
+			for(k;k<90;k++){
 
 				while( x > 0){
 					x=x-1;
-					b = b +1;
+					b++;
 				}
 			}
 		}
@@ -20,7 +20,7 @@ int main() {
 	
 	
 	
-
+ 	b = (a+=1);
 	return b;
 
 }

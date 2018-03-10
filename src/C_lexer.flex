@@ -205,7 +205,7 @@ extern "C" int fileno(FILE *stream);
 
 "!"			{  return('!'); }
 
-"~"			{  return('~'); }
+"~"			{  return(TILDE); }
 
 "^"			{  return('^'); }
 

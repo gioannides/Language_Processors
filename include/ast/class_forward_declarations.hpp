@@ -24,6 +24,9 @@ struct Context{
 	bool lhs_of_assignment=false;
 	std::string op_name="";
 
+	int declarations_in_a_list=1;
+	bool exclamation = false;
+	bool tilde = false;
 	bool increment = false;
 	bool decrement = false;
 	bool is_Selective = false;

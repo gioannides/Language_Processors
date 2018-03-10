@@ -411,7 +411,6 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 			if(PostFixExpressionPtr != NULL) {
 
 				if(OPERATOR != NULL && IDENTIFIER == NULL) {
-
 					contxt.AssignmentOperator = *OPERATOR;
 				}
 				contxt.lhs_of_assignment=true;
@@ -468,10 +467,10 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			if(found_0nothing_1local_2globl==1)  
 			{
 
-				if(contxt.AssignmentOperator != "=" /*&& contxt.AssignmentOperator != "++" && contxt.AssignmentOperator != "--"*/  && contxt.AssignmentOperator != "~"  && contxt.AssignmentOperator != "!" ){
+				//if(contxt.AssignmentOperator != "=" /*&& contxt.AssignmentOperator != "++" && contxt.AssignmentOperator != "--"*/  && contxt.AssignmentOperator != "~"  && contxt.AssignmentOperator != "!" ){
 
 					AssignmentOperator(file,good_index,contxt);				
-				}
+				//}
 
 				if(contxt.Variables[good_index].word_size==1) 
 				{
@@ -515,9 +514,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 					file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
 					
 				}
-				// if(contxt.AssignmentOperator == "++" || contxt.AssignmentOperator == "--"){
-				// 		AssignmentOperator(file,good_index,contxt);			
-				// 	}		
+						
 				if(contxt.Variables[good_index].DataType == "unsigned") 
 				{
 					contxt.is_unsigned = true;			
@@ -534,9 +531,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				{
 					file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
    				}
-				// if(contxt.AssignmentOperator == "++" || contxt.AssignmentOperator == "--"){
-				// 		AssignmentOperator(file,good_index,contxt);			
-				// 	}
+				
     			if(contxt.Variables[good_index].DataType == "unsigned") 
        			{
 					contxt.is_unsigned = true;
@@ -551,10 +546,24 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 	else if( CONSTANT != NULL && !contxt.reading ) 
 	{				//this constant is involved in expressions
 		std::string tmp ;
+		int temp;
 		if(contxt.negative) 
 		{				
 			tmp = "-" + *CONSTANT;
 			contxt.negative = false;					
+		}
+		else if(contxt.tilde) 
+		{				
+			temp = (std::stod(*CONSTANT));
+			tmp = ~temp;		
+			contxt.tilde = false;					
+		}
+		else if(contxt.exclamation) 
+		{				
+			temp =(std::stod(*CONSTANT));
+			
+			tmp = !temp;		
+			contxt.exclamation = false;					
 		}
 		else 
 		{
@@ -622,7 +631,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 				contxt.rhs_of_expression = false;
 			}
 			if(UnaryExpressionPtr != NULL && AssignmentOperator != NULL) {
-
+				
 				contxt.AssignmentOperator = *AssignmentOperator;	
 				contxt.lhs_of_assignment = true;
 				UnaryExpressionPtr->render_asm(file,contxt);			//TODO: This is for identifier names and values
@@ -663,7 +672,17 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 			
 				if( *OPERATOR == "-"){
 					contxt.negative = true;
+					contxt.AssignmentOperator = "-";
+					
 				}
+				if( *OPERATOR == "~"){
+					contxt.tilde = true;
+				}
+				if( *OPERATOR == "!"){
+					contxt.exclamation = true;
+				}
+				
+				
 					CastExpressionPtr->render_asm(file,contxt);  
 			
 			}
@@ -691,21 +710,21 @@ inline void PrimaryExpression::AssignmentOperator(std::ofstream& file, int good_
 	}
 	else if(contxt.AssignmentOperator == "/="){
 			if(contxt.is_unsigned){
-							file << std::endl << "\tdivu\t$2,$3";
+							file << std::endl << "\tdivu\t$3,$2";
 							file << std::endl << "\tmflo\t$2";
 						}
 						else{
-							file << std::endl << "\tdiv\t$2,$3";
+							file << std::endl << "\tdiv\t$3,$2";
 							file << std::endl << "\tmflo\t$2";
 						}
 					}
 					else if(contxt.AssignmentOperator == "%="){
 						if(contxt.is_unsigned){
-							file << std::endl << "\tdivu\t$2,$3";
+							file << std::endl << "\tdivu\t$3,$2";
 							file << std::endl << "\tmfhi\t$2";
 						}
 						else{
-							file << std::endl << "\tdiv\t$2,$3";
+							file << std::endl << "\tdiv\t$3,$2";
 							file << std::endl << "\tmfhi\t$2";
 						}
 					}
