@@ -44,7 +44,7 @@ struct Context{
 	int totalStackArea = 0; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
-	std::string AssignmentOperator;
+	std::string AssignmentOperator = "df";
 	
 	int global_value=0;
 	int current_value=0;

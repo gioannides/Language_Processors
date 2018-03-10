@@ -83,7 +83,7 @@ for i in ${input_dir}/*.c ; do
 	#rm tmp/compiler/$base
     else
         echo -e "${wht}$base.c ${grn}[PASS]""${red}"
-	rm tmp/compiler/$base-got.s
+	#rm tmp/compiler/$base-got.s
 	rm tmp/compiler/$base
     fi
 

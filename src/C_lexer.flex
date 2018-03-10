@@ -171,6 +171,12 @@ extern "C" int fileno(FILE *stream);
 
 "+"			{  return token(PLUS);  }
 
+"&"			{  return('&'); }
+
+"!"			{  return('!'); }
+
+"~"			{  return(TILDE); }
+
 "-"			{  return token(MINUS); }
 
 "*"			{  return token(MULTIPLY); }
@@ -200,12 +206,6 @@ extern "C" int fileno(FILE *stream);
 ("]"|":>")		{  return(']'); }
 
 "."			{  return('.'); }
-
-"&"			{  return('&'); }
-
-"!"			{  return('!'); }
-
-"~"			{  return(TILDE); }
 
 "^"			{  return('^'); }
 

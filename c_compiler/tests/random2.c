@@ -6,20 +6,11 @@ int main() {
 	int a = 7;
 	int b =8;
 	int d = 98;
-	char g = 's';
+	int g = 115;
 	a -= b+=9;
 
-	if( x != 88) {
-		int i = 0;
-		for(i;i<100;++i)
-			x--;
-	}
-	else{
-		return -1;
-	}
-
-
 	
-	return (x+(g/=(d|=(b&=(a*=(b+=8))))));
+	
+	return x+(a+=4);
 
 }

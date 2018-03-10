@@ -412,11 +412,12 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 				if(OPERATOR != NULL && IDENTIFIER == NULL) {
 					contxt.AssignmentOperator = *OPERATOR;
+					file << "\n # this is the problem" << *OPERATOR;
 				}
 				contxt.lhs_of_assignment=true;
-				contxt.Regs++;
+				//contxt.Regs++;
 				PostFixExpressionPtr->render_asm(file,contxt);
-				contxt.Regs--;
+				//contxt.Regs--;
 				contxt.lhs_of_assignment=false;
 			}
 
@@ -464,12 +465,19 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		}   			
 
 		if(contxt.lhs_of_assignment){
+			if(found_0nothing_1local_2globl)
+			{
+				if(contxt.AssignmentOperator != "df" && contxt.AssignmentOperator != "=")// && contxt.AssignmentOperator != "--"*/  && contxt.AssignmentOperator != "~"  && contxt.AssignmentOperator != "!" ){
+				{
+					AssignmentOperator(file,good_index,contxt,found_0nothing_1local_2globl);				
+				}
+			}
 			if(found_0nothing_1local_2globl==1)  
 			{
-
-				//if(contxt.AssignmentOperator != "=" /*&& contxt.AssignmentOperator != "++" && contxt.AssignmentOperator != "--"*/  && contxt.AssignmentOperator != "~"  && contxt.AssignmentOperator != "!" ){
-
-					AssignmentOperator(file,good_index,contxt);				
+				file << "\n#" << contxt.AssignmentOperator;
+				//if(contxt.AssignmentOperator != "df" && contxt.AssignmentOperator != "=")// && contxt.AssignmentOperator != "--"*/  && contxt.AssignmentOperator != "~"  && contxt.AssignmentOperator != "!" ){
+				//{
+				//	AssignmentOperator(file,good_index,contxt);				
 				//}
 
 				if(contxt.Variables[good_index].word_size==1) 
@@ -636,7 +644,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 				contxt.lhs_of_assignment = true;
 				UnaryExpressionPtr->render_asm(file,contxt);			//TODO: This is for identifier names and values
 				contxt.lhs_of_assignment = false;
-				contxt.AssignmentOperator = "";
+				contxt.AssignmentOperator = "df";
 				
 			}				
 			else if(ConditionalExpressionPtr != NULL) {
@@ -645,156 +653,180 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 		}
 
 inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
-		
-			if(OPERATOR == NULL) {
+		if(OPERATOR != NULL){
+				//std::cout << std::endl << " w" << *OPERATOR<< "\n" ;
+			if( *OPERATOR == "~"){
+					contxt.tilde = true;
+					contxt.AssignmentOperator = "~";
+				}
+			if( *OPERATOR == "-"){
+					//std::cout << "\nthe minus is here\n";
+					contxt.negative = true;
+					contxt.AssignmentOperator = "-";
+					
+				}
+				
+				if( *OPERATOR == "!"){
+					contxt.exclamation = true;
+				}
+			}
+				
+				if ( CastExpressionPtr != NULL){
+					CastExpressionPtr->render_asm(file,contxt);  
+				}
+			if(PostFixExpressionPtr != NULL) {
 				PostFixExpressionPtr->render_asm(file,contxt);
 			}
 			else if( UnaryExpressionPtr != NULL){
 				 if( *OPERATOR == "--"){
 					contxt.AssignmentOperator = "--";
-					contxt.Regs++;
+					//contxt.Regs++;
 					contxt.lhs_of_assignment = true;
 					UnaryExpressionPtr->render_asm(file,contxt);
 					contxt.lhs_of_assignment = false;
-					contxt.Regs--;
+					//contxt.Regs--;
 				}
 				else if( *OPERATOR == "++"){
 					contxt.AssignmentOperator = "++";
-					contxt.Regs++;
+					//contxt.Regs++;
 					contxt.lhs_of_assignment = true;
 					UnaryExpressionPtr->render_asm(file,contxt);
 					contxt.lhs_of_assignment = false;					
-					contxt.Regs--;
-				}
-				
+					//contxt.Regs--;
+				}	
 			}
-			else if ( CastExpressionPtr != NULL) {  //assigning meaning eg. & , - , + 
+			//else if ( CastExpressionPtr != NULL && OPERATOR!=NULL) {  //assigning meaning eg. & , - , + 
 			
-				if( *OPERATOR == "-"){
-					contxt.negative = true;
-					contxt.AssignmentOperator = "-";
-					
-				}
-				if( *OPERATOR == "~"){
-					contxt.tilde = true;
-				}
-				if( *OPERATOR == "!"){
-					contxt.exclamation = true;
-				}
 				
-				
-					CastExpressionPtr->render_asm(file,contxt);  
 			
 			}
 			
+		
+
+
+
+inline void PrimaryExpression::AssignmentOperator(std::ofstream& file, int good_index, Context& contxt, int f) {
+	contxt.Regs++;
+	if(f==1){
+
+		if(contxt.Variables[good_index].word_size==1) {
+			file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		}				
+		else{
+			file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 		}
-
-
-
-inline void PrimaryExpression::AssignmentOperator(std::ofstream& file, int good_index, Context& contxt) {
-	if(contxt.Variables[good_index].word_size==1) {
-		file << std::endl << "\tlb\t$3, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
-	}				
-	else{
-		file << std::endl << "\tlw\t$3," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+	}
+	else if(f==2)
+	{
+			file << std::endl << "\tlui\t$" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
+			if(contxt.Variables[good_index].word_size==1) 
+			{
+				file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
+			}
+			else
+			{
+				file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
+   			}
 	}
 	if(contxt.AssignmentOperator == "*="){
 		if(contxt.is_unsigned){
-			file << std::endl << "\tmultu\t$2,$3";
-			file << std::endl << "\tmflo\t$2";
+			file << std::endl << "\tmultu\t$" << contxt.Regs << ",$" << contxt.Regs+1;
+			file << std::endl << "\tmflo\t$" << contxt.Regs;
 		}
 		else{
-			file << std::endl << "\tmult\t$2,$3";
-			file << std::endl << "\tmflo\t$2";
+			file << std::endl << "\tmult\t$" << contxt.Regs << ",$" << contxt.Regs+1;
+			file << std::endl << "\tmflo\t$" << contxt.Regs;
 			}
 	}
 	else if(contxt.AssignmentOperator == "/="){
 			if(contxt.is_unsigned){
-							file << std::endl << "\tdivu\t$3,$2";
-							file << std::endl << "\tmflo\t$2";
+							file << std::endl << "\tdivu\t$" << contxt.Regs+1 << ",$" << contxt.Regs;
+							file << std::endl << "\tmflo\t$"<< contxt.Regs;
 						}
 						else{
-							file << std::endl << "\tdiv\t$3,$2";
-							file << std::endl << "\tmflo\t$2";
+							file << std::endl << "\tdiv\t$" << contxt.Regs+1 << ",$" << contxt.Regs;
+							file << std::endl << "\tmflo\t$"<< contxt.Regs;
 						}
 					}
 					else if(contxt.AssignmentOperator == "%="){
 						if(contxt.is_unsigned){
-							file << std::endl << "\tdivu\t$3,$2";
-							file << std::endl << "\tmfhi\t$2";
+							file << std::endl << "\tdivu\t$" << contxt.Regs+1 << ",$" << contxt.Regs;
+							file << std::endl << "\tmfhi\t$"<< contxt.Regs;
 						}
 						else{
-							file << std::endl << "\tdiv\t$3,$2";
-							file << std::endl << "\tmfhi\t$2";
+							file << std::endl << "\tdiv\t$" << contxt.Regs+1 << ",$" << contxt.Regs;
+							file << std::endl << "\tmfhi\t$"<< contxt.Regs;
 						}
 					}
 					else if(contxt.AssignmentOperator == "+="){
+						// if(contxt.is_unsigned){
+						// 	file << std::endl << "\taddu\t$2,$3,$2";
+						// }
+						// else{
+						// 	file << std::endl << "\tadd\t$2,$3,$2";
+						// }
 						if(contxt.is_unsigned){
-							file << std::endl << "\taddu\t$2,$3,$2";
+							file << std::endl << "\taddu\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 						}
 						else{
-							file << std::endl << "\tadd\t$2,$3,$2";
+							file << std::endl << "\tadd\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 						}
 					}
 					else if(contxt.AssignmentOperator == "-="){
 						if(contxt.is_unsigned){
-							file << std::endl << "\tsubu\t$2,$3,$2";
+							file << std::endl << "\tsubu\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ", $" << contxt.Regs;
 						}
 						else{
-							file << std::endl << "\tsub\t$2,$3,$2";
+							file << std::endl << "\tsub\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ", $" << contxt.Regs;
 						}
 					}
 					else if(contxt.AssignmentOperator == "<<="){
 
-						file << std::endl << "\tsllv\t$2,$3,$2";
-
+						file << std::endl << "\tsllv\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 					}
 					else if(contxt.AssignmentOperator == ">>="){
 						if(contxt.is_unsigned){
-							file << std::endl << "\tsrlv\t$2,$3,$2";
+							file << std::endl << "\tsrlv\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 						}
 						else{
-							file << std::endl << "\tsrav\t$2,$3,$2";
+							file << std::endl << "\tsrav\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 						}
 					}
 					else if(contxt.AssignmentOperator == "&="){
 						
-							file << std::endl << "\tand\t$2,$3,$2";
+							file << std::endl << "\tand\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 					
 						}
 					else if(contxt.AssignmentOperator == "^="){
 						
-							file << std::endl << "\txor\t$2,$3,$2";
+							file << std::endl << "\txor\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 					
 						}
 					else if(contxt.AssignmentOperator == "|="){
 						
-							file << std::endl << "\tor\t$2,$3,$2";
+							file << std::endl << "\tor\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 					
 						}
 					else if(contxt.AssignmentOperator == "++"){
 						
-						file << std::endl << "\taddiu\t$2,$3,1";
+						file << std::endl << "\taddiu\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ",1";
 						
 					}
 					else if(contxt.AssignmentOperator == "--"){
 						
-						file << std::endl << "\taddiu\t$2,$3,-1";
+						file << std::endl << "\taddiu\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ",-1";
 						
 					}
-					else if(contxt.AssignmentOperator == "~"){
-						if(contxt.is_unsigned){
-							file << std::endl << "\tnegu\t$2,$3";
-						}
-						else{
-							file << std::endl << "\tneg\t$2,$3";
-						}						
+					else if(contxt.AssignmentOperator == "~" || contxt.tilde){
+						file << std::endl << "\tnor\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ",$0";		
 					}
 					else if(contxt.AssignmentOperator == "!"){
 						
 						file << std::endl << "\tnot\t$2,$3";
 						
 					}
+					contxt.AssignmentOperator = "df";
+					contxt.Regs--;
 			}
 
 	

@@ -55,7 +55,7 @@ class PrimaryExpression : public Node {
 
 		void render_asm(std::ofstream& file,Context& contxt) ; 
 
-		void AssignmentOperator(std::ofstream& file, int good_index, Context& contxt) ; //For CodeGen
+		void AssignmentOperator(std::ofstream& file, int good_index, Context& contxt, int f) ; //For CodeGen
 		
 		
 
@@ -673,7 +673,18 @@ class InitDeclarator : public Node {
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {
+			if(contxt.reading) { //this is predicting total stack frame for all paramters/local declarations in function body
+					//contxt.variable.offset = contxt.totalStackArea;
+					contxt.totalStackArea += contxt.variable.word_size;
+					//file << "\nonly golbals get here " << contxt.totalStackArea << "\n";
 
+				}
+
+				if(!contxt.reading){ //this is execution
+
+					contxt.StackOffset += contxt.variable.word_size;
+					contxt.variable.offset = contxt.StackOffset-contxt.variable.word_size;
+				}
 			
 			if( InitiaLizer != NULL && DecLarator != NULL) {
 				contxt.initialized = true;
@@ -1040,18 +1051,18 @@ class TypeSpecifier : public Node {
 					contxt.is_unsigned = true;
 				}
 
-				if(contxt.reading) { //this is predicting total stack frame for all paramters/local declarations in function body
-					//contxt.variable.offset = contxt.totalStackArea;
-					contxt.totalStackArea += contxt.variable.word_size;
-					//file << "\nonly golbals get here " << contxt.totalStackArea << "\n";
+				// if(contxt.reading) { //this is predicting total stack frame for all paramters/local declarations in function body
+				// 	//contxt.variable.offset = contxt.totalStackArea;
+				// 	contxt.totalStackArea += contxt.variable.word_size;
+				// 	//file << "\nonly golbals get here " << contxt.totalStackArea << "\n";
 
-				}
+				// }
 
-				if(!contxt.reading){ //this is execution
+				// if(!contxt.reading){ //this is execution
 
-					contxt.StackOffset += contxt.variable.word_size;
-					contxt.variable.offset = contxt.StackOffset-contxt.variable.word_size;
-				}
+				// 	contxt.StackOffset += contxt.variable.word_size;
+				// 	contxt.variable.offset = contxt.StackOffset-contxt.variable.word_size;
+				// }
 		}
 
 		~TypeSpecifier() {}
