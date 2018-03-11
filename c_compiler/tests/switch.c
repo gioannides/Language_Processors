@@ -15,7 +15,6 @@ int main(){
 		
 			x= 3;
 			break;
-			
 		case 9:
 			x= 7;
 			break;
@@ -24,7 +23,8 @@ int main(){
 			x= 98;
 			break;
 			
+			
 	}
-
+return x;
 }
 

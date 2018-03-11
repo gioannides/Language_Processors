@@ -1196,7 +1196,7 @@ class JumpStatement : public Node {
 				file << std::endl << "\tnop";
 			}
 
-			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "continue") {
+			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "continue"  && AssignmentExpressionPtr == NULL) {
 
 						if( contxt.TestConditionContinue != NULL){
 							contxt.rhs_of_expression = true;
@@ -1208,14 +1208,14 @@ class JumpStatement : public Node {
 							file << std::endl << "\tnop";
 						}			
 			}			
-			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "break") {
+			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "break" && AssignmentExpressionPtr == NULL) {
 
 				if( contxt.EndSwitchLoop.size() != 0){
 					file << std::endl << "\tb\t" << contxt.EndSwitchLoop[contxt.EndSwitchLoop.size()-1];		//The label of the loopend
 					file << std::endl << "\tnop";
 				}
 			}
-			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "return" && AssignmentExpressionPtr != NULL) {
+			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "return" ) {
 				contxt.rhs_of_expression = true;
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
@@ -1915,11 +1915,20 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = true;
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
+
 				contxt.Regs++;
+				contxt.ReadingSwitch = true;
 				StatementPtr->render_asm(file,contxt);
+				contxt.ReadingSwitch = false;
 				contxt.Regs--;
-				file << std::endl << END << ":";
+
+				contxt.CaseVectorSize = 0;
 				contxt.EndSwitchLoop.push_back(END);
+				//contxt.Regs++;
+				StatementPtr->render_asm(file,contxt);
+				//contxt.Regs--;
+				file << std::endl << END << ":";
+				
 				
 			}
 			
@@ -1929,30 +1938,36 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 
 			
-				std::string label_id = labelGen(contxt);
+							
 				
-				std::string CASE = "$CASE" + label_id ;
-				std::string SKIP = "$SKIP" + label_id ;
-				std::string DEFAULT = "$DEFAULT" + label_id ;
-				contxt.Labels.push_back(CASE);
+				
+				
 
 			if( LABELED_TYPE != NULL && ConstantExpressionPtr != NULL && *LABELED_TYPE == "case" && StatementPtr != NULL) {
-
 				
-				
-				
-				contxt.rhs_of_expression = true;
-				ConstantExpressionPtr->render_asm(file,contxt); //li in register 3
-				contxt.rhs_of_expression = false;
-				file << std::endl << "\tbeq\t$2,$3," << CASE;  //beq
-				file << std::endl << "\tnop";				//nop
-				file << std::endl << "\tb\t" << SKIP;
-				file << std::endl << "\tnop";				//nop
-				file <<  std::endl << CASE << ":";
-				
-				StatementPtr->render_asm(file,contxt);	
+				if(!contxt.ReadingSwitch){
 					
-				file << std::endl << SKIP << ":";
+					if(contxt.CaseVectorSize < contxt.Cases.size() && contxt.Cases.size() != 0){
+						file <<  std::endl << contxt.Cases[contxt.CaseVectorSize] << ":";
+						StatementPtr->render_asm(file,contxt);					
+						contxt.CaseVectorSize++;
+					}
+					
+					
+				}
+				else if(contxt.ReadingSwitch){
+					std::string label_id = labelGen(contxt);	
+					std::string CASE = "$CASE" + label_id ;
+					
+					contxt.rhs_of_expression = true;
+					ConstantExpressionPtr->render_asm(file,contxt); //li in register 3
+					contxt.rhs_of_expression = false;
+					file << std::endl << "\tbeq\t$2,$3," << CASE;  //beq
+					contxt.Cases.push_back(CASE);
+					file << std::endl << "\tnop";				//nop
+					
+				}
+				
 			}
 
 
@@ -1966,8 +1981,12 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 
 			else if( LABELED_TYPE != NULL && ConstantExpressionPtr == NULL && *LABELED_TYPE == "default" && StatementPtr != NULL) {				
 				
-				file <<  std::endl << DEFAULT << ":";				
-				StatementPtr->render_asm(file,contxt);	
+				if(!contxt.ReadingSwitch){
+					std::string label_id = labelGen(contxt);
+					std::string DEFAULT = "$DEFAULT" + label_id ;				
+					file <<  std::endl << DEFAULT << ":";				
+					StatementPtr->render_asm(file,contxt);
+				}
 					
 			}
 
