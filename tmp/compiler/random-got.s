@@ -20,155 +20,163 @@ $END0:
 $END1:
 $END2:
 $END3:
-$END4:	.set	noreorder
+$END4:
+$END5:	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-21
-	sw	$fp,17($sp)
+	addiu	$sp,$sp,-36
+	sw	$fp,32($sp)
+	sw	$31,28($sp)
 	move	$fp,$sp
 
 	li	$2, 9
-$END5:
-	sw	$2, 0($sp) #x
+$END6:
+	sw	$2, 24($sp) #x
 
 	li	$2, 7
-$END6:
-	sw	$2, 4($sp) #a
+$END7:
+	sw	$2, 20($sp) #a
 
 	li	$2, 8
-$END7:
-	sw	$2, 8($sp) #b
+$END8:
+	sw	$2, 16($sp) #b
 
 	li	$2, 98
-$END8:
+$END9:
 	sw	$2, 12($sp) #d
 
 	li	$2, 115
-$END9:
-	sb	$2, 16($sp) #g
+$END10:
+	sb	$2, 8($sp) #g
 
 	li	$2, 9
-$END10:
-	lw	$3, 8($sp) #b
+$END11:
+	lw	$3, 16($sp) #b
 
 	add	$2, $2, $3
 #df
-	sw	$2,8($sp) #b
+	sw	$2,16($sp) #b
 
-	lw	$3, 4($sp) #a
+	lw	$3, 20($sp) #a
 
 	sub	$2, $3, $2
 #df
-	sw	$2,4($sp) #a
+	sw	$2,20($sp) #a
 
-	lw	$2, 0($sp) #x
+	lw	$2, 24($sp) #x
 	li	$3, 88
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END12:
-	beq	$2,$0,$ELSE11
-	nop
-$IF11:
-	li	$2, 0
 $END13:
-	sw	$2, 17($sp) #i
+	beq	$2,$0,$ELSE12
+	nop
+$IF12:
+	li	$2, 0
+$END14:
+	sw	$2, 4($sp) #i
 
-	lw	$2, 17($sp) #i
-$END15:
-$FOR14:
-	lw	$2, 17($sp) #i
+	lw	$2, 4($sp) #i
+$END16:
+$FOR15:
+	lw	$2, 4($sp) #i
 	li	$3, 100
 	slt	$2, $2, $3
-$END16:
-	beq	$2,$0,$END14
-	nop
-	lw	$3, 17($sp) #i
-
-	addiu	$2, $3,1
-#df
-	sw	$2,17($sp) #i
-
 $END17:
- # this is the problem--
-	lw	$3, 0($sp) #x
+	beq	$2,$0,$END15
+	nop
+	lw	$3, 24($sp) #x
 
 	addiu	$2, $3,-1
 #df
-	sw	$2,0($sp) #x
+	sw	$2,24($sp) #x
 
 $END18:
-	b $FOR14
-	nop
-$END14:
-	b $END11
-	nop
-$ELSE11:
-	li	$2, -1
+	lw	$3, 4($sp) #i
+
+	addiu	$2, $3,1
+#df
+	sw	$2,4($sp) #i
+
 $END19:
+	b $FOR15
+	nop
+$END15:
+	b $END12
+	nop
+$ELSE12:
+	li	$2, -1
+$END20:
+	move	$2,$2
 	move	$sp,$fp
-	lw	$fp,17($sp)
-	addiu	$sp,$sp,21
+	lw	$31,28($sp)
+	lw	$fp,32($sp)
+	addiu	$sp,$sp,36
 	j	$31
 
 	nop
 
-$END11:
-	lw	$2, 0($sp) #x
-$END20:
+$END12:
+	lw	$2, 24($sp) #x
+$END21:
+	move	$2,$2
 	move	$sp,$fp
-	lw	$fp,17($sp)
-	addiu	$sp,$sp,21
+	lw	$31,28($sp)
+	lw	$fp,32($sp)
+	addiu	$sp,$sp,36
 	j	$31
 
 	nop
 
 	li	$2, 8
-$END27:
-	lw	$3, 8($sp) #b
+$END28:
+	lw	$3, 16($sp) #b
 
 	add	$2, $2, $3
 #df
-	sw	$2,8($sp) #b
+	sw	$2,16($sp) #b
 
-$END26:
-	lw	$3, 4($sp) #a
+$END27:
+	lw	$3, 20($sp) #a
 
 	mult	$2,$3
 	mflo	$2
 #df
-	sw	$2,4($sp) #a
+	sw	$2,20($sp) #a
 
-$END25:
-	lw	$3, 8($sp) #b
+$END26:
+	lw	$3, 16($sp) #b
 
 	and	$2, $2, $3
 #df
-	sw	$2,8($sp) #b
+	sw	$2,16($sp) #b
 
-$END24:
+$END25:
 	lw	$3, 12($sp) #d
 
 	or	$2, $2, $3
 #df
 	sw	$2,12($sp) #d
 
-$END23:
-	lb	$3, 16($sp) #g
+$END24:
+	lb	$3, 8($sp) #g
 	div	$3,$2
 	mflo	$2
 #df
-	sb	$2, 16($sp) #g
+	sb	$2, 8($sp) #g
+$END23:
 $END22:
-$END21:
+	move	$2,$2
 	move	$sp,$fp
-	lw	$fp,17($sp)
-	addiu	$sp,$sp,21
+	lw	$31,28($sp)
+	lw	$fp,32($sp)
+	addiu	$sp,$sp,36
 	j	$31
 
 	nop
 
 	move	$sp,$fp
-	lw	$fp,17($sp)
-	addiu	$sp,$sp,21
+	lw	$31,28($sp)
+	lw	$fp,32($sp)
+	addiu	$sp,$sp,36
 	j	$31
 
 	nop

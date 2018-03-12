@@ -17,7 +17,13 @@ struct bindings {
 		std::string scope = "";		//name of scope the variable is in
 		int offset = 0;			//the stack offset saved on the stack to load it from
 		std::string DataType;
+		int param_offset = 0;
 	};
+
+struct function_details{
+	int paramters_size = 0;
+	std::string name = "";
+};
 
 struct Context{
 	bool rhs_of_expression=false;
@@ -41,7 +47,7 @@ struct Context{
 	std::string funct_id = "";
 	std::vector<bindings> Variables;
 	bindings variable;
-	int totalStackArea = 0; //For the whole stack
+	int totalStackArea = 8; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
 	std::string AssignmentOperator = "df";
@@ -57,9 +63,23 @@ struct Context{
 	std::vector<std::string> LoopHeader;
 	bool continue_for = false;
 	AssignmentExpression* TestConditionContinue = NULL;
-
+	
+	std::vector<function_details> functions_declared;
+	function_details funcion_temp;
+	std::vector<std::string> Scopes;
+	int argument_no = 0;
+	bool parameter = false;
+	int max_offset = 0;
 };
-
+inline void print_variables(Context& contxt, std::ofstream& f){
+	for(int i=0; i<contxt.Variables.size(); i++)
+	{ 
+		f << "\n#" << contxt.Variables[i].id << " - " << contxt.Variables[i].scope << " - " << contxt.Variables[i].word_size << " - "<< contxt.Variables[i].value << " - " << contxt.Variables[i].offset << "-" << contxt.Variables[i].param_offset;
+		std::cout << "\n" << contxt.Variables[i].id << " - " << contxt.Variables[i].scope << " - " << contxt.Variables[i].word_size << " - "<< contxt.Variables[i].value << " - " << contxt.Variables[i].offset << "-" << contxt.Variables[i].param_offset;
+	}
+	f << "\n\n";
+	std::cout << "\n\n";
+}
 
 inline std::string labelGen(Context& contxt) {
 

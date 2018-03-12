@@ -28,8 +28,9 @@ a:
 main:
 	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-4
-	sw	$fp,0($sp)
+	addiu	$sp,$sp,-16
+	sw	$fp,12($sp)
+	sw	$31,8($sp)
 	move	$fp,$sp
 
 	lui	$2, %hi(a)
@@ -59,9 +60,11 @@ $IF3:
 	div	$2, $3
 	mflo	$2
 $END5:
+	move	$2,$2
 	move	$sp,$fp
-	lw	$fp,0($sp)
-	addiu	$sp,$sp,4
+	lw	$31,8($sp)
+	lw	$fp,12($sp)
+	addiu	$sp,$sp,16
 	j	$31
 
 	nop
@@ -71,9 +74,11 @@ $END5:
 $ELSE3:
 	li	$2, -76
 $END6:
+	move	$2,$2
 	move	$sp,$fp
-	lw	$fp,0($sp)
-	addiu	$sp,$sp,4
+	lw	$31,8($sp)
+	lw	$fp,12($sp)
+	addiu	$sp,$sp,16
 	j	$31
 
 	nop
@@ -92,9 +97,11 @@ $END8:
 $IF7:
 	li	$2, 89
 $END9:
+	move	$2,$2
 	move	$sp,$fp
-	lw	$fp,0($sp)
-	addiu	$sp,$sp,4
+	lw	$31,8($sp)
+	lw	$fp,12($sp)
+	addiu	$sp,$sp,16
 	j	$31
 
 	nop
@@ -104,9 +111,11 @@ $END9:
 $ELSE7:
 	li	$2, 8
 $END10:
+	move	$2,$2
 	move	$sp,$fp
-	lw	$fp,0($sp)
-	addiu	$sp,$sp,4
+	lw	$31,8($sp)
+	lw	$fp,12($sp)
+	addiu	$sp,$sp,16
 	j	$31
 
 	nop
@@ -115,16 +124,19 @@ $END7:
 $END1:
 	li	$2, 1
 $END11:
+	move	$2,$2
 	move	$sp,$fp
-	lw	$fp,0($sp)
-	addiu	$sp,$sp,4
+	lw	$31,8($sp)
+	lw	$fp,12($sp)
+	addiu	$sp,$sp,16
 	j	$31
 
 	nop
 
 	move	$sp,$fp
-	lw	$fp,0($sp)
-	addiu	$sp,$sp,4
+	lw	$31,8($sp)
+	lw	$fp,12($sp)
+	addiu	$sp,$sp,16
 	j	$31
 
 	nop
