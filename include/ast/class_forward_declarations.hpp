@@ -8,7 +8,7 @@
 #include <string.h>
 class AssignmentExpression;
 
-
+class Statement;
 
 struct bindings {
 		int word_size = 0;
@@ -18,6 +18,16 @@ struct bindings {
 		int offset = 0;			//the stack offset saved on the stack to load it from
 		std::string DataType;
 	};
+
+
+struct CasesJumpTable{
+
+	std::string SwitchScope;
+	std::string CaseID;
+	bool Used = false;
+	std::string ENDLABEL;
+
+};
 
 struct Context{
 	bool rhs_of_expression=false;
@@ -50,21 +60,44 @@ struct Context{
 	int current_value=0;
 	std::vector<std::string> EndSwitchLoop;
 	std::vector<std::string> Labels;
-	std::vector<std::string> Cases;
+
+	std::vector<CasesJumpTable> Cases;
+	std::vector<std::string> CaseLabels;
+	CasesJumpTable temp;
+	bool Jump = false;
 	bool no_return = true;
 	bool ReadingSwitch = false;
-	int CaseVectorSize =0;
+	int CaseVectorDefault =0;
+	int CaseVectorTrack =0;
+	int WasInSwitchBefore = 0;
 	std::vector<std::string> LoopHeader;
 	bool continue_for = false;
 	AssignmentExpression* TestConditionContinue = NULL;
+	
+	std::vector<std::string> LastScope;
 
 };
+
+inline std::string labelGenScope(Context& contxt) {
+
+	contxt.LastScope.push_back(std::to_string(contxt.LastScope.size()));
+	return contxt.LastScope[contxt.LastScope.size()-1];
+		
+}
+
 
 
 inline std::string labelGen(Context& contxt) {
 
 	contxt.Labels.push_back(std::to_string(contxt.Labels.size()));
 	return contxt.Labels[contxt.Labels.size()-1];
+		
+}
+
+inline std::string labelGenCase(Context& contxt) {
+
+	contxt.CaseLabels.push_back(std::to_string(contxt.CaseLabels.size()));
+	return contxt.CaseLabels[contxt.CaseLabels.size()-1];
 		
 }
 
@@ -162,7 +195,7 @@ class TranslationalUnit;
 class FunctionDefinition;
 class ExternalDeclaration;
 
-class Statement;
+
 class IterationStatement;
 class LabeledStatement;
 class SelectionStatement;

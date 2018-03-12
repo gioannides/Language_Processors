@@ -1,6 +1,4 @@
 
-
-
 int main(){
 	
 	int x = 8;
@@ -27,34 +25,26 @@ int main(){
 					switch(x){
 
 						case 7:
-							return 56;
+							return y;
 						case 8:
-							return x+=3;
+							  x=3;
+							  break;
 					}
 
 
-				switch(z){
-
-					case 7:
-						return 8;
-					case 88:
-						return 51;
-				}
-
 				case 10:
-					return 8;
+					return z;
 				case 12:
-					return 90;
+					return y;
 				case 9:
-					return 100;
+					return 9;
 
 			}
 			
-			x= 3;
-			return x;
+			
 		case 9:
 			x= 7;
-			return x;
+			return 0;
 
 		default:
 			x= 98;

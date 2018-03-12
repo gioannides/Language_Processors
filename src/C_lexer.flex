@@ -12,6 +12,7 @@
 #include <string>
 #include <iostream>		
 
+
 void yyerror (char const *s);
 extern FILE *yyin;
 extern FILE *yyout;
@@ -175,7 +176,7 @@ extern "C" int fileno(FILE *stream);
 
 "!"			{  return('!'); }
 
-"~"			{  return(TILDE); }
+"~"			{ contxt.AssignmentOperator = "~"; return(TILDE); }
 
 "-"			{  return token(MINUS); }
 

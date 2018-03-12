@@ -482,11 +482,11 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 
 				if(contxt.Variables[good_index].word_size==1) 
 				{
-					file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+					file << std::endl << "\tsb\t$" << contxt.Regs+1 <<"," << contxt.Variables[good_index].offset  << "($sp) #" << contxt.Variables[good_index].id;
 				}				
 				else
 				{
-					file << std::endl << "\tsw\t$2," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+					file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 				}
 
 				if(contxt.Variables[good_index].DataType == "unsigned") {
@@ -819,6 +819,7 @@ inline void PrimaryExpression::AssignmentOperator(std::ofstream& file, int good_
 						
 					}
 					else if(contxt.AssignmentOperator == "~" || contxt.tilde){
+						std::cout << "cacme";
 						file << std::endl << "\tnor\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ",$0";		
 					}
 					else if(contxt.AssignmentOperator == "!"){
