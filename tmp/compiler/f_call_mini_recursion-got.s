@@ -15,65 +15,70 @@
 	.ent	f
 	.type	f, @function
 f:
-	.set	noreorder
+
+$END0:	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-16
-	sw	$fp,12($sp)
-	sw	$31,8($sp)
+	addiu	$sp,$sp,-20
+	sw	$fp,16($sp)
+	sw	$31,12($sp)
 	move	$fp,$sp
 
-	lw	$2, 24($sp) #y
-	lw	$3, 20($sp) #x
-	slt	$2, $2, $3
+	li	$2, 1
 $END1:
-	beq	$2,$0,$ELSE0
+	sw	$2, 8($sp) #r
+
+	lw	$2, 28($sp) #y
+	lw	$3, 24($sp) #x
+	slt	$2, $2, $3
+$END3:
+	beq	$2,$0,$ELSE2
 	nop
-$IF0:
+$IF2:
 #VARIABLE : fNOT DECLARED!!!
 
-	lw	$2, 24($sp) #y
+	lw	$2, 28($sp) #y
 	li	$3, 1
 	add	$2, $2, $3
-$END3:
+$END5:
 	sw	$2, 4($sp) #x
 
-	lw	$2, 20($sp) #x
-$END4:
+	lw	$2, 24($sp) #x
+$END6:
 	sw	$2, 8($sp) #y
 	.option pic
 	jal f
 	nop
-$END2:
+$END4:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,8($sp)
-	lw	$fp,12($sp)
-	addiu	$sp,$sp,16
+	lw	$31,12($sp)
+	lw	$fp,16($sp)
+	addiu	$sp,$sp,20
 	j	$31
 
 	nop
 
-	b $END0
+	b $END2
 	nop
-$ELSE0:
-	lw	$2, 24($sp) #y
-	lw	$3, 20($sp) #x
+$ELSE2:
+	lw	$2, 28($sp) #y
+	lw	$3, 24($sp) #x
 	add	$2, $2, $3
-$END5:
+$END7:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,8($sp)
-	lw	$fp,12($sp)
-	addiu	$sp,$sp,16
+	lw	$31,12($sp)
+	lw	$fp,16($sp)
+	addiu	$sp,$sp,20
 	j	$31
 
 	nop
 
-$END0:
+$END2:
 	move	$sp,$fp
-	lw	$31,8($sp)
-	lw	$fp,12($sp)
-	addiu	$sp,$sp,16
+	lw	$31,12($sp)
+	lw	$fp,16($sp)
+	addiu	$sp,$sp,20
 	j	$31
 
 	nop
@@ -93,11 +98,11 @@ $END0:
 	.type	main, @function
 main:
 
-$END6:
-$END7:
+$END8:
 $END9:
-$END10:
-$END8:	.set	noreorder
+$END11:
+$END12:
+$END10:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-32
 	sw	$fp,28($sp)
@@ -105,26 +110,26 @@ $END8:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 3
-$END11:
+$END13:
 	sw	$2, 20($sp) #a
 
 	li	$2, 5
-$END12:
+$END14:
 	sw	$2, 16($sp) #b
 
 #VARIABLE : fNOT DECLARED!!!
 
 	lw	$2, 20($sp) #a
-$END14:
+$END16:
 	sw	$2, 4($sp) #x
 
 	lw	$2, 16($sp) #b
-$END15:
+$END17:
 	sw	$2, 8($sp) #y
 	.option pic
 	jal f
 	nop
-$END13:
+$END15:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,24($sp)

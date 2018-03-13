@@ -1,5 +1,6 @@
 int f(int x, int y)
 {
+	int r=1;
 	if(y<x)
 	{
 		return f(y+1, x);

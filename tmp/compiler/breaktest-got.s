@@ -54,6 +54,8 @@ $END8:
 	beq	$2,$0,$END7
 	nop
 $IF7:
+	b	$END3
+	nop
 $END7:
 	lw	$3, 8($sp) #i
 

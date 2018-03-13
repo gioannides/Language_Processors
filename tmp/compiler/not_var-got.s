@@ -30,9 +30,7 @@ $END2:
 
 	sw	$0, 8($sp) #a
 
-	lw	$2, 8($sp) #a
-	lw	$3, 12($sp) #x
-	add	$2, $2, $3
+	lw	$2, 12($sp) #x
 $END3:
 	move	$2,$2
 	move	$sp,$fp

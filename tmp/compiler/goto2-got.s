@@ -36,16 +36,25 @@ $END4:
 start:
 
 	lw	$2, 12($sp) #x
+	li	$3, 1
+	add	$2, $2, $3
+$END5:
+	lw	$3, 12($sp) #x
+
+#df
+	sw	$2,12($sp) #x
+
+	lw	$2, 12($sp) #x
 	li	$3, 10
 	slt	$2, $2, $3
-$END6:
-	beq	$2,$0,$END5
+$END7:
+	beq	$2,$0,$END6
 	nop
-$IF5:
+$IF6:
 	lw	$2, 8($sp) #y
 	lw	$3, 12($sp) #x
 	add	$2, $2, $3
-$END7:
+$END8:
 	lw	$3, 8($sp) #y
 
 #df
@@ -53,9 +62,9 @@ $END7:
 
 	b	start
 	nop
-$END5:
+$END6:
 	lw	$2, 8($sp) #y
-$END8:
+$END9:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,16($sp)

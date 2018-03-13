@@ -42,11 +42,11 @@ $END6:
 	lb	$3, 8($sp) #c
 	add	$2, $2, $3
 #df
-	sb	$2, 8($sp) #c
+	sb	$2,8($sp) #c
 	lb	$3, 8($sp) #c
 	addiu	$2, $3,1
 #df
-	sb	$2, 8($sp) #c
+	sb	$2,8($sp) #c
 $END7:
 	b $FOR3
 	nop

@@ -1,6 +1,6 @@
 int main(){
-    int x = 0;
-    if (x || x++) {
+    int x = 1;
+    if (x || x++|| x++ || x++ || x++) {
         return x;  
   }
  else {

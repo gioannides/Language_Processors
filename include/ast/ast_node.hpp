@@ -1214,23 +1214,25 @@ class JumpStatement : public Node {
 			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "return" ) {
 				
 				
-			if(!contxt.reading){
+			
 
 				if( AssignmentExpressionPtr != NULL){
 					contxt.rhs_of_expression = true;
 					AssignmentExpressionPtr->render_asm(file,contxt);
 					contxt.rhs_of_expression = false;
 				}
-				if( AssignmentExpressionPtr != NULL){
+				if( AssignmentExpressionPtr != NULL && !contxt.reading){
 					file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
 				}
+				if(!contxt.reading){
 				file << std::endl << "\tmove\t$sp,$fp";
 				file << std::endl << "\tlw\t$31," << contxt.totalStackArea-4 <<"($sp)";
 				file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
 				file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
 				file << std::endl << "\tj\t$31" << std::endl;
 				file << std::endl << "\tnop" << std::endl;
-			}
+				}
+		
 		}
 	}
 };
@@ -1607,7 +1609,7 @@ class TranslationUnit : public Node{
 			// {
 			// 	std::cout << contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size; 
 			// }
-		
+		print_variables(file, contxt);
 		}
 
 		 virtual ~TranslationUnit() {}

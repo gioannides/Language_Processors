@@ -163,7 +163,7 @@ $END26:
 	div	$3,$2
 	mflo	$2
 #df
-	sb	$2, 8($sp) #g
+	sb	$2,8($sp) #g
 $END25:
 $END24:
 	move	$2,$2

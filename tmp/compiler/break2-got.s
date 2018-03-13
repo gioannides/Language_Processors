@@ -49,6 +49,8 @@ $END7:
 	beq	$2,$0,$END6
 	nop
 $IF6:
+	b	$END3
+	nop
 $END6:
 	lw	$2, 8($sp) #y
 	lw	$3, 12($sp) #x

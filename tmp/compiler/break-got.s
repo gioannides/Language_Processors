@@ -48,6 +48,8 @@ $END7:
 #df
 	sw	$2,12($sp) #a
 
+	b	$END5
+	nop
 	li	$2, 465
 $END8:
 	lw	$3, 8($sp) #c

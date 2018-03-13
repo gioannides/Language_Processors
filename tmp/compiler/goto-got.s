@@ -31,7 +31,25 @@ $END2:
 d:
 
 	lw	$2, 8($sp) #x
+	li	$3, 9
+	xor	$2, $2, $3
+	sltu	$2, $0, $2
+$END4:
+	beq	$2,$0,$END3
+	nop
+$IF3:
+	lw	$3, 8($sp) #x
+
+	addiu	$2, $3,1
+#df
+	sw	$2,8($sp) #x
+
+$END5:
+	b	d
+	nop
 $END3:
+	lw	$2, 8($sp) #x
+$END6:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,12($sp)

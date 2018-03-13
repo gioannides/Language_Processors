@@ -27,7 +27,7 @@ a:
 	.type	main, @function
 main:
 
-	beq	$2,$0,$END1
+	beq	$2,$0,$ELSE1
 	nop
 $IF1:
 $END2:
@@ -35,6 +35,8 @@ $END2:
 	nop
 $ELSE1:
 $END3:
+	b $END1
+	nop
 $END1:
 $END4:	.set	noreorder
 	.set	nomacro
@@ -48,7 +50,7 @@ $END4:	.set	noreorder
 	li	$3, 0
 	slt	$2, $2, $3
 $END6:
-	beq	$2,$0,$END5
+	beq	$2,$0,$ELSE5
 	nop
 $IF5:
 	li	$2, 0
@@ -60,8 +62,13 @@ $END7:
 	b $END5
 	nop
 $ELSE5:
+	lui	$2, %hi(a)
+	lw	$2, %lo(a)($2)
+	li	$3, 9
 	seq	$2, $2, $3
 $END8:
+	b $END5
+	nop
 $END5:
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
