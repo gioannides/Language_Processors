@@ -2005,7 +2005,6 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 
 				
 				file << std::endl << *IDENTIFIER << ":" << std::endl;
-				StatementPtr->render_asm(file,contxt);
 				
 			}
 		

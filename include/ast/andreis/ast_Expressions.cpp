@@ -397,11 +397,9 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 
 
 inline void ExpressionStatement::render_asm(std::ofstream& file,Context& contxt){
-			if( AssignmentExpressionPtr != NULL){
-				contxt.rhs_of_expression=true;
-				AssignmentExpressionPtr->render_asm(file,contxt);
-				contxt.rhs_of_expression=false;
-			}
+			contxt.rhs_of_expression=true;
+			AssignmentExpressionPtr->render_asm(file,contxt);
+			contxt.rhs_of_expression=false;
 		}
 inline void ArgumentExpressionList::render_asm(std::ofstream& file,Context& contxt)
 {
@@ -520,11 +518,11 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				// }
 				if(contxt.Variables[good_index].word_size==1) 
 				{
-					file << std::endl << "\tsb\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+					file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
 				}				
 				else
 				{
-					file << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+					file << std::endl << "\tsw\t$2," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 				}
 
 				if(contxt.Variables[good_index].DataType == "unsigned") {
@@ -716,20 +714,14 @@ inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contx
 				contxt.rhs_of_expression = true;
 				LogicalORExpression->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;				
-				file << std::endl << "\tbeq\t$2,$0," << ELSE;
+				file << std::endl << "\tbeq\t$2,$0," << END;
 				file << std::endl << "\tnop";
 				file << std::endl << IF << ":";
-				contxt.rhs_of_expression = true;
 				ExpressioN->render_asm(file,contxt);
-				contxt.rhs_of_expression = false;
 				file << "\n\tb " << END;
 				file << std::endl << "\tnop";
 				file << std::endl << ELSE << ":";
-				contxt.rhs_of_expression = true;
 				ConditionalExpressionPtr->render_asm(file,contxt);
-				contxt.rhs_of_expression = false;
-				file << "\n\tb " << END;
-				file << std::endl << "\tnop";
 			}
 			file << std::endl << END << ":";
 }
@@ -952,3 +944,5 @@ inline void PrimaryExpression::AssignmentOperator(std::ofstream& file, int good_
 					contxt.AssignmentOperator = "df";
 					contxt.Regs--;
 			}
+
+	
