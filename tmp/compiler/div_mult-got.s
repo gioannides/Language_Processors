@@ -26,7 +26,8 @@ a:
 	.ent	main
 	.type	main, @function
 main:
-	.set	noreorder
+
+$END1:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-16
 	sw	$fp,12($sp)
@@ -42,7 +43,7 @@ main:
 	li	$3, 2
 	div	$2, $3
 	mflo	$2
-$END1:
+$END2:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,8($sp)

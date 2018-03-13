@@ -15,7 +15,8 @@
 	.ent	func
 	.type	func, @function
 func:
-	.set	noreorder
+
+$END0:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-16
 	sw	$fp,12($sp)
@@ -25,7 +26,7 @@ func:
 	lw	$2, 56($sp) #h1
 	lw	$3, 52($sp) #p1
 	add	$2, $2, $3
-$END0:
+$END1:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,8($sp)
@@ -57,7 +58,8 @@ $END0:
 	.ent	gunv
 	.type	gunv, @function
 gunv:
-	.set	noreorder
+
+$END2:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-16
 	sw	$fp,12($sp)
@@ -67,7 +69,7 @@ gunv:
 	lw	$2, 44($sp) #h
 	lw	$3, 52($sp) #p1
 	add	$2, $2, $3
-$END1:
+$END3:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,8($sp)
@@ -100,13 +102,11 @@ $END1:
 	.type	main, @function
 main:
 
-$END2:
-$END3:
 $END4:
 $END5:
 $END6:
+$END7:
 $END8:
-$END9:
 $END10:
 $END11:
 $END12:
@@ -115,9 +115,9 @@ $END14:
 $END15:
 $END16:
 $END17:
-$END7:
+$END18:
 $END19:
-$END20:
+$END9:
 $END21:
 $END22:
 $END23:
@@ -126,7 +126,31 @@ $END25:
 $END26:
 $END27:
 $END28:
-$END18:	.set	noreorder
+$END29:
+$END30:
+$END20:
+$END32:
+$END33:
+$END34:
+$END35:
+$END36:
+$END37:
+$END38:
+$END39:
+$END40:
+$END41:
+$END31:
+$END43:
+$END44:
+$END45:
+$END46:
+$END47:
+$END48:
+$END49:
+$END50:
+$END51:
+$END52:
+$END42:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-80
 	sw	$fp,76($sp)
@@ -134,168 +158,203 @@ $END18:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 1
-$END29:
+$END53:
 	sw	$2, 68($sp) #x
 
 	li	$2, 2
-$END30:
+$END54:
 	sw	$2, 64($sp) #y
 
 	li	$2, 3
-$END31:
+$END55:
 	sw	$2, 60($sp) #z
 
 	li	$2, 4
-$END32:
+$END56:
 	sw	$2, 56($sp) #a
 
 	li	$2, 5
-$END33:
+$END57:
 	sw	$2, 52($sp) #f
 
 	sb	$0, 48($sp) #yu
 
+#VARIABLE : gunvNOT DECLARED!!!
+
+	lb	$2, 48($sp) #yu
+$END59:
+	sb	$2, 4($sp) #r
+	lw	$2, 64($sp) #y
+$END60:
+	sw	$2, 8($sp) #t
+
+	lw	$2, 60($sp) #z
+$END61:
+	sw	$2, 12($sp) #w
+
+	lw	$2, 56($sp) #a
+$END62:
+	sw	$2, 16($sp) #j
+
+	lw	$2, 52($sp) #f
+$END63:
+	sw	$2, 20($sp) #o
+
+	lw	$2, 56($sp) #a
+$END64:
+	sw	$2, 24($sp) #p
+
+	lw	$2, 68($sp) #x
+$END65:
+	sw	$2, 28($sp) #h
+
+	lw	$2, 68($sp) #x
+$END66:
+	sw	$2, 32($sp) #o1
+
+	lw	$2, 68($sp) #x
+$END67:
+	sw	$2, 36($sp) #p1
+
+	lw	$2, 52($sp) #f
+$END68:
+	sw	$2, 40($sp) #h1
+	.option pic
+	jal gunv
+	nop
+$END58:
 #VARIABLE : funcNOT DECLARED!!!
 
 	lb	$2, 48($sp) #yu
+$END70:
 	sb	$2, 4($sp) #r
-$END35:
 	lw	$2, 64($sp) #y
+$END71:
 	sw	$2, 8($sp) #t
 
-$END36:
 	lw	$2, 60($sp) #z
+$END72:
 	sw	$2, 12($sp) #w
 
-$END37:
 	lw	$2, 56($sp) #a
+$END73:
 	sw	$2, 16($sp) #j
 
-$END38:
 	lw	$2, 52($sp) #f
+$END74:
 	sw	$2, 20($sp) #o
 
-$END39:
 	lw	$2, 56($sp) #a
+$END75:
 	sw	$2, 24($sp) #p
 
-$END40:
 	lw	$2, 68($sp) #x
+$END76:
 	sw	$2, 28($sp) #h
 
-$END41:
 	lw	$2, 68($sp) #x
+$END77:
 	sw	$2, 32($sp) #o1
 
-$END42:
 	lw	$2, 68($sp) #x
+$END78:
 	sw	$2, 36($sp) #p1
 
-$END43:
 	lw	$2, 52($sp) #f
+$END79:
 	sw	$2, 40($sp) #h1
-
-$END44:	.option pic
-	jal gunv
+	.option pic
+	jal func
 	nop
-$END34:
+$END69:
 #VARIABLE : gunvNOT DECLARED!!!
 
 	lb	$2, 48($sp) #yu
+$END81:
 	sb	$2, 4($sp) #r
-$END46:
 	lw	$2, 64($sp) #y
+$END82:
 	sw	$2, 8($sp) #t
 
-$END47:
 	lw	$2, 60($sp) #z
+$END83:
 	sw	$2, 12($sp) #w
 
-$END48:
 	lw	$2, 56($sp) #a
+$END84:
 	sw	$2, 16($sp) #j
 
-$END49:
 	lw	$2, 52($sp) #f
+$END85:
 	sw	$2, 20($sp) #o
 
-$END50:
 	lw	$2, 56($sp) #a
+$END86:
 	sw	$2, 24($sp) #p
 
-$END51:
 	lw	$2, 68($sp) #x
+$END87:
 	sw	$2, 28($sp) #h
 
-$END52:
 	lw	$2, 68($sp) #x
+$END88:
 	sw	$2, 32($sp) #o1
 
-$END53:
 	lw	$2, 68($sp) #x
+$END89:
 	sw	$2, 36($sp) #p1
 
-$END54:
 	lw	$2, 52($sp) #f
+$END90:
 	sw	$2, 40($sp) #h1
-
-$END55:	.option pic
+	.option pic
 	jal gunv
 	nop
-$END45:
+$END80:
 #VARIABLE : gunvNOT DECLARED!!!
 
 	lb	$2, 48($sp) #yu
+$END92:
 	sb	$2, 4($sp) #r
-$END57:
 	lw	$2, 64($sp) #y
+$END93:
 	sw	$2, 8($sp) #t
 
-$END58:
 	lw	$2, 60($sp) #z
+$END94:
 	sw	$2, 12($sp) #w
 
-$END59:
 	lw	$2, 56($sp) #a
+$END95:
 	sw	$2, 16($sp) #j
 
-$END60:
 	lw	$2, 52($sp) #f
+$END96:
 	sw	$2, 20($sp) #o
 
-$END61:
 	lw	$2, 56($sp) #a
+$END97:
 	sw	$2, 24($sp) #p
 
-$END62:
 	lw	$2, 68($sp) #x
+$END98:
 	sw	$2, 28($sp) #h
 
-$END63:
 	lw	$2, 68($sp) #x
+$END99:
 	sw	$2, 32($sp) #o1
 
-$END64:
 	lw	$2, 68($sp) #x
+$END100:
 	sw	$2, 36($sp) #p1
 
-$END65:
 	lw	$2, 52($sp) #f
+$END101:
 	sw	$2, 40($sp) #h1
-
-$END66:	.option pic
+	.option pic
 	jal gunv
 	nop
-$END56:
-	move	$2,$2
-	move	$sp,$fp
-	lw	$31,72($sp)
-	lw	$fp,76($sp)
-	addiu	$sp,$sp,80
-	j	$31
-
-	nop
-
+$END91:
 	move	$sp,$fp
 	lw	$31,72($sp)
 	lw	$fp,76($sp)

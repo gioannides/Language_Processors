@@ -27,7 +27,8 @@ x:
 main:
 
 $END0:
-$END1:	.set	noreorder
+$END1:
+$END2:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-16
 	sw	$fp,12($sp)
@@ -35,7 +36,7 @@ $END1:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 5
-$END2:
+$END3:
 	lui	$3, %hi(x)
 	lw	$3, %lo(x)($3)
 	lui	$3, %hi(x)
@@ -46,14 +47,14 @@ $END2:
 	lw	$3, %lo(x)($3)
 	mult	$2, $3
 	mflo	$2
-$END3:
+$END4:
 	lui	$3, %hi(x)
 	lw	$3, %lo(x)($3)
 	lui	$3, %hi(x)
 	sw	$2, %lo(x)($3)
 	lui	$2, %hi(x)
 	lw	$2, %lo(x)($2)
-$END4:
+$END5:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,8($sp)

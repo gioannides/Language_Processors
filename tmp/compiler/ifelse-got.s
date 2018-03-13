@@ -26,7 +26,8 @@ a:
 	.ent	main
 	.type	main, @function
 main:
-	.set	noreorder
+
+$END1:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-16
 	sw	$fp,12($sp)
@@ -38,18 +39,18 @@ main:
 	li	$3, 8
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END2:
-	beq	$2,$0,$ELSE1
+$END3:
+	beq	$2,$0,$ELSE2
 	nop
-$IF1:
+$IF2:
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
 	li	$3, 8
 	slt	$2, $2, $3
-$END4:
-	beq	$2,$0,$ELSE3
+$END5:
+	beq	$2,$0,$ELSE4
 	nop
-$IF3:
+$IF4:
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
 	lui	$3, %hi(a)
@@ -59,20 +60,6 @@ $IF3:
 	li	$3, 2
 	div	$2, $3
 	mflo	$2
-$END5:
-	move	$2,$2
-	move	$sp,$fp
-	lw	$31,8($sp)
-	lw	$fp,12($sp)
-	addiu	$sp,$sp,16
-	j	$31
-
-	nop
-
-	b $END3
-	nop
-$ELSE3:
-	li	$2, -76
 $END6:
 	move	$2,$2
 	move	$sp,$fp
@@ -83,20 +70,11 @@ $END6:
 
 	nop
 
-$END3:
-	b $END1
+	b $END4
 	nop
-$ELSE1:
-	lui	$2, %hi(a)
-	lw	$2, %lo(a)($2)
-	li	$3, 4
-	seq	$2, $2, $3
-$END8:
-	beq	$2,$0,$ELSE7
-	nop
-$IF7:
-	li	$2, 89
-$END9:
+$ELSE4:
+	li	$2, -76
+$END7:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,8($sp)
@@ -106,10 +84,19 @@ $END9:
 
 	nop
 
-	b $END7
+$END4:
+	b $END2
 	nop
-$ELSE7:
-	li	$2, 8
+$ELSE2:
+	lui	$2, %hi(a)
+	lw	$2, %lo(a)($2)
+	li	$3, 4
+	seq	$2, $2, $3
+$END9:
+	beq	$2,$0,$ELSE8
+	nop
+$IF8:
+	li	$2, 89
 $END10:
 	move	$2,$2
 	move	$sp,$fp
@@ -120,10 +107,24 @@ $END10:
 
 	nop
 
-$END7:
-$END1:
-	li	$2, 1
+	b $END8
+	nop
+$ELSE8:
+	li	$2, 8
 $END11:
+	move	$2,$2
+	move	$sp,$fp
+	lw	$31,8($sp)
+	lw	$fp,12($sp)
+	addiu	$sp,$sp,16
+	j	$31
+
+	nop
+
+$END8:
+$END2:
+	li	$2, 1
+$END12:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,8($sp)

@@ -15,7 +15,8 @@
 	.ent	main
 	.type	main, @function
 main:
-	.set	noreorder
+
+$END0:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-16
 	sw	$fp,12($sp)
@@ -23,30 +24,16 @@ main:
 	move	$fp,$sp
 
 	li	$2, 1
-$END1:
-	beq	$2,$0,$END0
+$END2:
+	beq	$2,$0,$END1
 	nop
-$IF0:
+$IF1:
 	li	$2, 0
-$END3:
-	beq	$2,$0,$ELSE2
-	nop
-$IF2:
-	li	$2, 10
 $END4:
-	move	$2,$2
-	move	$sp,$fp
-	lw	$31,8($sp)
-	lw	$fp,12($sp)
-	addiu	$sp,$sp,16
-	j	$31
-
+	beq	$2,$0,$ELSE3
 	nop
-
-	b $END2
-	nop
-$ELSE2:
-	li	$2, 13
+$IF3:
+	li	$2, 10
 $END5:
 	move	$2,$2
 	move	$sp,$fp
@@ -57,10 +44,24 @@ $END5:
 
 	nop
 
-$END2:
-$END0:
-	li	$2, 11
+	b $END3
+	nop
+$ELSE3:
+	li	$2, 13
 $END6:
+	move	$2,$2
+	move	$sp,$fp
+	lw	$31,8($sp)
+	lw	$fp,12($sp)
+	addiu	$sp,$sp,16
+	j	$31
+
+	nop
+
+$END3:
+$END1:
+	li	$2, 11
+$END7:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,8($sp)

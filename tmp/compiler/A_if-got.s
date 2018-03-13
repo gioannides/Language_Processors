@@ -27,7 +27,8 @@ f:
 	.type	main, @function
 main:
 
-$END1:	.set	noreorder
+$END1:
+$END2:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-20
 	sw	$fp,16($sp)
@@ -35,34 +36,34 @@ $END1:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 1
-$END2:
+$END3:
 	sw	$2, 8($sp) #x
 
 	lw	$2, 8($sp) #x
 	li	$3, 1
 	seq	$2, $2, $3
-$END4:
-	beq	$2,$0,$END3
+$END5:
+	beq	$2,$0,$END4
 	nop
-$IF3:
+$IF4:
 	lw	$2, 8($sp) #x
 	li	$3, 2
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END6:
-	beq	$2,$0,$END5
+$END7:
+	beq	$2,$0,$END6
 	nop
-$IF5:
+$IF6:
 	lw	$2, 8($sp) #x
 	li	$3, 3
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END8:
-	beq	$2,$0,$END7
-	nop
-$IF7:
-	li	$2, 3
 $END9:
+	beq	$2,$0,$END8
+	nop
+$IF8:
+	li	$2, 3
+$END10:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,12($sp)
@@ -72,26 +73,26 @@ $END9:
 
 	nop
 
-$END7:
-$END5:
-$END3:
+$END8:
+$END6:
+$END4:
 	lw	$2, 8($sp) #x
 	li	$3, 1
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END11:
-	beq	$2,$0,$END10
+$END12:
+	beq	$2,$0,$END11
 	nop
-$IF10:
+$IF11:
 	lw	$2, 8($sp) #x
 	li	$3, 4
 	seq	$2, $2, $3
-$END13:
-	beq	$2,$0,$END12
-	nop
-$IF12:
-	li	$2, 4
 $END14:
+	beq	$2,$0,$END13
+	nop
+$IF13:
+	li	$2, 4
+$END15:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,12($sp)
@@ -101,24 +102,24 @@ $END14:
 
 	nop
 
-$END12:
+$END13:
 	lw	$2, 8($sp) #x
 	li	$3, 5
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END16:
-	beq	$2,$0,$END15
+$END17:
+	beq	$2,$0,$END16
 	nop
-$IF15:
+$IF16:
 	lw	$2, 8($sp) #x
 	li	$3, 6
 	seq	$2, $2, $3
-$END18:
-	beq	$2,$0,$ELSE17
-	nop
-$IF17:
-	li	$2, 6
 $END19:
+	beq	$2,$0,$ELSE18
+	nop
+$IF18:
+	li	$2, 6
+$END20:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,12($sp)
@@ -128,32 +129,18 @@ $END19:
 
 	nop
 
-	b $END17
+	b $END18
 	nop
-$ELSE17:
+$ELSE18:
 	lw	$2, 8($sp) #x
 	li	$3, 7
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END21:
-	beq	$2,$0,$ELSE20
-	nop
-$IF20:
-	li	$2, 7
 $END22:
-	move	$2,$2
-	move	$sp,$fp
-	lw	$31,12($sp)
-	lw	$fp,16($sp)
-	addiu	$sp,$sp,20
-	j	$31
-
+	beq	$2,$0,$ELSE21
 	nop
-
-	b $END20
-	nop
-$ELSE20:
-	li	$2, 1
+$IF21:
+	li	$2, 7
 $END23:
 	move	$2,$2
 	move	$sp,$fp
@@ -164,12 +151,26 @@ $END23:
 
 	nop
 
-$END20:
-$END17:
-$END15:
-$END10:
-	li	$2, 99
+	b $END21
+	nop
+$ELSE21:
+	li	$2, 1
 $END24:
+	move	$2,$2
+	move	$sp,$fp
+	lw	$31,12($sp)
+	lw	$fp,16($sp)
+	addiu	$sp,$sp,20
+	j	$31
+
+	nop
+
+$END21:
+$END18:
+$END16:
+$END11:
+	li	$2, 99
+$END25:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,12($sp)

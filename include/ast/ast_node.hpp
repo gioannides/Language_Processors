@@ -1215,6 +1215,7 @@ class JumpStatement : public Node {
 				contxt.rhs_of_expression = true;
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
+			if(!contxt.reading){
 				file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
 				file << std::endl << "\tmove\t$sp,$fp";
 				file << std::endl << "\tlw\t$31," << contxt.totalStackArea-4 <<"($sp)";
@@ -1222,7 +1223,7 @@ class JumpStatement : public Node {
 				file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
 				file << std::endl << "\tj\t$31" << std::endl;
 				file << std::endl << "\tnop" << std::endl;
-
+				}
 		}
 	}
 };
@@ -1778,7 +1779,7 @@ inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 			else if( IterationStatementPtr != NULL && !contxt.reading) {
 				IterationStatementPtr->render_asm(file,contxt);
 			}
-			else if( JumpStatementPtr != NULL && !contxt.reading) {
+			else if( JumpStatementPtr != NULL) {
 				JumpStatementPtr->render_asm(file,contxt);
 			}
 			else if( SelectionStatementPtr != NULL && !contxt.reading) {			//TODO: SWITCH / CASE

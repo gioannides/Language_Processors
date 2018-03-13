@@ -30,7 +30,8 @@ main:
 $END1:
 $END2:
 $END3:
-$END4:	.set	noreorder
+$END4:
+$END5:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-20
 	sw	$fp,16($sp)
@@ -38,16 +39,9 @@ $END4:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 0
-$END5:
+$END6:
 	sw	$2, 8($sp) #b
 
-	lw	$3, 8($sp) #b
-
-	addiu	$2, $3,-1
-#df
-	sw	$2,8($sp) #b
-
-$END6:
 	lw	$3, 8($sp) #b
 
 	addiu	$2, $3,-1
@@ -62,8 +56,15 @@ $END7:
 	sw	$2,8($sp) #b
 
 $END8:
-	lw	$2, 8($sp) #b
+	lw	$3, 8($sp) #b
+
+	addiu	$2, $3,-1
+#df
+	sw	$2,8($sp) #b
+
 $END9:
+	lw	$2, 8($sp) #b
+$END10:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,12($sp)

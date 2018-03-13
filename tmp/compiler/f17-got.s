@@ -18,7 +18,8 @@ main:
 
 $END0:
 $END1:
-$END2:	.set	noreorder
+$END2:
+$END3:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-28
 	sw	$fp,24($sp)
@@ -30,51 +31,51 @@ $END2:	.set	noreorder
 	sw	$0, 12($sp) #y
 
 	li	$2, 2
-$END3:
+$END4:
 	sw	$2, 8($sp) #acc
 
 	li	$2, 0
-$END4:
+$END5:
 	lw	$3, 16($sp) #x
 
 #df
 	sw	$2,16($sp) #x
 
 	li	$2, 0
-$END5:
+$END6:
 	lw	$3, 12($sp) #y
 
 #df
 	sw	$2,12($sp) #y
 
-$BEGIN6:
+$BEGIN7:
 	lw	$2, 16($sp) #x
 	li	$3, 6
 	slt	$2, $2, $3
-$END7:
-	beq	$2,$0,$END6
-	nop
-$WHILE6:
-	li	$2, 0
 $END8:
+	beq	$2,$0,$END7
+	nop
+$WHILE7:
+	li	$2, 0
+$END9:
 	lw	$3, 12($sp) #y
 
 #df
 	sw	$2,12($sp) #y
 
-$BEGIN9:
+$BEGIN10:
 	lw	$2, 12($sp) #y
 	lw	$3, 16($sp) #x
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END10:
-	beq	$2,$0,$END9
+$END11:
+	beq	$2,$0,$END10
 	nop
-$WHILE9:
+$WHILE10:
 	lw	$2, 8($sp) #acc
 	lw	$3, 12($sp) #y
 	add	$2, $2, $3
-$END11:
+$END12:
 	lw	$3, 8($sp) #acc
 
 #df
@@ -83,33 +84,33 @@ $END11:
 	lw	$2, 12($sp) #y
 	li	$3, 1
 	add	$2, $2, $3
-$END12:
+$END13:
 	lw	$3, 12($sp) #y
 
 #df
 	sw	$2,12($sp) #y
 
-	b $BEGIN9
+	b $BEGIN10
 	nop
-$END9:
+$END10:
 	lw	$2, 16($sp) #x
 	li	$3, 2
 	add	$2, $2, $3
-$END13:
+$END14:
 	lw	$3, 16($sp) #x
 
 #df
 	sw	$2,16($sp) #x
 
-	b $BEGIN6
+	b $BEGIN7
 	nop
-$END6:
+$END7:
 	lw	$2, 8($sp) #acc
 	lw	$3, 16($sp) #x
 	sub	$2, $2, $3
 	lw	$3, 12($sp) #y
 	sub	$2, $2, $3
-$END14:
+$END15:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,20($sp)

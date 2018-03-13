@@ -16,7 +16,8 @@
 	.type	main, @function
 main:
 
-$END0:	.set	noreorder
+$END0:
+$END1:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-20
 	sw	$fp,16($sp)
@@ -24,20 +25,20 @@ $END0:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 97
-$END1:
+$END2:
 	sb	$2, 8($sp) #c
 
 	lb	$2, 8($sp) #c
-$END3:
-$FOR2:
+$END4:
+$FOR3:
 	lb	$2, 8($sp) #c
 	li	$3, 122
 	slt	$2, $2, $3
-$END4:
-	beq	$2,$0,$END2
+$END5:
+	beq	$2,$0,$END3
 	nop
 	li	$2, 1
-$END5:
+$END6:
 	lb	$3, 8($sp) #c
 	add	$2, $2, $3
 #df
@@ -46,12 +47,12 @@ $END5:
 	addiu	$2, $3,1
 #df
 	sb	$2, 8($sp) #c
-$END6:
-	b $FOR2
-	nop
-$END2:
-	lb	$2, 8($sp) #c
 $END7:
+	b $FOR3
+	nop
+$END3:
+	lb	$2, 8($sp) #c
+$END8:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,12($sp)
