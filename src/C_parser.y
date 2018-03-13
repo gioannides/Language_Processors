@@ -30,8 +30,8 @@
 	TypeQualifier* TypeQuaLifier;
 	TypeSpecifier* TypeSpeCifier;
 	StructOrUnionSpecifier* StructOrUnionSpecifieR;
-	StructDeclarationList* StructDeclarationLisT;
-	StructDeclarator* STructDeclarator;
+	
+	
 	StructDeclaration* StructDecLaration;
 	StructDeclaratorList* StructDeclaratoRList;
 	StorageClassSpecifiers* StorageClassSpecifierS;
@@ -78,6 +78,14 @@
 	DirectAbstractDeclarator* DirectAbstractDeclaratorPtr;
 	IdentifierList* IdentifierListPtr;
 	Pointer* PointerPtr;
+	TypeName* TypeNamePtr;
+	EnumeratorList* EnumeratorListPtr;
+	Enumerator* EnumeratorPtr;
+	StructDeclarationList* StructDeclarationListPtr;
+	SpecifierQualifierList* SpecifierQualifierListPtr;
+	StructDeclaratorList* StructDeclaratorListPtr;
+	StructDeclarator* StructDeclaratorPtr;
+	TypeQualifierList* TypeQualifierListPtr;
 }
 
 
@@ -134,18 +142,26 @@
 %type <ExternalDecLaration>  EXTERNAL_DECLARATION
 %type <DecLaration> DECLARATION
 %type <DeclarationSpecifierS> DECLARATION_SPECIFIERS
-%type <TypeQuaLifier> TYPE_QUALIFIER TYPE_QUALIFIER_LIST
+%type <TypeQuaLifier> TYPE_QUALIFIER 
+%type <TypeQualifierListPtr> TYPE_QUALIFIER_LIST
 %type <TypeSpeCifier> TYPE_SPECIFIER
 %type <StructOrUnionSpecifieR> STRUCT_OR_UNION_SPECIFIER
-%type <StructDeclarationLisT> STRUCT_DECLARATION_LIST
 %type <StorageClassSpecifierS> STORAGE_CLASS_SPECIFIERS
 %type <InitDeclaratoRList> INIT_DECLARATOR_LIST
 %type <InitDeclArator> INIT_DECLARATOR
 %type <DecLarator> DECLARATOR
 %type <StruCtOrUnion> STRUCT_OR_UNION
 %type <ENumSpecifier> ENUM_SPECIFIER
-%type <STructDeclarator> STRUCT_DECLARATOR
-%type <text> IDENTIFIER TYPEDEF EXTERN STATIC AUTO REGISTER VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED CONST VOLATILE STRUCT UNION
+%type <StructDecLaration> STRUCT_DECLARATION
+%type <TypeNamePtr> TYPE_NAME
+%type <EnumeratorListPtr> ENUMERATOR_LIST
+%type <EnumeratorPtr> ENUMERATOR
+%type <StructDeclarationListPtr> STRUCT_DECLARATION_LIST
+%type <SpecifierQualifierListPtr> SPECIFIER_QUALIFIER_LIST
+%type <StructDeclaratorListPtr> STRUCT_DECLARATOR_LIST
+%type <StructDeclaratorPtr> STRUCT_DECLARATOR
+
+%type <text> IDENTIFIER TYPEDEF EXTERN STATIC AUTO REGISTER VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED CONST VOLATILE STRUCT UNION ENUM  
 %type <text> MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN UNARY_OPERATOR SIZEOF OR_OP
 %type <text> '&' '!' LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP '=' LT GT ASSIGNMENT_OPERATOR INC_OP DEC_OP '.' CONSTANT STRING_LITERAL PTR_OP SEMICOLON
 %type <text> '{' '}' ':' ',' CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN AND_OP '|' '^' PLUS MINUS  MULTIPLY MODULO DIVIDE ELLIPSIS PREPROCESSOR TILDE
@@ -176,7 +192,7 @@ EXTERNAL_DECLARATION: FUNCTION_DEFINITION							{ $$ = new ExternalDeclaration($
 
 
 FUNCTION_DEFINITION: DECLARATION_SPECIFIERS DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT 	{ $$ = new FunctionDefinition($1,$2,$3,$4); } 
-		   | DECLARATION_SPECIFIERS DECLARATOR COMPOUND_STATEMENT			{ $$ = new FunctionDefinition($1,$2,NULL,$3); } //DONE definition with no param
+		   | DECLARATION_SPECIFIERS DECLARATOR COMPOUND_STATEMENT			{ $$ = new FunctionDefinition($1,$2,NULL,$3); } 
 		   | DECLARATOR DECLARATION_LIST COMPOUND_STATEMENT				{ $$ = new FunctionDefinition(NULL,$1,$2,$3); } 
 		   | DECLARATOR COMPOUND_STATEMENT						{ $$ = new FunctionDefinition(NULL,$1,NULL,$2); } 
 
@@ -184,67 +200,67 @@ FUNCTION_DEFINITION: DECLARATION_SPECIFIERS DECLARATOR DECLARATION_LIST COMPOUND
 
 
 
-DECLARATION : DECLARATION_SPECIFIERS SEMICOLON 							{ $$ = new Declaration($1,NULL);  } //DONE COMPLETELY
-	    | DECLARATION_SPECIFIERS INIT_DECLARATOR_LIST SEMICOLON				{ $$ = new Declaration($1,$2); } //DONE
+DECLARATION : DECLARATION_SPECIFIERS SEMICOLON 							{ $$ = new Declaration($1,NULL);  } 
+	    | DECLARATION_SPECIFIERS INIT_DECLARATOR_LIST SEMICOLON				{ $$ = new Declaration($1,$2); } 
 
 
 
 
 
-DECLARATION_SPECIFIERS: STORAGE_CLASS_SPECIFIERS						{ $$ = new DeclarationSpecifiers($1,NULL,NULL) ;}//DONE COMPLETELY
-			| DECLARATION_SPECIFIERS STORAGE_CLASS_SPECIFIERS 			{ $$ = new DeclarationSpecifiers($2,NULL,NULL) ;}//DONE COMPLETELY
-			| TYPE_SPECIFIER							{ $$ = new DeclarationSpecifiers(NULL,$1,NULL) ;}//DONE COMPLETELY
-			| DECLARATION_SPECIFIERS TYPE_SPECIFIER 				{ $$ = new DeclarationSpecifiers(NULL,$2,NULL) ;}//DONE COMPLETELY
-			| TYPE_QUALIFIER							{ $$ = new DeclarationSpecifiers(NULL,NULL,$1) ;}//DONE COMPLETELY
-			| DECLARATION_SPECIFIERS TYPE_QUALIFIER 				{ $$ = new DeclarationSpecifiers(NULL,NULL,$2) ;}//DONE COMPLETELY
+DECLARATION_SPECIFIERS: STORAGE_CLASS_SPECIFIERS						{ $$ = new DeclarationSpecifiers($1,NULL,NULL) ;}
+			| DECLARATION_SPECIFIERS STORAGE_CLASS_SPECIFIERS 			{ $$ = new DeclarationSpecifiers($2,NULL,NULL) ;}
+			| TYPE_SPECIFIER							{ $$ = new DeclarationSpecifiers(NULL,$1,NULL) ;}
+			| DECLARATION_SPECIFIERS TYPE_SPECIFIER 				{ $$ = new DeclarationSpecifiers(NULL,$2,NULL) ;}
+			| TYPE_QUALIFIER							{ $$ = new DeclarationSpecifiers(NULL,NULL,$1) ;}
+			| DECLARATION_SPECIFIERS TYPE_QUALIFIER 				{ $$ = new DeclarationSpecifiers(NULL,NULL,$2) ;}
 
 
 
 
 
-STORAGE_CLASS_SPECIFIERS: TYPEDEF								{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
-			| EXTERN								{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
-			| STATIC								{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
-			| AUTO									{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
-			| REGISTER								{ $$ = new StorageClassSpecifiers( $1) ; } //DONE COMPLETELY
-
-
-
-	
-
-TYPE_SPECIFIER: VOID										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| CHAR										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| SHORT										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| INT										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| LONG										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| FLOAT										{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| DOUBLE									{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| SIGNED									{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| UNSIGNED									{ $$ = new TypeSpecifier($1); } //DONE COMPLETELY
-		| STRUCT_OR_UNION_SPECIFIER							{ $$ = new TypeSpecifier($1); } //DONE
-		| ENUM_SPECIFIER								{ $$ = new TypeSpecifier($1); } //DONE
-		//| TYPE_NAME									{ $$ = new TypeSpecifier($1); } // IMPLEMENT THIS 
-
-
-
-
-
-TYPE_QUALIFIER: CONST										{ $$ = new TypeQualifier( $1 ) ; }	//DONE COMPLETELY
-	      | VOLATILE									{ $$ = new TypeQualifier( $1 ) ; }	//DONE COMPLETELY
+STORAGE_CLASS_SPECIFIERS: TYPEDEF								{ $$ = new StorageClassSpecifiers( $1) ; } 
+			| EXTERN								{ $$ = new StorageClassSpecifiers( $1) ; } 
+			| STATIC								{ $$ = new StorageClassSpecifiers( $1) ; } 
+			| AUTO									{ $$ = new StorageClassSpecifiers( $1) ; } 
+			| REGISTER								{ $$ = new StorageClassSpecifiers( $1) ; } 
 
 
 
 	
 
+TYPE_SPECIFIER: VOID										{ $$ = new TypeSpecifier($1); } 
+		| CHAR										{ $$ = new TypeSpecifier($1); } 
+		| SHORT										{ $$ = new TypeSpecifier($1); }
+		| INT										{ $$ = new TypeSpecifier($1); } 
+		| LONG										{ $$ = new TypeSpecifier($1); } 
+		| FLOAT										{ $$ = new TypeSpecifier($1); } 
+		| DOUBLE									{ $$ = new TypeSpecifier($1); } 
+		| SIGNED									{ $$ = new TypeSpecifier($1); } 
+		| UNSIGNED									{ $$ = new TypeSpecifier($1); } 
+		| STRUCT_OR_UNION_SPECIFIER							{ $$ = new TypeSpecifier($1); } 
+		| ENUM_SPECIFIER								{ $$ = new TypeSpecifier($1); } 
+		| TYPE_NAME									{ $$ = new TypeSpecifier($1); } 
 
-INIT_DECLARATOR_LIST: INIT_DECLARATOR								{ $$ = new InitDeclaratorList($1,NULL); }//DONE COMPLETELY
-		| INIT_DECLARATOR_LIST ',' INIT_DECLARATOR					{ $$ = new InitDeclaratorList($3,$1); }//DONE
+
+
+
+
+TYPE_QUALIFIER: CONST										{ $$ = new TypeQualifier( $1 ) ; }	
+	      | VOLATILE									{ $$ = new TypeQualifier( $1 ) ; }	
+
 
 
 	
 
-INIT_DECLARATOR: DECLARATOR									{ $$ = new InitDeclarator($1,NULL); }					//PARTIALLY
-		| DECLARATOR '=' INITIALIZER							{ $$ = new InitDeclarator($1,$3);  }					//PARTIALLY
+
+INIT_DECLARATOR_LIST: INIT_DECLARATOR								{ $$ = new InitDeclaratorList($1,NULL); }
+		| INIT_DECLARATOR_LIST ',' INIT_DECLARATOR					{ $$ = new InitDeclaratorList($3,$1); }
+
+
+	
+
+INIT_DECLARATOR: DECLARATOR									{ $$ = new InitDeclarator($1,NULL); }					
+		| DECLARATOR '=' INITIALIZER							{ $$ = new InitDeclarator($1,$3);  }					
 
 
 
@@ -287,48 +303,48 @@ ASSIGNMENT_EXPRESSION:CONDITIONAL_EXPRESSION							{ $$ = new AssignmentExpressi
 
 
 
-UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,NULL,NULL) ; } //DONE
-		| INC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,$2) ; } //DONE COMPLETELY
-		| DEC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,$2) ; } //DONE COMPLETELY
-		| UNARY_OPERATOR CAST_EXPRESSION						{ $$ = new UnaryExpression(NULL,$1,$2,NULL) ; } //DONE COMPLETELY
-		//| SIZEOF UNARY_EXPRESSION
-		//| SIZEOF '(' TYPE_NAME ')'							//IMPLEMENT THIS
+UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,NULL,NULL) ; } 
+		| INC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,$2) ; } 
+		| DEC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,$2) ; } 
+		| UNARY_OPERATOR CAST_EXPRESSION						{ $$ = new UnaryExpression(NULL,$1,$2,NULL) ; } 
+		| SIZEOF UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,$2) ; } 
+		| SIZEOF '(' TYPE_NAME ')'							{ $$ = new UnaryExpression(NULL,$1,NULL,NULL,$3) ; } 
 
 
 
-CAST_EXPRESSION: UNARY_EXPRESSION								{ $$ = new CastExpression($1,NULL); }//DONE COMPLETELY
-		//| '(' TYPE_NAME ')' CAST_EXPRESSION						{ $$ = new CastExpression(NULL,$2); }//IMPLEMENT TYPE_NAME
+CAST_EXPRESSION: UNARY_EXPRESSION								{ $$ = new CastExpression($1,NULL); }
+		| '(' TYPE_NAME ')' CAST_EXPRESSION						{ $$ = new CastExpression(NULL,$2,$4); }
 
 
 
 
-UNARY_OPERATOR:   '&'		{ $$ = $1;}								//DONE COMPLETELY
-		| MULTIPLY	{ $$ = $1;}								//DONE COMPLETELY
-		| PLUS		{ $$ = $1;}								//DONE COMPLETELY
-		| MINUS		{ $$ = $1;}								//DONE COMPLETELY
-		| TILDE		{ $$ = $1;}								//DONE COMPLETELY
-		| '!'		{ $$ = $1;}								//DONE COMPLETELY
+UNARY_OPERATOR:   '&'		{ $$ = $1;}								
+		| MULTIPLY	{ $$ = $1;}								
+		| PLUS		{ $$ = $1;}								
+		| MINUS		{ $$ = $1;}								
+		| TILDE		{ $$ = $1;}								
+		| '!'		{ $$ = $1;}								
 	
 
 
 
-ASSIGNMENT_OPERATOR: '='     {$$ = $1;}//DONE COMPLETELY
-		| MUL_ASSIGN {$$ = $1;}//DONE COMPLETELY
-		| DIV_ASSIGN {$$ = $1;}//DONE COMPLETELY
-		| MOD_ASSIGN {$$ = $1;}//DONE COMPLETELY
-		| ADD_ASSIGN {$$ = $1;}//DONE COMPLETELY
-		| SUB_ASSIGN {$$ = $1;}//DONE COMPLETELY
-		| LEFT_ASSIGN {$$ = $1;}//DONE COMPLETELY
-		| RIGHT_ASSIGN {$$ = $1;}//DONE COMPLETELY
-		| AND_ASSIGN {$$ = $1;}//DONE COMPLETELY
-		| XOR_ASSIGN {$$ = $1;}//DONE COMPLETELY
-		| OR_ASSIGN {$$ = $1;}//DONE COMPLETELY
+ASSIGNMENT_OPERATOR: '='     {$$ = $1;}
+		| MUL_ASSIGN {$$ = $1;}
+		| DIV_ASSIGN {$$ = $1;}
+		| MOD_ASSIGN {$$ = $1;}
+		| ADD_ASSIGN {$$ = $1;}
+		| SUB_ASSIGN {$$ = $1;}
+		| LEFT_ASSIGN {$$ = $1;}
+		| RIGHT_ASSIGN {$$ = $1;}
+		| AND_ASSIGN {$$ = $1;}
+		| XOR_ASSIGN {$$ = $1;}
+		| OR_ASSIGN {$$ = $1;}
 
 
 
 
-CONDITIONAL_EXPRESSION: LOGICAL_OR_EXPRESSION							{ $$ = new ConditionalExpression($1,NULL,NULL); }//DONE COMPLETELY
-		      | LOGICAL_OR_EXPRESSION '?' EXPRESSION ':' CONDITIONAL_EXPRESSION		{ $$ = new ConditionalExpression($1,$3,$5); }//DONE COMPLETELY
+CONDITIONAL_EXPRESSION: LOGICAL_OR_EXPRESSION							{ $$ = new ConditionalExpression($1,NULL,NULL); }
+		      | LOGICAL_OR_EXPRESSION '?' EXPRESSION ':' CONDITIONAL_EXPRESSION		{ $$ = new ConditionalExpression($1,$3,$5); }
 
 
 
@@ -340,18 +356,18 @@ PARAMETER_TYPE_LIST: PARAMETER_LIST 								{ $$ = new ParameterTypeList($1,NULL
 
 
 
-PARAMETER_LIST: PARAMETER_DECLARATION 								{ $$ = new ParameterList($1,NULL); }//done
-	      | PARAMETER_LIST ',' PARAMETER_DECLARATION 					{ $$ = new ParameterList($3,$1); }//done
+PARAMETER_LIST: PARAMETER_DECLARATION 								{ $$ = new ParameterList($1,NULL); }
+	      | PARAMETER_LIST ',' PARAMETER_DECLARATION 					{ $$ = new ParameterList($3,$1); }
 
 
 
 
-PARAMETER_DECLARATION: DECLARATION_SPECIFIERS DECLARATOR 					{ $$ = new ParameterDeclaration($1,NULL,$2); } //done
-	             | DECLARATION_SPECIFIERS ABSTRACT_DECLARATOR 				{ $$ = new ParameterDeclaration($1,$2,NULL); }//done
-		     | DECLARATION_SPECIFIERS 							{ $$ = new ParameterDeclaration($1,NULL,NULL); }//done
+PARAMETER_DECLARATION: DECLARATION_SPECIFIERS DECLARATOR 					{ $$ = new ParameterDeclaration($1,NULL,$2); } 
+	             | DECLARATION_SPECIFIERS ABSTRACT_DECLARATOR 				{ $$ = new ParameterDeclaration($1,$2,NULL); }
+		     | DECLARATION_SPECIFIERS 							{ $$ = new ParameterDeclaration($1,NULL,NULL); }
 
-LOGICAL_OR_EXPRESSION: LOGICAL_AND_EXPRESSION							{ $$ = new LogicalOrExpression($1, NULL, NULL);}//DONE COMPLETELY
-		     | LOGICAL_OR_EXPRESSION OR_OP LOGICAL_AND_EXPRESSION			{ $$ = new LogicalOrExpression($3, $2 ,$1);}//DONE COMPLETELY
+LOGICAL_OR_EXPRESSION: LOGICAL_AND_EXPRESSION							{ $$ = new LogicalOrExpression($1, NULL, NULL);}
+		     | LOGICAL_OR_EXPRESSION OR_OP LOGICAL_AND_EXPRESSION			{ $$ = new LogicalOrExpression($3, $2 ,$1);}
 
 
 
@@ -359,16 +375,16 @@ LOGICAL_OR_EXPRESSION: LOGICAL_AND_EXPRESSION							{ $$ = new LogicalOrExpressi
 
 	
 
-LOGICAL_AND_EXPRESSION: INCLUSIVE_OR_EXPRESSION							{ $$ = new LogicalAndExpression($1, NULL, NULL);}//DONE COMPLETELY
-		      | LOGICAL_AND_EXPRESSION AND_OP INCLUSIVE_OR_EXPRESSION			{ $$ = new LogicalAndExpression($3, $2 ,$1);}//DONE COMPLETELY
+LOGICAL_AND_EXPRESSION: INCLUSIVE_OR_EXPRESSION							{ $$ = new LogicalAndExpression($1, NULL, NULL);}
+		      | LOGICAL_AND_EXPRESSION AND_OP INCLUSIVE_OR_EXPRESSION			{ $$ = new LogicalAndExpression($3, $2 ,$1);}
 
 
 
 	
 
 
-INCLUSIVE_OR_EXPRESSION: EXCLUSIVE_OR_EXPRESSION						{ $$ = new InclusiveOrExpression($1, NULL, NULL);}//DONE COMPLETELY
-		       | INCLUSIVE_OR_EXPRESSION '|' EXCLUSIVE_OR_EXPRESSION			{ $$ = new InclusiveOrExpression($3, $2 ,$1);}//DONE COMPLETELY
+INCLUSIVE_OR_EXPRESSION: EXCLUSIVE_OR_EXPRESSION						{ $$ = new InclusiveOrExpression($1, NULL, NULL);}
+		       | INCLUSIVE_OR_EXPRESSION '|' EXCLUSIVE_OR_EXPRESSION			{ $$ = new InclusiveOrExpression($3, $2 ,$1);}
 
 
 
@@ -376,71 +392,63 @@ INCLUSIVE_OR_EXPRESSION: EXCLUSIVE_OR_EXPRESSION						{ $$ = new InclusiveOrExpr
 
 
 
-EXCLUSIVE_OR_EXPRESSION: AND_EXPRESSION								{ $$ = new ExclusiveOrExpression($1, NULL, NULL);}//DONE COMPLETELY
-		       | EXCLUSIVE_OR_EXPRESSION '^' AND_EXPRESSION				{ $$ = new ExclusiveOrExpression($3, $2 ,$1);}//DONE COMPLETELY
-
-
-
-	
-
-
-AND_EXPRESSION: EQUALITY_EXPRESSION								{ $$ = new AndExpression($1, NULL, NULL);}//DONE COMPLETELY
-	      | AND_EXPRESSION '&' EQUALITY_EXPRESSION						{ $$ = new AndExpression($3, $2 ,$1);}//DONE COMPLETELY
+EXCLUSIVE_OR_EXPRESSION: AND_EXPRESSION								{ $$ = new ExclusiveOrExpression($1, NULL, NULL);}
+		       | EXCLUSIVE_OR_EXPRESSION '^' AND_EXPRESSION				{ $$ = new ExclusiveOrExpression($3, $2 ,$1);}
 
 
 
 	
 
 
-EQUALITY_EXPRESSION: RELATIONAL_EXPRESSION							{ $$ = new EqualityExpression($1, NULL, NULL); }//DONE COMPLETELY
-		   | EQUALITY_EXPRESSION EQ_OP RELATIONAL_EXPRESSION				{ $$ = new EqualityExpression($3, $2 ,$1); }//DONE COMPLETELY
-		   | EQUALITY_EXPRESSION NE_OP RELATIONAL_EXPRESSION				{ $$ = new EqualityExpression($3, $2 ,$1); }//DONE COMPLETELY
+AND_EXPRESSION: EQUALITY_EXPRESSION								{ $$ = new AndExpression($1, NULL, NULL);}
+	      | AND_EXPRESSION '&' EQUALITY_EXPRESSION						{ $$ = new AndExpression($3, $2 ,$1);}
 
 
 
 	
 
 
-RELATIONAL_EXPRESSION: SHIFT_EXPRESSION								{ $$ = new RelationalExpression($1,NULL,NULL); }//DONE COMPLETELY
-		     | RELATIONAL_EXPRESSION LT SHIFT_EXPRESSION				{ $$ = new RelationalExpression($3, $2 ,$1); }//DONE COMPLETELY
-		     | RELATIONAL_EXPRESSION GT SHIFT_EXPRESSION				{ $$ = new RelationalExpression($3, $2 ,$1); }//DONE COMPLETELY
-		     | RELATIONAL_EXPRESSION LE_OP SHIFT_EXPRESSION				{ $$ = new RelationalExpression($3, $2 ,$1); }//DONE COMPLETELY
-		     | RELATIONAL_EXPRESSION GE_OP SHIFT_EXPRESSION				{ $$ = new RelationalExpression($3, $2 ,$1); }//DONE COMPLETELY
+EQUALITY_EXPRESSION: RELATIONAL_EXPRESSION							{ $$ = new EqualityExpression($1, NULL, NULL); }
+		   | EQUALITY_EXPRESSION EQ_OP RELATIONAL_EXPRESSION				{ $$ = new EqualityExpression($3, $2 ,$1); }
+		   | EQUALITY_EXPRESSION NE_OP RELATIONAL_EXPRESSION				{ $$ = new EqualityExpression($3, $2 ,$1); }
 
 
 
 	
 
 
-SHIFT_EXPRESSION													//DONE COMPLETELY
-	: ADDITIVE_EXPRESSION									{ $$ = new ShiftExpression($1,NULL,NULL); }//DONE COMPLETELY
-	| SHIFT_EXPRESSION LEFT_OP ADDITIVE_EXPRESSION						{ $$ = new ShiftExpression($3, $2 ,$1); }//DONE COMPLETELY
-	| SHIFT_EXPRESSION RIGHT_OP ADDITIVE_EXPRESSION						{ $$ = new ShiftExpression($3, $2 ,$1); }//DONE COMPLETELY
-
-
-
-	
-
-ADDITIVE_EXPRESSION: MULTIPLICATIVE_EXPRESSION							{ $$ = new AdditiveExpression($1,NULL,NULL); }//DONE COMPLETELY
-		   | ADDITIVE_EXPRESSION PLUS MULTIPLICATIVE_EXPRESSION				{ $$ = new AdditiveExpression($3, $2 ,$1); }//DONE COMPLETELY
-	           | ADDITIVE_EXPRESSION MINUS MULTIPLICATIVE_EXPRESSION			{ $$ = new AdditiveExpression($3, $2 ,$1); }//DONE COMPLETELY
-
-
-
-	
-
-MULTIPLICATIVE_EXPRESSION: CAST_EXPRESSION							{ $$ = new MultiplicativeExpression($1,NULL,NULL); }//DONE 
-			| MULTIPLICATIVE_EXPRESSION MULTIPLY CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
-			| MULTIPLICATIVE_EXPRESSION DIVIDE CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
-			| MULTIPLICATIVE_EXPRESSION MODULO CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }//DONE COMPLETELY
-
+RELATIONAL_EXPRESSION: SHIFT_EXPRESSION								{ $$ = new RelationalExpression($1,NULL,NULL); }
+		     | RELATIONAL_EXPRESSION LT SHIFT_EXPRESSION				{ $$ = new RelationalExpression($3, $2 ,$1); }
+		     | RELATIONAL_EXPRESSION GT SHIFT_EXPRESSION				{ $$ = new RelationalExpression($3, $2 ,$1); }
+		     | RELATIONAL_EXPRESSION LE_OP SHIFT_EXPRESSION				{ $$ = new RelationalExpression($3, $2 ,$1); }
+		     | RELATIONAL_EXPRESSION GE_OP SHIFT_EXPRESSION				{ $$ = new RelationalExpression($3, $2 ,$1); }
 
 
 
 	
 
 
+SHIFT_EXPRESSION													
+	: ADDITIVE_EXPRESSION									{ $$ = new ShiftExpression($1,NULL,NULL); }
+	| SHIFT_EXPRESSION LEFT_OP ADDITIVE_EXPRESSION						{ $$ = new ShiftExpression($3, $2 ,$1); }
+	| SHIFT_EXPRESSION RIGHT_OP ADDITIVE_EXPRESSION						{ $$ = new ShiftExpression($3, $2 ,$1); }
 
+
+
+	
+
+ADDITIVE_EXPRESSION: MULTIPLICATIVE_EXPRESSION							{ $$ = new AdditiveExpression($1,NULL,NULL); }
+		   | ADDITIVE_EXPRESSION PLUS MULTIPLICATIVE_EXPRESSION				{ $$ = new AdditiveExpression($3, $2 ,$1); }
+	           | ADDITIVE_EXPRESSION MINUS MULTIPLICATIVE_EXPRESSION			{ $$ = new AdditiveExpression($3, $2 ,$1); }
+
+
+
+	
+
+MULTIPLICATIVE_EXPRESSION: CAST_EXPRESSION							{ $$ = new MultiplicativeExpression($1,NULL,NULL); }
+			| MULTIPLICATIVE_EXPRESSION MULTIPLY CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }
+			| MULTIPLICATIVE_EXPRESSION DIVIDE CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }
+			| MULTIPLICATIVE_EXPRESSION MODULO CAST_EXPRESSION			{ $$ = new MultiplicativeExpression($3, $2 ,$1); }
 
 
 
@@ -512,8 +520,8 @@ LABELED_STATEMENT: IDENTIFIER ':' STATEMENT			{ $$ = new LabeledStatement($1,NUL
 
 	
 
-COMPOUND_STATEMENT: '{' '}'					{ $$ = new CompoundStatement(NULL,NULL); } //DONE
-		  | '{' STATEMENT_LIST '}'			{ $$ = new CompoundStatement($2,NULL); }   //DONE
+COMPOUND_STATEMENT: '{' '}'					{ $$ = new CompoundStatement(NULL,NULL); } 
+		  | '{' STATEMENT_LIST '}'			{ $$ = new CompoundStatement($2,NULL); }   
 		  | '{' DECLARATION_LIST '}'			{ $$ = new CompoundStatement(NULL,$2); }
 		  | '{' DECLARATION_LIST STATEMENT_LIST '}'	{ $$ = new CompoundStatement($3,$2); }
 		  | '{' STATEMENT_LIST DECLARATION_LIST '}'	{ $$ = new CompoundStatement($2,$3); }
@@ -533,7 +541,7 @@ EXPRESSION_STATEMENT: SEMICOLON						{ $$ = new ExpressionStatement(NULL) ; }
 		    | EXPRESSION SEMICOLON				{ $$ = new ExpressionStatement($1) ; }
 
 
-SELECTION_STATEMENT: IF '(' EXPRESSION ')' STATEMENT			{ $$ = new SelectionStatement($3,$5,NULL,$1,NULL,NULL); } //DONE
+SELECTION_STATEMENT: IF '(' EXPRESSION ')' STATEMENT			{ $$ = new SelectionStatement($3,$5,NULL,$1,NULL,NULL); } 
 		| IF '(' EXPRESSION ')' STATEMENT ELSE STATEMENT	{ $$ = new SelectionStatement($3,$5,$7,$1,$6,NULL); }     
 		| SWITCH '(' EXPRESSION ')' STATEMENT			{ $$ = new SelectionStatement($3,$5,NULL,NULL,NULL,$1); }
 
@@ -565,33 +573,33 @@ IDENTIFIER_LIST: IDENTIFIER				{ $$ = new IdentifierList($1,NULL); }
 
 
 
-POINTER	: '*'						{ $$ = new Pointer(NULL,NULL); }
-	| '*' TYPE_QUALIFIER_LIST			{ $$ = new Pointer(NULL,$2); }
-	| '*' POINTER					{ $$ = new Pointer($2,NULL); }
-	| '*' TYPE_QUALIFIER_LIST POINTER		{ $$ = new Pointer($3,$2); }
+POINTER	: MULTIPLY					{ $$ = new Pointer(NULL,NULL); }
+	| MULTIPLY TYPE_QUALIFIER_LIST			{ $$ = new Pointer(NULL,$2); }
+	| MULTIPLY POINTER				{ $$ = new Pointer($2,NULL); }
+	| MULTIPLY TYPE_QUALIFIER_LIST POINTER		{ $$ = new Pointer($3,$2); }
 
 
-TYPE_QUALIFIER_LIST: TYPE_QUALIFIER			{ $$ = $1;}
-		   | TYPE_QUALIFIER_LIST TYPE_QUALIFIER	{ $$ = $2;}
-
-
-
-TYPE_NAME: SPECIFIER_QUALIFIER_LIST
-	 | SPECIFIER_QUALIFIER_LIST ABSTRACT_DECLARATOR
+TYPE_QUALIFIER_LIST: TYPE_QUALIFIER			{ $$ = new TypeQualifierList($1,NULL);}
+		   | TYPE_QUALIFIER_LIST TYPE_QUALIFIER	{ $$ = new TypeQualifierList($2,$1);}
 
 
 
-
-ABSTRACT_DECLARATOR //POINTER 					{ $$ = new AbstractDeclarator($1,NULL) ; }//done
-		   : DIRECT_ABSTRACT_DECLARATOR 		{ $$ = new AbstractDeclarator(NULL,$1); }//done
-	          // | POINTER DIRECT_ABSTRACT_DECLARATOR 	{ $$ = new AbstractDeclarator($1,$2); }  //done
+TYPE_NAME: SPECIFIER_QUALIFIER_LIST			{ $$ = new TypeName($1,NULL); }
+	 | SPECIFIER_QUALIFIER_LIST ABSTRACT_DECLARATOR	{ $$ = new TypeName($1,$2); }
 
 
 
 
-DIRECT_ABSTRACT_DECLARATOR: '(' ABSTRACT_DECLARATOR ')' 				{ $$ = new DirectAbstractDeclarator($2,NULL,NULL,NULL); } //done
+ABSTRACT_DECLARATOR :POINTER 					{ $$ = new AbstractDeclarator($1,NULL) ; }
+		    |DIRECT_ABSTRACT_DECLARATOR 		{ $$ = new AbstractDeclarator(NULL,$1); }
+	            |POINTER DIRECT_ABSTRACT_DECLARATOR 	{ $$ = new AbstractDeclarator($1,$2); }  
+
+
+
+
+DIRECT_ABSTRACT_DECLARATOR: '(' ABSTRACT_DECLARATOR ')' 				{ $$ = new DirectAbstractDeclarator($2,NULL,NULL,NULL); } 
 			  | '[' ']'							{ $$ = new DirectAbstractDeclarator(NULL,NULL,NULL,NULL); } 
-			  | '[' CONSTANT_EXPRESSION ']'					{ std::cout << "array"; $$ = new DirectAbstractDeclarator(NULL,$2,NULL,NULL); } 
+			  | '[' CONSTANT_EXPRESSION ']'					{ $$ = new DirectAbstractDeclarator(NULL,$2,NULL,NULL); } 
 			  | DIRECT_ABSTRACT_DECLARATOR '[' ']'				{ $$ = new DirectAbstractDeclarator(NULL,NULL,NULL,$1); } 
 			  | DIRECT_ABSTRACT_DECLARATOR '[' CONSTANT_EXPRESSION ']'	{ $$ = new DirectAbstractDeclarator(NULL,$3,NULL,$1); } 
 			  | '(' ')'						  	{ $$ = new DirectAbstractDeclarator(NULL,NULL,NULL,NULL); } 
@@ -605,49 +613,49 @@ DIRECT_ABSTRACT_DECLARATOR: '(' ABSTRACT_DECLARATOR ')' 				{ $$ = new DirectAbs
 
 
 
-ENUM_SPECIFIER :/*	  ENUM '{' ENUMERATOR_LIST '}'			//DONE
-		| ENUM IDENTIFIER '{' ENUMERATOR_LIST '}'	//DONE
-		| ENUM IDENTIFIER				//DONE*/
+ENUM_SPECIFIER :  ENUM '{' ENUMERATOR_LIST '}'			{ $$ = new EnumSpecifier($3,NULL); }			
+		| ENUM IDENTIFIER '{' ENUMERATOR_LIST '}'	{ $$ = new EnumSpecifier($4,$2);   }			
+		| ENUM IDENTIFIER				{ $$ = new EnumSpecifier(NULL,$2); }			
 
 
-ENUMERATOR_LIST: ENUMERATOR
-		| ENUMERATOR_LIST ',' ENUMERATOR
+ENUMERATOR_LIST: ENUMERATOR					{ $$ = new EnumeratorList($1,NULL); }
+		| ENUMERATOR_LIST ',' ENUMERATOR		{ $$ = new EnumeratorList($3,$1); }
 
 
-ENUMERATOR: IDENTIFIER
-	  | IDENTIFIER '=' CONSTANT_EXPRESSION
+ENUMERATOR: IDENTIFIER						{ $$ = new Enumerator($1,NULL); }
+	  | IDENTIFIER '=' CONSTANT_EXPRESSION			{ $$ = new Enumerator($1,$3); }
 
 
 
 STRUCT_OR_UNION_SPECIFIER: STRUCT_OR_UNION IDENTIFIER '{' STRUCT_DECLARATION_LIST '}'    { $$ = new StructOrUnionSpecifier($1,$2,$4); }
-			| STRUCT_OR_UNION '{' STRUCT_DECLARATION_LIST '}'              	 { $$ = new StructOrUnionSpecifier($1,NULL,$3); }//DONE
-			| STRUCT_OR_UNION IDENTIFIER					 { $$ = new StructOrUnionSpecifier($1,$2,NULL); }//DONE COMPLETELY
+			| STRUCT_OR_UNION '{' STRUCT_DECLARATION_LIST '}'              	 { $$ = new StructOrUnionSpecifier($1,NULL,$3); }
+			| STRUCT_OR_UNION IDENTIFIER					 { $$ = new StructOrUnionSpecifier($1,$2,NULL); }
 	
 
-STRUCT_OR_UNION: STRUCT									{ $$ = new StructOrUnion( $1 ); }	//DONE COMPLETELY
-		| UNION									{ $$ = new StructOrUnion( $1 ); }	//DONE COMPLETELY
+STRUCT_OR_UNION: STRUCT									{ $$ = new StructOrUnion( $1 ); }	
+		| UNION									{ $$ = new StructOrUnion( $1 ); }	
 	
 
-STRUCT_DECLARATION_LIST: STRUCT_DECLARATION						//DONE
-			| STRUCT_DECLARATION_LIST STRUCT_DECLARATION
+STRUCT_DECLARATION_LIST: STRUCT_DECLARATION						{ $$ = new StructDeclarationList($1,NULL); }
+			| STRUCT_DECLARATION_LIST STRUCT_DECLARATION			{ $$ = new StructDeclarationList($2,$1); }
 	
 
-STRUCT_DECLARATION: SPECIFIER_QUALIFIER_LIST STRUCT_DECLARATOR_LIST ';'		//DONE
+STRUCT_DECLARATION: SPECIFIER_QUALIFIER_LIST STRUCT_DECLARATOR_LIST ';'			{ $$ = new StructDeclaration($1,$2); }
 
 
-SPECIFIER_QUALIFIER_LIST: TYPE_SPECIFIER SPECIFIER_QUALIFIER_LIST
-			| TYPE_SPECIFIER
-			| TYPE_QUALIFIER SPECIFIER_QUALIFIER_LIST
-			| TYPE_QUALIFIER
+SPECIFIER_QUALIFIER_LIST: TYPE_SPECIFIER SPECIFIER_QUALIFIER_LIST			{ $$ = new SpecifierQualifierList($1,$2,NULL) ; }			
+			| TYPE_SPECIFIER						{ $$ = new SpecifierQualifierList($1,NULL,NULL) ; }	
+			| TYPE_QUALIFIER SPECIFIER_QUALIFIER_LIST			{ $$ = new SpecifierQualifierList(NULL,$2,$1) ; }
+			| TYPE_QUALIFIER						{ $$ = new SpecifierQualifierList(NULL,NULL,$1) ; }	
 
 
-STRUCT_DECLARATOR_LIST: STRUCT_DECLARATOR						//DONE
-			| STRUCT_DECLARATOR_LIST ',' STRUCT_DECLARATOR			//DONE
+STRUCT_DECLARATOR_LIST: STRUCT_DECLARATOR						{ $$ = new StructDeclaratorList($1,NULL); }						
+			| STRUCT_DECLARATOR_LIST ',' STRUCT_DECLARATOR			{ $$ = new StructDeclaratorList($3,$1); }		
 
 
-STRUCT_DECLARATOR: DECLARATOR							//HAVE NOT PUT IT IN MEMBER VARIABLES
-		| ':' CONSTANT_EXPRESSION					//DONE
-		| DECLARATOR ':' CONSTANT_EXPRESSION				//DONE
+STRUCT_DECLARATOR: DECLARATOR								{ $$ = new StructDeclarator($1,NULL); }					
+		| ':' CONSTANT_EXPRESSION						{ $$ = new StructDeclarator(NULL,$2); }				
+		| DECLARATOR ':' CONSTANT_EXPRESSION					{ $$ = new StructDeclarator($1,$3); }				
 
 %%
 
