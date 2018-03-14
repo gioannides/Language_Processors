@@ -16,102 +16,115 @@
 	.type	main, @function
 main:
 
-$END0:
-$END1:	.set	noreorder
+$END1:
+$END3:
+$IF2:
+$END5:
+$END7:
+$IF6:
+$END9:
+$END11:
+$IF10:
+$END13:
+$END10:
+$END6:
+$END14:
+$END2:
+$END15:	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-24
-	sw	$fp,20($sp)
-	sw	$31,16($sp)
+	addiu	$sp,$sp,-128
+	sw	$fp,124($sp)
+	sw	$31,120($sp)
 	move	$fp,$sp
 
-	sw	$0, 12($sp) #a
+	sw	$0, 116($sp) #a
 
 	li	$2, 8
-$END2:
-	sw	$2, 8($sp) #b
+$END17:
+	sw	$2, 112($sp) #b
 
-	lw	$2, 12($sp) #a
-	lw	$3, 8($sp) #b
+	lw	$2, 116($sp) #a
+	lw	$3, 112($sp) #b
 	slt	$2, $2, $3
-$END4:
-	beq	$2,$0,$END3
+$END19:
+	beq	$2,$0,$END18
 	nop
-$IF3:
-	lw	$2, 12($sp) #a
+$IF18:
+	lw	$2, 116($sp) #a
 	li	$3, 1
 	sub	$2, $2, $3
-$END5:
-	lw	$3, 12($sp) #a
+$END21:
+	lw	$3, 116($sp) #a
 
 #df
-	sw	$2,12($sp) #a
+	sw	$2,116($sp) #a
 
-	lw	$2, 12($sp) #a
-	lw	$3, 8($sp) #b
+	lw	$2, 116($sp) #a
+	lw	$3, 112($sp) #b
 	sgt	$2, $2, $3
-$END7:
-	beq	$2,$0,$END6
+$END23:
+	beq	$2,$0,$END22
 	nop
-$IF6:
-	lw	$2, 8($sp) #b
+$IF22:
+	lw	$2, 112($sp) #b
 	li	$3, 3
 	add	$2, $2, $3
-$END8:
-	lw	$3, 8($sp) #b
+$END25:
+	lw	$3, 112($sp) #b
 
 #df
-	sw	$2,8($sp) #b
+	sw	$2,112($sp) #b
 
-	lw	$2, 12($sp) #a
-	lw	$3, 8($sp) #b
+	lw	$2, 116($sp) #a
+	lw	$3, 112($sp) #b
 	seq	$2, $2, $3
-$END10:
-	beq	$2,$0,$END9
+$END27:
+	beq	$2,$0,$END26
 	nop
-$IF9:
-	lw	$2, 12($sp) #a
-	lw	$3, 8($sp) #b
+$IF26:
+	lw	$2, 116($sp) #a
+	lw	$3, 112($sp) #b
 	mult	$2, $3
 	mflo	$2
-$END11:
+$END29:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,16($sp)
-	lw	$fp,20($sp)
-	addiu	$sp,$sp,24
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
 
-$END9:
-$END6:
-	lw	$2, 8($sp) #b
-$END12:
+$END26:
+$END22:
+	lw	$2, 112($sp) #b
+$END30:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,16($sp)
-	lw	$fp,20($sp)
-	addiu	$sp,$sp,24
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
 
-$END3:
+$END18:
 	li	$2, 13
-$END13:
+$END31:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,16($sp)
-	lw	$fp,20($sp)
-	addiu	$sp,$sp,24
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
 
 	move	$sp,$fp
-	lw	$31,16($sp)
-	lw	$fp,20($sp)
-	addiu	$sp,$sp,24
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop

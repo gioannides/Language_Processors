@@ -16,164 +16,166 @@
 	.type	main, @function
 main:
 
-$END0:
 $END1:
-$END2:	.set	noreorder
+$END2:
+$END3:
+$END5:
+$END4:	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-28
-	sw	$fp,24($sp)
-	sw	$31,20($sp)
+	addiu	$sp,$sp,-132
+	sw	$fp,128($sp)
+	sw	$31,124($sp)
 	move	$fp,$sp
 
 	li	$2, 8
-$END3:
-	sw	$2, 16($sp) #x
+$END9:
+	sw	$2, 120($sp) #x
 
 	li	$2, 9
-$END4:
-	sw	$2, 12($sp) #y
+$END10:
+	sw	$2, 116($sp) #y
 
 	li	$2, 88
-$END5:
-	sw	$2, 8($sp) #z
-
-	lw	$2, 16($sp) #x
-$END7:
-	li	$3, 8
-$END9:
-	beq	$2,$3,$CASE8
-	nop
-$CASE8:
-	lw	$2, 12($sp) #y
 $END11:
-	lw	$3, 16($sp) #x
+	sw	$2, 112($sp) #z
+
+	lw	$2, 120($sp) #x
 $END13:
+	li	$3, 8
+$END16:
+	beq	$2,$3,$CASE15
+	nop
+$CASE15:
+	lw	$2, 116($sp) #y
+$END19:
+	lw	$3, 120($sp) #x
+$END22:
 	li	$4, 7
-$END15:
-	beq	$2,$3,$CASE14
+$END25:
+	beq	$2,$3,$CASE24
 	nop
 	li	$4, 8
-$END17:
-	beq	$2,$3,$CASE16
+$END27:
+	beq	$2,$3,$CASE26
 	nop
-$CASE8:
-	lw	$3, 12($sp) #y
-$END18:
+$CASE15:
+	lw	$3, 116($sp) #y
+$END29:
 	move	$2,$3
 	move	$sp,$fp
-	lw	$31,20($sp)
-	lw	$fp,24($sp)
-	addiu	$sp,$sp,28
+	lw	$31,124($sp)
+	lw	$fp,128($sp)
+	addiu	$sp,$sp,132
 	j	$31
 
 	nop
 
-$CASE14:
-	lw	$3, 16($sp) #x
+$CASE24:
+	lw	$3, 120($sp) #x
 	li	$4, 3
 	add	$3, $3, $4
-$END19:
+$END30:
 	move	$2,$3
 	move	$sp,$fp
-	lw	$31,20($sp)
-	lw	$fp,24($sp)
-	addiu	$sp,$sp,28
-	j	$31
-
-	nop
-
-$END12:
-$CASE16:
-	lw	$3, 8($sp) #z
-$END20:
-	move	$2,$3
-	move	$sp,$fp
-	lw	$31,20($sp)
-	lw	$fp,24($sp)
-	addiu	$sp,$sp,28
-	j	$31
-
-	nop
-
-	lw	$2, 16($sp) #x
-$END22:
-	li	$3, 7
-$END24:
-	beq	$2,$3,$CASE23
-	nop
-	li	$3, 8
-$END26:
-	beq	$2,$3,$CASE25
-	nop
-$CASE8:
-	lw	$2, 12($sp) #y
-$END27:
-	move	$2,$2
-	move	$sp,$fp
-	lw	$31,20($sp)
-	lw	$fp,24($sp)
-	addiu	$sp,$sp,28
-	j	$31
-
-	nop
-
-$CASE14:
-	lw	$2, 16($sp) #x
-	li	$3, 3
-	add	$2, $2, $3
-$END28:
-	move	$2,$2
-	move	$sp,$fp
-	lw	$31,20($sp)
-	lw	$fp,24($sp)
-	addiu	$sp,$sp,28
+	lw	$31,124($sp)
+	lw	$fp,128($sp)
+	addiu	$sp,$sp,132
 	j	$31
 
 	nop
 
 $END21:
-$CASE16:
-	lw	$2, 8($sp) #z
-$END29:
-	move	$2,$2
-	move	$sp,$fp
-	lw	$31,20($sp)
-	lw	$fp,24($sp)
-	addiu	$sp,$sp,28
-	j	$31
-
-	nop
-
-$CASE23:
-	lw	$2, 12($sp) #y
-$END30:
-	move	$2,$2
-	move	$sp,$fp
-	lw	$31,20($sp)
-	lw	$fp,24($sp)
-	addiu	$sp,$sp,28
-	j	$31
-
-	nop
-
-$CASE25:
-	li	$2, 9
+$CASE26:
+	lw	$3, 112($sp) #z
 $END31:
-	move	$2,$2
+	move	$2,$3
 	move	$sp,$fp
-	lw	$31,20($sp)
-	lw	$fp,24($sp)
-	addiu	$sp,$sp,28
+	lw	$31,124($sp)
+	lw	$fp,128($sp)
+	addiu	$sp,$sp,132
 	j	$31
 
 	nop
 
-$END10:
-$END6:
+	lw	$2, 120($sp) #x
+$END34:
+	li	$3, 7
+$END37:
+	beq	$2,$3,$CASE36
+	nop
+	li	$3, 8
+$END39:
+	beq	$2,$3,$CASE38
+	nop
+$CASE15:
+	lw	$2, 116($sp) #y
+$END41:
+	move	$2,$2
 	move	$sp,$fp
-	lw	$31,20($sp)
-	lw	$fp,24($sp)
-	addiu	$sp,$sp,28
+	lw	$31,124($sp)
+	lw	$fp,128($sp)
+	addiu	$sp,$sp,132
+	j	$31
+
+	nop
+
+$CASE24:
+	lw	$2, 120($sp) #x
+	li	$3, 3
+	add	$2, $2, $3
+$END42:
+	move	$2,$2
+	move	$sp,$fp
+	lw	$31,124($sp)
+	lw	$fp,128($sp)
+	addiu	$sp,$sp,132
+	j	$31
+
+	nop
+
+$END33:
+$CASE26:
+	lw	$2, 112($sp) #z
+$END43:
+	move	$2,$2
+	move	$sp,$fp
+	lw	$31,124($sp)
+	lw	$fp,128($sp)
+	addiu	$sp,$sp,132
+	j	$31
+
+	nop
+
+$CASE36:
+	lw	$2, 116($sp) #y
+$END44:
+	move	$2,$2
+	move	$sp,$fp
+	lw	$31,124($sp)
+	lw	$fp,128($sp)
+	addiu	$sp,$sp,132
+	j	$31
+
+	nop
+
+$CASE38:
+	li	$2, 9
+$END45:
+	move	$2,$2
+	move	$sp,$fp
+	lw	$31,124($sp)
+	lw	$fp,128($sp)
+	addiu	$sp,$sp,132
+	j	$31
+
+	nop
+
+$END18:
+$END12:
+	move	$sp,$fp
+	lw	$31,124($sp)
+	lw	$fp,128($sp)
+	addiu	$sp,$sp,132
 	j	$31
 
 	nop

@@ -1,12 +1,16 @@
-int main()                    
-{     int x = 0;
-    int y = 0;
+int multiplyNumbers(int n)
+{
+    if (n >= 1)
+        return n*multiplyNumbers(n-1);
+    else
+        return 1;
+}
 
-    start: x = x + 1;
-    if (x < 10) {
-        y = y + x;
-        goto start;
-    }
 
-    return y;                
-} 
+int main()
+{
+    int n=3;
+
+    return multiplyNumbers(n);
+    
+}

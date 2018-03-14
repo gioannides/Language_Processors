@@ -16,55 +16,55 @@
 	.type	main, @function
 main:
 
-$END0:	.set	noreorder
+$END1:	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-16
-	sw	$fp,12($sp)
-	sw	$31,8($sp)
+	addiu	$sp,$sp,-120
+	sw	$fp,116($sp)
+	sw	$31,112($sp)
 	move	$fp,$sp
 
 	li	$2, 122
 	li	$3, 6
 	li	$4, 7
 	add	$3, $3, $4
-$END3:
+$END5:
 	add	$2, $2, $3
 	li	$3, 322
 	add	$2, $2, $3
 	li	$3, 1
 	add	$2, $2, $3
-$END2:
+$END4:
 	li	$3, 12
 	li	$4, 22
 	li	$5, 12
 	li	$6, 89
 	add	$5, $5, $6
-$END6:
+$END8:
 	add	$4, $4, $5
 	li	$5, 34
 	add	$4, $4, $5
-$END5:
+$END7:
 	div	$3, $4
 	mflo	$3
 	li	$4, 1
 	add	$3, $3, $4
-$END4:
+$END6:
 	mult	$2, $3
 	mflo	$2
-$END1:
+$END3:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,8($sp)
-	lw	$fp,12($sp)
-	addiu	$sp,$sp,16
+	lw	$31,112($sp)
+	lw	$fp,116($sp)
+	addiu	$sp,$sp,120
 	j	$31
 
 	nop
 
 	move	$sp,$fp
-	lw	$31,8($sp)
-	lw	$fp,12($sp)
-	addiu	$sp,$sp,16
+	lw	$31,112($sp)
+	lw	$fp,116($sp)
+	addiu	$sp,$sp,120
 	j	$31
 
 	nop

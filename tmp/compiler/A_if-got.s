@@ -27,163 +27,194 @@ f:
 	.type	main, @function
 main:
 
-$END1:
-$END2:	.set	noreorder
+$END2:
+$END4:
+$IF3:
+$END7:
+$IF6:
+$END10:
+$IF9:
+$END12:
+$END9:
+$END6:
+$END3:
+$END14:
+$IF13:
+$END17:
+$IF16:
+$END18:
+$END16:
+$END20:
+$IF19:
+$END23:
+$IF22:
+$END25:
+$ELSE22:
+$END27:
+$IF26:
+$END29:
+$ELSE26:
+$END31:
+$END26:
+$END22:
+$END19:
+$END13:
+$END32:	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-20
-	sw	$fp,16($sp)
-	sw	$31,12($sp)
+	addiu	$sp,$sp,-124
+	sw	$fp,120($sp)
+	sw	$31,116($sp)
 	move	$fp,$sp
 
 	li	$2, 1
-$END3:
-	sw	$2, 8($sp) #x
+$END34:
+	sw	$2, 112($sp) #x
 
-	lw	$2, 8($sp) #x
+	lw	$2, 112($sp) #x
 	li	$3, 1
 	seq	$2, $2, $3
-$END5:
-	beq	$2,$0,$END4
+$END36:
+	beq	$2,$0,$END35
 	nop
-$IF4:
-	lw	$2, 8($sp) #x
+$IF35:
+	lw	$2, 112($sp) #x
 	li	$3, 2
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END7:
-	beq	$2,$0,$END6
+$END39:
+	beq	$2,$0,$END38
 	nop
-$IF6:
-	lw	$2, 8($sp) #x
+$IF38:
+	lw	$2, 112($sp) #x
 	li	$3, 3
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END9:
-	beq	$2,$0,$END8
+$END42:
+	beq	$2,$0,$END41
 	nop
-$IF8:
+$IF41:
 	li	$2, 3
-$END10:
+$END44:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,12($sp)
-	lw	$fp,16($sp)
-	addiu	$sp,$sp,20
+	lw	$31,116($sp)
+	lw	$fp,120($sp)
+	addiu	$sp,$sp,124
 	j	$31
 
 	nop
 
-$END8:
-$END6:
-$END4:
-	lw	$2, 8($sp) #x
+$END41:
+$END38:
+$END35:
+	lw	$2, 112($sp) #x
 	li	$3, 1
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END12:
-	beq	$2,$0,$END11
+$END46:
+	beq	$2,$0,$END45
 	nop
-$IF11:
-	lw	$2, 8($sp) #x
+$IF45:
+	lw	$2, 112($sp) #x
 	li	$3, 4
 	seq	$2, $2, $3
-$END14:
-	beq	$2,$0,$END13
+$END49:
+	beq	$2,$0,$END48
 	nop
-$IF13:
+$IF48:
 	li	$2, 4
-$END15:
+$END50:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,12($sp)
-	lw	$fp,16($sp)
-	addiu	$sp,$sp,20
+	lw	$31,116($sp)
+	lw	$fp,120($sp)
+	addiu	$sp,$sp,124
 	j	$31
 
 	nop
 
-$END13:
-	lw	$2, 8($sp) #x
+$END48:
+	lw	$2, 112($sp) #x
 	li	$3, 5
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END17:
-	beq	$2,$0,$END16
+$END52:
+	beq	$2,$0,$END51
 	nop
-$IF16:
-	lw	$2, 8($sp) #x
+$IF51:
+	lw	$2, 112($sp) #x
 	li	$3, 6
 	seq	$2, $2, $3
-$END19:
-	beq	$2,$0,$ELSE18
+$END55:
+	beq	$2,$0,$ELSE54
 	nop
-$IF18:
+$IF54:
 	li	$2, 6
-$END20:
+$END57:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,12($sp)
-	lw	$fp,16($sp)
-	addiu	$sp,$sp,20
+	lw	$31,116($sp)
+	lw	$fp,120($sp)
+	addiu	$sp,$sp,124
 	j	$31
 
 	nop
 
-	b $END18
+	b $END54
 	nop
-$ELSE18:
-	lw	$2, 8($sp) #x
+$ELSE54:
+	lw	$2, 112($sp) #x
 	li	$3, 7
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END22:
-	beq	$2,$0,$ELSE21
+$END59:
+	beq	$2,$0,$ELSE58
 	nop
-$IF21:
+$IF58:
 	li	$2, 7
-$END23:
+$END61:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,12($sp)
-	lw	$fp,16($sp)
-	addiu	$sp,$sp,20
+	lw	$31,116($sp)
+	lw	$fp,120($sp)
+	addiu	$sp,$sp,124
 	j	$31
 
 	nop
 
-	b $END21
+	b $END58
 	nop
-$ELSE21:
+$ELSE58:
 	li	$2, 1
-$END24:
+$END63:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,12($sp)
-	lw	$fp,16($sp)
-	addiu	$sp,$sp,20
+	lw	$31,116($sp)
+	lw	$fp,120($sp)
+	addiu	$sp,$sp,124
 	j	$31
 
 	nop
 
-$END21:
-$END18:
-$END16:
-$END11:
+$END58:
+$END54:
+$END51:
+$END45:
 	li	$2, 99
-$END25:
+$END64:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,12($sp)
-	lw	$fp,16($sp)
-	addiu	$sp,$sp,20
+	lw	$31,116($sp)
+	lw	$fp,120($sp)
+	addiu	$sp,$sp,124
 	j	$31
 
 	nop
 
 	move	$sp,$fp
-	lw	$31,12($sp)
-	lw	$fp,16($sp)
-	addiu	$sp,$sp,20
+	lw	$31,116($sp)
+	lw	$fp,120($sp)
+	addiu	$sp,$sp,124
 	j	$31
 
 	nop

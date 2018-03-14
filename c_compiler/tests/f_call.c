@@ -1,10 +1,11 @@
-int f(int a, int b, int c, int d, int e)
+int f(int a, int b)
 {
-    return a + b + c + d + e;
+    return a + b;
 }
 
 int main()
 {
-	int g=1,h=7,i=8,j=3,k=4;
-    return f(g, h, i, j, k);
+	int g=1,h=1,i=1,j=1,k=4;
+    return g+h+f(g+6*2-7, h)+k+j;
+
 }

@@ -951,4 +951,4 @@ inline void PrimaryExpression::AssignmentOperator(std::ofstream& file, int good_
 					}
 					contxt.AssignmentOperator = "df";
 					contxt.Regs--;
-			}
+}

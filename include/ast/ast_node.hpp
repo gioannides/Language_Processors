@@ -12,34 +12,21 @@
 
 static Context contxt;
 
-class SpecifierQualifierList : public Node {};
+
 
 class InclusiveAndExpression : public Node {};
-class TypeName : public Node {};
 
 
 
 
 
-class Pointer : public Node {
-
-	private:
-		Pointer* PointerPtr;
-		TypeQualifier* TypeQualifierPtr;
-
-	public:
-		Pointer( Pointer* PointerPtr , TypeQualifier* TypeQualifierPtr ) : PointerPtr(PointerPtr) , TypeQualifierPtr(TypeQualifierPtr) {}
-
-		~Pointer() {}
-
-};
 
 
 
 
 class PrimaryExpression : public Node {
 	
-	private:
+	public:
 		std::string* IDENTIFIER;
 		std::string* CONSTANT;
 		std::string* STRING_LITERAL;
@@ -87,7 +74,7 @@ class ArgumentExpressionList : public Node {
 
 class PostFixExpression : public Node {
 
-	private:
+	public:
 		PrimaryExpression* PrimaryExpressionPtr;
 		AssignmentExpression* AssignmentExpressionPtr;
 		ArgumentExpressionList* ArgumentExpressionListPtr;
@@ -108,18 +95,39 @@ class PostFixExpression : public Node {
 		void render_asm(std::ofstream& file,Context& contxt); 
 };
 
+class UnaryOperator : public Node {
+
+	private:
+		std::string* UNARYOPERATOR;
+
+	public:
+		UnaryOperator(std::string* UNARYOPERATOR) : UNARYOPERATOR(UNARYOPERATOR) {}
+
+		~UnaryOperator() {}
+
+		std::string render_asm(std::ofstream& file, Context& contxt) ;
+
+		std::string print_py() ;
+
+		
+
+
+};
 		
 
 class UnaryExpression : public Node {
 	
-	private:
+	public:
 		PostFixExpression* PostFixExpressionPtr;
+		UnaryOperator* UnaryOperatorPtr;
 		std::string* OPERATOR;
 		CastExpression* CastExpressionPtr;
 		UnaryExpression* UnaryExpressionPtr;
+		TypeName* TypeNamePtr;
 	public:
-		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, CastExpression* CastExpressionPtr, UnaryExpression* UnaryExpressionPtr) :
-			PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr) {}
+		
+		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, UnaryOperator* UnaryOperatorPtr, CastExpression* CastExpressionPtr, UnaryExpression* UnaryExpressionPtr,TypeName* TypeNamePtr) :
+			UnaryOperatorPtr(UnaryOperatorPtr) , PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr) , TypeNamePtr(TypeNamePtr) {}
 
 		~UnaryExpression() {}
 
@@ -134,9 +142,12 @@ class CastExpression : public Node {
 	private:
 		UnaryExpression* UNaryExpression;
 		TypeName* TYpeName;
+		CastExpression* CastExpressionPtr;
 
 	public:
 		CastExpression( UnaryExpression* UNaryExpression, TypeName* TYpeName) : UNaryExpression(UNaryExpression) , TYpeName(TYpeName) {}
+
+		CastExpression( UnaryExpression* UNaryExpression, TypeName* TYpeName , CastExpression* CastExpressionPtr ) : UNaryExpression(UNaryExpression) , TYpeName(TYpeName) , CastExpressionPtr(CastExpressionPtr) {}
 
 		~CastExpression() {}
 
@@ -842,40 +853,32 @@ class StorageClassSpecifiers : public Node {
 		void render_asm(std::ofstream& file,Context& contxt) {}
 };
 
+/* NEW STUFF */
 
 
+class StructDeclarator : public Node {
 
-
-
-		
-
-
-class StructDeclarator : public Node { 
-	
 	private:
-		ConstantExpression* CoNstantExpression;
-		
+		Declarator* DeclaratorPtr;
+		ConstantExpression* ConstantExpressionPtr;
+	
 	public:
-		StructDeclarator( ConstantExpression* CoNstantExpression) : CoNstantExpression(CoNstantExpression) {}
+		StructDeclarator( Declarator* DeclaratorPtr , ConstantExpression* ConstantExpressionPtr ) : DeclaratorPtr(DeclaratorPtr) , ConstantExpressionPtr(ConstantExpressionPtr) {}
 
 		~StructDeclarator() {}
 
 };
 
 
-
-
-
-
-
-
 class StructDeclaratorList : public Node {
-	
+
 	private:
-		StructDeclarator* StructDecLarator;
-		
+		StructDeclarator* StructDeclaratorPtr;
+		StructDeclaratorList* StructDeclaratorListPtr;
+
 	public:
-		StructDeclaratorList(StructDeclarator* StructDecLarator) : StructDecLarator(StructDecLarator) {}
+		StructDeclaratorList(StructDeclarator* StructDeclaratorPtr , StructDeclaratorList* StructDeclaratorListPtr) :
+			StructDeclaratorPtr(StructDeclaratorPtr) , StructDeclaratorListPtr(StructDeclaratorListPtr) {}
 
 		~StructDeclaratorList() {}
 
@@ -884,21 +887,69 @@ class StructDeclaratorList : public Node {
 
 
 
+class SpecifierQualifierList : public Node {
+
+	private:
+		TypeSpecifier* TypeSpecifierPtr;
+		SpecifierQualifierList* SpecifierQualifierListPtr;
+		TypeQualifier* TypeQualifierPtr;
+
+	public:
+		SpecifierQualifierList(TypeSpecifier* TypeSpecifierPtr , SpecifierQualifierList* SpecifierQualifierListPtr , TypeQualifier* TypeQualifierPtr) :
+				TypeSpecifierPtr(TypeSpecifierPtr) , SpecifierQualifierListPtr(SpecifierQualifierListPtr) , TypeQualifierPtr(TypeQualifierPtr) {}
+
+
+		~SpecifierQualifierList() {}
+
+
+};
 
 
 
+class TypeQualifierList : public Node {
+
+
+	private:
+		TypeQualifier* TypeQualifierPtr;
+		TypeQualifierList* TypeQualifierListPtr;
+
+	public:
+		TypeQualifierList( TypeQualifier* TypeQualifierPtr , TypeQualifierList* TypeQualifierListPtr) : TypeQualifierPtr(TypeQualifierPtr) , TypeQualifierListPtr(TypeQualifierListPtr) {}
+
+
+		~TypeQualifierList() {}
+
+
+};
+		
+
+
+
+
+class Pointer : public Node {
+
+	private:
+		Pointer* PointerPtr;
+		TypeQualifierList* TypeQualifierListPtr;
+
+	public:
+		Pointer( Pointer* PointerPtr , TypeQualifierList* TypeQualifierPtr ) : PointerPtr(PointerPtr) , TypeQualifierListPtr(TypeQualifierListPtr) {}
+
+		~Pointer() {}
+
+};
 
 class StructDeclaration : public Node {
 
 	private:
-		SpecifierQualifierList* SpeciFierQualifierList;
-		StructDeclaratorList* StrucTDeclaratorList;
+		SpecifierQualifierList* SpecifierQualifierListPtr;
+		StructDeclaratorList* StructDeclaratorListPtr;
 
 	public:
 
-		StructDeclaration( SpecifierQualifierList* SpeciFierQualifierList, StructDeclaratorList* StrucTDeclaratorList ) :
+		StructDeclaration( SpecifierQualifierList* SpecifierQualifierListPtr, StructDeclaratorList* StructDeclaratorListPtr ) :
 	
-					SpeciFierQualifierList(SpeciFierQualifierList) , StrucTDeclaratorList(StrucTDeclaratorList) {}
+					SpecifierQualifierListPtr(SpecifierQualifierListPtr) , StructDeclaratorListPtr(StructDeclaratorListPtr) {}
 
 		~StructDeclaration() {}
 
@@ -915,10 +966,11 @@ class StructDeclaration : public Node {
 class StructDeclarationList : public Node {
 
 	private:
-		StructDeclaration* StrucTDeclaration;
+		StructDeclaration* StructDeclarationPtr;
+		StructDeclarationList* StructDeclarationListPtr;
 	
 	public:
-		StructDeclarationList( StructDeclaration* StrucTDeclaration ) : StrucTDeclaration(StrucTDeclaration) {}
+		StructDeclarationList( StructDeclaration* StrucTDeclaration , StructDeclarationList* StructDeclarationListPtr) : StructDeclarationPtr(StructDeclarationPtr) , StructDeclarationListPtr(StructDeclarationListPtr) {}
 
 		~StructDeclarationList() {}
 
@@ -970,8 +1022,33 @@ class StructOrUnionSpecifier : public Node {
 
 
 
-class Enum : public Node {};
-class EnumeratorList : public Node {};
+class Enumerator : public Node {
+
+	private:
+		std::string* IDENTIFIER;
+		ConstantExpression* ConstantExpressionPtr;
+
+	public:
+		Enumerator(std::string* IDENTIFIER , ConstantExpression* ConstantExpressionPtr) : IDENTIFIER(IDENTIFIER) , ConstantExpressionPtr(ConstantExpressionPtr) {}
+
+		~Enumerator() {}
+
+};
+
+
+
+class EnumeratorList : public Node {
+
+	private:
+		Enumerator* EnumeratorPtr;
+		EnumeratorList* EnumeratorListPtr;
+
+	public:
+		EnumeratorList(Enumerator* EnumeratorPtr , EnumeratorList* EnumeratorListPtr) : EnumeratorPtr(EnumeratorPtr) , EnumeratorListPtr(EnumeratorListPtr) {}
+
+		~EnumeratorList() {}
+
+};
 
 
 
@@ -981,42 +1058,59 @@ class EnumeratorList : public Node {};
 class EnumSpecifier : public Node {
 
 	private:
-		Enum* ENum;
+		
 		EnumeratorList* ENumeratorList;
 		std::string* IDENTIFIER;
 
 	public:
 
-		EnumSpecifier( Enum* ENum, EnumeratorList* ENumeratorList, std::string* IDENTIFIER) : ENum(ENum) , ENumeratorList(ENumeratorList), IDENTIFIER(IDENTIFIER) {}
+		EnumSpecifier( EnumeratorList* ENumeratorList, std::string* IDENTIFIER) : ENumeratorList(ENumeratorList), IDENTIFIER(IDENTIFIER) {}
 
 		~EnumSpecifier() {}
 
 };
+ 
+
+class TypeName : public Node {
+
+	private:
+		SpecifierQualifierList* SpecifierQualifierListPtr;
+		AbstractDeclarator* AbstractDeclaratorPtr;
+
+	public:
+		TypeName(SpecifierQualifierList* SpecifierQualifierListPtr , AbstractDeclarator* AbstractDeclaratorPtr) : SpecifierQualifierListPtr(SpecifierQualifierListPtr) , AbstractDeclaratorPtr(AbstractDeclaratorPtr) {}
+
+		~TypeName() {}
 
 
+};
 
 
-
-
+/* END OF NEW STUFF */
 
 
 class TypeSpecifier : public Node {
 
 	private:
 		std::string* TYPES;
-		StructOrUnionSpecifier* StructORUnionSpeCifier;
-		EnumSpecifier* EnumSpec;
+		StructOrUnionSpecifier* StructOrUnionSpecifierPtr;
+		EnumSpecifier* EnumSpecifierPtr;
+		TypeName* TypeNamePtr;
 		
 	public:
 
 		TypeSpecifier(std::string* TYPES) : TYPES(TYPES) {}
 
-		TypeSpecifier(StructOrUnionSpecifier* StructORUnionSpeCifier) : StructORUnionSpeCifier(StructORUnionSpeCifier) {}
+		TypeSpecifier(StructOrUnionSpecifier* StructOrUnionSpecifierPtr) : StructOrUnionSpecifierPtr(StructOrUnionSpecifierPtr) {}
 
-		TypeSpecifier(EnumSpecifier* EnumSpec) : EnumSpec(EnumSpec) {}
+		TypeSpecifier(EnumSpecifier* EnumSpec) : EnumSpecifierPtr(EnumSpecifierPtr) {}
+
+		TypeSpecifier(TypeName* TypeNamePtr) : TypeNamePtr(TypeNamePtr) {}
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {
+
+			if( TYPES != NULL){
 			std::string types = *TYPES;			// Require conversion to be used
 
 				if (types=="char"){
@@ -1066,6 +1160,8 @@ class TypeSpecifier : public Node {
 				// 	contxt.StackOffset += contxt.variable.word_size;
 				// 	contxt.variable.offset = contxt.StackOffset-contxt.variable.word_size;
 				// }
+
+			}
 		}
 
 		~TypeSpecifier() {}
@@ -1609,7 +1705,7 @@ class TranslationUnit : public Node{
 			// {
 			// 	std::cout << contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size; 
 			// }
-		print_variables(file, contxt);
+			//print_variables(contxt,file);
 		}
 
 		 virtual ~TranslationUnit() {}
