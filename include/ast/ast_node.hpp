@@ -95,22 +95,39 @@ class PostFixExpression : public Node {
 		void render_asm(std::ofstream& file,Context& contxt); 
 };
 
+class UnaryOperator : public Node {
+
+	private:
+		std::string* UNARYOPERATOR;
+
+	public:
+		UnaryOperator(std::string* UNARYOPERATOR) : UNARYOPERATOR(UNARYOPERATOR) {}
+
+		~UnaryOperator() {}
+
+		std::string render_asm(std::ofstream& file, Context& contxt) ;
+
+		std::string print_py() ;
+
+		
+
+
+};
 		
 
 class UnaryExpression : public Node {
 	
 	public:
 		PostFixExpression* PostFixExpressionPtr;
+		UnaryOperator* UnaryOperatorPtr;
 		std::string* OPERATOR;
 		CastExpression* CastExpressionPtr;
 		UnaryExpression* UnaryExpressionPtr;
 		TypeName* TypeNamePtr;
 	public:
-		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, CastExpression* CastExpressionPtr, UnaryExpression* UnaryExpressionPtr) :
-			PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr) {}
-
-		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, CastExpression* CastExpressionPtr, UnaryExpression* UnaryExpressionPtr,TypeName* TypeNamePtr) :
-			PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr) , TypeNamePtr(TypeNamePtr) {}
+		
+		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, UnaryOperator* UnaryOperatorPtr, CastExpression* CastExpressionPtr, UnaryExpression* UnaryExpressionPtr,TypeName* TypeNamePtr) :
+			UnaryOperatorPtr(UnaryOperatorPtr) , PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr) , TypeNamePtr(TypeNamePtr) {}
 
 		~UnaryExpression() {}
 

@@ -86,6 +86,7 @@
 	StructDeclaratorList* StructDeclaratorListPtr;
 	StructDeclarator* StructDeclaratorPtr;
 	TypeQualifierList* TypeQualifierListPtr;
+	UnaryOperator* UnaryOperatorPtr;
 }
 
 
@@ -101,6 +102,7 @@
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
+%type <UnaryOperatorPtr> UNARY_OPERATOR
 %type <PointerPtr> POINTER
 %type <IdentifierListPtr> IDENTIFIER_LIST
 %type <DirectAbstractDeclaratorPtr> DIRECT_ABSTRACT_DECLARATOR
@@ -162,7 +164,7 @@
 %type <StructDeclaratorPtr> STRUCT_DECLARATOR
 
 %type <text> IDENTIFIER TYPEDEF EXTERN STATIC AUTO REGISTER VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED CONST VOLATILE STRUCT UNION ENUM  
-%type <text> MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN UNARY_OPERATOR SIZEOF OR_OP
+%type <text> MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN SIZEOF OR_OP
 %type <text> '&' '!' LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP '=' LT GT ASSIGNMENT_OPERATOR INC_OP DEC_OP '.' CONSTANT STRING_LITERAL PTR_OP SEMICOLON
 %type <text> '{' '}' ':' ',' CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN AND_OP '|' '^' PLUS MINUS  MULTIPLY MODULO DIVIDE ELLIPSIS PREPROCESSOR TILDE
 
@@ -303,12 +305,12 @@ ASSIGNMENT_EXPRESSION:CONDITIONAL_EXPRESSION							{ $$ = new AssignmentExpressi
 
 
 
-UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,NULL,NULL) ; } 
-		| INC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,$2) ; } 
-		| DEC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,$2) ; } 
-		| UNARY_OPERATOR CAST_EXPRESSION						{ $$ = new UnaryExpression(NULL,$1,$2,NULL) ; } 
-		| SIZEOF UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,$2) ; } 
-		| SIZEOF '(' TYPE_NAME ')'							{ $$ = new UnaryExpression(NULL,$1,NULL,NULL,$3) ; } 
+UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,NULL,NULL,NULL,NULL) ; } 
+		| INC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,NULL,$2,NULL) ; } 
+		| DEC_OP UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,NULL,$2,NULL) ; } 
+		| UNARY_OPERATOR CAST_EXPRESSION						{ $$ = new UnaryExpression(NULL,NULL,$1,$2,NULL,NULL) ; } 
+		| SIZEOF UNARY_EXPRESSION							{ $$ = new UnaryExpression(NULL,$1,NULL,NULL,$2,NULL) ; } 
+		| SIZEOF '(' TYPE_NAME ')'							{ $$ = new UnaryExpression(NULL,$1,NULL,NULL,NULL,$3) ; } 
 
 
 
@@ -318,12 +320,12 @@ CAST_EXPRESSION: UNARY_EXPRESSION								{ $$ = new CastExpression($1,NULL); }
 
 
 
-UNARY_OPERATOR:   '&'		{ $$ = $1;}								
-		| MULTIPLY	{ $$ = $1;}								
-		| PLUS		{ $$ = $1;}								
-		| MINUS		{ $$ = $1;}								
-		| TILDE		{ $$ = $1;}								
-		| '!'		{ $$ = $1;}								
+UNARY_OPERATOR:   '&'		{ $$ = new UnaryOperator(new std::string("&"));}								
+		| MULTIPLY	{ $$ = new UnaryOperator(new std::string("*"));}								
+		| PLUS		{ $$ = new UnaryOperator(new std::string("+"));}								
+		| MINUS		{ $$ = new UnaryOperator(new std::string("-"));}								
+		| TILDE		{$$ = new UnaryOperator(new std::string("~"));}								
+		| '!'		{$$ = new UnaryOperator(new std::string("!"));}								
 	
 
 
