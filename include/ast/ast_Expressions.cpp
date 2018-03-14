@@ -410,9 +410,9 @@ inline void ArgumentExpressionList::render_asm(std::ofstream& file,Context& cont
 				ArgumentExpressionListPtr->render_asm(file, contxt);
 			}
 			contxt.argument_no++;
-			contxt.rhs_of_expression=true;
+			//contxt.rhs_of_expression=true;
 			AssignmentExpressionPtr->render_asm(file, contxt);
-			contxt.rhs_of_expression=false;
+			//contxt.rhs_of_expression=false;
 
 }
 
@@ -421,31 +421,58 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 			if(PostFixExpressionPtr != NULL) {
 				if(OPERATOR != NULL && IDENTIFIER == NULL) {
 					contxt.AssignmentOperator = *OPERATOR;
-					//file << "\n # this is the problem" << *OPERATOR;
-				}
-				contxt.lhs_of_assignment=true;
+					contxt.lhs_of_assignment=true;
 				PostFixExpressionPtr->render_asm(file,contxt);
 				contxt.lhs_of_assignment=false;
+					//file << "\n # this is the problem" << *OPERATOR;
+				}
+				
 				if(OPERATOR == NULL && AssignmentExpressionPtr == NULL && PrimaryExpressionPtr == NULL && IDENTIFIER == NULL)
-				{
-					
+				{ 	int offset = 0;
+					int i = 0, j = 0;
+					if(!contxt.reading)
+					{
+						for(i=contxt.Variables.size()-1; i>=0; i--) 
+						{
+							for (j=contxt.Scopes.size()-1; j>=0; j--)
+							{
+								if(contxt.Variables[i].scope == contxt.Scopes[j]) 
+								{
+									offset = contxt.Variables[i].offset;				
+									i = -1;
+									j = -1;
+								}
+							}
+						}
+						for(i=1; i<=25; i++)
+						{
+							file << "\n\tsw\t$" << i << ", " << offset-(i*4) << "($sp)";
+						}
+					}
+					contxt.is_function_call=true;
+					//contxt.lhs_of_assignment=true;
+				PostFixExpressionPtr->render_asm(file,contxt);
+				//contxt.lhs_of_assignment=false;
 					if(ArgumentExpressionListPtr != NULL){
 					    contxt.argument_no = 0;
 						ArgumentExpressionListPtr->render_asm(file, contxt);
 						contxt.argument_no = 0;
 						//file << "the problem comes now!";
 					}
-					if(!contxt.reading){
-						file << "\t.option pic";
+					if(!contxt.reading && contxt.Scopes.size()){
+						file << "\n\t.option pic";
 						file << std::endl << "\tjal " << contxt.Scopes[contxt.Scopes.size()-1];
 						file << std::endl << "\tnop";
 						contxt.Scopes.pop_back();
 					}
-					for(int i=0; i<contxt.Scopes.size()-1; i++)
-					{
-						//std::cout << " scope:"  << contxt.Scopes[i] << " " ;
+					if(!contxt.reading){
+						file << "\n\tmove\t$25, $2"; 
+						for(i=1; i<25; i++)
+						{
+							file << "\n\tlw\t$" << i << ", " << offset-(i*4) << "($sp)";
+						}
+						file << "\n\tmove\t$" << contxt.Regs+1 << ", $25"; 
 					}
-					//
 				}
 			}
 			if( PrimaryExpressionPtr != NULL ) {
@@ -465,39 +492,52 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 	{
 		int found_0nothing_1local_2globl = 0;	
 		int good_index=0;			//this will determine whether the variable wanted is a global or a local
-		int i(0);				//must initialize the index i outside so it is accessible throughout here
-		
-		for (int i=0; i<contxt.functions_declared.size(); i++)
+		int i(0), j;				//must initialize the index i outside so it is accessible throughout here
+		if(contxt.is_function_call)
 		{
+			for (int i=0; i<contxt.functions_declared.size(); i++)
+			{
 			//std::cout << "\n\n\n merge!\n\n";
-			 if(contxt.functions_declared[i].name==*IDENTIFIER)
-			 {	//std::cout << "aici;";
-			 	contxt.Scopes.push_back(*IDENTIFIER);
-			 }
-			 	
-		}
-		for(i=0; i<contxt.Variables.size(); i++) {
-			if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
-				found_0nothing_1local_2globl = 1;	//means that we found a local variable in the function of that name					
-				good_index=i;
-				i = contxt.Variables.size();
-				if(contxt.Variables[good_index].DataType == "unsigned") {
-					contxt.is_unsigned = true;
-				}										
+			 	if(contxt.functions_declared[i].name==*IDENTIFIER)
+			 	{	//std::cout << "aici;";
+				 	contxt.Scopes.push_back(*IDENTIFIER);
+				 }
 			}
+			contxt.is_function_call=false;
 		}
-		if(!found_0nothing_1local_2globl) {
-			for(i=0; i<contxt.Variables.size(); i++) {
-				if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
-					found_0nothing_1local_2globl=2;
-					good_index = i;
-					i = contxt.Variables.size();
-					if(contxt.Variables[good_index].DataType == "unsigned") {
-						contxt.is_unsigned = true;
+		else
+		{ 
+			if(contxt.Variables.size()&&contxt.Scopes.size())
+			{
+			for(i=contxt.Variables.size()-1; i>=0; i--) {
+				for (j=contxt.Scopes.size()-1; j>=0; j--)
+				{
+					if(contxt.Variables[i].scope == contxt.Scopes[j] && *IDENTIFIER == contxt.Variables[i].id) 
+					{
+						found_0nothing_1local_2globl = 1;	//means that we found a local variable in the function of that name					
+						good_index=i;
+						i = -1;
+						j = -1;
 					}
+					if(contxt.Variables[good_index].DataType == "unsigned") { //[0] this might cause problems
+						contxt.is_unsigned = true;
+					}										
 				}
+			  }
 			}
-		}   		
+			if(!found_0nothing_1local_2globl ) {
+				for(i=0; i<contxt.Variables.size(); i++) {
+					if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
+						found_0nothing_1local_2globl=2;
+						good_index = i;
+						i = contxt.Variables.size();
+						if(contxt.Variables[good_index].DataType == "unsigned") {
+							contxt.is_unsigned = true;
+						}
+					}	
+				}
+		  	} 
+		  		
 		if(contxt.lhs_of_assignment){
 			if(found_0nothing_1local_2globl)
 			{
@@ -604,7 +644,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			// 		}
 			// 		ki++;
 			// 	}
-			// }
+		}	// }
 		}
 	}
 	else if( CONSTANT != NULL && !contxt.reading ) 
@@ -685,11 +725,11 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			 {	//std::cout << "aici;";
 			 	//contxt.Scopes.push_back(*IDENTIFIER);
 			 	if(contxt.max_offset<contxt.functions_declared[i].paramters_size){
-					std::cout <<"\n update max_offset: " << contxt.functions_declared[i].paramters_size << "\n";
+					//std::cout <<"\n update max_offset: " << contxt.functions_declared[i].paramters_size << "\n";
 					contxt.max_offset=contxt.functions_declared[i].paramters_size;
 					break;
 				} 	
-				std::cout << "\n" <<  contxt.functions_declared[i].paramters_size << " " <<  contxt.functions_declared[i].name << "\n"; 
+			//	std::cout << "\n" <<  contxt.functions_declared[i].paramters_size << " " <<  contxt.functions_declared[i].name << "\n"; 
 			//	for(int j=0; j<contxt.Scopes.size(); j++)
 			//	{
 			//		std::cout << contxt.Scopes[j] << " ";
@@ -758,7 +798,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 				int ki=0;
 				while(ki<contxt.Variables.size())
 				{
-					if(contxt.Scopes[contxt.Scopes.size()-1]==contxt.Variables[ki].scope)
+					if(contxt.Scopes.size() && contxt.Scopes[contxt.Scopes.size()-1]==contxt.Variables[ki].scope)
 					{
 						if(contxt.Variables[ki+contxt.argument_no-1].word_size==1) 
 						{
@@ -777,9 +817,11 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 
 
 inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
-		if(OPERATOR != NULL){
+		if(OPERATOR != NULL&&!contxt.reading){
 				//std::cout << std::endl << " w" << *OPERATOR<< "\n" ;
+			//file << "\n#operator";
 			if( *OPERATOR == "~"){
+				file << "\n~tilda";
 					contxt.tilde = true;
 					contxt.AssignmentOperator = "~";
 				}
@@ -951,4 +993,4 @@ inline void PrimaryExpression::AssignmentOperator(std::ofstream& file, int good_
 					}
 					contxt.AssignmentOperator = "df";
 					contxt.Regs--;
-}
+			}

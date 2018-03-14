@@ -47,7 +47,7 @@ struct Context{
 	std::string funct_id = "";
 	std::vector<bindings> Variables;
 	bindings variable;
-	int totalStackArea = 8; //For the whole stack
+	int totalStackArea = 12+104; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
 	std::string AssignmentOperator = "df";
@@ -70,6 +70,7 @@ struct Context{
 	int argument_no = 0;
 	bool parameter = false;
 	int max_offset = 0;
+	bool is_function_call = false;
 
 
 	std::vector<std::string> LastScope;
@@ -84,12 +85,22 @@ inline void print_variables(Context& contxt, std::ofstream& f){
 	f << "\n\n";
 	std::cout << "\n\n";
 }
+inline void print_scopes(Context& contxt, std::ofstream& f){
+	if(contxt.Scopes.size()>0)
+	{
+		std::cout << std::endl;
+		for(int i=contxt.Scopes.size()-1; i>=0; i--)
+		{
+			std::cout << contxt.Scopes[i] << " - ";
+		}
+		std::cout << std::endl;
+	}
+}
 
 inline std::string labelGenScope(Context& contxt) {
 
 	contxt.LastScope.push_back(std::to_string(contxt.LastScope.size()));
 	return contxt.LastScope[contxt.LastScope.size()-1];
-		
 }
 
 inline std::string labelGen(Context& contxt) {

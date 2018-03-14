@@ -12,21 +12,34 @@
 
 static Context contxt;
 
-
+class SpecifierQualifierList : public Node {};
 
 class InclusiveAndExpression : public Node {};
+class TypeName : public Node {};
 
 
 
 
 
+class Pointer : public Node {
+
+	private:
+		Pointer* PointerPtr;
+		TypeQualifier* TypeQualifierPtr;
+
+	public:
+		Pointer( Pointer* PointerPtr , TypeQualifier* TypeQualifierPtr ) : PointerPtr(PointerPtr) , TypeQualifierPtr(TypeQualifierPtr) {}
+
+		~Pointer() {}
+
+};
 
 
 
 
 class PrimaryExpression : public Node {
 	
-	public:
+	private:
 		std::string* IDENTIFIER;
 		std::string* CONSTANT;
 		std::string* STRING_LITERAL;
@@ -74,7 +87,7 @@ class ArgumentExpressionList : public Node {
 
 class PostFixExpression : public Node {
 
-	public:
+	private:
 		PrimaryExpression* PrimaryExpressionPtr;
 		AssignmentExpression* AssignmentExpressionPtr;
 		ArgumentExpressionList* ArgumentExpressionListPtr;
@@ -95,39 +108,18 @@ class PostFixExpression : public Node {
 		void render_asm(std::ofstream& file,Context& contxt); 
 };
 
-class UnaryOperator : public Node {
-
-	private:
-		std::string* UNARYOPERATOR;
-
-	public:
-		UnaryOperator(std::string* UNARYOPERATOR) : UNARYOPERATOR(UNARYOPERATOR) {}
-
-		~UnaryOperator() {}
-
-		std::string render_asm(std::ofstream& file, Context& contxt) ;
-
-		std::string print_py() ;
-
-		
-
-
-};
 		
 
 class UnaryExpression : public Node {
 	
-	public:
+	private:
 		PostFixExpression* PostFixExpressionPtr;
-		UnaryOperator* UnaryOperatorPtr;
 		std::string* OPERATOR;
 		CastExpression* CastExpressionPtr;
 		UnaryExpression* UnaryExpressionPtr;
-		TypeName* TypeNamePtr;
 	public:
-		
-		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, UnaryOperator* UnaryOperatorPtr, CastExpression* CastExpressionPtr, UnaryExpression* UnaryExpressionPtr,TypeName* TypeNamePtr) :
-			UnaryOperatorPtr(UnaryOperatorPtr) , PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr) , TypeNamePtr(TypeNamePtr) {}
+		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, CastExpression* CastExpressionPtr, UnaryExpression* UnaryExpressionPtr) :
+			PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr) {}
 
 		~UnaryExpression() {}
 
@@ -142,12 +134,9 @@ class CastExpression : public Node {
 	private:
 		UnaryExpression* UNaryExpression;
 		TypeName* TYpeName;
-		CastExpression* CastExpressionPtr;
 
 	public:
 		CastExpression( UnaryExpression* UNaryExpression, TypeName* TYpeName) : UNaryExpression(UNaryExpression) , TYpeName(TYpeName) {}
-
-		CastExpression( UnaryExpression* UNaryExpression, TypeName* TYpeName , CastExpression* CastExpressionPtr ) : UNaryExpression(UNaryExpression) , TYpeName(TYpeName) , CastExpressionPtr(CastExpressionPtr) {}
 
 		~CastExpression() {}
 
@@ -515,13 +504,14 @@ class ParameterList : public Node {
 		void render_asm(std::ofstream& file,Context& contxt) {
 
 			if( ParameterListPtr != NULL) {
-				
-				ParameterListPtr->render_asm(file,contxt);
-				
+				//std::cout << "parameter type list detected" << std::endl;
+				ParameterListPtr->render_asm(file,contxt);	
 			}
-			contxt.parameter = true;
-			ParameterDeclarationPtr->render_asm(file,contxt);
-			contxt.parameter = false;
+			if(ParameterDeclarationPtr!=NULL){
+				contxt.parameter = true;
+				ParameterDeclarationPtr->render_asm(file,contxt);
+				contxt.parameter = false;
+			}
 			//contxt.variable.offset = 0; // reset the offset before you enter another parameter list
 			
 		}
@@ -542,10 +532,11 @@ class ParameterTypeList : public Node {
 		void render_asm(std::ofstream& file,Context& contxt) {
 			contxt.variable.offset = 0;
 			if( ParameterListPtr != NULL) {
+				//std::cout << " go to parameter list" << std::endl;
 				 // reset the offset before you enter another parameter list
 				ParameterListPtr->render_asm(file,contxt);
 				contxt.funcion_temp.paramters_size = contxt.variable.offset;
-				std:: cout <<"\t\t\t" << 	contxt.variable.offset;
+				//std:: cout <<"\t\t\t" << 	contxt.variable.offset;
 			}
 			 			
 		
@@ -600,10 +591,6 @@ class DirectDeclarator : public Node {
 	
 		~DirectDeclarator() {}
 };
-
-
-		
-
 
 
 class Declarator : public Node {
@@ -853,32 +840,40 @@ class StorageClassSpecifiers : public Node {
 		void render_asm(std::ofstream& file,Context& contxt) {}
 };
 
-/* NEW STUFF */
 
 
-class StructDeclarator : public Node {
 
-	private:
-		Declarator* DeclaratorPtr;
-		ConstantExpression* ConstantExpressionPtr;
+
+
+		
+
+
+class StructDeclarator : public Node { 
 	
+	private:
+		ConstantExpression* CoNstantExpression;
+		
 	public:
-		StructDeclarator( Declarator* DeclaratorPtr , ConstantExpression* ConstantExpressionPtr ) : DeclaratorPtr(DeclaratorPtr) , ConstantExpressionPtr(ConstantExpressionPtr) {}
+		StructDeclarator( ConstantExpression* CoNstantExpression) : CoNstantExpression(CoNstantExpression) {}
 
 		~StructDeclarator() {}
 
 };
 
 
+
+
+
+
+
+
 class StructDeclaratorList : public Node {
-
+	
 	private:
-		StructDeclarator* StructDeclaratorPtr;
-		StructDeclaratorList* StructDeclaratorListPtr;
-
+		StructDeclarator* StructDecLarator;
+		
 	public:
-		StructDeclaratorList(StructDeclarator* StructDeclaratorPtr , StructDeclaratorList* StructDeclaratorListPtr) :
-			StructDeclaratorPtr(StructDeclaratorPtr) , StructDeclaratorListPtr(StructDeclaratorListPtr) {}
+		StructDeclaratorList(StructDeclarator* StructDecLarator) : StructDecLarator(StructDecLarator) {}
 
 		~StructDeclaratorList() {}
 
@@ -887,69 +882,21 @@ class StructDeclaratorList : public Node {
 
 
 
-class SpecifierQualifierList : public Node {
-
-	private:
-		TypeSpecifier* TypeSpecifierPtr;
-		SpecifierQualifierList* SpecifierQualifierListPtr;
-		TypeQualifier* TypeQualifierPtr;
-
-	public:
-		SpecifierQualifierList(TypeSpecifier* TypeSpecifierPtr , SpecifierQualifierList* SpecifierQualifierListPtr , TypeQualifier* TypeQualifierPtr) :
-				TypeSpecifierPtr(TypeSpecifierPtr) , SpecifierQualifierListPtr(SpecifierQualifierListPtr) , TypeQualifierPtr(TypeQualifierPtr) {}
-
-
-		~SpecifierQualifierList() {}
-
-
-};
 
 
 
-class TypeQualifierList : public Node {
-
-
-	private:
-		TypeQualifier* TypeQualifierPtr;
-		TypeQualifierList* TypeQualifierListPtr;
-
-	public:
-		TypeQualifierList( TypeQualifier* TypeQualifierPtr , TypeQualifierList* TypeQualifierListPtr) : TypeQualifierPtr(TypeQualifierPtr) , TypeQualifierListPtr(TypeQualifierListPtr) {}
-
-
-		~TypeQualifierList() {}
-
-
-};
-		
-
-
-
-
-class Pointer : public Node {
-
-	private:
-		Pointer* PointerPtr;
-		TypeQualifierList* TypeQualifierListPtr;
-
-	public:
-		Pointer( Pointer* PointerPtr , TypeQualifierList* TypeQualifierPtr ) : PointerPtr(PointerPtr) , TypeQualifierListPtr(TypeQualifierListPtr) {}
-
-		~Pointer() {}
-
-};
 
 class StructDeclaration : public Node {
 
 	private:
-		SpecifierQualifierList* SpecifierQualifierListPtr;
-		StructDeclaratorList* StructDeclaratorListPtr;
+		SpecifierQualifierList* SpeciFierQualifierList;
+		StructDeclaratorList* StrucTDeclaratorList;
 
 	public:
 
-		StructDeclaration( SpecifierQualifierList* SpecifierQualifierListPtr, StructDeclaratorList* StructDeclaratorListPtr ) :
+		StructDeclaration( SpecifierQualifierList* SpeciFierQualifierList, StructDeclaratorList* StrucTDeclaratorList ) :
 	
-					SpecifierQualifierListPtr(SpecifierQualifierListPtr) , StructDeclaratorListPtr(StructDeclaratorListPtr) {}
+					SpeciFierQualifierList(SpeciFierQualifierList) , StrucTDeclaratorList(StrucTDeclaratorList) {}
 
 		~StructDeclaration() {}
 
@@ -966,11 +913,10 @@ class StructDeclaration : public Node {
 class StructDeclarationList : public Node {
 
 	private:
-		StructDeclaration* StructDeclarationPtr;
-		StructDeclarationList* StructDeclarationListPtr;
+		StructDeclaration* StrucTDeclaration;
 	
 	public:
-		StructDeclarationList( StructDeclaration* StrucTDeclaration , StructDeclarationList* StructDeclarationListPtr) : StructDeclarationPtr(StructDeclarationPtr) , StructDeclarationListPtr(StructDeclarationListPtr) {}
+		StructDeclarationList( StructDeclaration* StrucTDeclaration ) : StrucTDeclaration(StrucTDeclaration) {}
 
 		~StructDeclarationList() {}
 
@@ -1022,33 +968,8 @@ class StructOrUnionSpecifier : public Node {
 
 
 
-class Enumerator : public Node {
-
-	private:
-		std::string* IDENTIFIER;
-		ConstantExpression* ConstantExpressionPtr;
-
-	public:
-		Enumerator(std::string* IDENTIFIER , ConstantExpression* ConstantExpressionPtr) : IDENTIFIER(IDENTIFIER) , ConstantExpressionPtr(ConstantExpressionPtr) {}
-
-		~Enumerator() {}
-
-};
-
-
-
-class EnumeratorList : public Node {
-
-	private:
-		Enumerator* EnumeratorPtr;
-		EnumeratorList* EnumeratorListPtr;
-
-	public:
-		EnumeratorList(Enumerator* EnumeratorPtr , EnumeratorList* EnumeratorListPtr) : EnumeratorPtr(EnumeratorPtr) , EnumeratorListPtr(EnumeratorListPtr) {}
-
-		~EnumeratorList() {}
-
-};
+class Enum : public Node {};
+class EnumeratorList : public Node {};
 
 
 
@@ -1058,59 +979,42 @@ class EnumeratorList : public Node {
 class EnumSpecifier : public Node {
 
 	private:
-		
+		Enum* ENum;
 		EnumeratorList* ENumeratorList;
 		std::string* IDENTIFIER;
 
 	public:
 
-		EnumSpecifier( EnumeratorList* ENumeratorList, std::string* IDENTIFIER) : ENumeratorList(ENumeratorList), IDENTIFIER(IDENTIFIER) {}
+		EnumSpecifier( Enum* ENum, EnumeratorList* ENumeratorList, std::string* IDENTIFIER) : ENum(ENum) , ENumeratorList(ENumeratorList), IDENTIFIER(IDENTIFIER) {}
 
 		~EnumSpecifier() {}
 
 };
- 
-
-class TypeName : public Node {
-
-	private:
-		SpecifierQualifierList* SpecifierQualifierListPtr;
-		AbstractDeclarator* AbstractDeclaratorPtr;
-
-	public:
-		TypeName(SpecifierQualifierList* SpecifierQualifierListPtr , AbstractDeclarator* AbstractDeclaratorPtr) : SpecifierQualifierListPtr(SpecifierQualifierListPtr) , AbstractDeclaratorPtr(AbstractDeclaratorPtr) {}
-
-		~TypeName() {}
 
 
-};
 
 
-/* END OF NEW STUFF */
+
+
 
 
 class TypeSpecifier : public Node {
 
 	private:
 		std::string* TYPES;
-		StructOrUnionSpecifier* StructOrUnionSpecifierPtr;
-		EnumSpecifier* EnumSpecifierPtr;
-		TypeName* TypeNamePtr;
+		StructOrUnionSpecifier* StructORUnionSpeCifier;
+		EnumSpecifier* EnumSpec;
 		
 	public:
 
 		TypeSpecifier(std::string* TYPES) : TYPES(TYPES) {}
 
-		TypeSpecifier(StructOrUnionSpecifier* StructOrUnionSpecifierPtr) : StructOrUnionSpecifierPtr(StructOrUnionSpecifierPtr) {}
+		TypeSpecifier(StructOrUnionSpecifier* StructORUnionSpeCifier) : StructORUnionSpeCifier(StructORUnionSpeCifier) {}
 
-		TypeSpecifier(EnumSpecifier* EnumSpec) : EnumSpecifierPtr(EnumSpecifierPtr) {}
-
-		TypeSpecifier(TypeName* TypeNamePtr) : TypeNamePtr(TypeNamePtr) {}
+		TypeSpecifier(EnumSpecifier* EnumSpec) : EnumSpec(EnumSpec) {}
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {
-
-			if( TYPES != NULL){
 			std::string types = *TYPES;			// Require conversion to be used
 
 				if (types=="char"){
@@ -1160,8 +1064,6 @@ class TypeSpecifier : public Node {
 				// 	contxt.StackOffset += contxt.variable.word_size;
 				// 	contxt.variable.offset = contxt.StackOffset-contxt.variable.word_size;
 				// }
-
-			}
 		}
 
 		~TypeSpecifier() {}
@@ -1483,7 +1385,11 @@ class CompoundStatement : public Node {
 		void print_py(std::ofstream& file, bool initialized=false, bool function=true) ;
 
 		void render_asm(std::ofstream& file,Context& contxt) {
-
+			std::string label_id = labelGen(contxt);
+			std::string scope = "SCOPE" + label_id;
+			contxt.Scopes.push_back(scope);
+			//std::cout << "where are the scopes?";
+			//print_scopes(contxt, file);
 			if(DeclarationListPtr != NULL && StatementListPtr == NULL) {
 
 				DeclarationListPtr->render_asm(file,contxt);
@@ -1500,6 +1406,7 @@ class CompoundStatement : public Node {
 					StatementListPtr->render_asm(file,contxt);
 				//}
 			}	
+			contxt.Scopes.pop_back();
 		}
 };
 
@@ -1532,6 +1439,7 @@ class FunctionDefinition : public Node {
 				contxt.protect = false; //protect overwriting currennt scope global/function
 				//contxt.max_offset = 0;
 				DeclaratorPtr->render_asm(file,contxt);
+				//std::cout << "end of declarator" << std::endl;
 				file << std::endl;
 				file << "\t.text" << std::endl;
 				file << "\t.align\t2" << std::endl; 
@@ -1543,16 +1451,16 @@ class FunctionDefinition : public Node {
 				file << contxt.funct_id << ":" << std::endl;
 				contxt.protect = true;
 			}
-			contxt.Scopes.push_back(contxt.funct_id);
+			//contxt.Scopes.push_back(contxt.funct_id);
 			contxt.funcion_temp.name=contxt.funct_id;
 			contxt.functions_declared.push_back(contxt.funcion_temp);
 			contxt.funcion_temp.paramters_size=0;
 			if( DeclarationListPtr != NULL ) {   			//( functions having const-correctness for example )
 				//DeclarationListPtr->render_asm(file,contxt);
 			}
-
+			//std::cout << "start of compund" << contxt.funct_id << std::endl;
 			if( CompoundStatementPtr != NULL ) { // function_def.area is calculated here
-				contxt.totalStackArea = 12;
+				contxt.totalStackArea = 12+104;
 				contxt.reading = true;						// this flag is used to prevent writing asm on file<< while reading ahead
 				CompoundStatementPtr->render_asm(file,contxt);  // ...(file,initialized,function)
 				contxt.reading = false;
@@ -1560,15 +1468,19 @@ class FunctionDefinition : public Node {
 			//std:: cout << "\nmax_offset" << contxt.max_offset << " " <<  contxt.funct_id <<"\n";
 			contxt.totalStackArea+=contxt.max_offset;
 			contxt.max_offset=0;
-			for (int k=0; k<contxt.Variables.size(); k++)
-			{
-				if(contxt.funct_id==contxt.Variables[k].scope)
-				{
-					contxt.Variables[k].param_offset = contxt.Variables[k].offset;
-					contxt.Variables[k].offset += contxt.totalStackArea+4;
+			//print_scopes(contxt, file);
+			if(contxt.Scopes.size()>=1){
+				for (int k=0; k<contxt.Variables.size(); k++)
+				{	for (int j=contxt.Scopes.size()-1; j>=0; j--)
+					{			
+						if(contxt.Scopes[j]==contxt.Variables[k].scope)
+						{
+							contxt.Variables[k].param_offset = contxt.Variables[k].offset;
+							contxt.Variables[k].offset += contxt.totalStackArea+4;
+						}
+					}
 				}
-			}
-			
+			}		
 			//contxt.function_def.name = contxt.funct_id;
 			//contxt.function_def.no_parameters = no_parameters; // private var in ParameterList
 			//no_parameters = 0;
@@ -1628,8 +1540,8 @@ class ExternalDeclaration : public Node {
 		void render_asm(std::ofstream& file,Context& contxt) {
 
 			if( ExternalDeclarationPtr != NULL ) {
+				//std::cout << "\nExternalDec!" << std::endl;; 
 				ExternalDeclarationPtr->render_asm(file,contxt);
-
 			}
 
 			if ( DecLaration  == NULL && FunctionDef != NULL){
@@ -1637,6 +1549,7 @@ class ExternalDeclaration : public Node {
 				file << std::endl;
 				contxt.StackOffset = 0;
 				contxt.protect=true; 
+				//std::cout << "\nFunctDef" << std::endl;
 				FunctionDef->render_asm(file,contxt);
 				contxt.protect=false;
 				contxt.StackOffset = 0; 				//reset the stack offset for other functions
@@ -1647,9 +1560,11 @@ class ExternalDeclaration : public Node {
 			if ( FunctionDef  == NULL && DecLaration != NULL){
 				contxt.function = false;
 				file << std::endl;
+				//std::cout << "\nDeclaration" << std::endl;
 				DecLaration->render_asm(file,contxt);			// This path is taken for global declarations that are not functions
 				file << std::endl;
 			}
+			//std::cout << "\nhow?" << std::endl;
 		}
 			
 
@@ -1705,7 +1620,6 @@ class TranslationUnit : public Node{
 			// {
 			// 	std::cout << contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size; 
 			// }
-			//print_variables(contxt,file);
 		}
 
 		 virtual ~TranslationUnit() {}
@@ -1730,54 +1644,69 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 
 	
 			if( DirectDeclaratorPtr != NULL) {
-
+				//std::cout << "print this once" << std::endl; 
 				DirectDeclaratorPtr->render_asm(file,contxt);
 			}
 			if((contxt.function && IDENTIFIER !=NULL && !contxt.reading && !contxt.protect)&&!contxt.parameter){
-					//std::cout << "\n\n\n\ndasdafafafafaf" << *IDENTIFIER ;
-					contxt.funct_id=*IDENTIFIER;
+				//std::cout << "new function id : " << *IDENTIFIER ;
+				contxt.funct_id=*IDENTIFIER;		// the names of the param might wnd up here!
 			}
 			if((!contxt.function && IDENTIFIER != NULL && !contxt.reading && !contxt.protect)) 			//if we are not in a function then this must be a global declaration
 			{
+				//std::cout << "it shouldn't be global!" << std::endl;
 				contxt.variable.id = *IDENTIFIER;
 				if( !contxt.initialized ) {				//if it is not initialized then set it to 0
 					contxt.variable.value = 0;
 				}
 				contxt.variable.scope = "global";			//set the variable's scope as global to be saved in the bindings struct
 				if(contxt.Variables.size()==0){
-					contxt.Variables.push_back(contxt.variable);				
+					contxt.Variables.push_back(contxt.variable);
+
 				}
 				else if(contxt.Variables[contxt.Variables.size()-1].id!=*IDENTIFIER)
 				{	
 					contxt.Variables.push_back(contxt.variable);
-				}   
+				}  
+				//print_variables(contxt,file);
 			}
 			else if((contxt.function && IDENTIFIER != NULL && !contxt.reading)||contxt.parameter){		//if we are in a function and the identifier is not null and protect flag is off
-
+					//std::cout << "it should be local!" << std::endl;
 					if( !contxt.protect && !contxt.parameter) {				//then this is a function name we are reading					
-						//std:: cout << "\nyet another problem\n";
+						//std:: cout << "yet another problem" <<std::endl;
 						contxt.funct_id = *IDENTIFIER;		//obtain the scope we are currently in	
+						contxt.Scopes.push_back(contxt.funct_id);
+
 					}
 					else{
-						//std::cout << "\n\nthis is alright!";
-						contxt.variable.scope = contxt.funct_id; //assign the variable the scope it is in
+						//std::cout << "this is alright!" << std::endl;
+						contxt.variable.scope = contxt.Scopes[contxt.Scopes.size()-1]; //assign the variable the scope it is in
 						contxt.variable.id = *IDENTIFIER;	//if the portect flag is on then we are already inside the function , not reading the function name
-					}
+					
+					//std::cout << "this should be not printed" << std::endl;
+
 					if( !contxt.initialized ) {			//if the local declaration is not initialized, set it to 0
 						contxt.variable.value = 0;
 					}
 					contxt.Variables.push_back(contxt.variable);
+					//print_variables(contxt, file);
+					}
 				}
 				int found_local = 0;	
 				int good_index = 0;		//this will determine whether the variable wanted is a global or a local
-				int i;				//must initialize the index i outside so it is accessible throughout here
-				
-				for(i=0; i<contxt.Variables.size(); i++) {
-					
-					if(contxt.Variables[i].scope == contxt.funct_id && *IDENTIFIER == contxt.Variables[i].id) {
-						found_local = 1;		//means that we found a local variable in the function of that name					
-						good_index=i;
-						i = contxt.Variables.size();						
+				int i, j;				//must initialize the index i outside so it is accessible throughout here
+				if(contxt.Variables.size()>0&&contxt.Scopes.size()>0)
+				{
+					for (j=contxt.Scopes.size()-1; j>=0; j--)
+					{
+						for(i=contxt.Variables.size()-1; i>=0; i--) {
+							if(contxt.Variables[i].scope == contxt.Scopes[j] && *IDENTIFIER == contxt.Variables[i].id) 
+							{
+								good_index = i;
+								found_local = 1;		//means that we found a local variable in the function of that name												good_index=i;
+								i = -1;
+								j = -1;						
+							}
+						}
 					}
 				}
 				if(!found_local) {
@@ -1827,6 +1756,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				
 
 					if( ParameterTypeLiSt != NULL) {
+						//std::cout << "go to parameter type list" << std::endl;
 						ParameterTypeLiSt->render_asm(file,contxt);
 					}
 
@@ -1843,7 +1773,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 
 
 inline void ParameterDeclaration::render_asm(std::ofstream& file, Context& contxt)  {
-
+			//std::cout << "parameter declaration" << std::endl;
 			if( DeclarationSpecifiersPtr != NULL) {
 				
 				DeclarationSpecifiersPtr->render_asm(file,contxt);
@@ -1853,9 +1783,6 @@ inline void ParameterDeclaration::render_asm(std::ofstream& file, Context& contx
 			if( DeclaratorPtr != NULL) {
 				contxt.variable.offset += 4;//contxt.variable.word_size;
 				DeclaratorPtr->render_asm(file,contxt);
-				
-
-				
 			}
 			
 		}	
@@ -1863,11 +1790,14 @@ inline void ParameterDeclaration::render_asm(std::ofstream& file, Context& contx
 
 
 inline void Declarator::render_asm(std::ofstream& file,Context& contxt) {
-
+			//file << "#fine";
 			if( DeclaratorPtr != NULL) {
 				DeclaratorPtr->render_asm(file,contxt);
 			}
-			DirectDecLarator->render_asm(file,contxt);
+			if( DirectDecLarator != NULL){
+						//	std::cout << "declarator fine until here" << std::endl;
+				DirectDecLarator->render_asm(file,contxt);
+			}
 		}
 
 inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
@@ -1875,7 +1805,7 @@ inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 			if( LabeledStatementPtr != NULL && !contxt.reading) {				//TODO: DO IT
 				LabeledStatementPtr->render_asm(file,contxt);
 			}
-			else if( CompoundStatementPtr != NULL && !contxt.reading) {
+			else if( CompoundStatementPtr != NULL) {
 				CompoundStatementPtr->render_asm(file,contxt);
 			}
 			else if( ExpressionStatementPtr != NULL) {		
@@ -1887,7 +1817,7 @@ inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 			else if( JumpStatementPtr != NULL) {
 				JumpStatementPtr->render_asm(file,contxt);
 			}
-			else if( SelectionStatementPtr != NULL && !contxt.reading) {			//TODO: SWITCH / CASE
+			else if( SelectionStatementPtr != NULL ) {			//TODO: SWITCH / CASE
 				SelectionStatementPtr->render_asm(file,contxt);
 			}
 		}
@@ -1904,20 +1834,25 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 
 
 			if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
-					
+				
 				file << std::endl << BEGIN_ << ":";
+				
 				contxt.LoopHeader.push_back(BEGIN_);
 				contxt.rhs_of_expression = true;
 				contxt.TestConditionContinue = AssignmentExpressionPtr; //In case of a continue
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
-				file << std::endl << "\tbeq\t$2,$0," << END;
-				file << std::endl << "\tnop";
+				if(!contxt.reading)	{
+					file << std::endl << "\tbeq\t$2,$0," << END;
+					file << std::endl << "\tnop";
+				}
 				file << std::endl << WHILE << ":";
 				contxt.LastScope.push_back(END);
 				StatementPtr->render_asm(file,contxt);
-				file << "\n\tb " << BEGIN_;
-				file << std::endl << "\tnop";
+				if(!contxt.reading)	{
+					file << "\n\tb " << BEGIN_;
+					file << std::endl << "\tnop";
+				}
 				file << std::endl << END << ":";
 				
 
@@ -1934,10 +1869,13 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.TestConditionContinue = AssignmentExpressionPtr; //In case of a continue
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
-				file << std::endl << "\tbeq\t$2,$0," << END;
-				file << std::endl << "\tnop";				
-				file << "\n\tb " << DO;
-				file << std::endl << "\tnop";
+				if(!contxt.reading)	
+				{
+					file << std::endl << "\tbeq\t$2,$0," << END;
+					file << std::endl << "\tnop";				
+					file << "\n\tb " << DO;
+					file << std::endl << "\tnop";
+				}
 				file << std::endl << END << ":";
 				
 			}
@@ -1951,13 +1889,16 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = true;
 				ExpressionStatementPtr2->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
-
-				file << std::endl << "\tbeq\t$2,$0," << END;
-				file << std::endl << "\tnop";
+				if(!contxt.reading)	{
+					file << std::endl << "\tbeq\t$2,$0," << END;
+					file << std::endl << "\tnop";
+				}
 				contxt.LastScope.push_back(END);
 				StatementPtr->render_asm(file,contxt);				
-				file << "\n\tb " << FOR;
-				file << std::endl << "\tnop";				
+				if(!contxt.reading)	{
+					file << "\n\tb " << FOR;
+					file << std::endl << "\tnop";
+				}				
 				file << std::endl << END << ":";
 						
 			}
@@ -1972,10 +1913,10 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = true;
 				ExpressionStatementPtr2->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
-
-				file << std::endl << "\tbeq\t$2,$0," << END;
-				file << std::endl << "\tnop";					
-
+				if(!contxt.reading)	{
+					file << std::endl << "\tbeq\t$2,$0," << END;
+					file << std::endl << "\tnop";					
+				}
 				contxt.TestConditionContinue = AssignmentExpressionPtr; //In case of a continue
 				StatementPtr->render_asm(file,contxt);
 				
@@ -1983,10 +1924,10 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
-				
-				file << "\n\tb " << FOR;
-				file << std::endl << "\tnop";
-
+				if(!contxt.reading){
+					file << "\n\tb " << FOR;
+					file << std::endl << "\tnop";
+				}
 				
 				file << std::endl << END << ":";
 				
@@ -2015,8 +1956,10 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = true;
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
-				file << std::endl << "\tbeq\t$2,$0," << END;
-				file << std::endl << "\tnop";
+				if(!contxt.reading)	{
+					file << std::endl << "\tbeq\t$2,$0," << END;
+					file << std::endl << "\tnop";
+				}
 				file << std::endl << IF << ":";
 				StatementPtr->render_asm(file,contxt);
 			    file << std::endl << END << ":"; 
@@ -2027,12 +1970,16 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = true;
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
-				file << std::endl << "\tbeq\t$2,$0," << ELSE;
-				file << std::endl << "\tnop";
+				if(!contxt.reading)	{
+					file << std::endl << "\tbeq\t$2,$0," << ELSE;
+					file << std::endl << "\tnop";
+				}
 				file << std::endl << IF << ":";
 				StatementPtr->render_asm(file,contxt);
-				file << "\n\tb " << END;
-				file << std::endl << "\tnop";
+				if(!contxt.reading)	{
+					file << "\n\tb " << END;
+					file << std::endl << "\tnop";
+				}
 				file << std::endl << ELSE << ":";
 				StatementPtr2->render_asm(file,contxt);
 				file << std::endl << END << ":"; 
@@ -2090,7 +2037,9 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 					contxt.rhs_of_expression = true;
 					ConstantExpressionPtr->render_asm(file,contxt); //li in register 3
 					contxt.rhs_of_expression = false;
-					file << std::endl << "\tbeq\t$2,$3," << CASE;  //beq
+					if(!contxt.reading)	{
+						file << std::endl << "\tbeq\t$2,$3," << CASE;  //beq
+					}
 					contxt.Cases.push_back(CASE);
 					file << std::endl << "\tnop";				//nop
 					
