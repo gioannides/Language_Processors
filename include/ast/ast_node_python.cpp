@@ -740,12 +740,25 @@ inline void PostFixExpression::print_py(std::ofstream& file)  {
 			
 		}
 
+inline std::string UnaryOperator::print_py(){
+	
+		return *UNARYOPERATOR;
+
+}
+
 inline void UnaryExpression::print_py(std::ofstream& file) {
-			if(OPERATOR == NULL) {
+			if(OPERATOR == NULL && UnaryExpressionPtr == NULL && CastExpressionPtr == NULL) {
 				PostFixExpressionPtr->print_py(file);
 			}
 			else if ( CastExpressionPtr != NULL) {
-				file << " " << *OPERATOR << " ";
+				std::string temp = "";
+				if(UnaryOperatorPtr != NULL){
+					temp = UnaryOperatorPtr->print_py();
+				}
+				else if(OPERATOR != NULL){
+					temp = *OPERATOR;
+				}
+				file << " " << temp << " ";
 				CastExpressionPtr->print_py(file);
 			}
 

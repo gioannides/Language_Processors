@@ -166,26 +166,6 @@ extern "C" int fileno(FILE *stream);
 
 "!="			{  return token(NE_OP); }
 
-"<"			{  return token(LT);    }
-
-">"			{  return token(GT);    }
-
-"+"			{  return token(PLUS);  }
-
-"&"			{  return('&'); }
-
-"!"			{  return('!'); }
-
-"~"			{ contxt.AssignmentOperator = "~"; return(TILDE); }
-
-"-"			{  return token(MINUS); }
-
-"*"			{  return token(MULTIPLY); }
-
-"%"			{  return token(MODULO); }
-
-"/"			{  return token(DIVIDE); } 
-
 ";"			{  return(SEMICOLON); }
 
 ("{"|"<%")		{  return('{'); }
@@ -207,6 +187,26 @@ extern "C" int fileno(FILE *stream);
 ("]"|":>")		{  return(']'); }
 
 "."			{  return('.'); }
+
+"&"			{  return('&'); }
+
+"!"			{  return('!'); }
+
+"~"			{ return(TILDE); }
+
+"-"			{  return token(MINUS); }
+
+"+"			{  return token(PLUS);  }
+
+"*"			{  return token(MULTIPLY); }
+
+"/"			{  return token(DIVIDE); } 
+
+"%"			{  return token(MODULO); }
+
+"<"			{  return token(LT);    }
+
+">"			{  return token(GT);    }
 
 "^"			{  return('^'); }
 
