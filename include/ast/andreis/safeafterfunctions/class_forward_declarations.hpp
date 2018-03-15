@@ -31,19 +31,15 @@ struct Context{
 	std::string op_name="";
 
 	int declarations_in_a_list=1;
-
-	int exclamation = 0;
-	int tilde = 0;
-	int negative = 0;
-
-
-	int increment = false;
+	bool exclamation = false;
+	bool tilde = false;
+	bool increment = false;
 	bool decrement = false;
 	bool is_Selective = false;
 	bool elseif = false;
 	bool initialized = false;
 	bool function = false;
-	
+	bool negative = false; 	//is value a negative number?
 	bool float_ = false;   //is value a floating point?
 	bool is_unsigned = false;
 	bool protect = false; // to not overwrite function_id
@@ -51,7 +47,7 @@ struct Context{
 	std::string funct_id = "";
 	std::vector<bindings> Variables;
 	bindings variable;
-	int totalStackArea = 12+104; //For the whole stack
+	int totalStackArea = 8; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
 	std::string AssignmentOperator = "df";
@@ -74,40 +70,26 @@ struct Context{
 	int argument_no = 0;
 	bool parameter = false;
 	int max_offset = 0;
-	bool is_function_call = false;
-
 	char UnaryOperator;
+
 	std::vector<std::string> LastScope;
-	std::vector<char> UnaryOperators;
-	
-	
 	
 };
 inline void print_variables(Context& contxt, std::ofstream& f){
 	for(int i=0; i<contxt.Variables.size(); i++)
 	{ 
 		f << "\n#" << contxt.Variables[i].id << " - " << contxt.Variables[i].scope << " - " << contxt.Variables[i].word_size << " - "<< contxt.Variables[i].value << " - " << contxt.Variables[i].offset << "-" << contxt.Variables[i].param_offset;
-		std::cout << "\n" << contxt.Variables[i].id << " - " << contxt.Variables[i].scope << " - " << contxt.Variables[i].word_size << " - "<< contxt.Variables[i].value << " - " << contxt.Variables[i].offset << "-" << contxt.Variables[i].param_offset;
+		//std::cout << "\n" << contxt.Variables[i].id << " - " << contxt.Variables[i].scope << " - " << contxt.Variables[i].word_size << " - "<< contxt.Variables[i].value << " - " << contxt.Variables[i].offset << "-" << contxt.Variables[i].param_offset;
 	}
 	f << "\n\n";
-	std::cout << "\n\n";
-}
-inline void print_scopes(Context& contxt, std::ofstream& f){
-	if(contxt.Scopes.size()>0)
-	{
-		std::cout << std::endl;
-		for(int i=contxt.Scopes.size()-1; i>=0; i--)
-		{
-			std::cout << contxt.Scopes[i] << " - ";
-		}
-		std::cout << std::endl;
-	}
+	//std::cout << "\n\n";
 }
 
 inline std::string labelGenScope(Context& contxt) {
 
 	contxt.LastScope.push_back(std::to_string(contxt.LastScope.size()));
 	return contxt.LastScope[contxt.LastScope.size()-1];
+		
 }
 
 inline std::string labelGen(Context& contxt) {

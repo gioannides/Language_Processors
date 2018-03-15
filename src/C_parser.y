@@ -172,6 +172,7 @@
 %precedence IF
 %precedence ELSE
 
+
 %start TRANSLATION_UNIT 
 
 
@@ -314,7 +315,7 @@ UNARY_EXPRESSION: POSTFIX_EXPRESSION								{ $$ = new UnaryExpression($1,NULL,N
 
 
 
-CAST_EXPRESSION: UNARY_EXPRESSION								{ $$ = new CastExpression($1,NULL); }
+CAST_EXPRESSION: UNARY_EXPRESSION								{ $$ = new CastExpression($1,NULL,NULL); }
 		| '(' TYPE_NAME ')' CAST_EXPRESSION						{ $$ = new CastExpression(NULL,$2,$4); }
 
 
