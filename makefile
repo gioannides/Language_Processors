@@ -1,10 +1,11 @@
-CPPFLAGS += -std=c++11 -W -Wall -g -Wno-unused-parameter -Wno-reorder -w  
+CPPFLAGS += -std=c++11 -W -Wall -g -Wno-unused-parameter -Wno-reorder -w 
 CPPFLAGS += -I include
 
 all : bin/c_compiler 
 
 src/C_parser.tab.cpp src/C_parser.tab.hpp : src/C_parser.y
-	bison -v -d src/C_parser.y -o src/C_parser.tab.cpp -Wno-other -Wconflicts-sr 
+	bison -v -d src/C_parser.y -o src/C_parser.tab.cpp -Wno-other -Wconflicts-sr
+
 
 src/C_lexer.yy.cpp : src/C_lexer.flex src/C_parser.tab.hpp
 	flex -o src/C_lexer.yy.cpp  src/C_lexer.flex

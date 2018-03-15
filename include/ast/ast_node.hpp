@@ -16,11 +16,9 @@ static Context contxt;
 
 
 
-
-
 class PrimaryExpression : public Node {
 	
-	private:
+	public:
 		std::string* IDENTIFIER;
 		std::string* CONSTANT;
 		std::string* STRING_LITERAL;
@@ -68,7 +66,7 @@ class ArgumentExpressionList : public Node {
 
 class PostFixExpression : public Node {
 
-	private:
+	public:
 		PrimaryExpression* PrimaryExpressionPtr;
 		AssignmentExpression* AssignmentExpressionPtr;
 		ArgumentExpressionList* ArgumentExpressionListPtr;
@@ -89,41 +87,37 @@ class PostFixExpression : public Node {
 		void render_asm(std::ofstream& file,Context& contxt); 
 };
 
-
-class UnaryOperator : public Node {
+		
+class UnaryOperator: public Node{
 
 	private:
 		std::string* UNARYOPERATOR;
-
 	public:
 		UnaryOperator(std::string* UNARYOPERATOR) : UNARYOPERATOR(UNARYOPERATOR) {}
 
+		char render_asm(std::ofstream& file, Context& contxt);
+	
+		std::string* print_py();
+
 		~UnaryOperator() {}
-
-		char render_asm(std::ofstream& file, Context& contxt) ;
-
-		std::string print_py() ;
-
-		
-
 
 };
 
-		
 
 class UnaryExpression : public Node {
 	
 	public:
 		PostFixExpression* PostFixExpressionPtr;
-		UnaryOperator* UnaryOperatorPtr;
 		std::string* OPERATOR;
 		CastExpression* CastExpressionPtr;
 		UnaryExpression* UnaryExpressionPtr;
+		UnaryOperator* UnaryOperatorPtr;
 		TypeName* TypeNamePtr;
 	public:
-		
+
+
 		UnaryExpression(PostFixExpression* PostFixExpressionPtr, std::string* OPERATOR, UnaryOperator* UnaryOperatorPtr, CastExpression* CastExpressionPtr, UnaryExpression* UnaryExpressionPtr,TypeName* TypeNamePtr) :
-			UnaryOperatorPtr(UnaryOperatorPtr) , PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr) , TypeNamePtr(TypeNamePtr) {}
+			PostFixExpressionPtr(PostFixExpressionPtr) , OPERATOR(OPERATOR) , CastExpressionPtr(CastExpressionPtr), UnaryExpressionPtr(UnaryExpressionPtr) , TypeNamePtr(TypeNamePtr) , UnaryOperatorPtr(UnaryOperatorPtr) {}
 
 		~UnaryExpression() {}
 
@@ -141,7 +135,9 @@ class CastExpression : public Node {
 		CastExpression* CastExpressionPtr;
 
 	public:
-		CastExpression( UnaryExpression* UNaryExpression, TypeName* TYpeName, CastExpression* CastExpressionPtr) : UNaryExpression(UNaryExpression) , TYpeName(TYpeName) , CastExpressionPtr(CastExpressionPtr) {}
+		CastExpression( UnaryExpression* UNaryExpression, TypeName* TYpeName) : UNaryExpression(UNaryExpression) , TYpeName(TYpeName) {}
+
+		CastExpression( UnaryExpression* UNaryExpression, TypeName* TYpeName , CastExpression* CastExpressionPtr ) : UNaryExpression(UNaryExpression) , TYpeName(TYpeName) , CastExpressionPtr(CastExpressionPtr) {}
 
 		~CastExpression() {}
 
@@ -398,9 +394,8 @@ class ConstantExpression : public Node {
 		void render_asm(std::ofstream& file, Context& contxt) {
 
 			ConditionalExpressionPtr->render_asm(file,contxt);
-		
-			}
-		
+
+		}
 
 		~ConstantExpression() {}
 
@@ -535,6 +530,7 @@ class ParameterTypeList : public Node {
 
 		void print_py(std::ofstream& file) ;
 
+		
 		void render_asm(std::ofstream& file,Context& contxt) {
 			contxt.variable.offset = 0;
 			if( ParameterListPtr != NULL) {
@@ -547,7 +543,6 @@ class ParameterTypeList : public Node {
 			 			
 		
 		}
-
 };
 
 
@@ -597,6 +592,10 @@ class DirectDeclarator : public Node {
 	
 		~DirectDeclarator() {}
 };
+
+
+		
+
 
 
 class Declarator : public Node {
@@ -846,12 +845,7 @@ class StorageClassSpecifiers : public Node {
 		void render_asm(std::ofstream& file,Context& contxt) {}
 };
 
-
-
-
-
-
-		/* NEW STUFF */
+/* NEW STUFF */
 
 
 class StructDeclarator : public Node {
@@ -1087,28 +1081,28 @@ class TypeName : public Node {
 /* END OF NEW STUFF */
 
 
-
-
 class TypeSpecifier : public Node {
 
 	private:
 		std::string* TYPES;
-		StructOrUnionSpecifier* StructORUnionSpeCifier;
-		EnumSpecifier* EnumSpec;
+		StructOrUnionSpecifier* StructOrUnionSpecifierPtr;
+		EnumSpecifier* EnumSpecifierPtr;
 		TypeName* TypeNamePtr;
 		
 	public:
 
 		TypeSpecifier(std::string* TYPES) : TYPES(TYPES) {}
 
-		TypeSpecifier(StructOrUnionSpecifier* StructORUnionSpeCifier) : StructORUnionSpeCifier(StructORUnionSpeCifier) {}
+		TypeSpecifier(StructOrUnionSpecifier* StructOrUnionSpecifierPtr) : StructOrUnionSpecifierPtr(StructOrUnionSpecifierPtr) {}
 
-		TypeSpecifier(EnumSpecifier* EnumSpec) : EnumSpec(EnumSpec) {}
+		TypeSpecifier(EnumSpecifier* EnumSpec) : EnumSpecifierPtr(EnumSpecifierPtr) {}
 
 		TypeSpecifier(TypeName* TypeNamePtr) : TypeNamePtr(TypeNamePtr) {}
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {
+
+			if( TYPES != NULL){
 			std::string types = *TYPES;			// Require conversion to be used
 
 				if (types=="char"){
@@ -1158,6 +1152,8 @@ class TypeSpecifier : public Node {
 				// 	contxt.StackOffset += contxt.variable.word_size;
 				// 	contxt.variable.offset = contxt.StackOffset-contxt.variable.word_size;
 				// }
+
+			}
 		}
 
 		~TypeSpecifier() {}
@@ -1314,7 +1310,6 @@ class JumpStatement : public Node {
 					contxt.rhs_of_expression = false;
 				}
 				if( AssignmentExpressionPtr != NULL && !contxt.reading){
-					
 					file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
 				}
 				if(!contxt.reading){
@@ -1614,8 +1609,6 @@ class FunctionDefinition : public Node {
 
 
 
-
-
 class ExternalDeclaration : public Node {
 	
 	private:
@@ -1715,6 +1708,7 @@ class TranslationUnit : public Node{
 			// {
 			// 	std::cout << contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size; 
 			// }
+			//print_variables(contxt,file);
 		}
 
 		 virtual ~TranslationUnit() {}
@@ -1867,6 +1861,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 	}
 
 
+
 inline void ParameterDeclaration::render_asm(std::ofstream& file, Context& contxt)  {
 			//std::cout << "parameter declaration" << std::endl;
 			if( DeclarationSpecifiersPtr != NULL) {
@@ -1881,7 +1876,6 @@ inline void ParameterDeclaration::render_asm(std::ofstream& file, Context& contx
 			}
 			
 		}	
-
 
 
 inline void Declarator::render_asm(std::ofstream& file,Context& contxt) {
@@ -2036,7 +2030,6 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 
 
 
-
 inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt) {
 		
 			std::string label_id = labelGen(contxt);
@@ -2105,6 +2098,7 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 			//contxt.Labels.clear();
 		}
 
+
 inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 
 			
@@ -2165,4 +2159,6 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 
 		}
 
+
 #endif
+

@@ -10,7 +10,7 @@ int main(){
 	
 	int x = 32;
 
-	return f(x) | c;
+	return f(x) | -c;
 	
 
 }

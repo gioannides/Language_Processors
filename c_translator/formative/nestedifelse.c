@@ -24,5 +24,5 @@ int main()
 	var1=890;
 	var2=7699;
    }
-   return var1+var2;
+   return -(var1+var2);
 }

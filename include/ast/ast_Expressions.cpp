@@ -612,26 +612,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 					file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;					
 				}
 				
-		/*if(contxt.UnaryOperators.size() != 0 && contxt.function && !contxt.reading && contxt.OperandCounter==1){
-				if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '~' && contxt.tilde){
-					file << std::endl << "\tnor\t$" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
-					contxt.UnaryOperators.pop_back();
-					contxt.tilde = false;
-					
-				}
-				else if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '!' && contxt.exclamation) {
-					file << std::endl << "\tsltu\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",1";
-					file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0x00FF";
-					contxt.UnaryOperators.pop_back();
-					contxt.exclamation = false;
-					
-				}
-				else if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '-' && contxt.negative) {
-					file << std::endl << "\tsub\t$" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
-					contxt.UnaryOperators.pop_back();
-					contxt.negative = false;
-				}
-		}*/				
+			
 				
 						
 				if(contxt.Variables[good_index].DataType == "unsigned") 
@@ -680,50 +661,48 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			// 		}
 			// 		ki++;
 			// 	}
-			
+
 		}	// }
 		}
 	}
 	else if( CONSTANT != NULL && !contxt.reading ) 
 	{	
 					//this constant is involved in expressions
-		std::string tmp ;
-		int temp;
-		if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '-' && !contxt.function) 
-		{			
-			temp = (std::stod(*CONSTANT));
-			temp = (-1) * temp;
-			contxt.UnaryOperators.pop_back();				
-		}
-		else if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '~'  && !contxt.function) 
-		{				
-			temp = (std::stod(*CONSTANT));
-			temp = ~temp;
-			contxt.UnaryOperators.pop_back();	
-							
-		}
-		else if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '!'  && !contxt.function) 
-		{				
-			temp = (std::stod(*CONSTANT));
-			temp = !temp;
-			contxt.UnaryOperators.pop_back();		
-							
-		}
-		else 
-		{
-			temp = std::stol(*CONSTANT);
-		}				
-		char tmp2;
-		if(tmp.find_first_of("'")==0 && contxt.variable.word_size == 1) 
-		{
-			tmp2 = tmp[1];
-			contxt.variable.value = int(tmp2);
+		
+		int temp=0;
+		
+		if( (*CONSTANT).find_first_of("'")==0 && contxt.variable.word_size == 1){
+			char tmp2;
+			tmp2 = (*CONSTANT)[1];
 			temp = int(tmp2);
-		}			
-		else
-		{
-			contxt.variable.value = temp;
+
 		}
+		else {
+		 	temp = (std::stod(*CONSTANT));
+		}				
+		if(contxt.UnaryOperators.size() != 0){
+			if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '-' && !contxt.function) 
+			{			
+				temp = (-1) * temp;
+				contxt.UnaryOperators.pop_back();
+							
+			}
+			else if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '~'  && !contxt.function) 
+			{				
+				
+				temp = ~temp;
+				contxt.UnaryOperators.pop_back();
+							
+			}
+			else if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '!'  && !contxt.function) 
+			{	
+				temp = !temp;
+				contxt.UnaryOperators.pop_back();		
+							
+			}
+		}			
+		contxt.variable.value = temp;
+
 		if(contxt.rhs_of_expression && !contxt.reading && contxt.function)
 		{
 			file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << temp;
@@ -737,28 +716,6 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				contxt.current_value= temp;
 		}
 		
-		/*contxt.OperandCounter--;
-		if(contxt.UnaryOperators.size() != 0 && contxt.function && !contxt.reading && contxt.OperandCounter==1){
-				
-				if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '~' && contxt.tilde){
-					file << std::endl << "\tnor\t$" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
-					contxt.UnaryOperators.pop_back();
-					contxt.tilde = false;
-					
-				}
-				else if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '!' && contxt.exclamation) {
-					file << std::endl << "\tsltu\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",1";
-					file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0x00FF";
-					contxt.UnaryOperators.pop_back();
-					contxt.exclamation = false;
-					
-				}
-				else if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '-' && contxt.negative) {
-					file << std::endl << "\tsub\t$" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
-					contxt.UnaryOperators.pop_back();
-					contxt.negative = false;
-					
-				}*/
 		}
 				
 		// if(contxt.argument_no)
@@ -879,9 +836,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 					ki++;
 				}
 			}
-
-			
-}
+		}
 
 
 
@@ -893,7 +848,11 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 	
 		if(CastExpressionPtr != NULL && !contxt.reading) {
 
-				contxt.UnaryOperators.push_back(UnaryOperatorPtr->render_asm(file,contxt));
+				if(!contxt.function){
+					if(UnaryOperatorPtr != NULL){
+						contxt.UnaryOperators.push_back(UnaryOperatorPtr->render_asm(file,contxt));
+					}
+				}
 
 				CastExpressionPtr->render_asm(file,contxt);
 
@@ -901,17 +860,17 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 					
 					if(UnaryOperatorPtr->render_asm(file,contxt) == '~'){
 					file << std::endl << "\tnor\t$" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1 << " #~";
-					contxt.UnaryOperators.pop_back();
+					
 					}
 					else if(UnaryOperatorPtr->render_asm(file,contxt) == '!') {
 					file << std::endl << "\tsltu\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",1";
 					file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0x00FF" << " #!";
-					contxt.UnaryOperators.pop_back();
+					
 					
 					}
 					else if(UnaryOperatorPtr->render_asm(file,contxt) == '-') {
 					file << std::endl << "\tsub\t$" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1 << "#-"; 
-					contxt.UnaryOperators.pop_back();
+					
 					}
 				}
 				
