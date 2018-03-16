@@ -718,7 +718,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 	{	
 					//this constant is involved in expressions
 		
-		int temp=0;
+		int64_t temp;
 		
 		if( (*CONSTANT).find_first_of("'")==0 && contxt.variable.word_size == 1){
 			char tmp2;
