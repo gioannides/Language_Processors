@@ -4,4 +4,4 @@ bin/*
 *.yy.cpp
 *.output
 *.tab.hpp
-tmp/formative/*
+tmp/*
