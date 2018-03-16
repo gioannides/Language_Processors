@@ -43,10 +43,14 @@ $END9:
 	lb	$3, 116($sp) #c
 	lw	$4, 124($sp) #h
 	sne	$3,$0,$3
+	beq	$3,$0,$SHORTCIRCUIT0
 	sne	$4,$0,$4
+$SHORTCIRCUIT0:
 	and	$3,$3,$4
 	sne	$2,$0,$2
+	bne	$2,$0,$SHORTCIRCUIT1
 	sne	$3,$0,$3
+$SHORTCIRCUIT1:
 	or	$2,$2,$3
 $END10:
 	sw	$2, 112($sp) #x

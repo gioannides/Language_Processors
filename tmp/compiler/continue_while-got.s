@@ -41,10 +41,9 @@ $END8:
 	beq	$2,$0,$END7
 	nop
 $WHILE7:
-	lw	$3, 116($sp) #x
-
-	addiu	$2, $3,1
-	sw	$2,116($sp) #x
+	lw	$2, 116($sp) #x
+	addi	$3, $2, 1 #++
+	sw	$3,116($sp) #x
 
 $END10:
 	lw	$2, 116($sp) #x
@@ -61,10 +60,9 @@ $END14:
 	b $BEGIN7
 	nop
 $END11:
-	lw	$3, 112($sp) #y
-
-	addiu	$2, $3,1
-	sw	$2,112($sp) #y
+	lw	$2, 112($sp) #y
+	addi	$3, $2, 1 #++
+	sw	$3,112($sp) #y
 
 $END15:
 	b $BEGIN7

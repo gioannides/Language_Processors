@@ -1796,6 +1796,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 							if(contxt.Variables[i].scope == contxt.Scopes[j] && *IDENTIFIER == contxt.Variables[i].id) 
 							{
 								good_index = i;
+								contxt.good_i = good_index;
 								found_local = 1;		//means that we found a local variable in the function of that name												good_index=i;
 								i = -1;
 								j = -1;						
@@ -1808,6 +1809,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 							if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
 								found_local=2;
 								good_index = i;
+								contxt.good_i = good_index;
 								i = contxt.Variables.size();
 							}
 						}

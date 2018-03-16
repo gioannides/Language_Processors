@@ -56,10 +56,9 @@ $IF10:
 	b	$END5
 	nop
 $END10:
-	lw	$3, 112($sp) #i
-
-	addiu	$2, $3,1
-	sw	$2,112($sp) #i
+	lw	$2, 112($sp) #i
+	addi	$3, $2, 1 #++
+	sw	$3,112($sp) #i
 
 $END13:
 	b $FOR5

@@ -46,7 +46,9 @@ $BEGIN9:
 	li	$4, 99
 	slt	$3, $3, $4
 	sne	$2,$0,$2
+	bne	$2,$0,$SHORTCIRCUIT0
 	sne	$3,$0,$3
+$SHORTCIRCUIT0:
 	or	$2,$2,$3
 $END10:
 	beq	$2,$0,$END9

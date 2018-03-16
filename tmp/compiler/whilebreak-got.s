@@ -52,26 +52,21 @@ $END11:
 $WHILE10:
 	b	$END10
 	nop
-	lw	$3, 112($sp) #j
-
-	addiu	$2, $3,-1
-	sw	$2,112($sp) #j
-
+	lw	$2, 112($sp) #j
+	addi	$3, $2, -1 #--
+	sw	$3, 112($sp) #j
 $END13:
 	b $BEGIN10
 	nop
 $END10:
-	lw	$3, 112($sp) #j
-
-	addiu	$2, $3,1
-	sw	$2,112($sp) #j
+	lw	$2, 112($sp) #j
+	addi	$3, $2, 1 #++
+	sw	$3,112($sp) #j
 
 $END14:
-	lw	$3, 116($sp) #i
-
-	addiu	$2, $3,-1
-	sw	$2,116($sp) #i
-
+	lw	$2, 116($sp) #i
+	addi	$3, $2, -1 #--
+	sw	$3, 116($sp) #i
 $END15:
 	b $BEGIN7
 	nop

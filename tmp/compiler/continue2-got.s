@@ -50,10 +50,9 @@ $END10:
 	beq	$2,$0,$END9
 	nop
 $IF9:
-	lw	$3, 112($sp) #x
-
-	addiu	$2, $3,1
-	sw	$2,112($sp) #x
+	lw	$2, 112($sp) #x
+	addi	$3, $2, 1 #++
+	sw	$3,112($sp) #x
 
 $END12:
 	b $FOR5
@@ -67,10 +66,9 @@ $END13:
 
 	sw	$2,116($sp) #y
 
-	lw	$3, 112($sp) #x
-
-	addiu	$2, $3,1
-	sw	$2,112($sp) #x
+	lw	$2, 112($sp) #x
+	addi	$3, $2, 1 #++
+	sw	$3,112($sp) #x
 
 $END14:
 	b $FOR5

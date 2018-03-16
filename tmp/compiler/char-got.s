@@ -42,9 +42,9 @@ $END9:
 	lb	$3, 116($sp) #c
 	add	$2, $2, $3
 	sb	$2,116($sp) #c
-	lb	$3, 116($sp) #c
-	addiu	$2, $3,1
-	sb	$2,116($sp) #c
+	lb	$2, 116($sp) #c
+	addi	$3, $2, 1 #++
+	sb	$3,116($sp) #c
 $END10:
 	b $FOR5
 	nop

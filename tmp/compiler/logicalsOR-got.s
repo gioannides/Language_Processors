@@ -34,37 +34,41 @@ $END9:
 	sw	$2, 116($sp) #x
 
 	lw	$2, 116($sp) #x
-	lw	$4, 116($sp) #x
-
-	addiu	$3, $4,1
-	sw	$3,116($sp) #x
+	lw	$3, 116($sp) #x
+	addi	$4, $3, 1 #++
+	sw	$4,116($sp) #x
 
 	sne	$2,$0,$2
+	bne	$2,$0,$SHORTCIRCUIT0
 	sne	$3,$0,$3
+$SHORTCIRCUIT0:
 	or	$2,$2,$3
-	lw	$4, 116($sp) #x
-
-	addiu	$3, $4,1
-	sw	$3,116($sp) #x
+	lw	$3, 116($sp) #x
+	addi	$4, $3, 1 #++
+	sw	$4,116($sp) #x
 
 	sne	$2,$0,$2
+	bne	$2,$0,$SHORTCIRCUIT1
 	sne	$3,$0,$3
+$SHORTCIRCUIT1:
 	or	$2,$2,$3
-	lw	$4, 116($sp) #x
-
-	addiu	$3, $4,1
-	sw	$3,116($sp) #x
+	lw	$3, 116($sp) #x
+	addi	$4, $3, 1 #++
+	sw	$4,116($sp) #x
 
 	sne	$2,$0,$2
+	bne	$2,$0,$SHORTCIRCUIT2
 	sne	$3,$0,$3
+$SHORTCIRCUIT2:
 	or	$2,$2,$3
-	lw	$4, 116($sp) #x
-
-	addiu	$3, $4,1
-	sw	$3,116($sp) #x
+	lw	$3, 116($sp) #x
+	addi	$4, $3, 1 #++
+	sw	$4,116($sp) #x
 
 	sne	$2,$0,$2
+	bne	$2,$0,$SHORTCIRCUIT3
 	sne	$3,$0,$3
+$SHORTCIRCUIT3:
 	or	$2,$2,$3
 $END11:
 	beq	$2,$0,$ELSE10

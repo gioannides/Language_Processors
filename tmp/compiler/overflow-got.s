@@ -25,7 +25,7 @@ $END3:	.set	noreorder
 	sw	$31,120($sp)
 	move	$fp,$sp
 
-	li	$2, -2147483648
+	li	$2, 4151801719
 $END5:
 	sw	$2, 116($sp) #x
 

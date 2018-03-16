@@ -32,29 +32,21 @@ $END6:	.set	noreorder
 $END8:
 	sw	$2, 116($sp) #a
 
-	lw	$3, 116($sp) #a
-
-	addiu	$2, $3,-1
-	sw	$2,116($sp) #a
-
+	lw	$2, 116($sp) #a
+	addi	$3, $2, -1 #--
+	sw	$3, 116($sp) #a
 $END9:
-	lw	$3, 116($sp) #a
-
-	addiu	$2, $3,-1
-	sw	$2,116($sp) #a
-
+	lw	$2, 116($sp) #a
+	addi	$3, $2, -1 #--
+	sw	$3, 116($sp) #a
 $END10:
-	lw	$3, 116($sp) #a
-
-	addiu	$2, $3,-1
-	sw	$2,116($sp) #a
-
+	lw	$2, 116($sp) #a
+	addi	$3, $2, -1 #--
+	sw	$3, 116($sp) #a
 $END11:
-	lw	$3, 116($sp) #a
-
-	addiu	$2, $3,-1
-	sw	$2,116($sp) #a
-
+	lw	$2, 116($sp) #a
+	addi	$3, $2, -1 #--
+	sw	$3, 116($sp) #a
 $END12:
 	lw	$2, 116($sp) #a
 $END13:

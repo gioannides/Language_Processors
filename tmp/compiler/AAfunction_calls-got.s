@@ -207,18 +207,22 @@ $END63:
 	lb	$2, 152($sp) #yu
 $END65:
 	sb	$2, 4($sp) #r
+	move	$4, $2
 	lw	$2, 168($sp) #y
 $END66:
 	sw	$2, 8($sp) #t
 
+	move	$5, $2
 	lw	$2, 164($sp) #z
 $END67:
 	sw	$2, 12($sp) #w
 
+	move	$6, $2
 	lw	$2, 160($sp) #a
 $END68:
 	sw	$2, 16($sp) #j
 
+	move	$7, $2
 	lw	$2, 156($sp) #f
 $END69:
 	sw	$2, 20($sp) #o
@@ -301,18 +305,22 @@ $END64:
 	lb	$2, 152($sp) #yu
 $END76:
 	sb	$2, 4($sp) #r
+	move	$4, $2
 	lw	$2, 168($sp) #y
 $END77:
 	sw	$2, 8($sp) #t
 
+	move	$5, $2
 	lw	$2, 164($sp) #z
 $END78:
 	sw	$2, 12($sp) #w
 
+	move	$6, $2
 	lw	$2, 160($sp) #a
 $END79:
 	sw	$2, 16($sp) #j
 
+	move	$7, $2
 	lw	$2, 156($sp) #f
 $END80:
 	sw	$2, 20($sp) #o
@@ -395,18 +403,22 @@ $END75:
 	lb	$2, 152($sp) #yu
 $END87:
 	sb	$2, 4($sp) #r
+	move	$4, $2
 	lw	$2, 168($sp) #y
 $END88:
 	sw	$2, 8($sp) #t
 
+	move	$5, $2
 	lw	$2, 164($sp) #z
 $END89:
 	sw	$2, 12($sp) #w
 
+	move	$6, $2
 	lw	$2, 160($sp) #a
 $END90:
 	sw	$2, 16($sp) #j
 
+	move	$7, $2
 	lw	$2, 156($sp) #f
 $END91:
 	sw	$2, 20($sp) #o
@@ -489,18 +501,22 @@ $END86:
 	lb	$2, 152($sp) #yu
 $END98:
 	sb	$2, 4($sp) #r
+	move	$4, $2
 	lw	$2, 168($sp) #y
 $END99:
 	sw	$2, 8($sp) #t
 
+	move	$5, $2
 	lw	$2, 164($sp) #z
 $END100:
 	sw	$2, 12($sp) #w
 
+	move	$6, $2
 	lw	$2, 160($sp) #a
 $END101:
 	sw	$2, 16($sp) #j
 
+	move	$7, $2
 	lw	$2, 156($sp) #f
 $END102:
 	sw	$2, 20($sp) #o
@@ -579,17 +595,17 @@ $END97:
 functd:
 	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-124
-	sw	$fp,120($sp)
-	sw	$31,116($sp)
+	addiu	$sp,$sp,-128
+	sw	$fp,124($sp)
+	sw	$31,120($sp)
 	move	$fp,$sp
 
-	sw	$0, 112($sp) #d
+	sw	$0, 116($sp) #d
 
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop

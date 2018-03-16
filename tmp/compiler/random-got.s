@@ -89,11 +89,9 @@ $FOR25:
 $END27:
 	beq	$2,$0,$END25
 	nop
-	lw	$3, 132($sp) #x
-
-	addiu	$2, $3,-1
-	sw	$2,132($sp) #x
-
+	lw	$2, 132($sp) #x
+	addi	$3, $2, -1 #--
+	sw	$3, 132($sp) #x
 $END29:
 	lw	$3, 112($sp) #i
 

@@ -46,10 +46,9 @@ $END10:
 	beq	$2,$0,$END9
 	nop
 $IF9:
-	lw	$3, 112($sp) #i
-
-	addiu	$2, $3,1
-	sw	$2,112($sp) #i
+	lw	$2, 112($sp) #i
+	addi	$3, $2, 1 #++
+	sw	$3,112($sp) #i
 
 $END12:
 	b $FOR5
@@ -62,10 +61,9 @@ $END13:
 	add	$2, $2, $3
 	sw	$2,116($sp) #j
 
-	lw	$3, 112($sp) #i
-
-	addiu	$2, $3,1
-	sw	$2,112($sp) #i
+	lw	$2, 112($sp) #i
+	addi	$3, $2, 1 #++
+	sw	$3,112($sp) #i
 
 $END14:
 	b $FOR5
