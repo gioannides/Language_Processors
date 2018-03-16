@@ -598,7 +598,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 			}
 		}
-		else if(contxt.rhs_of_expression)
+		else //if(contxt.rhs_of_expression)
 		{
 			
 		 	if(found_0nothing_1local_2globl==1) 
@@ -703,12 +703,12 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		}			
 		contxt.variable.value = temp;
 
-		if(contxt.rhs_of_expression && !contxt.reading && contxt.function)
+		if(!contxt.reading && contxt.function) //&& contxt.rhs_of_expression)
 		{
 			file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << temp;
 			
 		}
-		else if (contxt.rhs_of_expression && !contxt.reading && !contxt.function)
+		else if (!contxt.reading && !contxt.function) //&& contxt.rhs_of_expression)
 		{
 			if(contxt.global_value==0)
 				contxt.global_value= temp;

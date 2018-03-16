@@ -1275,7 +1275,7 @@ class JumpStatement : public Node {
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {
-			if( IDENTIFIER != NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "goto" && AssignmentExpressionPtr == NULL) {
+			if( IDENTIFIER != NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "goto" && AssignmentExpressionPtr == NULL && !contxt.reading) {
 				file << std::endl << "\tb\t" << *IDENTIFIER;
 				file << std::endl << "\tnop";
 			}
@@ -1294,8 +1294,9 @@ class JumpStatement : public Node {
 			}			
 			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "break" && AssignmentExpressionPtr == NULL) {
 
-				if( contxt.LastScope.size() != 0){
-					file << std::endl << "\tb\t" << contxt.LastScope[contxt.LastScope.size()-1];		//The label of the loopend
+				if( contxt.LastScope.size() != 0 && contxt.BreakTracker.size() != 0){
+					file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
+					contxt.BreakTracker.pop_back();
 					file << std::endl << "\tnop";
 				}
 			}
@@ -1923,7 +1924,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 
 
 			if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
-				
+				contxt.BreakCounter++;
 				file << std::endl << BEGIN_ << ":";
 				
 				contxt.LoopHeader.push_back(BEGIN_);
@@ -1936,23 +1937,31 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 					file << std::endl << "\tnop";
 				}
 				file << std::endl << WHILE << ":";
+
 				contxt.LastScope.push_back(END);
+				contxt.BreakTracker.push_back(contxt.BreakCounter);
+
 				StatementPtr->render_asm(file,contxt);
 				if(!contxt.reading)	{
 					file << "\n\tb " << BEGIN_;
 					file << std::endl << "\tnop";
 				}
 				file << std::endl << END << ":";
+
 				
+				contxt.BreakCounter--;
 
 			}
 
 			else if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "do" && AssignmentExpressionPtr != NULL && StatementPtr != NULL){
 
-					
+				contxt.BreakCounter++;
 				file << std::endl << DO << ":";
 				contxt.LoopHeader.push_back(DO);
+
 				contxt.LastScope.push_back(END);
+				contxt.BreakTracker.push_back(contxt.BreakCounter);
+
 				StatementPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = true;
 				contxt.TestConditionContinue = AssignmentExpressionPtr; //In case of a continue
@@ -1966,11 +1975,11 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 					file << std::endl << "\tnop";
 				}
 				file << std::endl << END << ":";
-				
+				contxt.BreakCounter--;
 			}
 
 			else if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr == NULL && StatementPtr != NULL){
-				
+				contxt.BreakCounter++;
 				ExpressionStatementPtr->render_asm(file,contxt);
 				file << std::endl << FOR << ":";
 				contxt.LoopHeader.push_back(FOR);
@@ -1982,20 +1991,26 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 					file << std::endl << "\tbeq\t$2,$0," << END;
 					file << std::endl << "\tnop";
 				}
+
 				contxt.LastScope.push_back(END);
+				contxt.BreakTracker.push_back(contxt.BreakCounter);
+
 				StatementPtr->render_asm(file,contxt);				
 				if(!contxt.reading)	{
 					file << "\n\tb " << FOR;
 					file << std::endl << "\tnop";
 				}				
 				file << std::endl << END << ":";
-						
+				contxt.BreakCounter--;
 			}
 
 			else if(ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL){
-
+				contxt.BreakCounter++;
 				ExpressionStatementPtr->render_asm(file,contxt);
+
 				contxt.LastScope.push_back(END);
+				contxt.BreakTracker.push_back(contxt.BreakCounter);
+
 				file << std::endl << FOR << ":";
 				contxt.LoopHeader.push_back(FOR);
 
@@ -2019,7 +2034,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				}
 				
 				file << std::endl << END << ":";
-				
+				contxt.BreakCounter--;
 			
 			}
 			//file << std::endl << END << ":"; 
