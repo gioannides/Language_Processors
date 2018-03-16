@@ -135,18 +135,22 @@ $END24:
 $END27:
 	sw	$2, 4($sp) #a
 
+	move	$4, $2
 	lw	$2, 144($sp) #h
 $END28:
 	sw	$2, 8($sp) #b
 
+	move	$5, $2
 	lw	$2, 140($sp) #i
 $END29:
 	sw	$2, 12($sp) #c
 
+	move	$6, $2
 	lw	$2, 136($sp) #j
 $END30:
 	sw	$2, 16($sp) #d
 
+	move	$7, $2
 	lw	$2, 132($sp) #k
 $END31:
 	sw	$2, 20($sp) #e

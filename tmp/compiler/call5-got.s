@@ -97,10 +97,12 @@ $END5:	.set	noreorder
 $END10:
 	sw	$2, 4($sp) #a
 
+	move	$4, $2
 	li	$2, 54
 $END11:
 	sw	$2, 8($sp) #b
 
+	move	$5, $2
 	.option pic
 	jal test_add
 	nop

@@ -61,23 +61,23 @@ $END19:
 $END13:
 $END32:	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-124
-	sw	$fp,120($sp)
-	sw	$31,116($sp)
+	addiu	$sp,$sp,-128
+	sw	$fp,124($sp)
+	sw	$31,120($sp)
 	move	$fp,$sp
 
 	li	$2, 1
 $END34:
-	sw	$2, 112($sp) #x
+	sw	$2, 116($sp) #x
 
-	lw	$2, 112($sp) #x
+	lw	$2, 116($sp) #x
 	li	$3, 1
 	seq	$2, $2, $3
 $END36:
 	beq	$2,$0,$END35
 	nop
 $IF35:
-	lw	$2, 112($sp) #x
+	lw	$2, 116($sp) #x
 	li	$3, 2
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
@@ -85,7 +85,7 @@ $END39:
 	beq	$2,$0,$END38
 	nop
 $IF38:
-	lw	$2, 112($sp) #x
+	lw	$2, 116($sp) #x
 	li	$3, 3
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
@@ -97,9 +97,9 @@ $IF41:
 $END44:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
@@ -107,7 +107,7 @@ $END44:
 $END41:
 $END38:
 $END35:
-	lw	$2, 112($sp) #x
+	lw	$2, 116($sp) #x
 	li	$3, 1
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
@@ -115,7 +115,7 @@ $END46:
 	beq	$2,$0,$END45
 	nop
 $IF45:
-	lw	$2, 112($sp) #x
+	lw	$2, 116($sp) #x
 	li	$3, 4
 	seq	$2, $2, $3
 $END49:
@@ -126,15 +126,15 @@ $IF48:
 $END50:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
 
 $END48:
-	lw	$2, 112($sp) #x
+	lw	$2, 116($sp) #x
 	li	$3, 5
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
@@ -142,7 +142,7 @@ $END52:
 	beq	$2,$0,$END51
 	nop
 $IF51:
-	lw	$2, 112($sp) #x
+	lw	$2, 116($sp) #x
 	li	$3, 6
 	seq	$2, $2, $3
 $END55:
@@ -153,9 +153,9 @@ $IF54:
 $END57:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
@@ -163,7 +163,7 @@ $END57:
 	b $END54
 	nop
 $ELSE54:
-	lw	$2, 112($sp) #x
+	lw	$2, 116($sp) #x
 	li	$3, 7
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
@@ -175,9 +175,9 @@ $IF58:
 $END61:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
@@ -189,9 +189,9 @@ $ELSE58:
 $END63:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
@@ -204,17 +204,17 @@ $END45:
 $END64:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
 
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop

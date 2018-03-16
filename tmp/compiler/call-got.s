@@ -19,17 +19,17 @@ mult:
 $END1:
 $END2:	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-124
-	sw	$fp,120($sp)
-	sw	$31,116($sp)
+	addiu	$sp,$sp,-128
+	sw	$fp,124($sp)
+	sw	$31,120($sp)
 	move	$fp,$sp
 
 	li	$2, 0
 $END4:
-	sw	$2, 112($sp) #c
+	sw	$2, 116($sp) #c
 
 $BEGIN5:
-	lw	$2, 128($sp) #a
+	lw	$2, 132($sp) #a
 	li	$3, 0
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
@@ -37,40 +37,40 @@ $END6:
 	beq	$2,$0,$END5
 	nop
 $WHILE5:
-	lw	$2, 112($sp) #c
-	lw	$3, 132($sp) #b
+	lw	$2, 116($sp) #c
+	lw	$3, 136($sp) #b
 	add	$2, $2, $3
 $END8:
-	lw	$3, 112($sp) #c
+	lw	$3, 116($sp) #c
 
-	sw	$2,112($sp) #c
+	sw	$2,116($sp) #c
 
-	lw	$2, 128($sp) #a
+	lw	$2, 132($sp) #a
 	li	$3, 1
 	sub	$2, $2, $3
 $END9:
-	lw	$3, 128($sp) #a
+	lw	$3, 132($sp) #a
 
-	sw	$2,128($sp) #a
+	sw	$2,132($sp) #a
 
 	b $BEGIN5
 	nop
 $END5:
-	lw	$2, 112($sp) #c
+	lw	$2, 116($sp) #c
 $END10:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
 
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
@@ -138,10 +138,12 @@ $END19:
 $END21:
 	sw	$2, 4($sp) #a
 
+	move	$4, $2
 	lw	$2, 120($sp) #b
 $END22:
 	sw	$2, 8($sp) #b
 
+	move	$5, $2
 	.option pic
 	jal mult
 	nop

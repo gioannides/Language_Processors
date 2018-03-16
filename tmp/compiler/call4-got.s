@@ -101,6 +101,7 @@ $END9:
 $END11:
 	sw	$2, 4($sp) #a
 
+	move	$4, $2
 	.option pic
 	jal test
 	nop

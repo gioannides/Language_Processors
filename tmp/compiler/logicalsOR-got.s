@@ -24,44 +24,44 @@ $ELSE2:
 $END7:
 $END2:	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-124
-	sw	$fp,120($sp)
-	sw	$31,116($sp)
+	addiu	$sp,$sp,-128
+	sw	$fp,124($sp)
+	sw	$31,120($sp)
 	move	$fp,$sp
 
 	li	$2, 1
 $END9:
-	sw	$2, 112($sp) #x
+	sw	$2, 116($sp) #x
 
-	lw	$2, 112($sp) #x
-	lw	$4, 112($sp) #x
+	lw	$2, 116($sp) #x
+	lw	$4, 116($sp) #x
 
 	addiu	$3, $4,1
-	sw	$3,112($sp) #x
+	sw	$3,116($sp) #x
 
 	sne	$2,$0,$2
 	sne	$3,$0,$3
 	or	$2,$2,$3
-	lw	$4, 112($sp) #x
+	lw	$4, 116($sp) #x
 
 	addiu	$3, $4,1
-	sw	$3,112($sp) #x
+	sw	$3,116($sp) #x
 
 	sne	$2,$0,$2
 	sne	$3,$0,$3
 	or	$2,$2,$3
-	lw	$4, 112($sp) #x
+	lw	$4, 116($sp) #x
 
 	addiu	$3, $4,1
-	sw	$3,112($sp) #x
+	sw	$3,116($sp) #x
 
 	sne	$2,$0,$2
 	sne	$3,$0,$3
 	or	$2,$2,$3
-	lw	$4, 112($sp) #x
+	lw	$4, 116($sp) #x
 
 	addiu	$3, $4,1
-	sw	$3,112($sp) #x
+	sw	$3,116($sp) #x
 
 	sne	$2,$0,$2
 	sne	$3,$0,$3
@@ -70,13 +70,13 @@ $END11:
 	beq	$2,$0,$ELSE10
 	nop
 $IF10:
-	lw	$2, 112($sp) #x
+	lw	$2, 116($sp) #x
 $END13:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
@@ -88,18 +88,18 @@ $ELSE10:
 $END15:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop
 
 $END10:
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,120($sp)
+	lw	$fp,124($sp)
+	addiu	$sp,$sp,128
 	j	$31
 
 	nop

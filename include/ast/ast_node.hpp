@@ -1559,6 +1559,10 @@ class FunctionDefinition : public Node {
 			contxt.totalStackArea+=contxt.max_offset;
 			contxt.max_offset=0;
 			//print_scopes(contxt, file);
+			while ((contxt.totalStackArea+4)%8)
+			{
+				contxt.totalStackArea++;
+			}
 			if(contxt.Scopes.size()>=1){
 				for (int k=0; k<contxt.Variables.size(); k++)
 				{	for (int j=contxt.Scopes.size()-1; j>=0; j--)

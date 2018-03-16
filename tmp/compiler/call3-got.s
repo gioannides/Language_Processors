@@ -119,18 +119,22 @@ $END16:
 $END18:
 	sw	$2, 4($sp) #a
 
+	move	$4, $2
 	lw	$2, 136($sp) #z
 $END19:
 	sw	$2, 8($sp) #b
 
+	move	$5, $2
 	li	$2, 3
 $END20:
 	sw	$2, 12($sp) #c
 
+	move	$6, $2
 	li	$2, 4
 $END21:
 	sw	$2, 16($sp) #d
 
+	move	$7, $2
 	li	$2, 5
 $END22:
 	sw	$2, 20($sp) #e

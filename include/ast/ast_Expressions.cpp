@@ -512,6 +512,10 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 	}
 	else if( IDENTIFIER != NULL && !contxt.reading && contxt.function)			//this identifier is involved in expressions
 	{
+		if(contxt.Regs>=24)
+		{
+			std::cout << std::endl << "buy more registers!" << std::endl;
+		}
 		int found_0nothing_1local_2globl = 0;	
 		int good_index=0;			//this will determine whether the variable wanted is a global or a local
 		int i(0), j;				//must initialize the index i outside so it is accessible throughout here
@@ -830,6 +834,10 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 						else
 						{
 							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[ki+contxt.argument_no-1].param_offset << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << "\n";
+						}
+						if(contxt.argument_no<=4) //load the first four parameters in $4-$7;
+						{
+							file << std::endl << "\tmove\t$" << 3+contxt.argument_no << ", $" << contxt.Regs+1; 
 						}
 						ki=contxt.Variables.size();
 					}
