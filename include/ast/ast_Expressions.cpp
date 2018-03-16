@@ -1,5 +1,5 @@
 #include "ast_node.hpp"
-
+#include "stdint.h"
 
 inline void CastExpression::render_asm(std::ofstream& file,Context& contxt) {
 
@@ -334,6 +334,7 @@ inline void ExclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 
 
 inline void InclusiveOrExpression::render_asm(std::ofstream& file,Context& contxt) {
+			
 
 			if(INC_OR==NULL && EXclusiveOrExpression != NULL){
 				EXclusiveOrExpression->render_asm(file,contxt);
@@ -361,15 +362,38 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 			if(AND_OP==NULL && INclusiveOrExpression != NULL){
 				INclusiveOrExpression->render_asm(file,contxt);
 			}
+			
 			else if(LogicalAndExpressionPtr != NULL && !contxt.reading && INclusiveOrExpression != NULL && AND_OP != NULL) { 
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;
 				INclusiveOrExpression->render_asm(file,contxt);
 				if (contxt.function){
 					
+					std::string SHORTCIRCUIT, PASS, label_id;
+					label_id = labelGenLogical(contxt);
+					SHORTCIRCUIT = "$SHORTCIRCUIT" + label_id;
+					//PASS = "$PASS" + label_id;			
+
+					
+					/*file<<   std::endl << "\tbeq\t$" << contxt.Regs << ",$0," << SHORTCIRCUIT; 
+					file<<   std::endl << "\tnop\t";					
+					file<<   std::endl << "\tbeq\t$" << contxt.Regs+1 << ",$0," << SHORTCIRCUIT; 
+					file<<   std::endl << "\tnop\t";
+					file << std::endl << "\tb\t" << PASS;
+					file<<   std::endl << "\tnop\t";
+					file << std::endl << SHORTCIRCUIT << ":";
+					file << std::endl << "\tli\t$" << contxt.Regs << ",0";
+					file << std::endl << "\tb\t" << contxt.END;
+					file<<   std::endl << "\tnop\t";
+					file << std::endl << PASS << ":";
+					file << std::endl << "\tli\t$" << contxt.Regs << ",1";*/
+
 					file <<  std::endl << "\tsne\t$"  << contxt.Regs  << ",$0,$" << contxt.Regs;
+					file<<   std::endl << "\tbeq\t$" << contxt.Regs << ",$0," << SHORTCIRCUIT; 
 					file<<   std::endl << "\tsne\t$" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
-					file<<   std::endl << "\tand\t$" << contxt.Regs <<  ",$" << contxt.Regs << ",$" << contxt.Regs+1;
+					file << std::endl << SHORTCIRCUIT << ":";
+					file<< std::endl << "\tand\t$" << contxt.Regs << ",$" << contxt.Regs << ",$" << contxt.Regs+1;
+					
 					
 				}
 				else 
@@ -378,6 +402,7 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 					contxt.current_value = 0;
 				}
 				contxt.Regs--;
+						
 				
 			}
 
@@ -390,17 +415,39 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 			if(OR_OP==NULL && LogicalAndExpressionPtr != NULL){
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 			}
+			
 			else if( LogicalAndExpressionPtr != NULL && !contxt.reading && LogicalAndExpressionPtr != NULL && OR_OP != NULL){ 
 				LogicalOrExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 				if (contxt.function){
+					//contxt.END = "$ENDLOGICAL" + labelGenLogical(contxt);
+					std::string SHORTCIRCUIT, PASS, label_id;
+					label_id = labelGenLogical(contxt);
+					SHORTCIRCUIT = "$SHORTCIRCUIT" + label_id;
+					//PASS = "$PASS" + label_id;			
+
 					
+					/*file<<   std::endl << "\tbne\t$" << contxt.Regs << ",$0," << SHORTCIRCUIT; 
+					file<<   std::endl << "\tnop\t";					
+					file<<   std::endl << "\tbne\t$" << contxt.Regs+1 << ",$0," << SHORTCIRCUIT; 
+					file<<   std::endl << "\tnop\t";
+					file <<  std::endl << "\tb\t" << PASS;
+					file<<   std::endl << "\tnop\t";
+					file <<  std::endl << SHORTCIRCUIT << ":";
+					file <<  std::endl << "\tli\t$" << contxt.Regs << ",1";
+					file <<  std::endl << "\tb\t" << contxt.END;
+					file<<   std::endl << "\tnop\t";
+					file <<  std::endl << PASS << ":";
+					file <<  std::endl << "\tli\t$" << contxt.Regs << ",0";*/
+
 					file <<  std::endl << "\tsne\t$"  << contxt.Regs  << ",$0,$" << contxt.Regs;
+					file<<   std::endl << "\tbne\t$" << contxt.Regs << ",$0," << SHORTCIRCUIT; 
 					file<<   std::endl << "\tsne\t$" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
-					file<<   std::endl << "\tor\t$" << contxt.Regs <<  ",$" << contxt.Regs << ",$" << contxt.Regs+1;
+					file <<  std::endl << SHORTCIRCUIT << ":";
+					file<< std::endl << "\tor\t$" << contxt.Regs << ",$" << contxt.Regs << ",$" << contxt.Regs+1;
 					
-					
+
 				}
 				else 
 				{
@@ -408,7 +455,10 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 					contxt.current_value = 0;
 				}
 				contxt.Regs--;
-				
+				 if(OR_OP==NULL && LogicalAndExpressionPtr == NULL){
+					
+					file << std::endl <<  contxt.END << ":";
+				}
 			}
 		}
 			
@@ -500,7 +550,6 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 				
 			}
 }
-
 
 inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 {
@@ -762,6 +811,8 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 	}
 
 }
+
+
 					
 inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contxt) {
 
@@ -769,10 +820,11 @@ inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contx
 			std::string ELSE = "$ELSE" + label_id;
 			std::string IF = "$IF" + label_id;
 			std::string END = "$END" + label_id;
-
+			
 			
 			if( LogicalORExpression != NULL && ExpressioN == NULL && ConditionalExpressionPtr == NULL) {
 				LogicalORExpression->render_asm(file,contxt);
+				
 			}
 			else if (LogicalORExpression != NULL && ExpressioN != NULL && ConditionalExpressionPtr != NULL) {
 				
@@ -795,6 +847,7 @@ inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contx
 				file << std::endl << "\tnop";
 			}
 			file << std::endl << END << ":";
+			
 }
 				
 inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contxt)  {
@@ -815,6 +868,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 			}				
 			else if(ConditionalExpressionPtr != NULL) {
 				ConditionalExpressionPtr->render_asm(file,contxt);		//THIS IS FOR IF STATEMENTS/ LOGICAL / ARITHMETIC OPERATIONS / ASSIGNEMENTS
+				
 			}
 			if(contxt.argument_no)
 			{
