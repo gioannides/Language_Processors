@@ -79,9 +79,13 @@ struct Context{
 	char UnaryOperator;
 	std::vector<std::string> LastScope;
 	std::vector<char> UnaryOperators;
+	std::vector<std::string> LogicalLabels;
+	std::string END;
+	int post_incr = 0;
+	int post_decr = 0;	
 	
-	
-	
+	int BreakCounter=0;
+	std::vector<int>BreakTracker;
 };
 inline void print_variables(Context& contxt, std::ofstream& f){
 	for(int i=0; i<contxt.Variables.size(); i++)
@@ -107,8 +111,18 @@ inline void print_scopes(Context& contxt, std::ofstream& f){
 inline std::string labelGenScope(Context& contxt) {
 
 	contxt.LastScope.push_back(std::to_string(contxt.LastScope.size()));
+	
 	return contxt.LastScope[contxt.LastScope.size()-1];
 }
+
+inline std::string labelGenLogical(Context& contxt) {
+
+	contxt.LogicalLabels.push_back(std::to_string(contxt.LogicalLabels.size()));
+	return contxt.LogicalLabels[contxt.LogicalLabels.size()-1];
+		
+}
+
+
 
 inline std::string labelGen(Context& contxt) {
 
