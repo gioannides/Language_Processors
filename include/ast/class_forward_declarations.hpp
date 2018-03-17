@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 class AssignmentExpression;
-
+class Expression;
 
 
 struct bindings {
@@ -66,7 +66,7 @@ struct Context{
 	int CaseVectorSize =0;
 	std::vector<std::string> LoopHeader;
 	bool continue_for = false;
-	AssignmentExpression* TestConditionContinue = NULL;
+	Expression* TestConditionContinue = NULL;
 	
 	std::vector<function_details> functions_declared;
 	function_details funcion_temp;
@@ -86,7 +86,42 @@ struct Context{
 	
 	int BreakCounter=0;
 	std::vector<int>BreakTracker;
+	
+	int SwitchControl=0;
+	bool inCase=false;
+	int VectorSize=0;
+	bool is_postfix = false;
+	int good_i = 0;
 };
+
+
+inline void postfix_ops(Context& contxt, std::ofstream& f){
+		contxt.Regs++;
+		if(contxt.AssignmentOperator == "++" && contxt.is_postfix && !contxt.reading)
+	{ 
+		//std::cout << std::endl << "got here" << std::endl;
+		f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", 1 #++"; //maybe +2
+		if(contxt.Variables[contxt.good_i].word_size==1) {
+			f << std::endl << "\tsb\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id;			
+		}				
+		else{
+			f << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id << "\n";
+		}
+		//f << "\n\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[contxt.good_i].offset << "($sp)" << " #" << contxt.Variables[contxt.good_i].id;
+		contxt.is_postfix=false;
+	}
+	else if (contxt.AssignmentOperator == "--" && contxt.is_postfix && !contxt.reading)
+	{
+		//std::cout << std::endl << "got here" << std::endl;
+
+		f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", -1 #--";
+		f << "\n\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[contxt.good_i].offset << "($sp)" << " #" << contxt.Variables[contxt.good_i].id;
+		contxt.is_postfix=false;
+	} 
+	contxt.Regs--;
+}
+
+
 inline void print_variables(Context& contxt, std::ofstream& f){
 	for(int i=0; i<contxt.Variables.size(); i++)
 	{ 

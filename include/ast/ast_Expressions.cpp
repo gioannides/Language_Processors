@@ -13,12 +13,17 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 			
 			if(OPERATOR==NULL && CaStExpression != NULL){
 				CaStExpression->render_asm(file,contxt);
+				postfix_ops(contxt, file);
+
 			}
 			else if(MultiplicativeExpressionPtr != NULL && !contxt.reading && CaStExpression != NULL && OPERATOR != NULL){ 
 				MultiplicativeExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;			
 				CaStExpression->render_asm(file,contxt);
+				
+
 				if(!contxt.function){
+					postfix_ops(contxt, file);
 					if( *OPERATOR == "*" ){
 						contxt.global_value = contxt.global_value*contxt.current_value;
 						contxt.current_value = 0;
@@ -85,14 +90,17 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 
 			if(OPERATOR==NULL && MultiplicativeExpressioN != NULL){
 				MultiplicativeExpressioN->render_asm(file,contxt);
+				postfix_ops(contxt, file);
+
 			}
 			else if(AdditiveExpressionPtr != NULL && !contxt.reading  && MultiplicativeExpressioN != NULL && OPERATOR != NULL) { 
 				
 				
-				AdditiveExpressionPtr->render_asm(file,contxt);				
+				AdditiveExpressionPtr->render_asm(file,contxt);	
 				contxt.Regs++;
 				MultiplicativeExpressioN->render_asm(file,contxt);
 				if(!contxt.function){
+					postfix_ops(contxt, file);
 					if( *OPERATOR == "+" ){
 						contxt.global_value+=contxt.current_value;
 						contxt.current_value=0;
@@ -131,17 +139,21 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 
 
 
+
 inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 			if(OPERATOR==NULL && AdditiVeExpression != NULL){
 				AdditiVeExpression->render_asm(file,contxt);
+				postfix_ops(contxt, file);
+
 			}
 			else if(ShiftExpressionPtr != NULL && !contxt.reading && AdditiVeExpression != NULL && OPERATOR != NULL){ 
 				ShiftExpressionPtr->render_asm(file,contxt);				
 				contxt.Regs++;
 				AdditiVeExpression->render_asm(file,contxt);
-				
+								
 				if(!contxt.function){
+					postfix_ops(contxt, file);
 					if( *OPERATOR == "<<" ){
 						contxt.global_value = contxt.global_value << contxt.current_value;
 						contxt.current_value=0;
@@ -173,17 +185,21 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 
 
+
 inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 			if(OPERATOR==NULL && SHiftExpression != NULL){
 				SHiftExpression->render_asm(file,contxt);
+				postfix_ops(contxt, file);
+
 			}
 			else if(RelationalExpressionPtr != NULL && !contxt.reading && SHiftExpression != NULL && OPERATOR != NULL){ 
 				RelationalExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;
 				SHiftExpression->render_asm(file,contxt);
+				
 				if (contxt.function){
-					
+					postfix_ops(contxt, file);	
 					if( *OPERATOR == "<" ){
 						if(contxt.is_unsigned){
 							file << std::endl << "\tsltu\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
@@ -235,7 +251,6 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 					}
 					contxt.current_value =0;
 				}
-
 				contxt.Regs--;
 				
 			}
@@ -244,17 +259,20 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 		}
 
 
+
 inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 			if(OPERATOR==NULL && RElationalExpression != NULL){
 				RElationalExpression->render_asm(file,contxt);
+				postfix_ops(contxt, file);
 			}
 			else if(EqualityExpressionPtr != NULL && !contxt.reading && RElationalExpression != NULL && OPERATOR != NULL){ 
 				EqualityExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;	
 				RElationalExpression->render_asm(file,contxt);
+				
 				if (contxt.function){
-					
+					postfix_ops(contxt, file);	
 					if( *OPERATOR == "==" ){
 						file << std::endl << "\tseq\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;						
 						
@@ -287,15 +305,17 @@ inline void AndExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 			if(BIT_AND==NULL && EqualitYExpression != NULL){
 				EqualitYExpression->render_asm(file,contxt);
+				postfix_ops(contxt, file);
 			}
 			else if(AndExpressionPtr != NULL && !contxt.reading && EqualitYExpression != NULL && BIT_AND != NULL){ 
 				AndExpressionPtr->render_asm(file,contxt);
+				
 				contxt.Regs++;
 				EqualitYExpression->render_asm(file,contxt);
 				if (contxt.function){
 					
 					file << std::endl << "\tand\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
-					
+					postfix_ops(contxt, file);
 				}
 				else 
 				{
@@ -485,14 +505,19 @@ inline void ArgumentExpressionList::render_asm(std::ofstream& file,Context& cont
 
 }
 
+
 inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 
 			if(PostFixExpressionPtr != NULL) {
 				if(OPERATOR != NULL && IDENTIFIER == NULL) {
 					contxt.AssignmentOperator = *OPERATOR;
-					contxt.lhs_of_assignment=true;
+					if(!contxt.reading){
+						//std::cout << std::endl << "it's never getting here" << std::endl;
+						contxt.is_postfix= true;
+					}
+					//contxt.lhs_of_assignment=true;
 				PostFixExpressionPtr->render_asm(file,contxt);
-				contxt.lhs_of_assignment=false;
+				//contxt.lhs_of_assignment=false;
 					//file << "\n # this is the problem" << *OPERATOR;
 				}
 				
@@ -550,7 +575,6 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 				
 			}
 }
-
 inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 {
 	if( AssignmentExpressionPtr != NULL && !contxt.reading ) 
@@ -561,6 +585,10 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 	}
 	else if( IDENTIFIER != NULL && !contxt.reading && contxt.function)			//this identifier is involved in expressions
 	{
+		if(contxt.Regs>=24)
+		{
+			std::cout << std::endl << "buy more registers!" << std::endl;
+		}
 		int found_0nothing_1local_2globl = 0;	
 		int good_index=0;			//this will determine whether the variable wanted is a global or a local
 		int i(0), j;				//must initialize the index i outside so it is accessible throughout here
@@ -587,6 +615,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 					{
 						found_0nothing_1local_2globl = 1;	//means that we found a local variable in the function of that name					
 						good_index=i;
+						contxt.good_i = good_index;
 						i = -1;
 						j = -1;
 					}
@@ -601,6 +630,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 					if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
 						found_0nothing_1local_2globl=2;
 						good_index = i;
+						contxt.good_i = good_index;
 						i = contxt.Variables.size();
 						if(contxt.Variables[good_index].DataType == "unsigned") {
 							contxt.is_unsigned = true;
@@ -811,6 +841,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 	}
 
 }
+
 
 
 					
