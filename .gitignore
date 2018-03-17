@@ -6,3 +6,4 @@ bin/*
 *.tab.hpp
 tmp/*
 c_compiler/*
+*.s

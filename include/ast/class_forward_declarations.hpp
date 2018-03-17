@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 class AssignmentExpression;
-
+class Expression;
 
 
 struct bindings {
@@ -23,6 +23,7 @@ struct bindings {
 struct function_details{
 	int paramters_size = 0;
 	std::string name = "";
+	std::string returnType = "";
 };
 
 struct Context{
@@ -44,7 +45,7 @@ struct Context{
 	bool initialized = false;
 	bool function = false;
 	
-	bool float_ = false;   //is value a floating point?
+	
 	bool is_unsigned = false;
 	bool protect = false; // to not overwrite function_id
 	bool reading = false; // are we reading for stack allocation or are we executing?
@@ -58,6 +59,13 @@ struct Context{
 	
 	int global_value=0;
 	int current_value=0;
+	int global_value_float=0;
+	int current_value_float=0;
+	bool float_ = false;   //is value a floating point?
+	char regType[31];
+	bool functionReturnType=false;
+	std::string functionReturnTypetemp;
+
 	std::vector<std::string> EndSwitchLoop;
 	std::vector<std::string> Labels;
 	std::vector<std::string> Cases;
@@ -66,7 +74,7 @@ struct Context{
 	int CaseVectorSize =0;
 	std::vector<std::string> LoopHeader;
 	bool continue_for = false;
-	AssignmentExpression* TestConditionContinue = NULL;
+	Expression* TestConditionContinue = NULL;
 	
 	std::vector<function_details> functions_declared;
 	function_details funcion_temp;
@@ -86,9 +94,41 @@ struct Context{
 	
 	int BreakCounter=0;
 	std::vector<int>BreakTracker;
+	
+	int SwitchControl=0;
+	bool inCase=false;
+	int VectorSize=0;
 	bool is_postfix = false;
 	int good_i = 0;
+	std::string SHORTCIRCUIT;
+	std::string SHORTCIRCUIT2;
 };
+
+
+inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt){
+
+	if(contxt.regType[reg1] != 'f' && contxt.regType[reg2] != 'f'){
+		return;
+	}
+	else if(contxt.regType[reg1] != contxt.regType[reg2]){
+		if(contxt.regType[reg1] == 'i' || contxt.regType[reg1] == 'u' || contxt.regType[reg1] == 'c' && contxt.regType[reg2] == 'f'){
+			file << std::endl << "\ttrunc.w.s\t$f" << reg2 << ",$f" << reg2 << ",$" << reg2;
+			file << std::endl << "\tmfc1\t$f" << reg2 << ",$" << reg2;
+			if(contxt.regType[reg1] == 'u'){
+				file << std::endl << "\tandi\t$" << reg2 << ",$" << reg2 << ",0xFF";
+			}
+			return;
+		}
+		if(contxt.regType[reg1] == 'f' && contxt.regType[reg2] == 'i' || contxt.regType[reg2] == 'u' || contxt.regType[reg2] == 'c'){
+			file << std::endl << "\tmtc1\t$" << reg2 << ",$f" << reg2;
+			file << std::endl << "\tcvt.s.w\t$f" << reg2 << ",$f" << reg2;
+			return;
+		}
+	}
+
+}
+
+
 inline void postfix_ops(Context& contxt, std::ofstream& f){
 		contxt.Regs++;
 		if(contxt.AssignmentOperator == "++" && contxt.is_postfix && !contxt.reading)
@@ -114,6 +154,8 @@ inline void postfix_ops(Context& contxt, std::ofstream& f){
 	} 
 	contxt.Regs--;
 }
+
+
 inline void print_variables(Context& contxt, std::ofstream& f){
 	for(int i=0; i<contxt.Variables.size(); i++)
 	{ 

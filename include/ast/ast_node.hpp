@@ -22,9 +22,9 @@ class PrimaryExpression : public Node {
 		std::string* IDENTIFIER;
 		std::string* CONSTANT;
 		std::string* STRING_LITERAL;
-		AssignmentExpression* AssignmentExpressionPtr;
+		Expression* AssignmentExpressionPtr;
 	public:
-		PrimaryExpression(std::string* IDENTIFIER, std::string* CONSTANT, std::string* STRING_LITERAL, AssignmentExpression* AssignmentExpressionPtr) :
+		PrimaryExpression(std::string* IDENTIFIER, std::string* CONSTANT, std::string* STRING_LITERAL, Expression* AssignmentExpressionPtr) :
 
 			IDENTIFIER(IDENTIFIER) , CONSTANT(CONSTANT) , STRING_LITERAL(STRING_LITERAL) , AssignmentExpressionPtr(AssignmentExpressionPtr) {}
 
@@ -68,14 +68,14 @@ class PostFixExpression : public Node {
 
 	public:
 		PrimaryExpression* PrimaryExpressionPtr;
-		AssignmentExpression* AssignmentExpressionPtr;
+		Expression* AssignmentExpressionPtr;
 		ArgumentExpressionList* ArgumentExpressionListPtr;
 		PostFixExpression* PostFixExpressionPtr;
 		std::string* IDENTIFIER;
 		std::string* OPERATOR;
 		
 	public:
-		PostFixExpression(PostFixExpression* PostFixExpressionPtr, PrimaryExpression* PrimaryExpressionPtr, AssignmentExpression* AssignmentExpressionPtr, ArgumentExpressionList* ArgumentExpressionListPtr, std::string* IDENTIFIER, std::string* OPERATOR) :
+		PostFixExpression(PostFixExpression* PostFixExpressionPtr, PrimaryExpression* PrimaryExpressionPtr, Expression* AssignmentExpressionPtr, ArgumentExpressionList* ArgumentExpressionListPtr, std::string* IDENTIFIER, std::string* OPERATOR) :
 	
 				PrimaryExpressionPtr(PrimaryExpressionPtr), AssignmentExpressionPtr(AssignmentExpressionPtr) , ArgumentExpressionListPtr(ArgumentExpressionListPtr) , IDENTIFIER(IDENTIFIER) , OPERATOR(OPERATOR) , PostFixExpressionPtr(PostFixExpressionPtr) {}
 
@@ -338,12 +338,12 @@ class ConditionalExpression : public Node {
 
 	private:
 		LogicalOrExpression* LogicalORExpression;
-		AssignmentExpression* ExpressioN;
+		Expression* ExpressioN;
 		ConditionalExpression* ConditionalExpressionPtr;
 
 	public:
 
-		ConditionalExpression( LogicalOrExpression* LogicalORExpression, AssignmentExpression* ExpressioN, ConditionalExpression* ConditionalExpressionPtr) : LogicalORExpression(LogicalORExpression),  ExpressioN(ExpressioN) , ConditionalExpressionPtr(ConditionalExpressionPtr) {}
+		ConditionalExpression( LogicalOrExpression* LogicalORExpression, Expression* ExpressioN, ConditionalExpression* ConditionalExpressionPtr) : LogicalORExpression(LogicalORExpression),  ExpressioN(ExpressioN) , ConditionalExpressionPtr(ConditionalExpressionPtr) {}
 
 		~ConditionalExpression() {}
 
@@ -377,6 +377,50 @@ class AssignmentExpression : public Node {
 
 
 
+class Expression : public Node{
+	
+	private:
+		AssignmentExpression* AssignmentExpressionPtr;
+		Expression* ExpressionPtr;
+
+	public:
+		Expression(AssignmentExpression* AssignmentExpressionPtr , Expression* ExpressionPtr) : AssignmentExpressionPtr(AssignmentExpressionPtr) , ExpressionPtr(ExpressionPtr) {}
+
+
+		~Expression() {}
+
+
+		void print_py(std::ofstream& file) {
+
+			if(ExpressionPtr != NULL) {
+
+				ExpressionPtr->print_py(file);
+			}
+
+			else{
+				AssignmentExpressionPtr->print_py(file);
+			}
+
+		}
+
+
+
+
+		void render_asm(std::ofstream& file,Context& contxt) {
+
+			if(ExpressionPtr != NULL) {
+
+				ExpressionPtr->render_asm(file,contxt);
+			}
+
+			else{
+				AssignmentExpressionPtr->render_asm(file,contxt);
+			}
+		}
+
+};
+
+
 
 
 
@@ -390,7 +434,7 @@ class ConstantExpression : public Node {
 	public:
 		ConstantExpression( ConditionalExpression* ConditionalExpressionPtr ) : ConditionalExpressionPtr(ConditionalExpressionPtr) {}
 
-
+		
 		void render_asm(std::ofstream& file, Context& contxt) {
 
 			ConditionalExpressionPtr->render_asm(file,contxt);
@@ -724,6 +768,7 @@ class InitDeclarator : public Node {
 				//contxt.is_unsigned = false;
 			}
 			contxt.is_unsigned = false;
+			contxt.float_ = false;
 		}
 	
 };
@@ -1140,6 +1185,12 @@ class TypeSpecifier : public Node {
 					contxt.is_unsigned = true;
 				}
 
+				if(contxt.functionReturnType){
+
+					contxt.functionReturnTypetemp = *TYPES;
+
+				}
+
 				// if(contxt.reading) { //this is predicting total stack frame for all paramters/local declarations in function body
 				// 	//contxt.variable.offset = contxt.totalStackArea;
 				// 	contxt.totalStackArea += contxt.variable.word_size;
@@ -1264,10 +1315,10 @@ class JumpStatement : public Node {
 
 	public:
 		std::string* IDENTIFIER;
-		AssignmentExpression* AssignmentExpressionPtr;
+		Expression* AssignmentExpressionPtr;
 		std::string* JUMP_TYPE;
 	public:
-		JumpStatement( std::string* IDENTIFIER , AssignmentExpression* AssignmentExpressionPtr, std::string* JUMP_TYPE) : IDENTIFIER(IDENTIFIER) , AssignmentExpressionPtr(AssignmentExpressionPtr) , JUMP_TYPE(JUMP_TYPE) {}
+		JumpStatement( std::string* IDENTIFIER , Expression* AssignmentExpressionPtr, std::string* JUMP_TYPE) : IDENTIFIER(IDENTIFIER) , AssignmentExpressionPtr(AssignmentExpressionPtr) , JUMP_TYPE(JUMP_TYPE) {}
 
 		~JumpStatement() {}
 
@@ -1280,7 +1331,7 @@ class JumpStatement : public Node {
 				file << std::endl << "\tnop";
 			}
 
-			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "continue"  && AssignmentExpressionPtr == NULL) {
+			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "continue"  && AssignmentExpressionPtr == NULL && !contxt.reading) {
 
 						if( contxt.TestConditionContinue != NULL){
 							contxt.rhs_of_expression = true;
@@ -1292,7 +1343,7 @@ class JumpStatement : public Node {
 							file << std::endl << "\tnop";
 						}			
 			}			
-			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "break" && AssignmentExpressionPtr == NULL) {
+			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "break" && AssignmentExpressionPtr == NULL && !contxt.reading) {
 
 				if( contxt.LastScope.size() != 0 && contxt.BreakTracker.size() != 0){
 					file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
@@ -1300,9 +1351,7 @@ class JumpStatement : public Node {
 					file << std::endl << "\tnop";
 				}
 			}
-			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "return" ) {
-				
-				
+			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "return" && !contxt.reading) {				
 			
 
 				if( AssignmentExpressionPtr != NULL){
@@ -1310,33 +1359,56 @@ class JumpStatement : public Node {
 					AssignmentExpressionPtr->render_asm(file,contxt);
 					contxt.rhs_of_expression = false;
 				}
-				if( AssignmentExpressionPtr != NULL && !contxt.reading){
-					file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
-				}
-				if(!contxt.reading){
-				file << std::endl << "\tmove\t$sp,$fp";
-				file << std::endl << "\tlw\t$31," << contxt.totalStackArea-4 <<"($sp)";
-				file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
-				file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
-				file << std::endl << "\tj\t$31" << std::endl;
-				file << std::endl << "\tnop" << std::endl;
+				for(int i(0); i < contxt.functions_declared.size() && !contxt.reading; i++){
+	
+					if(contxt.functions_declared[i].returnType == "float" && contxt.functions_declared[i].name == contxt.funct_id ){
+						if( AssignmentExpressionPtr != NULL && !contxt.reading){
+							if( contxt.regType[contxt.Regs+1] != 'f'){
+								file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;		// MAY CAUSE PROBLEMS
+							}
+							file << std::endl << "\tmov.s\t$f0," << "$f" << contxt.Regs+1;
+						}
+							file << std::endl << "\tmove\t$sp,$fp";
+							file << std::endl << "\tlw\t$31," << contxt.totalStackArea-4 <<"($sp)";
+							file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
+							file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
+							file << std::endl << "\tj\t$31" << std::endl;
+							file << std::endl << "\tnop" << std::endl;
+							break;
+						}
+					else if(contxt.functions_declared[i].returnType != "float" && contxt.functions_declared[i].name == contxt.funct_id ){
+						if( AssignmentExpressionPtr != NULL && !contxt.reading){
+							if( contxt.regType[contxt.Regs+1] == 'f'){
+								file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+								file << std::endl << "\tmfc1\t$2," << "$f" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
+							}
+							file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;
+						}
+						file << std::endl << "\tmove\t$sp,$fp";
+						file << std::endl << "\tlw\t$31," << contxt.totalStackArea-4 <<"($sp)";
+						file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
+						file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
+						file << std::endl << "\tj\t$31" << std::endl;
+						file << std::endl << "\tnop" << std::endl;
+						break;
+					}
 				}
 		
+			}
 		}
-	}
 };
 
 class IterationStatement : public Node {
 
 	private:
-		AssignmentExpression* AssignmentExpressionPtr; //EXPRESSION = ASSIGNMENT_EXPRESSION
+		Expression* AssignmentExpressionPtr; //EXPRESSION = ASSIGNMENT_EXPRESSION
 		Statement* StatementPtr;
 		ExpressionStatement* ExpressionStatementPtr;
 		ExpressionStatement* ExpressionStatementPtr2;
 		std::string* ITERATIVE_TYPE;
 		
 	public:
-		IterationStatement(AssignmentExpression* AssignmentExpressionPtr , Statement* StatementPtr, ExpressionStatement* ExpressionStatementPtr, ExpressionStatement* ExpressionStatementPtr2, std::string* ITERATIVE_TYPE) : AssignmentExpressionPtr(AssignmentExpressionPtr) , StatementPtr(StatementPtr) , ExpressionStatementPtr(ExpressionStatementPtr) , ExpressionStatementPtr2(ExpressionStatementPtr2) , ITERATIVE_TYPE(ITERATIVE_TYPE) {}
+		IterationStatement(Expression* AssignmentExpressionPtr , Statement* StatementPtr, ExpressionStatement* ExpressionStatementPtr, ExpressionStatement* ExpressionStatementPtr2, std::string* ITERATIVE_TYPE) : AssignmentExpressionPtr(AssignmentExpressionPtr) , StatementPtr(StatementPtr) , ExpressionStatementPtr(ExpressionStatementPtr) , ExpressionStatementPtr2(ExpressionStatementPtr2) , ITERATIVE_TYPE(ITERATIVE_TYPE) {}
 
 		~IterationStatement() {}
 
@@ -1351,14 +1423,14 @@ class IterationStatement : public Node {
 class SelectionStatement : public Node {
 
 	public:
-		AssignmentExpression* AssignmentExpressionPtr;
+		Expression* AssignmentExpressionPtr;
 		Statement* StatementPtr;
 		Statement* StatementPtr2;
 		std::string* SELECTIVE_IF;
 		std::string* SELECTIVE_ELSE;
 		std::string* SELECTIVE_SWITCH;
 	public:
-		SelectionStatement(AssignmentExpression* AssignmentExpressionPtr , Statement* StatementPtr, Statement* StatementPtr2, std::string* SELECTIVE_IF, std::string* SELECTIVE_ELSE , std::string* SELECTIVE_SWITCH) : AssignmentExpressionPtr(AssignmentExpressionPtr) , StatementPtr(StatementPtr) , StatementPtr2(StatementPtr2) ,SELECTIVE_IF(SELECTIVE_IF) , 
+		SelectionStatement(Expression* AssignmentExpressionPtr , Statement* StatementPtr, Statement* StatementPtr2, std::string* SELECTIVE_IF, std::string* SELECTIVE_ELSE , std::string* SELECTIVE_SWITCH) : AssignmentExpressionPtr(AssignmentExpressionPtr) , StatementPtr(StatementPtr) , StatementPtr2(StatementPtr2) ,SELECTIVE_IF(SELECTIVE_IF) , 
 			SELECTIVE_ELSE(SELECTIVE_ELSE) , SELECTIVE_SWITCH(SELECTIVE_SWITCH) {}
 
 		~SelectionStatement() {}
@@ -1378,10 +1450,10 @@ class SelectionStatement : public Node {
 class ExpressionStatement : public Node {
 
 	private:
-		AssignmentExpression* AssignmentExpressionPtr;
+		Expression* AssignmentExpressionPtr;
 		
 	public:
-		ExpressionStatement(AssignmentExpression* AssignmentExpressionPtr) : AssignmentExpressionPtr(AssignmentExpressionPtr) {}
+		ExpressionStatement(Expression* AssignmentExpressionPtr) : AssignmentExpressionPtr(AssignmentExpressionPtr) {}
 
 		~ExpressionStatement() {}
 
@@ -1522,7 +1594,9 @@ class FunctionDefinition : public Node {
 		void render_asm(std::ofstream& file, Context& contxt) {
 			
 			if( DeclarationSpecifiersPtr != NULL ) {
-										//check the return type
+				contxt.functionReturnType = true;
+				DeclarationSpecifiersPtr->render_asm(file,contxt);			//check the return type
+				contxt.functionReturnType = false;
 			}
 
 			if( DeclaratorPtr != NULL ) {				//function_def.name and function_def.no_parameters are assigned here
@@ -1544,6 +1618,7 @@ class FunctionDefinition : public Node {
 			}
 			//contxt.Scopes.push_back(contxt.funct_id);
 			contxt.funcion_temp.name=contxt.funct_id;
+			contxt.funcion_temp.returnType=contxt.functionReturnTypetemp;
 			contxt.functions_declared.push_back(contxt.funcion_temp);
 			contxt.funcion_temp.paramters_size=0;
 			if( DeclarationListPtr != NULL ) {   			//( functions having const-correctness for example )
@@ -1560,10 +1635,6 @@ class FunctionDefinition : public Node {
 			contxt.totalStackArea+=contxt.max_offset;
 			contxt.max_offset=0;
 			//print_scopes(contxt, file);
-			while ((contxt.totalStackArea+4)%8)
-			{
-				contxt.totalStackArea++;
-			}
 			if(contxt.Scopes.size()>=1){
 				for (int k=0; k<contxt.Variables.size(); k++)
 				{	for (int j=contxt.Scopes.size()-1; j>=0; j--)
@@ -1815,13 +1886,16 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 						}
 				}   	
 				if(contxt.lhs_of_assignment  && !contxt.reading && contxt.function){
-					if(found_local==1) {
+					if(found_local==1) { //local
 						if(contxt.initialized){
 							if(contxt.Variables[good_index].word_size==1){
 								file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 							}
-							else{
+							else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
 								file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+							}
+							else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
+								file << std::endl << "\tswc1\t$f2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 							}
 						}
 						else {
@@ -1835,13 +1909,20 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					}
 
 				
-					else if(found_local==2) {
-						file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
+					else if(found_local==2) { //global
+						
 						if(contxt.Variables[good_index].word_size==1) {
+							file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
 							file << std::endl << "\tsb\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 						}
-						else{
+						else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
+							file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
 							file << std::endl << "\tsw\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+						}
+						else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
+							file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
+							file << std::endl << "\tmtc1\t$2,$f2";
+							file << std::endl << "\tswc1\t$f2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 						}	
 					}	
 								
@@ -1897,14 +1978,15 @@ inline void Declarator::render_asm(std::ofstream& file,Context& contxt) {
 		}
 
 inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
-
+		
 			if( LabeledStatementPtr != NULL && !contxt.reading) {				//TODO: DO IT
 				LabeledStatementPtr->render_asm(file,contxt);
 			}
 			else if( CompoundStatementPtr != NULL) {
 				CompoundStatementPtr->render_asm(file,contxt);
 			}
-			else if( ExpressionStatementPtr != NULL) {		
+		if( !contxt.ReadingSwitch){
+			if( ExpressionStatementPtr != NULL) {		
 				ExpressionStatementPtr->render_asm(file,contxt);
 			}
 			else if( IterationStatementPtr != NULL && !contxt.reading) {
@@ -1917,6 +1999,7 @@ inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 				SelectionStatementPtr->render_asm(file,contxt);
 			}
 		}
+	}
 
 
 inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt) {
@@ -2095,28 +2178,70 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 			}
 						
 
-			else if( SELECTIVE_IF == NULL && SELECTIVE_SWITCH != NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {
-				contxt.rhs_of_expression = true;
-				AssignmentExpressionPtr->render_asm(file,contxt);
-				contxt.rhs_of_expression = false;
-
-				contxt.Regs++;
-				contxt.ReadingSwitch = true;
-				StatementPtr->render_asm(file,contxt);
-				contxt.ReadingSwitch = false;
-				contxt.Regs--;
-
-				contxt.CaseVectorSize = 0;
-				contxt.EndSwitchLoop.push_back(END);
-				//contxt.Regs++;
-				StatementPtr->render_asm(file,contxt);
-				//contxt.Regs--;
-				file << std::endl << END << ":";
+			else if( SELECTIVE_IF == NULL && SELECTIVE_SWITCH != NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {					std::string label_idS;
+					std::string SWITCH = "$SWITCH";
+					contxt.LastScope.push_back(SWITCH);
 				
+					
+
+					if( contxt.BreakTracker.size() != 0 && contxt.LastScope.size() > 0 && contxt.SwitchControl != 1 && !contxt.inCase){
+							file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
+							//contxt.BreakTracker.pop_back();
+							file << std::endl << "\tnop";
+					}
+
+					
+					contxt.SwitchControl++;
+					contxt.BreakCounter++;
+
+				if( contxt.SwitchControl == 1 || contxt.inCase){
+
+					
+
+					contxt.rhs_of_expression = true;
+					AssignmentExpressionPtr->render_asm(file,contxt);
+					contxt.rhs_of_expression = false;			
+
+					contxt.BreakTracker.push_back(contxt.BreakCounter);
+					contxt.Regs++;
+					contxt.ReadingSwitch = true;
+					StatementPtr->render_asm(file,contxt);
+					contxt.ReadingSwitch = false;
+					contxt.Regs--;			
+
+					
+				//	label_idS = labelGen(contxt);
+					//SWITCH = "$SWITCH" + label_idS;
+					
+
+					contxt.EndSwitchLoop.push_back(SWITCH);
+					contxt.Regs++;
+					StatementPtr->render_asm(file,contxt);
+					contxt.Regs--;
 				
-			}
+					
+					
+					
+				}
+
+
+				
+
 			
-			//contxt.Labels.clear();
+					
+					
+				if(contxt.SwitchControl!=0){
+					contxt.SwitchControl--;
+				}
+					contxt.BreakCounter--;
+					
+				
+					
+			}
+			if(contxt.LastScope.size() > 0 && !contxt.ReadingSwitch && contxt.VectorSize >= contxt.Cases.size() && contxt.VectorSize != 0){
+				file << std::endl << contxt.LastScope[contxt.LastScope.size()-1] << ":";
+			}
+			//contxt.inCase = false;
 		}
 
 
@@ -2132,33 +2257,40 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 				
 				if(!contxt.ReadingSwitch){
 					
-					if(contxt.CaseVectorSize < contxt.Cases.size() && contxt.Cases.size() != 0){
-						file <<  std::endl << contxt.Cases[contxt.CaseVectorSize] << ":";
-						StatementPtr->render_asm(file,contxt);					
-						contxt.CaseVectorSize++;
-					}
+					if( contxt.Cases.size() != 0 && contxt.VectorSize < contxt.Cases.size()){
+						file <<  std::endl << contxt.Cases[contxt.VectorSize] << ":";
+						contxt.VectorSize++;
+						
+						
+						StatementPtr->render_asm(file,contxt);
+					}					
 					
 					
 				}
 				else if(contxt.ReadingSwitch){
+					
+					contxt.inCase = true;
 					std::string label_id = labelGen(contxt);	
 					std::string CASE = "$CASE" + label_id ;
 					
-					contxt.rhs_of_expression = true;
-					ConstantExpressionPtr->render_asm(file,contxt); //li in register 3
-					contxt.rhs_of_expression = false;
-					if(!contxt.reading)	{
+						contxt.rhs_of_expression = true;
+						ConstantExpressionPtr->render_asm(file,contxt); //li in register 3
+						contxt.rhs_of_expression = false;
+
 						file << std::endl << "\tbeq\t$2,$3," << CASE;  //beq
-					}
-					contxt.Cases.push_back(CASE);
-					file << std::endl << "\tnop";				//nop
+
+						contxt.Cases.push_back(CASE);
+						file << std::endl << "\tnop";				//nop
+					contxt.SwitchControl = 0;
+					contxt.inCase = false;
 					
 				}
+				
 				
 			}
 
 
-			else if( LABELED_TYPE == NULL && ConstantExpressionPtr == NULL && IDENTIFIER != NULL && StatementPtr != NULL) {
+			else if( LABELED_TYPE == NULL && ConstantExpressionPtr == NULL && IDENTIFIER != NULL && StatementPtr != NULL && !contxt.ReadingSwitch) {
 
 				
 				file << std::endl << *IDENTIFIER << ":" << std::endl;
@@ -2177,9 +2309,9 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 				}
 					
 			}
+			
 
 		}
 
 
 #endif
-
