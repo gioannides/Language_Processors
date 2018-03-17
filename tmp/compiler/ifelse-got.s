@@ -31,19 +31,14 @@ $END3:
 $IF2:
 $END6:
 $IF5:
-$END8:
 $ELSE5:
-$END10:
 $END5:
 $ELSE2:
-$END12:
-$IF11:
-$END14:
-$ELSE11:
-$END16:
-$END11:
-$END2:
-$END17:	.set	noreorder
+$END10:
+$IF9:
+$ELSE9:
+$END9:
+$END2:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-120
 	sw	$fp,116($sp)
@@ -55,18 +50,18 @@ $END17:	.set	noreorder
 	li	$3, 8
 	xor	$2, $2, $3
 	sltu	$2, $0, $2
-$END20:
-	beq	$2,$0,$ELSE19
+$END15:
+	beq	$2,$0,$ELSE14
 	nop
-$IF19:
+$IF14:
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
 	li	$3, 8
 	slt	$2, $2, $3
-$END23:
-	beq	$2,$0,$ELSE22
+$END18:
+	beq	$2,$0,$ELSE17
 	nop
-$IF22:
+$IF17:
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
 	lui	$3, %hi(a)
@@ -76,7 +71,7 @@ $IF22:
 	li	$3, 2
 	div	$2, $3
 	mflo	$2
-$END25:
+$END20:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,112($sp)
@@ -86,12 +81,12 @@ $END25:
 
 	nop
 
-	b $END22
+	b $END17
 	nop
-$ELSE22:
+$ELSE17:
 	li	$2, 76
 	sub	$2,$0,$2#-
-$END27:
+$END22:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,112($sp)
@@ -101,20 +96,20 @@ $END27:
 
 	nop
 
-$END22:
-	b $END19
+$END17:
+	b $END14
 	nop
-$ELSE19:
+$ELSE14:
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
 	li	$3, 4
 	seq	$2, $2, $3
-$END29:
-	beq	$2,$0,$ELSE28
+$END24:
+	beq	$2,$0,$ELSE23
 	nop
-$IF28:
+$IF23:
 	li	$2, 89
-$END31:
+$END26:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,112($sp)
@@ -124,11 +119,11 @@ $END31:
 
 	nop
 
-	b $END28
+	b $END23
 	nop
-$ELSE28:
+$ELSE23:
 	li	$2, 8
-$END33:
+$END28:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,112($sp)
@@ -138,10 +133,10 @@ $END33:
 
 	nop
 
-$END28:
-$END19:
+$END23:
+$END14:
 	li	$2, 1
-$END34:
+$END29:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,112($sp)

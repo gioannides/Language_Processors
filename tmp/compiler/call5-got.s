@@ -15,8 +15,7 @@
 	.ent	test_add
 	.type	test_add, @function
 test_add:
-
-$END1:	.set	noreorder
+	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-120
 	sw	$fp,116($sp)
@@ -26,7 +25,7 @@ $END1:	.set	noreorder
 	lw	$2, 124($sp) #a
 	lw	$3, 128($sp) #b
 	add	$2, $2, $3
-$END3:
+$END2:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,112($sp)
@@ -58,14 +57,11 @@ $END3:
 	.ent	main
 	.type	main, @function
 main:
-
-$END6:
-$END7:
-$END5:	.set	noreorder
+	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-128
-	sw	$fp,124($sp)
-	sw	$31,120($sp)
+	addiu	$sp,$sp,-120
+	sw	$fp,116($sp)
+	sw	$31,112($sp)
 	move	$fp,$sp
 
 	sw	$1, 108($sp)
@@ -94,15 +90,13 @@ $END5:	.set	noreorder
 	sw	$24, 16($sp)
 	sw	$25, 12($sp)
 	li	$2, 4
-$END10:
+$END6:
 	sw	$2, 4($sp) #a
 
-	move	$4, $2
 	li	$2, 54
-$END11:
+$END7:
 	sw	$2, 8($sp) #b
 
-	move	$5, $2
 	.option pic
 	jal test_add
 	nop
@@ -132,20 +126,20 @@ $END11:
 	lw	$23, 20($sp)
 	lw	$24, 16($sp)
 	move	$2, $25
-$END9:
+$END5:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,120($sp)
-	lw	$fp,124($sp)
-	addiu	$sp,$sp,128
+	lw	$31,112($sp)
+	lw	$fp,116($sp)
+	addiu	$sp,$sp,120
 	j	$31
 
 	nop
 
 	move	$sp,$fp
-	lw	$31,120($sp)
-	lw	$fp,124($sp)
-	addiu	$sp,$sp,128
+	lw	$31,112($sp)
+	lw	$fp,116($sp)
+	addiu	$sp,$sp,120
 	j	$31
 
 	nop

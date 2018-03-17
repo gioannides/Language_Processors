@@ -17,8 +17,7 @@
 main:
 
 $END1:
-$END2:
-$END3:	.set	noreorder
+$END2:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-128
 	sw	$fp,124($sp)
@@ -26,17 +25,17 @@ $END3:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 4151801719
-$END5:
+$END4:
 	sw	$2, 116($sp) #x
 
 	li	$2, 859121447
-$END6:
+$END5:
 	sw	$2, 112($sp) #y
 
 	lw	$2, 116($sp) #x
 	lw	$3, 112($sp) #y
 	add	$2, $2, $3
-$END7:
+$END6:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,120($sp)

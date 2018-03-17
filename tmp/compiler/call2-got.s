@@ -27,8 +27,7 @@ de:
 	.type	f, @function
 f:
 
-$END2:
-$END3:	.set	noreorder
+$END2:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-120
 	sw	$fp,116($sp)
@@ -36,13 +35,13 @@ $END3:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 3
-$END5:
+$END4:
 	lui	$3, %hi(de)
 	lw	$3, %lo(de)($3)
 	lui	$3, %hi(de)
 	sw	$2, %lo(de)($3)
 	li	$2, 1
-$END6:
+$END5:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,112($sp)
@@ -75,9 +74,8 @@ $END6:
 	.type	main, @function
 main:
 
-$END8:
-$END9:
-$END10:	.set	noreorder
+$END7:
+$END8:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-120
 	sw	$fp,116($sp)
@@ -85,7 +83,7 @@ $END10:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 5
-$END12:
+$END10:
 	sw	$1, 108($sp)
 	sw	$2, 104($sp)
 	sw	$3, 100($sp)
@@ -140,10 +138,10 @@ $END12:
 	lw	$23, 20($sp)
 	lw	$24, 16($sp)
 	move	$2, $25
-$END13:
+$END11:
 	lui	$2, %hi(de)
 	lw	$2, %lo(de)($2)
-$END14:
+$END12:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,112($sp)

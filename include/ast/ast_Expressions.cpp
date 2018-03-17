@@ -689,6 +689,9 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 								}
 							}
 						}
+						if (!offset || offset > contxt.totalStackArea-4){
+							offset=112;
+						}
 						for(i=1; i<=25; i++)
 						{
 							file << "\n\tsw\t$" << i << ", " << offset-(i*4) << "($sp)";

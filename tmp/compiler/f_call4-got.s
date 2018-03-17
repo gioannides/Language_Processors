@@ -15,8 +15,7 @@
 	.ent	f
 	.type	f, @function
 f:
-
-$END1:	.set	noreorder
+	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-120
 	sw	$fp,116($sp)
@@ -32,7 +31,7 @@ $END1:	.set	noreorder
 	add	$2, $2, $3
 	lw	$3, 140($sp) #e
 	add	$2, $2, $3
-$END3:
+$END2:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,112($sp)
@@ -65,18 +64,17 @@ $END3:
 	.type	main, @function
 main:
 
+$END4:
 $END5:
 $END6:
 $END7:
 $END8:
-$END9:
+$END10:
 $END11:
 $END12:
 $END13:
 $END14:
-$END15:
-$END10:
-$END16:	.set	noreorder
+$END9:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-160
 	sw	$fp,156($sp)
@@ -84,23 +82,23 @@ $END16:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 1
-$END18:
+$END16:
 	sw	$2, 148($sp) #g
 
 	li	$2, 7
-$END19:
+$END17:
 	sw	$2, 144($sp) #h
 
 	li	$2, 8
-$END20:
+$END18:
 	sw	$2, 140($sp) #i
 
 	li	$2, 3
-$END21:
+$END19:
 	sw	$2, 136($sp) #j
 
 	li	$2, 4
-$END22:
+$END20:
 	sw	$2, 132($sp) #k
 
 	sw	$1, 128($sp)
@@ -129,27 +127,23 @@ $END22:
 	sw	$24, 36($sp)
 	sw	$25, 32($sp)
 	lw	$2, 148($sp) #g
-$END24:
+$END22:
 	sw	$2, 4($sp) #a
 
-	move	$4, $2
 	lw	$2, 144($sp) #h
-$END25:
+$END23:
 	sw	$2, 8($sp) #b
 
-	move	$5, $2
 	lw	$2, 140($sp) #i
-$END26:
+$END24:
 	sw	$2, 12($sp) #c
 
-	move	$6, $2
 	lw	$2, 136($sp) #j
-$END27:
+$END25:
 	sw	$2, 16($sp) #d
 
-	move	$7, $2
 	lw	$2, 132($sp) #k
-$END28:
+$END26:
 	sw	$2, 20($sp) #e
 
 	.option pic
@@ -181,13 +175,13 @@ $END28:
 	lw	$23, 40($sp)
 	lw	$24, 36($sp)
 	move	$2, $25
-$END23:
+$END21:
 	lw	$3, 148($sp) #g
 
 	sw	$2,148($sp) #g
 
 	lw	$2, 148($sp) #g
-$END29:
+$END27:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,152($sp)

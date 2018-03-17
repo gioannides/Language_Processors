@@ -20,8 +20,7 @@ $END1:
 $END2:
 $END3:
 $END4:
-$END5:
-$END6:	.set	noreorder
+$END5:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-136
 	sw	$fp,132($sp)
@@ -29,23 +28,23 @@ $END6:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 7
-$END8:
+$END7:
 	sw	$2, 124($sp) #a
 
 	li	$2, 8
-$END9:
+$END8:
 	sw	$2, 120($sp) #b
 
 	li	$2, 98
-$END10:
+$END9:
 	sw	$2, 116($sp) #d
 
 	li	$2, 115
-$END11:
+$END10:
 	sb	$2, 112($sp) #g
 
 	li	$2, 9
-$END12:
+$END11:
 	lw	$3, 120($sp) #b
 
 	add	$2, $2, $3
@@ -57,37 +56,37 @@ $END12:
 	sw	$2,124($sp) #a
 
 	li	$2, 8
-$END18:
+$END17:
 	lw	$3, 120($sp) #b
 
 	add	$2, $2, $3
 	sw	$2,120($sp) #b
 
-$END17:
+$END16:
 	lw	$3, 124($sp) #a
 
 	mult	$2,$3
 	mflo	$2
 	sw	$2,124($sp) #a
 
-$END16:
+$END15:
 	lw	$3, 120($sp) #b
 
 	and	$2, $2, $3
 	sw	$2,120($sp) #b
 
-$END15:
+$END14:
 	lw	$3, 116($sp) #d
 
 	or	$2, $2, $3
 	sw	$2,116($sp) #d
 
-$END14:
+$END13:
 	lb	$3, 112($sp) #g
 	div	$3,$2
 	mflo	$2
 	sb	$2,112($sp) #g
-$END13:
+$END12:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,128($sp)

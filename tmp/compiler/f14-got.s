@@ -20,12 +20,9 @@ $END2:
 $IF1:
 $END4:
 $IF3:
-$END5:
 $ELSE3:
-$END6:
 $END3:
-$END1:
-$END7:	.set	noreorder
+$END1:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-120
 	sw	$fp,116($sp)
@@ -33,44 +30,44 @@ $END7:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 1
-$END10:
-	beq	$2,$0,$END9
+$END7:
+	beq	$2,$0,$END6
 	nop
-$IF9:
+$IF6:
 	li	$2, 2
-$END12:
-	beq	$2,$0,$ELSE11
-	nop
-$IF11:
-	li	$2, 10
-$END13:
-	move	$2,$2
-	move	$sp,$fp
-	lw	$31,112($sp)
-	lw	$fp,116($sp)
-	addiu	$sp,$sp,120
-	j	$31
-
-	nop
-
-	b $END11
-	nop
-$ELSE11:
-	li	$2, 13
-$END14:
-	move	$2,$2
-	move	$sp,$fp
-	lw	$31,112($sp)
-	lw	$fp,116($sp)
-	addiu	$sp,$sp,120
-	j	$31
-
-	nop
-
-$END11:
 $END9:
+	beq	$2,$0,$ELSE8
+	nop
+$IF8:
+	li	$2, 10
+$END10:
+	move	$2,$2
+	move	$sp,$fp
+	lw	$31,112($sp)
+	lw	$fp,116($sp)
+	addiu	$sp,$sp,120
+	j	$31
+
+	nop
+
+	b $END8
+	nop
+$ELSE8:
+	li	$2, 13
+$END11:
+	move	$2,$2
+	move	$sp,$fp
+	lw	$31,112($sp)
+	lw	$fp,116($sp)
+	addiu	$sp,$sp,120
+	j	$31
+
+	nop
+
+$END8:
+$END6:
 	li	$2, 11
-$END15:
+$END12:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,112($sp)

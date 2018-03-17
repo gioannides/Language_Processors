@@ -87,6 +87,7 @@
 	StructDeclarator* StructDeclaratorPtr;
 	TypeQualifierList* TypeQualifierListPtr;
 	UnaryOperator* UnaryOperatorPtr;
+	Expression* ExpressionPtr;
 }
 
 
@@ -124,7 +125,7 @@
 %type <PrimaryExpressionPtr> PRIMARY_EXPRESSION
 %type <PostFixExpressionPtr> POSTFIX_EXPRESSION
 %type <UnaryExpressionPtr> UNARY_EXPRESSION
-%type <AssignmentExpressionPtr> ASSIGNMENT_EXPRESSION EXPRESSION
+%type <AssignmentExpressionPtr> ASSIGNMENT_EXPRESSION
 %type <InitializerPtr> INITIALIZER INITIALIZER_LIST
 %type <DirectDeclaratorPtr> DIRECT_DECLARATOR
 %type <CAstExpression> CAST_EXPRESSION
@@ -163,6 +164,7 @@
 %type <StructDeclaratorListPtr> STRUCT_DECLARATOR_LIST
 %type <StructDeclaratorPtr> STRUCT_DECLARATOR
 %type <UnaryOperatorPtr> UNARY_OPERATOR
+%type <ExpressionPtr> EXPRESSION
 
 %type <text> IDENTIFIER TYPEDEF EXTERN STATIC AUTO REGISTER VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED CONST VOLATILE STRUCT UNION ENUM  
 %type <text> MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN SIZEOF OR_OP
@@ -294,8 +296,8 @@ CONSTANT_EXPRESSION: CONDITIONAL_EXPRESSION							{ $$ = new ConstantExpression(
 
 
 
-EXPRESSION: ASSIGNMENT_EXPRESSION								{ $$ = $1; }
-	| EXPRESSION ',' ASSIGNMENT_EXPRESSION							{ $$ = $3; }
+EXPRESSION: ASSIGNMENT_EXPRESSION								{ $$ = new Expression($1,NULL); }
+	| EXPRESSION ',' ASSIGNMENT_EXPRESSION							{ $$ = new Expression($3,$1); }
 
 
 

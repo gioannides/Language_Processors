@@ -37,8 +37,7 @@ $ELSE2:
 $END4:
 	b $END2
 	nop
-$END2:
-$END5:	.set	noreorder
+$END2:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-120
 	sw	$fp,116($sp)
@@ -49,30 +48,30 @@ $END5:	.set	noreorder
 	lw	$2, %lo(a)($2)
 	li	$3, 0
 	slt	$2, $2, $3
-$END8:
-	beq	$2,$0,$ELSE7
+$END7:
+	beq	$2,$0,$ELSE6
 	nop
-$IF7:
+$IF6:
 	li	$2, 0
-$END9:
+$END8:
 	lui	$3, %hi(a)
 	lw	$3, %lo(a)($3)
 	lui	$3, %hi(a)
 	sw	$2, %lo(a)($3)
-	b $END7
+	b $END6
 	nop
-$ELSE7:
+$ELSE6:
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
 	li	$3, 9
 	seq	$2, $2, $3
-$END10:
-	b $END7
+$END9:
+	b $END6
 	nop
-$END7:
+$END6:
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
-$END11:
+$END10:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,112($sp)

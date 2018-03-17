@@ -19,8 +19,7 @@ main:
 $END1:
 $END2:
 $END3:
-$END4:
-$END5:	.set	noreorder
+$END4:	.set	noreorder
 	.set	nomacro
 	addiu	$sp,$sp,-136
 	sw	$fp,132($sp)
@@ -28,15 +27,15 @@ $END5:	.set	noreorder
 	move	$fp,$sp
 
 	li	$2, 890
-$END7:
+$END6:
 	sw	$2, 124($sp) #h
 
 	li	$2, 0
-$END8:
+$END7:
 	sw	$2, 120($sp) #y
 
 	li	$2, 65
-$END9:
+$END8:
 	sb	$2, 116($sp) #c
 
 	lw	$2, 120($sp) #y
@@ -52,11 +51,11 @@ $SHORTCIRCUIT0:
 	sne	$3,$0,$3
 $SHORTCIRCUIT1:
 	or	$2,$2,$3
-$END10:
+$END9:
 	sw	$2, 112($sp) #x
 
 	lw	$2, 112($sp) #x
-$END11:
+$END10:
 	move	$2,$2
 	move	$sp,$fp
 	lw	$31,128($sp)
