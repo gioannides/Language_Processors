@@ -768,6 +768,7 @@ class InitDeclarator : public Node {
 				//contxt.is_unsigned = false;
 			}
 			contxt.is_unsigned = false;
+			contxt.float_ = false;
 		}
 	
 };
@@ -1354,8 +1355,12 @@ class JumpStatement : public Node {
 					AssignmentExpressionPtr->render_asm(file,contxt);
 					contxt.rhs_of_expression = false;
 				}
-				if( AssignmentExpressionPtr != NULL && !contxt.reading){
+				if( AssignmentExpressionPtr != NULL && !contxt.reading && !contxt.float_){
 					file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
+				}
+				if( AssignmentExpressionPtr != NULL && !contxt.reading && contxt.float_){
+					file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+					file << std::endl << "\tmfc1\t$2," << "$f" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
 				}
 				if(!contxt.reading){
 				file << std::endl << "\tmove\t$sp,$fp";
@@ -1855,13 +1860,16 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 						}
 				}   	
 				if(contxt.lhs_of_assignment  && !contxt.reading && contxt.function){
-					if(found_local==1) {
+					if(found_local==1) { //local
 						if(contxt.initialized){
 							if(contxt.Variables[good_index].word_size==1){
 								file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 							}
-							else{
+							else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
 								file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+							}
+							else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
+								file << std::endl << "\tswc1\t$f2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 							}
 						}
 						else {
@@ -1875,13 +1883,20 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					}
 
 				
-					else if(found_local==2) {
-						file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
+					else if(found_local==2) { //global
+						
 						if(contxt.Variables[good_index].word_size==1) {
+							file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
 							file << std::endl << "\tsb\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 						}
-						else{
+						else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
+							file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
 							file << std::endl << "\tsw\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+						}
+						else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
+							file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
+							file << std::endl << "\tmtc1\t$2,$f2";
+							file << std::endl << "\tswc1\t$f2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 						}	
 					}	
 								
