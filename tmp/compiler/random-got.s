@@ -26,33 +26,32 @@ $END8:
 $IF7:
 $END10:
 $ELSE7:
-$END7:	.set	noreorder
-	.set	nomacro
-	addiu	$sp,$sp,-144
-	sw	$fp,140($sp)
-	sw	$31,136($sp)
-	move	$fp,$sp
+$END7:	.set noreorder
+	.set nomacro
+	addiu $sp,$sp,-144
+	sw $fp,140($sp)
+	sw $31,136($sp)
+	move $fp,$sp
 
 	li	$2, 20
 $END13:
-	sw	$2, 132($sp) #x
+	sw	$2,132($sp) #x
 
 	li	$2, 7
 $END14:
-	sw	$2, 128($sp) #a
+	sw	$2,128($sp) #a
 
 	li	$2, 8
 $END15:
-	sw	$2, 124($sp) #b
+	sw	$2,124($sp) #b
 
 	li	$2, 98
 $END16:
-	sw	$2, 120($sp) #d
+	sw	$2,120($sp) #d
 
 	li	$2, 115
 $END17:
-	sb	$2, 116($sp) #g
-
+	sb	$2,116($sp) #g
 	li	$2, 9
 $END18:
 	lw	$3, 124($sp) #b
@@ -76,7 +75,7 @@ $END20:
 $IF19:
 	li	$2, 0
 $END22:
-	sw	$2, 112($sp) #i
+	sw	$2,112($sp) #i
 
 	lw	$2, 112($sp) #i
 $END24:
@@ -89,7 +88,8 @@ $END25:
 	nop
 	lw	$2, 132($sp) #x
 	addi	$3, $2, -1 #--
-	sw	$3, 132($sp) #x
+	sw	$3,132($sp) #x
+
 $END27:
 	lw	$3, 112($sp) #i
 
@@ -127,15 +127,15 @@ $END31:
 
 	nop
 
-	move	$sp,$fp
-	lw	$31,136($sp)
-	lw	$fp,140($sp)
-	addiu	$sp,$sp,144
-	j	$31
+	move $sp,$fp
+	lw $31,136($sp)
+	lw $fp,140($sp)
+	addiu $sp,$sp,144
+	j $31
 
 	nop
-	.set	 macro
-	.set	 reorder
-	.end	 main
-	.size	 main, .-main
+	.set macro
+	.set reorder
+	.end main
+	.size main, .-main
 

@@ -15,12 +15,12 @@
 	.ent	f
 	.type	f, @function
 f:
-	.set	noreorder
-	.set	nomacro
-	addiu	$sp,$sp,-120
-	sw	$fp,116($sp)
-	sw	$31,112($sp)
-	move	$fp,$sp
+	.set noreorder
+	.set nomacro
+	addiu $sp,$sp,-120
+	sw $fp,116($sp)
+	sw $31,112($sp)
+	move $fp,$sp
 
 	lw	$2, 124($sp) #a
 	lw	$3, 128($sp) #b
@@ -62,17 +62,17 @@ $END2:
 
 	nop
 
-	move	$sp,$fp
-	lw	$31,112($sp)
-	lw	$fp,116($sp)
-	addiu	$sp,$sp,120
-	j	$31
+	move $sp,$fp
+	lw $31,112($sp)
+	lw $fp,116($sp)
+	addiu $sp,$sp,120
+	j $31
 
 	nop
-	.set	 macro
-	.set	 reorder
-	.end	 f
-	.size	 f, .-f
+	.set macro
+	.set reorder
+	.end f
+	.size f, .-f
 
 
 
@@ -96,54 +96,59 @@ $END15:
 $END16:
 $END17:
 $END18:
-$END7:	.set	noreorder
-	.set	nomacro
-	addiu	$sp,$sp,-164
-	sw	$fp,160($sp)
-	sw	$31,156($sp)
-	move	$fp,$sp
+$END7:	.set noreorder
+	.set nomacro
+	addiu $sp,$sp,-164
+	sw $fp,160($sp)
+	sw $31,156($sp)
+	move $fp,$sp
 
-	sw	$1, 108($sp)
-	sw	$2, 104($sp)
-	sw	$3, 100($sp)
-	sw	$4, 96($sp)
-	sw	$5, 92($sp)
-	sw	$6, 88($sp)
-	sw	$7, 84($sp)
-	sw	$8, 80($sp)
-	sw	$9, 76($sp)
-	sw	$10, 72($sp)
-	sw	$11, 68($sp)
-	sw	$12, 64($sp)
-	sw	$13, 60($sp)
-	sw	$14, 56($sp)
-	sw	$15, 52($sp)
-	sw	$16, 48($sp)
-	sw	$17, 44($sp)
-	sw	$18, 40($sp)
-	sw	$19, 36($sp)
-	sw	$20, 32($sp)
-	sw	$21, 28($sp)
-	sw	$22, 24($sp)
-	sw	$23, 20($sp)
-	sw	$24, 16($sp)
-	sw	$25, 12($sp)
+	sw	$1,108($sp)
+	sw	$2,104($sp)
+	sw	$3,100($sp)
+	sw	$4,96($sp)
+	sw	$5,92($sp)
+	sw	$6,88($sp)
+	sw	$7,84($sp)
+	sw	$8,80($sp)
+	sw	$9,76($sp)
+	sw	$10,72($sp)
+	sw	$11,68($sp)
+	sw	$12,64($sp)
+	sw	$13,60($sp)
+	sw	$14,56($sp)
+	sw	$15,52($sp)
+	sw	$16,48($sp)
+	sw	$17,44($sp)
+	sw	$18,40($sp)
+	sw	$19,36($sp)
+	sw	$20,32($sp)
+	sw	$21,28($sp)
+	sw	$22,24($sp)
+	sw	$23,20($sp)
+	sw	$24,16($sp)
+	sw	$25,12($sp)
+	sw	$31,8($sp)
 	li	$2, 1
 $END21:
 	sw	$2, 4($sp) #a
 
+	move	$4, $2 #load parameter 1
 	li	$2, 2
 $END22:
 	sw	$2, 8($sp) #b
 
+	move	$5, $2 #load parameter 2
 	li	$2, 3
 $END23:
 	sw	$2, 12($sp) #c
 
+	move	$6, $2 #load parameter 3
 	li	$2, 2
 $END24:
 	sw	$2, 16($sp) #d
 
+	move	$7, $2 #load parameter 4
 	li	$2, 2
 $END25:
 	sw	$2, 20($sp) #e
@@ -176,73 +181,79 @@ $END31:
 	jal f
 	nop
 	move	$25, $2
-	lw	$1, 108($sp)
-	lw	$2, 104($sp)
-	lw	$3, 100($sp)
-	lw	$4, 96($sp)
-	lw	$5, 92($sp)
-	lw	$6, 88($sp)
-	lw	$7, 84($sp)
-	lw	$8, 80($sp)
-	lw	$9, 76($sp)
-	lw	$10, 72($sp)
-	lw	$11, 68($sp)
-	lw	$12, 64($sp)
-	lw	$13, 60($sp)
-	lw	$14, 56($sp)
-	lw	$15, 52($sp)
-	lw	$16, 48($sp)
-	lw	$17, 44($sp)
-	lw	$18, 40($sp)
-	lw	$19, 36($sp)
-	lw	$20, 32($sp)
-	lw	$21, 28($sp)
-	lw	$22, 24($sp)
-	lw	$23, 20($sp)
-	lw	$24, 16($sp)
-	move	$2, $25
+	lw $1,108($sp)
+	lw $2,104($sp)
+	lw $3,100($sp)
+	lw $4,96($sp)
+	lw $5,92($sp)
+	lw $6,88($sp)
+	lw $7,84($sp)
+	lw $8,80($sp)
+	lw $9,76($sp)
+	lw $10,72($sp)
+	lw $11,68($sp)
+	lw $12,64($sp)
+	lw $13,60($sp)
+	lw $14,56($sp)
+	lw $15,52($sp)
+	lw $16,48($sp)
+	lw $17,44($sp)
+	lw $18,40($sp)
+	lw $19,36($sp)
+	lw $20,32($sp)
+	lw $21,28($sp)
+	lw $22,24($sp)
+	lw $23,20($sp)
+	lw $24,16($sp)
+	lw $31,12($sp)
+	move $2, $25
 $END20:
-	sw	$1, 108($sp)
-	sw	$2, 104($sp)
-	sw	$3, 100($sp)
-	sw	$4, 96($sp)
-	sw	$5, 92($sp)
-	sw	$6, 88($sp)
-	sw	$7, 84($sp)
-	sw	$8, 80($sp)
-	sw	$9, 76($sp)
-	sw	$10, 72($sp)
-	sw	$11, 68($sp)
-	sw	$12, 64($sp)
-	sw	$13, 60($sp)
-	sw	$14, 56($sp)
-	sw	$15, 52($sp)
-	sw	$16, 48($sp)
-	sw	$17, 44($sp)
-	sw	$18, 40($sp)
-	sw	$19, 36($sp)
-	sw	$20, 32($sp)
-	sw	$21, 28($sp)
-	sw	$22, 24($sp)
-	sw	$23, 20($sp)
-	sw	$24, 16($sp)
-	sw	$25, 12($sp)
+	sw	$1,108($sp)
+	sw	$2,104($sp)
+	sw	$3,100($sp)
+	sw	$4,96($sp)
+	sw	$5,92($sp)
+	sw	$6,88($sp)
+	sw	$7,84($sp)
+	sw	$8,80($sp)
+	sw	$9,76($sp)
+	sw	$10,72($sp)
+	sw	$11,68($sp)
+	sw	$12,64($sp)
+	sw	$13,60($sp)
+	sw	$14,56($sp)
+	sw	$15,52($sp)
+	sw	$16,48($sp)
+	sw	$17,44($sp)
+	sw	$18,40($sp)
+	sw	$19,36($sp)
+	sw	$20,32($sp)
+	sw	$21,28($sp)
+	sw	$22,24($sp)
+	sw	$23,20($sp)
+	sw	$24,16($sp)
+	sw	$25,12($sp)
+	sw	$31,8($sp)
 	li	$2, 4
 $END33:
 	sw	$2, 4($sp) #a
 
+	move	$4, $2 #load parameter 1
 	li	$2, 2
 $END34:
 	sw	$2, 8($sp) #b
 
+	move	$5, $2 #load parameter 2
 	li	$2, 3
 $END35:
 	sw	$2, 12($sp) #c
 
+	move	$6, $2 #load parameter 3
 	li	$2, 2
 $END36:
 	sw	$2, 16($sp) #d
 
+	move	$7, $2 #load parameter 4
 	li	$2, 2
 $END37:
 	sw	$2, 20($sp) #e
@@ -275,31 +286,32 @@ $END43:
 	jal f
 	nop
 	move	$25, $2
-	lw	$1, 108($sp)
-	lw	$2, 104($sp)
-	lw	$3, 100($sp)
-	lw	$4, 96($sp)
-	lw	$5, 92($sp)
-	lw	$6, 88($sp)
-	lw	$7, 84($sp)
-	lw	$8, 80($sp)
-	lw	$9, 76($sp)
-	lw	$10, 72($sp)
-	lw	$11, 68($sp)
-	lw	$12, 64($sp)
-	lw	$13, 60($sp)
-	lw	$14, 56($sp)
-	lw	$15, 52($sp)
-	lw	$16, 48($sp)
-	lw	$17, 44($sp)
-	lw	$18, 40($sp)
-	lw	$19, 36($sp)
-	lw	$20, 32($sp)
-	lw	$21, 28($sp)
-	lw	$22, 24($sp)
-	lw	$23, 20($sp)
-	lw	$24, 16($sp)
-	move	$2, $25
+	lw $1,108($sp)
+	lw $2,104($sp)
+	lw $3,100($sp)
+	lw $4,96($sp)
+	lw $5,92($sp)
+	lw $6,88($sp)
+	lw $7,84($sp)
+	lw $8,80($sp)
+	lw $9,76($sp)
+	lw $10,72($sp)
+	lw $11,68($sp)
+	lw $12,64($sp)
+	lw $13,60($sp)
+	lw $14,56($sp)
+	lw $15,52($sp)
+	lw $16,48($sp)
+	lw $17,44($sp)
+	lw $18,40($sp)
+	lw $19,36($sp)
+	lw $20,32($sp)
+	lw $21,28($sp)
+	lw $22,24($sp)
+	lw $23,20($sp)
+	lw $24,16($sp)
+	lw $31,12($sp)
+	move $2, $25
 $END32:
 	move	$2,$2
 	move	$sp,$fp
@@ -310,15 +322,15 @@ $END32:
 
 	nop
 
-	move	$sp,$fp
-	lw	$31,156($sp)
-	lw	$fp,160($sp)
-	addiu	$sp,$sp,164
-	j	$31
+	move $sp,$fp
+	lw $31,156($sp)
+	lw $fp,160($sp)
+	addiu $sp,$sp,164
+	j $31
 
 	nop
-	.set	 macro
-	.set	 reorder
-	.end	 main
-	.size	 main, .-main
+	.set macro
+	.set reorder
+	.end main
+	.size main, .-main
 

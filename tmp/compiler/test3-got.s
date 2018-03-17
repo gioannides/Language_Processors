@@ -20,29 +20,28 @@ $END1:
 $END2:
 $END3:
 $END4:
-$END5:	.set	noreorder
-	.set	nomacro
-	addiu	$sp,$sp,-136
-	sw	$fp,132($sp)
-	sw	$31,128($sp)
-	move	$fp,$sp
+$END5:	.set noreorder
+	.set nomacro
+	addiu $sp,$sp,-136
+	sw $fp,132($sp)
+	sw $31,128($sp)
+	move $fp,$sp
 
 	li	$2, 7
 $END7:
-	sw	$2, 124($sp) #a
+	sw	$2,124($sp) #a
 
 	li	$2, 8
 $END8:
-	sw	$2, 120($sp) #b
+	sw	$2,120($sp) #b
 
 	li	$2, 98
 $END9:
-	sw	$2, 116($sp) #d
+	sw	$2,116($sp) #d
 
 	li	$2, 115
 $END10:
-	sb	$2, 112($sp) #g
-
+	sb	$2,112($sp) #g
 	li	$2, 9
 $END11:
 	lw	$3, 120($sp) #b
@@ -96,15 +95,15 @@ $END12:
 
 	nop
 
-	move	$sp,$fp
-	lw	$31,128($sp)
-	lw	$fp,132($sp)
-	addiu	$sp,$sp,136
-	j	$31
+	move $sp,$fp
+	lw $31,128($sp)
+	lw $fp,132($sp)
+	addiu $sp,$sp,136
+	j $31
 
 	nop
-	.set	 macro
-	.set	 reorder
-	.end	 main
-	.size	 main, .-main
+	.set macro
+	.set reorder
+	.end main
+	.size main, .-main
 

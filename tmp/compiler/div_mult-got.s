@@ -26,12 +26,12 @@ a:
 	.ent	main
 	.type	main, @function
 main:
-	.set	noreorder
-	.set	nomacro
-	addiu	$sp,$sp,-120
-	sw	$fp,116($sp)
-	sw	$31,112($sp)
-	move	$fp,$sp
+	.set noreorder
+	.set nomacro
+	addiu $sp,$sp,-120
+	sw $fp,116($sp)
+	sw $31,112($sp)
+	move $fp,$sp
 
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
@@ -52,15 +52,15 @@ $END3:
 
 	nop
 
-	move	$sp,$fp
-	lw	$31,112($sp)
-	lw	$fp,116($sp)
-	addiu	$sp,$sp,120
-	j	$31
+	move $sp,$fp
+	lw $31,112($sp)
+	lw $fp,116($sp)
+	addiu $sp,$sp,120
+	j $31
 
 	nop
-	.set	 macro
-	.set	 reorder
-	.end	 main
-	.size	 main, .-main
+	.set macro
+	.set reorder
+	.end main
+	.size main, .-main
 
