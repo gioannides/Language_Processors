@@ -844,7 +844,7 @@ class InitDeclaratorList : public Node {
 					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
 				}
 				else if( (contxt.variable.word_size==4) && !contxt.float_){
-					file << std::endl << "\t.word\t" << contxt.global_value; //contxt.variable.value;
+					file << std::endl << "\t.word\t" << contxt.eval[contxt.Regs+1]; //contxt.variable.value;
 				}
 				else if( (contxt.variable.word_size==4) && contxt.float_){
 					file << std::endl << "\t.float\t" << contxt.variable.value;
@@ -856,7 +856,11 @@ class InitDeclaratorList : public Node {
 				else if(contxt.variable.word_size==1){
 					file << std::endl << "\t.byte\t" << contxt.variable.value;
 				}
-				contxt.global_value=0;         // reset the value of the global
+				        // reset the value of the global
+				for(int i=contxt.Regs; i<=20; i++)
+				{
+					file << "\n#" << contxt.eval[i]; 
+				}
 				
 			}
 

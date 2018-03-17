@@ -25,17 +25,17 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 				if(!contxt.function){
 					//postfix_ops(contxt, file);
 					if( *OPERATOR == "*" ){
-						contxt.global_value = contxt.global_value*contxt.current_value;
-						contxt.current_value = 0;
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs]*contxt.eval[contxt.Regs+1];
+						
 					}
 					else if(*OPERATOR == "/"){
-						contxt.global_value = contxt.global_value/contxt.current_value;
-						contxt.current_value = 0;
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs]/contxt.eval[contxt.Regs+1];
+						
 					}
 					else if (*OPERATOR == "%")
 					{
-						contxt.global_value = contxt.global_value%contxt.current_value;
-						contxt.current_value = 0;
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs]%contxt.eval[contxt.Regs+1];
+						
 					}
 					
 				}
@@ -116,12 +116,12 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 				if(!contxt.function){
 					//postfix_ops(contxt, file);
 					if( *OPERATOR == "+" ){
-						contxt.global_value+=contxt.current_value;
-						contxt.current_value=0;
+						contxt.eval[contxt.Regs]+=contxt.eval[contxt.Regs+1];
+						contxt.eval[contxt.Regs+1]=0;
 					}
 					else if(*OPERATOR == "-"){
-						contxt.global_value-=contxt.current_value;
-						contxt.current_value=0;
+						contxt.eval[contxt.Regs]-=contxt.eval[contxt.Regs+1];
+						contxt.eval[contxt.Regs+1]=0;
 					}
 				}
 				if (contxt.function){
@@ -182,12 +182,12 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 				if(!contxt.function){
 					//postfix_ops(contxt, file);
 					if( *OPERATOR == "<<" ){
-						contxt.global_value = contxt.global_value << contxt.current_value;
-						contxt.current_value=0;
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] << contxt.eval[contxt.Regs+1];
+						contxt.eval[contxt.Regs+1]=0;
 					}
 					else if(*OPERATOR == ">>"){
-						contxt.global_value = contxt.global_value >> contxt.current_value;
-						contxt.current_value=0;
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] >> contxt.eval[contxt.Regs+1];
+						contxt.eval[contxt.Regs+1]=0;
 					}
 				}
 				if (contxt.function){
@@ -339,20 +339,20 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 				}
 				if(!contxt.function){
 					if( *OPERATOR == "<" ){
-						contxt.global_value = contxt.global_value < contxt.current_value;
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] < contxt.eval[contxt.Regs+1];
 					}
 					else if(*OPERATOR == ">"){
-						contxt.global_value = contxt.global_value > contxt.current_value;
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] > contxt.eval[contxt.Regs+1];
 					}
 					else if(*OPERATOR == "<=")
 					{
-						contxt.global_value = contxt.global_value <= contxt.current_value;
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] <= contxt.eval[contxt.Regs+1];
 					}
 					else if(*OPERATOR == ">=")
 					{
-						contxt.global_value = contxt.global_value >= contxt.current_value;
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] >= contxt.eval[contxt.Regs+1];
 					}
-					contxt.current_value =0;
+					contxt.eval[contxt.Regs+1] =0;
 				}
 				contxt.Regs--;
 				
@@ -431,11 +431,11 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 				{
 					if(*OPERATOR == "==")
 					{
-						contxt.global_value = contxt.global_value == contxt.current_value;
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] == contxt.eval[contxt.Regs+1];
 					}
 					else if(*OPERATOR == "!=")
 					{
-						contxt.global_value = contxt.global_value != contxt.current_value;  
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] != contxt.eval[contxt.Regs+1];  
 					}
 				}
 				contxt.Regs--;
@@ -463,8 +463,8 @@ inline void AndExpression::render_asm(std::ofstream& file,Context& contxt) {
 				}
 				else 
 				{
-					contxt.global_value = contxt.global_value & contxt.current_value;
-					contxt.current_value = 0;
+					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] & contxt.eval[contxt.Regs+1];
+					
 				}
 				contxt.Regs--;
 			}
@@ -488,8 +488,8 @@ inline void ExclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 				}
 				else 
 				{
-					contxt.global_value = contxt.global_value ^ contxt.current_value;
-					contxt.current_value = 0;
+					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] ^ contxt.eval[contxt.Regs+1];
+					
 				}
 				contxt.Regs--;
 			}
@@ -516,8 +516,8 @@ inline void InclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 				}
 				else 
 				{
-					contxt.global_value = contxt.global_value | contxt.current_value;
-					contxt.current_value = 0;
+					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] | contxt.eval[contxt.Regs+1];
+					
 				}
 			}
 		}
@@ -566,8 +566,7 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 				}
 				else 
 				{
-					contxt.global_value = contxt.global_value && contxt.current_value;
-					contxt.current_value = 0;
+					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] && contxt.eval[contxt.Regs+1];
 				}
 				contxt.Regs--;
 						
@@ -587,6 +586,7 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 			
 			else if( LogicalAndExpressionPtr != NULL && !contxt.reading && LogicalAndExpressionPtr != NULL && OR_OP != NULL){ 
 				LogicalOrExpressionPtr->render_asm(file,contxt);
+				
 				contxt.Regs++;
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 				if (contxt.function){
@@ -622,8 +622,8 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 				}
 				else 
 				{
-					contxt.global_value = contxt.global_value || contxt.current_value;
-					contxt.current_value = 0;
+					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] || contxt.eval[contxt.Regs+1];
+					
 				}
 				contxt.Regs--;
 				 if(OR_OP==NULL && LogicalAndExpressionPtr == NULL){
@@ -920,18 +920,19 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		}
 		else if (!contxt.reading && !contxt.function) //&& contxt.rhs_of_expression)
 		{
-			if(contxt.global_value==0 && contxt.variable.DataType != "float"){
-				contxt.global_value= temp;
-			}
-			else if(contxt.global_value!=0 && contxt.variable.DataType != "float"){
-				contxt.current_value= temp;
-			}
-			else if(contxt.global_value==0 && contxt.variable.DataType == "float"){ //TODO: CHECK OK
-				contxt.global_value_float= temp_f;
-			}
-			else if(contxt.global_value!=0 && contxt.variable.DataType == "float"){ //TODO: CHECK OK
-				contxt.current_value_float= temp_f;
-			}
+			contxt.eval[contxt.Regs+1]=temp;
+			// if(contxt.eval[contxt.Regs]==0 && contxt.variable.DataType != "float"){
+			// 	contxt.eval[contxt.Regs]= temp;
+			// }
+			// else if(contxt.eval[contxt.Regs]!=0 && contxt.variable.DataType != "float"){
+			// 	contxt.eval[contxt.Regs+1]= temp;
+			// }
+			// else if(contxt.eval[contxt.Regs]==0 && contxt.variable.DataType == "float"){ //TODO: CHECK OK
+			// 	contxt.eval[contxt.Regs]_float= temp_f;
+			// }
+			// else if(contxt.eval[contxt.Regs]!=0 && contxt.variable.DataType == "float"){ //TODO: CHECK OK
+			// 	contxt.eval[contxt.Regs+1]_float= temp_f;
+			// }
 		}
 		
 		}

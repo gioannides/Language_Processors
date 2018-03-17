@@ -57,9 +57,10 @@ struct Context{
 	int Regs=1;
 	std::string AssignmentOperator = "df";
 	
-	int global_value=0;
-	int current_value=0;
+	//int global_value=0;
+	//int current_value=0;
 	int global_value_float=0;
+	
 	int current_value_float=0;
 	bool float_ = false;   //is value a floating point?
 	char regType[31];
@@ -102,6 +103,8 @@ struct Context{
 	int good_i = 0;
 	std::string SHORTCIRCUIT;
 	std::string SHORTCIRCUIT2;
+
+	int eval[1000];
 };
 
 

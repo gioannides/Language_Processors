@@ -5,6 +5,5 @@ problems :
 2) logical_or and logical_and left to do 
 3) short circuit : (1 || x++ || x++)
 4) int , float global var = 1+2*3^2;
-5) for(int i);
 6) unary operators globals not working
 7) switch case
