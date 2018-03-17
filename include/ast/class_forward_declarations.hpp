@@ -23,6 +23,7 @@ struct bindings {
 struct function_details{
 	int paramters_size = 0;
 	std::string name = "";
+	std::string returnType = "";
 };
 
 struct Context{
@@ -62,6 +63,8 @@ struct Context{
 	int current_value_float=0;
 	bool float_ = false;   //is value a floating point?
 	char regType[31];
+	bool functionReturnType=false;
+	std::string functionReturnTypetemp;
 
 	std::vector<std::string> EndSwitchLoop;
 	std::vector<std::string> Labels;

@@ -1185,6 +1185,12 @@ class TypeSpecifier : public Node {
 					contxt.is_unsigned = true;
 				}
 
+				if(contxt.functionReturnType){
+
+					contxt.functionReturnTypetemp = *TYPES;
+
+				}
+
 				// if(contxt.reading) { //this is predicting total stack frame for all paramters/local declarations in function body
 				// 	//contxt.variable.offset = contxt.totalStackArea;
 				// 	contxt.totalStackArea += contxt.variable.word_size;
@@ -1345,9 +1351,7 @@ class JumpStatement : public Node {
 					file << std::endl << "\tnop";
 				}
 			}
-			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "return" && !contxt.reading) {
-				
-				
+			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "return" && !contxt.reading) {				
 			
 
 				if( AssignmentExpressionPtr != NULL){
@@ -1355,24 +1359,43 @@ class JumpStatement : public Node {
 					AssignmentExpressionPtr->render_asm(file,contxt);
 					contxt.rhs_of_expression = false;
 				}
-				if( AssignmentExpressionPtr != NULL && !contxt.reading && !contxt.float_){
-					file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
-				}
-				if( AssignmentExpressionPtr != NULL && !contxt.reading && contxt.float_){
-					file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
-					file << std::endl << "\tmfc1\t$2," << "$f" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
-				}
-				if(!contxt.reading){
-				file << std::endl << "\tmove\t$sp,$fp";
-				file << std::endl << "\tlw\t$31," << contxt.totalStackArea-4 <<"($sp)";
-				file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
-				file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
-				file << std::endl << "\tj\t$31" << std::endl;
-				file << std::endl << "\tnop" << std::endl;
+				for(int i(0); i < contxt.functions_declared.size() && !contxt.reading; i++){
+	
+					if(contxt.functions_declared[i].returnType == "float" && contxt.functions_declared[i].name == contxt.funct_id ){
+						if( AssignmentExpressionPtr != NULL && !contxt.reading){
+							if( contxt.regType[contxt.Regs+1] != 'f'){
+								file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;		// MAY CAUSE PROBLEMS
+							}
+							file << std::endl << "\tmov.s\t$f0," << "$f" << contxt.Regs+1;
+						}
+							file << std::endl << "\tmove\t$sp,$fp";
+							file << std::endl << "\tlw\t$31," << contxt.totalStackArea-4 <<"($sp)";
+							file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
+							file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
+							file << std::endl << "\tj\t$31" << std::endl;
+							file << std::endl << "\tnop" << std::endl;
+							break;
+						}
+					else if(contxt.functions_declared[i].returnType != "float" && contxt.functions_declared[i].name == contxt.funct_id ){
+						if( AssignmentExpressionPtr != NULL && !contxt.reading){
+							if( contxt.regType[contxt.Regs+1] == 'f'){
+								file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+								file << std::endl << "\tmfc1\t$2," << "$f" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
+							}
+							file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;
+						}
+						file << std::endl << "\tmove\t$sp,$fp";
+						file << std::endl << "\tlw\t$31," << contxt.totalStackArea-4 <<"($sp)";
+						file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
+						file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
+						file << std::endl << "\tj\t$31" << std::endl;
+						file << std::endl << "\tnop" << std::endl;
+						break;
+					}
 				}
 		
+			}
 		}
-	}
 };
 
 class IterationStatement : public Node {
@@ -1571,7 +1594,9 @@ class FunctionDefinition : public Node {
 		void render_asm(std::ofstream& file, Context& contxt) {
 			
 			if( DeclarationSpecifiersPtr != NULL ) {
-										//check the return type
+				contxt.functionReturnType = true;
+				DeclarationSpecifiersPtr->render_asm(file,contxt);			//check the return type
+				contxt.functionReturnType = false;
 			}
 
 			if( DeclaratorPtr != NULL ) {				//function_def.name and function_def.no_parameters are assigned here
@@ -1593,6 +1618,7 @@ class FunctionDefinition : public Node {
 			}
 			//contxt.Scopes.push_back(contxt.funct_id);
 			contxt.funcion_temp.name=contxt.funct_id;
+			contxt.funcion_temp.returnType=contxt.functionReturnTypetemp;
 			contxt.functions_declared.push_back(contxt.funcion_temp);
 			contxt.funcion_temp.paramters_size=0;
 			if( DeclarationListPtr != NULL ) {   			//( functions having const-correctness for example )

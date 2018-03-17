@@ -237,8 +237,19 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							contxt.regType[contxt.Regs]='u';
 						}
 						else if(contxt.float_){
-							file << std::endl << "\tc.lt.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+							std::string label_id = labelGen(contxt);
+							std::string END = "$ENDLT" + label_id;
+							std::string NOT_LESS = "$NOT_LT" + label_id;
+
+							file << std::endl << "\tc.lt.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
+							file << std::endl << "\tbc1t\t" << NOT_LESS;
 							contxt.regType[contxt.Regs]='f';
+							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
+							file << std::endl << "\tb\t" << END;
+							file << std::endl << "\tnop\t";
+							file << std::endl << NOT_LESS << ":";
+							file << std::endl << "\tmtc1\t$0,$f" << contxt.Regs;
+							file << std::endl << END << ":";
 
 						}
 						else{
@@ -251,6 +262,22 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							file << std::endl << "\tsgtu\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='u';
 						}
+						else if(contxt.float_){
+							std::string label_id = labelGen(contxt);
+							std::string END = "$ENDGT" + label_id;
+							std::string NOT_GREATER = "$NOT_GT" + label_id;
+
+							file << std::endl << "\tc.lt.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+							file << std::endl << "\tbc1t\t" << NOT_GREATER;
+							contxt.regType[contxt.Regs]='f';
+							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
+							file << std::endl << "\tb\t" << END;
+							file << std::endl << "\tnop\t";
+							file << std::endl << NOT_GREATER << ":";
+							file << std::endl << "\tmtc1\t$0,$f" << contxt.Regs;
+							file << std::endl << END << ":";
+
+						}
 						else{
 							file << std::endl << "\tsgt\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='i';
@@ -262,8 +289,20 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							contxt.regType[contxt.Regs]='u';
 						}
 						else if(contxt.float_){
-							file << std::endl << "\tc.le.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+							std::string label_id = labelGen(contxt);
+							std::string END = "$ENDLE" + label_id;
+							std::string NOT_LE = "$NOT_LE" + label_id;
+
+							file << std::endl << "\tc.le.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
+							file << std::endl << "\tbc1t\t" << NOT_LE;
 							contxt.regType[contxt.Regs]='f';
+							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
+							file << std::endl << "\tb\t" << END;
+							file << std::endl << "\tnop\t";
+							file << std::endl << NOT_LE << ":";
+							file << std::endl << "\tmtc1\t$0,$f" << contxt.Regs;
+							file << std::endl << END << ":";
+
 						}
 						else{
 							file << std::endl << "\tsle\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
@@ -274,6 +313,22 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 						if(contxt.is_unsigned){
 							file << std::endl << "\tsgeu\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='u';
+						}
+						else if(contxt.float_){
+							std::string label_id = labelGen(contxt);
+							std::string END = "$ENDGE" + label_id;
+							std::string NOT_GE = "$NOT_GE" + label_id;
+
+							file << std::endl << "\tc.le.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+							file << std::endl << "\tbc1t\t" << NOT_GE;
+							contxt.regType[contxt.Regs]='f';
+							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
+							file << std::endl << "\tb\t" << END;
+							file << std::endl << "\tnop\t";
+							file << std::endl << NOT_GE << ":";
+							file << std::endl << "\tmtc1\t$0,$f" << contxt.Regs;
+							file << std::endl << END << ":";
+
 						}
 						else{
 							file << std::endl << "\tsge\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
@@ -324,8 +379,20 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);	
 					if( *OPERATOR == "==" ){
 						if(contxt.float_){
-							file << std::endl << "\tc.eq.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+							std::string label_id = labelGen(contxt);
+							std::string END = "$ENDEQ" + label_id;
+							std::string NOT_EQ = "$NOT_EQ" + label_id;
+
+							file << std::endl << "\tc.eq.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+							file << std::endl << "\tbc1f\t" << NOT_EQ;
 							contxt.regType[contxt.Regs]='f';
+							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
+							file << std::endl << "\tb\t" << END;
+							file << std::endl << "\tnop\t";
+							file << std::endl << NOT_EQ << ":";
+							file << std::endl << "\tmtc1\t$0,$f" << contxt.Regs;
+							file << std::endl << END << ":";
+
 						}
 						else{
 							file << std::endl << "\tseq\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
@@ -334,9 +401,28 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 						
 					}
 					else if(  *OPERATOR == "!=" ){
-						file << std::endl << "\txor\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;						
-						file << std::endl << "\tsltu\t$" << contxt.Regs << ", $0, $" << contxt.Regs;
-						contxt.regType[contxt.Regs]='i';
+
+						if(contxt.float_){
+							std::string label_id = labelGen(contxt);
+							std::string END = "$ENDEQ" + label_id;
+							std::string NOT_EQ = "$NOT_EQ" + label_id;
+
+							file << std::endl << "\tc.eq.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+							file << std::endl << "\tbc1t\t" << NOT_EQ;
+							contxt.regType[contxt.Regs]='f';
+							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
+							file << std::endl << "\tb\t" << END;
+							file << std::endl << "\tnop\t";
+							file << std::endl << NOT_EQ << ":";
+							file << std::endl << "\tmtc1\t$0,$f" << contxt.Regs;
+							file << std::endl << END << ":";
+
+						}
+						else{
+							file << std::endl << "\txor\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;						
+							file << std::endl << "\tsltu\t$" << contxt.Regs << ", $0, $" << contxt.Regs;
+							contxt.regType[contxt.Regs]='i';
+						}
 						
 					}
 					
