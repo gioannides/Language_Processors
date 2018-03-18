@@ -26,11 +26,12 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 					//postfix_ops(contxt, file);
 					if( *OPERATOR == "*" ){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs]*contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] * contxt.eval_f[contxt.Regs+1];
 						
 					}
 					else if(*OPERATOR == "/"){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs]/contxt.eval[contxt.Regs+1];
-						
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] / contxt.eval_f[contxt.Regs+1];
 					}
 					else if (*OPERATOR == "%")
 					{
@@ -118,10 +119,15 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 					if( *OPERATOR == "+" ){
 						contxt.eval[contxt.Regs]+=contxt.eval[contxt.Regs+1];
 						contxt.eval[contxt.Regs+1]=0;
+						contxt.eval_f[contxt.Regs]+=contxt.eval_f[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs+1]=0;
+						
 					}
 					else if(*OPERATOR == "-"){
 						contxt.eval[contxt.Regs]-=contxt.eval[contxt.Regs+1];
 						contxt.eval[contxt.Regs+1]=0;
+						contxt.eval_f[contxt.Regs]-=contxt.eval_f[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs+1]=0;
 					}
 				}
 				if (contxt.function){
@@ -340,19 +346,24 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 				if(!contxt.function){
 					if( *OPERATOR == "<" ){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] < contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] < contxt.eval_f[contxt.Regs+1];
 					}
 					else if(*OPERATOR == ">"){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] > contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] > contxt.eval_f[contxt.Regs+1];
 					}
 					else if(*OPERATOR == "<=")
 					{
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] <= contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] <= contxt.eval_f[contxt.Regs+1];
 					}
 					else if(*OPERATOR == ">=")
 					{
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] >= contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] >= contxt.eval_f[contxt.Regs+1];
 					}
 					contxt.eval[contxt.Regs+1] =0;
+					contxt.eval_f[contxt.Regs] = 0;
 				}
 				contxt.Regs--;
 				
@@ -432,10 +443,12 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 					if(*OPERATOR == "==")
 					{
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] == contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] == contxt.eval_f[contxt.Regs+1];
 					}
 					else if(*OPERATOR == "!=")
 					{
-						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] != contxt.eval[contxt.Regs+1];  
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] != contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] != contxt.eval_f[contxt.Regs+1]; 
 					}
 				}
 				contxt.Regs--;
@@ -552,6 +565,7 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 				else 
 				{
 					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] && contxt.eval[contxt.Regs+1];
+					contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] && contxt.eval_f[contxt.Regs+1];
 				}
 				contxt.Regs--;
 				file << std::endl << SHORTCIRCUIT << ":";			
@@ -588,7 +602,8 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 				}
 				else 
 				{
-					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] || contxt.eval[contxt.Regs+1];				
+					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] || contxt.eval[contxt.Regs+1];
+					contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] || contxt.eval_f[contxt.Regs+1];				
 				}
 				contxt.Regs--;
 				file <<  std::endl << SHORTCIRCUIT << ":";
@@ -888,7 +903,8 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		}
 		else if (!contxt.reading && !contxt.function) 
 		{
-			contxt.eval[contxt.Regs+1]=temp;		
+			contxt.eval[contxt.Regs+1]=temp;
+			contxt.eval_f[contxt.Regs+1] = temp_f;
 		}
 		
 	}

@@ -107,6 +107,7 @@ struct Context{
 	std::string SHORTCIRCUIT2;
 
 	int eval[1000];
+	float eval_f[1000];
 };
 
 

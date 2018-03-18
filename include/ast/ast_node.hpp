@@ -843,11 +843,11 @@ class InitDeclaratorList : public Node {
 				if( contxt.variable.word_size > 4 ){					
 					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
 				}
-				else if( (contxt.variable.word_size==4) && !contxt.float_){
+				else if( (contxt.variable.word_size==4) && contxt.variable.DataType!="float"){
 					file << std::endl << "\t.word\t" << contxt.eval[contxt.Regs+1]; //contxt.variable.value;
 				}
-				else if( (contxt.variable.word_size==4) && contxt.float_){
-					file << std::endl << "\t.float\t" << contxt.variable.value;
+				else if( (contxt.variable.word_size==4) && contxt.variable.DataType=="float"){
+					file << std::endl << "\t.float\t" << contxt.eval_f[contxt.Regs+1]; //contxt.variable.value;
 					contxt.float_ = false;
 				}
 				else if(contxt.variable.word_size==2){
@@ -1373,6 +1373,9 @@ class JumpStatement : public Node {
 							}
 							file << std::endl << "\tmov.s\t$f0," << "$f" << contxt.Regs+1;
 						}
+							file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+							file << std::endl << "\tmfc1\t$2," << "$f" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
+							file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;
 							file << std::endl << "\tmove\t$sp,$fp";
 							file << std::endl << "\tlw\t$31," << contxt.totalStackArea-4 <<"($sp)";
 							file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
@@ -1646,8 +1649,8 @@ class FunctionDefinition : public Node {
 					{			
 						if(contxt.Scopes[j]==contxt.Variables[k].scope)
 						{
-							contxt.Variables[k].param_offset = contxt.Variables[k].offset;
-							contxt.Variables[k].offset += contxt.totalStackArea+4;
+							contxt.Variables[k].param_offset = contxt.Variables[k].offset-4;
+							contxt.Variables[k].offset += contxt.totalStackArea;
 						}
 					}
 				}
