@@ -95,6 +95,8 @@ struct Context{
 	
 	int BreakCounter=0;
 	std::vector<int>BreakTracker;
+	std::vector<int>ContinueTracker;
+	int ContinueCounter=0;
 	
 	int SwitchControl=0;
 	bool inCase=false;

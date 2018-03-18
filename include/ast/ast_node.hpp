@@ -1331,7 +1331,7 @@ class JumpStatement : public Node {
 
 		void render_asm(std::ofstream& file,Context& contxt) {
 			if( IDENTIFIER != NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "goto" && AssignmentExpressionPtr == NULL && !contxt.reading) {
-				file << std::endl << "\tb\t" << "$GOTO_" << *IDENTIFIER;
+				file << std::endl << "\tb\t" << *IDENTIFIER << "_" << contxt.funct_id  << std::endl;
 				file << std::endl << "\tnop";
 			}
 
@@ -1342,16 +1342,17 @@ class JumpStatement : public Node {
 							contxt.TestConditionContinue->render_asm(file,contxt);
 							contxt.rhs_of_expression = false;
 						}
-						if(contxt.LoopHeader.size() != 0){
+						if(contxt.LoopHeader.size() != 0 && contxt.ContinueTracker.size() != 0){
 							file << "\n\tb " << contxt.LoopHeader[contxt.LoopHeader.size()-1];
+							//contxt.ContinueTracker.pop_back();
 							file << std::endl << "\tnop";
 						}			
 			}			
 			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "break" && AssignmentExpressionPtr == NULL && !contxt.reading) {
 
 				if( contxt.LastScope.size() != 0 && contxt.BreakTracker.size() != 0){
-					file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
-					contxt.BreakTracker.pop_back();
+					file << std::endl << "\tb\t" << contxt.LastScope[contxt.LastScope.size()-1];		//The label of the loopend
+					//contxt.BreakTracker.pop_back();
 					file << std::endl << "\tnop";
 				}
 			}
@@ -2005,19 +2006,24 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 			std::string END = "$END" + label_id;
 			std::string FOR = "$FOR" + label_id;
 			std::string BEGIN_ = "$BEGIN" + label_id;
+			std::string BEGIN_2 = "$BEGIN2" + label_id;
 
 
 			if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
 				contxt.BreakCounter++;
+				contxt.ContinueCounter++;
+
 				file << std::endl << BEGIN_ << ":";
 				
-				contxt.LoopHeader.push_back(BEGIN_);
+				contxt.LoopHeader.push_back(BEGIN_2);
+				contxt.ContinueTracker.push_back(contxt.ContinueCounter);
+
 				contxt.rhs_of_expression = true;
 				contxt.TestConditionContinue = AssignmentExpressionPtr; //In case of a continue
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << "\tbeq\t$2,$0," << END;
+					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
 					file << std::endl << "\tnop";
 				}
 				file << std::endl << WHILE << ":";
@@ -2030,18 +2036,25 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 					file << "\n\tb " << BEGIN_;
 					file << std::endl << "\tnop";
 				}
+				contxt.LoopHeader.pop_back();
+				contxt.LastScope.pop_back();
 				file << std::endl << END << ":";
 
 				
 				contxt.BreakCounter--;
+				contxt.ContinueCounter--;
+				
 
 			}
 
 			else if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "do" && AssignmentExpressionPtr != NULL && StatementPtr != NULL){
 
+				contxt.ContinueCounter++;
 				contxt.BreakCounter++;
+
 				file << std::endl << DO << ":";
-				contxt.LoopHeader.push_back(DO);
+				contxt.LoopHeader.push_back(BEGIN_2);
+				contxt.ContinueTracker.push_back(contxt.ContinueCounter);
 
 				contxt.LastScope.push_back(END);
 				contxt.BreakTracker.push_back(contxt.BreakCounter);
@@ -2053,26 +2066,34 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	
 				{
-					file << std::endl << "\tbeq\t$2,$0," << END;
+					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
 					file << std::endl << "\tnop";				
 					file << "\n\tb " << DO;
 					file << std::endl << "\tnop";
 				}
+				contxt.LoopHeader.pop_back();
+				contxt.LastScope.pop_back();
 				file << std::endl << END << ":";
 				contxt.BreakCounter--;
+				contxt.ContinueCounter--;
+				
 			}
 
 			else if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr == NULL && StatementPtr != NULL){
+				contxt.ContinueCounter++;
 				contxt.BreakCounter++;
+
 				ExpressionStatementPtr->render_asm(file,contxt);
 				file << std::endl << FOR << ":";
-				contxt.LoopHeader.push_back(FOR);
+
+				contxt.LoopHeader.push_back(BEGIN_2);
+				contxt.ContinueTracker.push_back(contxt.ContinueCounter);
 
 				contxt.rhs_of_expression = true;
 				ExpressionStatementPtr2->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << "\tbeq\t$2,$0," << END;
+					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
 					file << std::endl << "\tnop";
 				}
 
@@ -2083,12 +2104,17 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				if(!contxt.reading)	{
 					file << "\n\tb " << FOR;
 					file << std::endl << "\tnop";
-				}				
+				}
+				contxt.LoopHeader.pop_back();
+				contxt.LastScope.pop_back();			
 				file << std::endl << END << ":";
 				contxt.BreakCounter--;
+				contxt.ContinueCounter--;
+				
 			}
 
 			else if(ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL){
+				contxt.ContinueCounter++;
 				contxt.BreakCounter++;
 				ExpressionStatementPtr->render_asm(file,contxt);
 
@@ -2096,13 +2122,15 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.BreakTracker.push_back(contxt.BreakCounter);
 
 				file << std::endl << FOR << ":";
-				contxt.LoopHeader.push_back(FOR);
+
+				contxt.LoopHeader.push_back(BEGIN_2);
+				contxt.ContinueTracker.push_back(contxt.ContinueCounter);
 
 				contxt.rhs_of_expression = true;
 				ExpressionStatementPtr2->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << "\tbeq\t$2,$0," << END;
+					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
 					file << std::endl << "\tnop";					
 				}
 				contxt.TestConditionContinue = AssignmentExpressionPtr; //In case of a continue
@@ -2116,10 +2144,12 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 					file << "\n\tb " << FOR;
 					file << std::endl << "\tnop";
 				}
-				
+				contxt.LoopHeader.pop_back();
+				contxt.LastScope.pop_back();
 				file << std::endl << END << ":";
 				contxt.BreakCounter--;
-			
+				contxt.ContinueCounter--;
+				
 			}
 			//file << std::endl << END << ":"; 
 		
@@ -2288,7 +2318,7 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 			else if( LABELED_TYPE == NULL && ConstantExpressionPtr == NULL && IDENTIFIER != NULL && StatementPtr != NULL && !contxt.ReadingSwitch) {
 
 				
-				file << std::endl << "$GOTO_" << *IDENTIFIER << ":" << std::endl;
+				file << std::endl << *IDENTIFIER << "_" << contxt.funct_id << ":" << std::endl;
 				StatementPtr->render_asm(file,contxt);
 				
 			}
