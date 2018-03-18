@@ -32,42 +32,46 @@ $END7:
 	sw	$2,112($sp) #x
 
 	lw	$2, 112($sp) #x
+	sne $2,$0,$2
+	bne $2,$0,$SHORTCIRCUIT_OR0
+	nop	
 	lw	$3, 112($sp) #x
-	sne	$2,$0,$2
-	bne	$2,$0,$SHORTCIRCUIT0
-	sne	$3,$0,$3
+	sne $3,$0,$3
 	addi	$4, $3, 1 #++
 	sw	$4,112($sp) #x
 
-$SHORTCIRCUIT0:
-	or	$2,$2,$3
+	or $2,$2,$3
+$SHORTCIRCUIT_OR0:
+	sne $2,$0,$2
+	bne $2,$0,$SHORTCIRCUIT_OR1
+	nop	
 	lw	$3, 112($sp) #x
-	sne	$2,$0,$2
-	bne	$2,$0,$SHORTCIRCUIT1
-	sne	$3,$0,$3
+	sne $3,$0,$3
 	addi	$4, $3, 1 #++
 	sw	$4,112($sp) #x
 
-$SHORTCIRCUIT1:
-	or	$2,$2,$3
+	or $2,$2,$3
+$SHORTCIRCUIT_OR1:
+	sne $2,$0,$2
+	bne $2,$0,$SHORTCIRCUIT_OR2
+	nop	
 	lw	$3, 112($sp) #x
-	sne	$2,$0,$2
-	bne	$2,$0,$SHORTCIRCUIT2
-	sne	$3,$0,$3
+	sne $3,$0,$3
 	addi	$4, $3, 1 #++
 	sw	$4,112($sp) #x
 
-$SHORTCIRCUIT2:
-	or	$2,$2,$3
+	or $2,$2,$3
+$SHORTCIRCUIT_OR2:
+	sne $2,$0,$2
+	bne $2,$0,$SHORTCIRCUIT_OR3
+	nop	
 	lw	$3, 112($sp) #x
-	sne	$2,$0,$2
-	bne	$2,$0,$SHORTCIRCUIT3
-	sne	$3,$0,$3
+	sne $3,$0,$3
 	addi	$4, $3, 1 #++
 	sw	$4,112($sp) #x
 
-$SHORTCIRCUIT3:
-	or	$2,$2,$3
+	or $2,$2,$3
+$SHORTCIRCUIT_OR3:
 $END9:
 	beq	$2,$0,$ELSE8
 	nop

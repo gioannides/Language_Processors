@@ -854,7 +854,7 @@ class InitDeclaratorList : public Node {
 					file << std::endl << "\t.half\t" << contxt.variable.value;
 				}
 				else if(contxt.variable.word_size==1){
-					file << std::endl << "\t.byte\t" << contxt.variable.value;
+					file << std::endl << "\t.byte\t" << contxt.eval[contxt.Regs+1];
 				}
 				        // reset the value of the global
 				for(int i=contxt.Regs; i<=20; i++)

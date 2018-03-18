@@ -38,18 +38,20 @@ $END7:
 $END8:
 	sb	$2,116($sp) #c
 	lw	$2, 120($sp) #y
+	sne $2,$0,$2
+	bne $2,$0,$SHORTCIRCUIT_OR0
+	nop	
 	lb	$3, 116($sp) #c
+	sne $3,$0,$3
+	beq $0,$3,$SHORTCIRCUIT_AND1
+	nop	
 	lw	$4, 124($sp) #h
-	sne	$3,$0,$3
-	beq	$3,$0,$SHORTCIRCUIT0
-	sne	$4,$0,$4
-$SHORTCIRCUIT0:
-	and	$3,$3,$4
-	sne	$2,$0,$2
-	bne	$2,$0,$SHORTCIRCUIT1
-	sne	$3,$0,$3
-$SHORTCIRCUIT1:
-	or	$2,$2,$3
+	sne $4,$0,$4
+	and $3,$3,$4
+$SHORTCIRCUIT_AND1:
+	sne $3,$0,$3
+	or $2,$2,$3
+$SHORTCIRCUIT_OR0:
 $END9:
 	sw	$2,112($sp) #x
 
