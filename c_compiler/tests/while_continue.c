@@ -3,7 +3,8 @@ int x = 5;
 
 int main()
 { 
-    int y,z = 0;
+    int y=0;
+    int	z = 0;
     int x = 1;
     while (x < 3) {
         x = x + 1;

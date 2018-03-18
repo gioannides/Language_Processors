@@ -108,6 +108,7 @@ struct Context{
 
 	int eval[1000];
 	float eval_f[1000];
+	int allocate=0;
 };
 
 
@@ -342,15 +343,15 @@ inline void print_scopes(Context& contxt, std::ofstream& f){
 }
 
 inline std::string labelGenScope(Context& contxt) {
-
-	contxt.LastScope.push_back(std::to_string(contxt.LastScope.size()));
+	contxt.allocate++;
+	contxt.LastScope.push_back(std::to_string(contxt.allocate));
 	
 	return contxt.LastScope[contxt.LastScope.size()-1];
 }
 
 inline std::string labelGenLogical(Context& contxt) {
-
-	contxt.LogicalLabels.push_back(std::to_string(contxt.LogicalLabels.size()));
+	contxt.allocate++;
+	contxt.LogicalLabels.push_back(std::to_string(contxt.allocate));
 	return contxt.LogicalLabels[contxt.LogicalLabels.size()-1];
 		
 }
@@ -358,8 +359,8 @@ inline std::string labelGenLogical(Context& contxt) {
 
 
 inline std::string labelGen(Context& contxt) {
-
-	contxt.Labels.push_back(std::to_string(contxt.Labels.size()));
+	contxt.allocate++;
+	contxt.Labels.push_back(std::to_string(contxt.allocate));
 	return contxt.Labels[contxt.Labels.size()-1];
 		
 }

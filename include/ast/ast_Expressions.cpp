@@ -700,6 +700,10 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						file << "\n\tmove $" << contxt.Regs+1 << ", $25"; 
 					}
 				}
+				if(AssignmentExpressionPtr != NULL){
+					AssignmentExpressionPtr->render_asm(file,contxt);
+					PostFixExpressionPtr->render_asm(file,contxt);
+				}
 			}
 			if( PrimaryExpressionPtr != NULL ) {
 

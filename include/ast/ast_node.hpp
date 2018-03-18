@@ -1693,7 +1693,9 @@ class FunctionDefinition : public Node {
 			file << "\t.size " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;
 			//contxt.totalStackArea = 8;
 			//print_variables(contxt, file);
-			contxt.Scopes.pop_back();
+			if(contxt.Scopes.size() != 0){
+				contxt.Scopes.pop_back();
+			}
 		}	
 };
 
