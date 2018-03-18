@@ -812,8 +812,26 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		if( (*CONSTANT).find_first_of("'")==0 && contxt.variable.word_size == 1)
 		{
 			char tmp2;
-			tmp2 = (*CONSTANT)[1];
+			
+			if((*CONSTANT) == "'\\n'"){
+				tmp2 = '\n';}
+			else if((*CONSTANT) == "'\\r'"){
+				tmp2 = '\r';}
+			else if((*CONSTANT) == "'\\v'")
+				tmp2 = '\v';
+			else if((*CONSTANT) == "'\\t'")
+				tmp2 = '\t';
+			else if((*CONSTANT) == "'\\f'")
+				tmp2 = '\f';
+			else if((*CONSTANT) == "'\\b'")
+				tmp2 = '\b';
+			else if((*CONSTANT) == "'\\a'")
+				tmp2 = '\a';
+			else
+				tmp2 = (*CONSTANT)[1];
+
 			temp = int(tmp2);
+
 			is_char = true;
 
 		}
