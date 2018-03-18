@@ -5,7 +5,21 @@ int main(){
 	int z = 88;
 	switch(x){
 
+	switch(y){
+
+		case 45:
+			x=88;
+		case 77:
+			x=877;
+	}
 		case 1:
+			switch(y){
+
+		case 46:
+			x=88;
+		case 37:
+			x=877;
+	}
 			x=21;
 			break;
 		case 2:

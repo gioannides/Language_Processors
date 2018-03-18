@@ -57,9 +57,10 @@ struct Context{
 	int Regs=1;
 	std::string AssignmentOperator = "df";
 	
-	int global_value=0;
-	int current_value=0;
+	//int global_value=0;
+	//int current_value=0;
 	int global_value_float=0;
+	
 	int current_value_float=0;
 	bool float_ = false;   //is value a floating point?
 	char regType[31];
@@ -102,44 +103,196 @@ struct Context{
 	int good_i = 0;
 	std::string SHORTCIRCUIT;
 	std::string SHORTCIRCUIT2;
+
+	int eval[1000];
 };
+
 
 
 inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt){
 
-	if(contxt.regType[reg1] != 'f' && contxt.regType[reg2] != 'f'){
-		return;
+	if(contxt.regType[reg1] != 'f' && contxt.regType[reg2] != 'f' && reg2 > 1 && reg1 > 1){
+		//do nothing
 	}
-	else if(contxt.regType[reg1] != contxt.regType[reg2]){
-		if(contxt.regType[reg1] == 'i' || contxt.regType[reg1] == 'u' || contxt.regType[reg1] == 'c' && contxt.regType[reg2] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << reg2 << ",$f" << reg2 << ",$" << reg2;
-			file << std::endl << "\tmfc1\t$f" << reg2 << ",$" << reg2;
+	else if(contxt.regType[reg1] != contxt.regType[reg2] && reg2 > 1 && reg1 > 1){
+		if(contxt.regType[reg1] != 'f'  && contxt.regType[reg2] == 'f'){
+			file << std::endl << "\tmtc1\t$" << reg1 << ",$f" << reg1;
+			file << std::endl << "\tcvt.s.w\t$f" << reg1 << ",$f" << reg1;
+			if(contxt.regType[reg1] == 'u'){
+				file << std::endl << "\tandi\t$" << reg1 << ",$" << reg1 << ",0xFF";
+			}
+		
+		}
+		else if(contxt.regType[reg1] == 'f' && contxt.regType[reg2] != 'f'){
+			file << std::endl << "\tmtc1\t$" << reg2 << ",$f" << reg2;
+			file << std::endl << "\tcvt.s.w\t$f" << reg2 << ",$f" << reg2;
 			if(contxt.regType[reg1] == 'u'){
 				file << std::endl << "\tandi\t$" << reg2 << ",$" << reg2 << ",0xFF";
 			}
-			return;
-		}
-		if(contxt.regType[reg1] == 'f' && contxt.regType[reg2] == 'i' || contxt.regType[reg2] == 'u' || contxt.regType[reg2] == 'c'){
-			file << std::endl << "\tmtc1\t$" << reg2 << ",$f" << reg2;
-			file << std::endl << "\tcvt.s.w\t$f" << reg2 << ",$f" << reg2;
-			return;
 		}
 	}
 
 }
 
 
-inline void postfix_ops(Context& contxt, std::ofstream& f){
-		contxt.Regs++;
-		if(contxt.AssignmentOperator == "++" && contxt.is_postfix && !contxt.reading)
+
+inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
+{
+	if(contxt.Variables[good_index].word_size==1) {
+		if(contxt.regType[contxt.Regs+1] == 'f'){
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			if(contxt.regType[contxt.Regs+1] == 'u'){
+				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
+			}
+		}
+		file << std::endl << "\tsb\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		contxt.regType[contxt.Regs+1]='c';
+	}				
+	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
+		if(contxt.regType[contxt.Regs+1] == 'f'){
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			if(contxt.regType[contxt.Regs+1] == 'u'){
+				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
+			}
+		}	
+		file << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+		contxt.regType[contxt.Regs+1]='i';
+	}
+	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK		
+		if(contxt.regType[contxt.Regs+1] != 'f'){
+			file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+		}
+
+		file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+		contxt.regType[contxt.Regs+1]='f';
+	}
+	if(contxt.Variables[good_index].DataType == "unsigned") {
+		contxt.is_unsigned = true;
+	}
+	if(contxt.Variables[good_index].DataType == "float") {
+		contxt.float_ = true;
+	}
+}
+inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
+{
+	file << std::endl << "\tlui\t$" << contxt.Regs+2 << ", %hi(" << contxt.Variables[good_index].id << ")";
+	if(contxt.Variables[good_index].word_size==1) {
+		if(contxt.regType[contxt.Regs+1] == 'f'){
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			if(contxt.regType[contxt.Regs+1] == 'u'){
+				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
+			}
+		}
+					
+		file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+		contxt.regType[contxt.Regs+1]='c';
+	}
+	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
+
+		if(contxt.regType[contxt.Regs+1] == 'f'){
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			if(contxt.regType[contxt.Regs+1] == 'u'){
+				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
+			}
+		}	
+
+		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+		contxt.regType[contxt.Regs+1]='i';
+	}
+	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
+		
+		if(contxt.regType[contxt.Regs+1] != 'f'){
+			file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+		}
+
+		file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+		contxt.regType[contxt.Regs+1]='f';
+	}
+	if(contxt.Variables[good_index].DataType == "unsigned") {
+		contxt.is_unsigned = true;
+	}
+	if(contxt.Variables[good_index].DataType == "float") {
+		contxt.float_ = true;
+	}
+}
+
+
+inline void load_locals(Context& contxt, std::ofstream& file, int good_index)
+{
+	if(contxt.Variables[good_index].word_size==1)  
+	{
+		file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		contxt.regType[contxt.Regs+1]='c';
+	}
+	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float")
+	{
+		file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;			
+		contxt.regType[contxt.Regs+1]='i';					
+	}
+	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float") //TODO: CHECK OK
+	{
+		file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		contxt.regType[contxt.Regs+1]='f';		
+	}
+	if(contxt.Variables[good_index].DataType == "unsigned") 
+				{
+					contxt.is_unsigned = true;			
+				}
+				if(contxt.Variables[good_index].DataType == "float") {
+					contxt.float_ = true;
+				}
+}
+inline void load_globals(Context& contxt, std::ofstream& file, int good_index)
+{
+	file << std::endl << "\tlui\t$" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
+				if(contxt.Variables[good_index].word_size==1) 
+				{
+					file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
+					contxt.regType[contxt.Regs+1]='c';
+				}
+				else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float")
+				{
+					file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
+					contxt.regType[contxt.Regs+1]='i';
+   				}
+				else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float") //TODO: CHECK OK
+				{
+					file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
+					contxt.regType[contxt.Regs+1]='f';
+   				}
+   				if(contxt.Variables[good_index].DataType == "unsigned") 
+				{
+					contxt.is_unsigned = true;			
+				}
+				if(contxt.Variables[good_index].DataType == "float") {
+					contxt.float_ = true;
+				}
+}
+inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fixed for globals
+{
+	contxt.Regs++;
+	int index = contxt.good_i;
+	if(contxt.AssignmentOperator == "++" && contxt.is_postfix && !contxt.reading)
 	{ 
 		//std::cout << std::endl << "got here" << std::endl;
 		f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", 1 #++"; //maybe +2
-		if(contxt.Variables[contxt.good_i].word_size==1) {
-			f << std::endl << "\tsb\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id;			
-		}				
-		else{
-			f << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id << "\n";
+		//if(contxt.Variables[contxt.good_i].word_size==1) {
+		//	f << std::endl << "\tsb\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id;			
+		//}				
+		if(contxt.Variables[contxt.good_i].scope=="global")
+		{
+			store_globals(contxt, f, index);
+		}
+		else 
+		{
+			store_locals(contxt, f, index);
+			//f << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id << "\n";
 		}
 		//f << "\n\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[contxt.good_i].offset << "($sp)" << " #" << contxt.Variables[contxt.good_i].id;
 		contxt.is_postfix=false;
@@ -149,13 +302,21 @@ inline void postfix_ops(Context& contxt, std::ofstream& f){
 		//std::cout << std::endl << "got here" << std::endl;
 
 		f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", -1 #--";
-		f << "\n\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[contxt.good_i].offset << "($sp)" << " #" << contxt.Variables[contxt.good_i].id;
+		
+		if(contxt.Variables[contxt.good_i].scope=="global")
+		{
+			store_globals(contxt, f, index);
+		}
+		else 
+		{
+			store_locals(contxt, f, index);
+			//f << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id << "\n";
+		}
+		//f << "\n\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[contxt.good_i].offset << "($sp)" << " #" << contxt.Variables[contxt.good_i].id;
 		contxt.is_postfix=false;
 	} 
 	contxt.Regs--;
 }
-
-
 inline void print_variables(Context& contxt, std::ofstream& f){
 	for(int i=0; i<contxt.Variables.size(); i++)
 	{ 

@@ -844,7 +844,7 @@ class InitDeclaratorList : public Node {
 					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
 				}
 				else if( (contxt.variable.word_size==4) && !contxt.float_){
-					file << std::endl << "\t.word\t" << contxt.global_value; //contxt.variable.value;
+					file << std::endl << "\t.word\t" << contxt.eval[contxt.Regs+1]; //contxt.variable.value;
 				}
 				else if( (contxt.variable.word_size==4) && contxt.float_){
 					file << std::endl << "\t.float\t" << contxt.variable.value;
@@ -854,9 +854,13 @@ class InitDeclaratorList : public Node {
 					file << std::endl << "\t.half\t" << contxt.variable.value;
 				}
 				else if(contxt.variable.word_size==1){
-					file << std::endl << "\t.byte\t" << contxt.variable.value;
+					file << std::endl << "\t.byte\t" << contxt.eval[contxt.Regs+1];
 				}
-				contxt.global_value=0;         // reset the value of the global
+				        // reset the value of the global
+				for(int i=contxt.Regs; i<=20; i++)
+				{
+					file << "\n#" << contxt.eval[i]; 
+				}
 				
 			}
 
@@ -1327,7 +1331,7 @@ class JumpStatement : public Node {
 
 		void render_asm(std::ofstream& file,Context& contxt) {
 			if( IDENTIFIER != NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "goto" && AssignmentExpressionPtr == NULL && !contxt.reading) {
-				file << std::endl << "\tb\t" << *IDENTIFIER;
+				file << std::endl << "\tb\t" << "$GOTO_" << *IDENTIFIER;
 				file << std::endl << "\tnop";
 			}
 
@@ -1653,13 +1657,19 @@ class FunctionDefinition : public Node {
 			//contxt.function_def.area = contxt.totalStackArea;
 			
 			//contxt.functions.push_back(contxt.function_def);
-			file << "\t.set\tnoreorder" << std::endl;
-			file << "\t.set\tnomacro" << std::endl;
+			file << "\t.set noreorder" << std::endl;
+			file << "\t.set nomacro" << std::endl;
 			
-			file << "\taddiu\t$sp,$sp,-"<< contxt.totalStackArea+4;
-			file << std::endl << "\tsw\t$fp," << contxt.totalStackArea << "($sp)";
-			file << std::endl << "\tsw\t$31," << contxt.totalStackArea-4 <<"($sp)";
-			file << std::endl << "\tmove\t$fp,$sp\n";
+			file << "\taddiu $sp,$sp,-"<< contxt.totalStackArea+4;
+			file << std::endl << "\tsw $fp," << contxt.totalStackArea << "($sp)";
+			file << std::endl << "\tsw $31," << contxt.totalStackArea-4 <<"($sp)";
+			file << std::endl << "\tmove $fp,$sp\n";
+
+			// for(int i=4; i<=7; i++) //shift by 4 all the parameters
+			// {
+			// 	file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
+			// }
+
 			contxt.variable.offset=contxt.totalStackArea-4;
 			if( CompoundStatementPtr != NULL ) {
 				//contxt.reading = false;
@@ -1667,16 +1677,16 @@ class FunctionDefinition : public Node {
 				//contxt.reading = false;
 			}
 
-			file << std::endl << "\tmove\t$sp,$fp";
-			file << std::endl << "\tlw\t$31," << contxt.totalStackArea-4 <<"($sp)";
-			file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
-			file << std::endl << "\taddiu\t$sp,$sp," << contxt.totalStackArea + 4;
-			file << std::endl << "\tj\t$31" << std::endl;
+			file << std::endl << "\tmove $sp,$fp";
+			file << std::endl << "\tlw $31," << contxt.totalStackArea-4 <<"($sp)";
+			file << std::endl << "\tlw $fp," << contxt.totalStackArea << "($sp)";
+			file << std::endl << "\taddiu $sp,$sp," << contxt.totalStackArea + 4;
+			file << std::endl << "\tj $31" << std::endl;
 			file << std::endl << "\tnop" << std::endl;
-			file << "\t.set\t macro" << std::endl;
-			file << "\t.set\t reorder" << std::endl;
-			file << "\t.end\t " << contxt.funct_id << std::endl;
-			file << "\t.size\t " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;
+			file << "\t.set macro" << std::endl;
+			file << "\t.set reorder" << std::endl;
+			file << "\t.end " << contxt.funct_id << std::endl;
+			file << "\t.size " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;
 			//contxt.totalStackArea = 8;
 			//print_variables(contxt, file);
 			contxt.Scopes.pop_back();
@@ -1834,26 +1844,23 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				}  
 				//print_variables(contxt,file);
 			}
-			else if((contxt.function && IDENTIFIER != NULL && !contxt.reading)||contxt.parameter){		//if we are in a function and the identifier is not null and protect flag is off
-					//std::cout << "it should be local!" << std::endl;
-					if( !contxt.protect && !contxt.parameter) {				//then this is a function name we are reading					
-						//std:: cout << "yet another problem" <<std::endl;
-						contxt.funct_id = *IDENTIFIER;		//obtain the scope we are currently in	
-						contxt.Scopes.push_back(contxt.funct_id);
-
-					}
-					else{
-						//std::cout << "this is alright!" << std::endl;
-						contxt.variable.scope = contxt.Scopes[contxt.Scopes.size()-1]; //assign the variable the scope it is in
-						contxt.variable.id = *IDENTIFIER;	//if the portect flag is on then we are already inside the function , not reading the function name
-					
-					//std::cout << "this should be not printed" << std::endl;
-
-					if( !contxt.initialized ) {			//if the local declaration is not initialized, set it to 0
+			else if((contxt.function && IDENTIFIER != NULL && !contxt.reading)||contxt.parameter)
+			{		//if we are in a function and the identifier is not null and protect flag is off
+				
+				if( !contxt.protect && !contxt.parameter) 
+				{				//then this is a function name we are reading					
+					contxt.funct_id = *IDENTIFIER;		//obtain the scope we are currently in	
+					contxt.Scopes.push_back(contxt.funct_id);
+				}
+				else
+				{
+					contxt.variable.scope = contxt.Scopes[contxt.Scopes.size()-1]; //assign the variable the scope it is in
+					contxt.variable.id = *IDENTIFIER;	//if the portect flag is on then we are already inside the function , not reading the function name
+					if( !contxt.initialized ) 
+					{			//if the local declaration is not initialized, set it to 0
 						contxt.variable.value = 0;
 					}
-					contxt.Variables.push_back(contxt.variable);
-					//print_variables(contxt, file);
+						contxt.Variables.push_back(contxt.variable);
 					}
 				}
 				int found_local = 0;	
@@ -1875,64 +1882,52 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 						}
 					}
 				}
-				if(!found_local) {
-						for(i=0; i<contxt.Variables.size(); i++) {
-							if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
-								found_local=2;
-								good_index = i;
-								contxt.good_i = good_index;
-								i = contxt.Variables.size();
-							}
+				if(!found_local) 
+				{
+					for(i=0; i<contxt.Variables.size(); i++) 
+					{
+						if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) 
+						{
+							found_local=2;
+							good_index = i;
+							contxt.good_i = good_index;
+							i = contxt.Variables.size();
 						}
+					}
 				}   	
 				if(contxt.lhs_of_assignment  && !contxt.reading && contxt.function){
-					if(found_local==1) { //local
-						if(contxt.initialized){
-							if(contxt.Variables[good_index].word_size==1){
-								file << std::endl << "\tsb\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-							}
-							else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
-								file << std::endl << "\tsw\t$2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-							}
-							else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
-								file << std::endl << "\tswc1\t$f2, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-							}
+					if(found_local==1) 
+					{ //local
+						if(contxt.initialized)
+						{
+							store_locals(contxt, file, good_index);
 						}
-						else {
-							if(contxt.Variables[good_index].word_size==1){
+						else 
+						{
+							if(contxt.Variables[good_index].word_size==1)
+							{
 								file << std::endl << "\tsb\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 							}
-							else{
+							else
+							{
 								file << std::endl << "\tsw\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
 							}
 						}
 					}
-
-				
-					else if(found_local==2) { //global
-						
-						if(contxt.Variables[good_index].word_size==1) {
-							file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
-							file << std::endl << "\tsb\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
-						}
-						else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
-							file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
-							file << std::endl << "\tsw\t$2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
-						}
-						else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
-							file << std::endl << "\tlui\t$2" << ", %hi(" << contxt.Variables[good_index].id << ")";
-							file << std::endl << "\tmtc1\t$2,$f2";
-							file << std::endl << "\tswc1\t$f2" << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
-						}	
+					else if(found_local==2) 
+					{ //global
+						store_globals(contxt, file, good_index);
 					}	
 								
-					else{
+					else
+					{
 						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 					}
-			}		
+				}		
 				
 
-					if( ParameterTypeLiSt != NULL) {
+					if( ParameterTypeLiSt != NULL) 
+					{
 						//std::cout << "go to parameter type list" << std::endl;
 						ParameterTypeLiSt->render_asm(file,contxt);
 					}
@@ -2293,7 +2288,7 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 			else if( LABELED_TYPE == NULL && ConstantExpressionPtr == NULL && IDENTIFIER != NULL && StatementPtr != NULL && !contxt.ReadingSwitch) {
 
 				
-				file << std::endl << *IDENTIFIER << ":" << std::endl;
+				file << std::endl << "$GOTO_" << *IDENTIFIER << ":" << std::endl;
 				StatementPtr->render_asm(file,contxt);
 				
 			}
