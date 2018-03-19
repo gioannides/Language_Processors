@@ -15,71 +15,66 @@
 	.ent	main
 	.type	main, @function
 main:
-
-$END1:
-$END2:
-$END3:	.set noreorder
+	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-132
-	sw $fp,128($sp)
-	sw $31,124($sp)
+	addiu $sp,$sp,-160
+	sw $fp,156($sp)
+	sw $31,152($sp)
 	move $fp,$sp
 
+	sw $4,160($sp)
+	sw $5,164($sp)
+	sw $6,168($sp)
+	sw $7,172($sp)
 	li	$2, 99
-$END5:
-	sw	$2,120($sp) #n
+	sw	$2,148($sp) #n
 
 	li	$2, 0
-$END6:
-	sw	$2,116($sp) #acc
+	sw	$2,144($sp) #acc
 
-	lw	$2, 120($sp) #n
-$END7:
-	sw	$2,112($sp) #t
+	lw	$2, 148($sp) #n
+	sw	$2,140($sp) #t
 
-$BEGIN8:
-	lw	$2, 112($sp) #t
-	lw	$3, 120($sp) #n
+$BEGIN2:
+	lw	$2, 140($sp) #t
+	lw	$3, 148($sp) #n
 	slt	$2, $2, $3
 	sne $2,$0,$2
-	bne $2,$0,$SHORTCIRCUIT_OR0
+	bne $2,$0,$SHORTCIRCUIT_OR8
 	nop	
-	lw	$3, 116($sp) #acc
+	lw	$3, 144($sp) #acc
 	li	$4, 99
 	slt	$3, $3, $4
 	sne $3,$0,$3
 	or $2,$2,$3
-$SHORTCIRCUIT_OR0:
-$END9:
-	beq	$2,$0,$END8
+$SHORTCIRCUIT_OR8:
+	beq	$2,$0,$END_iter2
 	nop
-$WHILE8:
-	lw	$2, 116($sp) #acc
-	lw	$3, 112($sp) #t
+$WHILE2:
+	lw	$2, 144($sp) #acc
+	lw	$3, 140($sp) #t
 	add	$2, $2, $3
-$END11:
-	lw	$3, 116($sp) #acc
+	lw	$3, 144($sp) #acc
 
-	sw	$2,116($sp) #acc
+	sw	$2,144($sp) #acc
 
-	b $BEGIN8
+	b $BEGIN2
 	nop
-$END8:
-	lw	$2, 116($sp) #acc
-$END12:
+$END_iter2:
+	lw	$2, 144($sp) #acc
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,124($sp)
-	lw	$fp,128($sp)
-	addiu	$sp,$sp,132
+	lw	$31,152($sp)
+	lw	$fp,156($sp)
+	addiu	$sp,$sp,160
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,124($sp)
-	lw $fp,128($sp)
-	addiu $sp,$sp,132
+	lw $31,152($sp)
+	lw $fp,156($sp)
+	addiu $sp,$sp,160
 	j $31
 
 	nop

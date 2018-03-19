@@ -16,142 +16,121 @@
 	.type	main, @function
 main:
 
-$END1:
-$END2:
-$END3:
-$END4:
-$END5:
-$END6:
-$END8:
-$IF7:
-$END10:
-$IF9:
-$END12:
-$IF11:
-$ELSE11:
-$END11:
-$END9:
-$END7:	.set noreorder
+$IF1:
+$IF2:
+$IF3:
+$ELSE3:
+$END_sel3:
+$END_sel2:
+$END_sel1:	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-140
-	sw $fp,136($sp)
-	sw $31,132($sp)
+	addiu $sp,$sp,-168
+	sw $fp,164($sp)
+	sw $31,160($sp)
 	move $fp,$sp
 
+	sw $4,168($sp)
+	sw $5,172($sp)
+	sw $6,176($sp)
+	sw $7,180($sp)
 	li	$2, 9
-$END14:
-	sw	$2,128($sp) #x
+	sw	$2,156($sp) #x
 
 	li	$2, 7
-$END15:
-	sw	$2,124($sp) #a
+	sw	$2,152($sp) #a
 
 	li	$2, 8
-$END16:
-	sw	$2,120($sp) #b
+	sw	$2,148($sp) #b
 
 	li	$2, 98
-$END17:
-	sw	$2,116($sp) #d
+	sw	$2,144($sp) #d
 
 	li	$2, 115
-$END18:
-	sb	$2,112($sp) #g
+	sb	$2,140($sp) #g
 	li	$2, 9
-$END19:
-	lw	$3, 120($sp) #b
+	lw	$3, 148($sp) #b
 
 	add	$2, $2, $3
-	sw	$2,120($sp) #b
+	sw	$2,148($sp) #b
 
-	lw	$3, 124($sp) #a
+	lw	$3, 152($sp) #a
 
 	sub	$2, $3, $2
-	sw	$2,124($sp) #a
+	sw	$2,152($sp) #a
 
-	lw	$2, 128($sp) #x
+	lw	$2, 156($sp) #x
 	li	$3, 1
 	sgt	$2, $2, $3
-$END21:
-	beq	$2,$0,$END20
+	beq	$2,$0,$END_sel5
 	nop
-$IF20:
-	lw	$2, 128($sp) #x
+$IF5:
+	lw	$2, 156($sp) #x
 	li	$3, 1
 	sgt	$2, $2, $3
-$END23:
-	beq	$2,$0,$END22
+	beq	$2,$0,$END_sel6
 	nop
-$IF22:
-	lw	$2, 128($sp) #x
+$IF6:
+	lw	$2, 156($sp) #x
 	li	$3, 2
 	sgt	$2, $2, $3
-$END25:
-	beq	$2,$0,$ELSE24
+	beq	$2,$0,$ELSE7
 	nop
-$IF24:
+$IF7:
 	li	$2, 88
-$END26:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,132($sp)
-	lw	$fp,136($sp)
-	addiu	$sp,$sp,140
+	lw	$31,160($sp)
+	lw	$fp,164($sp)
+	addiu	$sp,$sp,168
 	j	$31
 
 	nop
 
-	b $END24
+	b $END_sel7
 	nop
-$ELSE24:
+$ELSE7:
 	li	$2, 8
-$END32:
-	lw	$3, 120($sp) #b
+	lw	$3, 148($sp) #b
 
 	add	$2, $2, $3
-	sw	$2,120($sp) #b
+	sw	$2,148($sp) #b
 
-$END31:
-	lw	$3, 124($sp) #a
+	lw	$3, 152($sp) #a
 
 	mult	$2,$3
 	mflo	$2
-	sw	$2,124($sp) #a
+	sw	$2,152($sp) #a
 
-$END30:
-	lw	$3, 120($sp) #b
+	lw	$3, 148($sp) #b
 
 	and	$2, $2, $3
-	sw	$2,120($sp) #b
+	sw	$2,148($sp) #b
 
-$END29:
-	lw	$3, 116($sp) #d
+	lw	$3, 144($sp) #d
 
 	or	$2, $2, $3
-	sw	$2,116($sp) #d
+	sw	$2,144($sp) #d
 
-$END28:
-	lb	$3, 112($sp) #g
+	lb	$3, 140($sp) #g
 	div	$3,$2
 	mflo	$2
-	sb	$2,112($sp) #g
-$END27:
+	sb	$2,140($sp) #g
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,132($sp)
-	lw	$fp,136($sp)
-	addiu	$sp,$sp,140
+	lw	$31,160($sp)
+	lw	$fp,164($sp)
+	addiu	$sp,$sp,168
 	j	$31
 
 	nop
 
-$END24:
-$END22:
-$END20:
+$END_sel7:
+$END_sel6:
+$END_sel5:
 	move $sp,$fp
-	lw $31,132($sp)
-	lw $fp,136($sp)
-	addiu $sp,$sp,140
+	lw $31,160($sp)
+	lw $fp,164($sp)
+	addiu $sp,$sp,168
 	j $31
 
 	nop

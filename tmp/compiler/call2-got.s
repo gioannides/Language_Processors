@@ -7,7 +7,6 @@
 	.abicalls
 
 
-$END0:
 
 	.data
 	.globl	de
@@ -46,35 +45,36 @@ de:
 	.ent	f
 	.type	f, @function
 f:
-
-$END2:	.set noreorder
+	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-120
-	sw $fp,116($sp)
-	sw $31,112($sp)
+	addiu $sp,$sp,-148
+	sw $fp,144($sp)
+	sw $31,140($sp)
 	move $fp,$sp
 
+	sw $4,148($sp)
+	sw $5,152($sp)
+	sw $6,156($sp)
+	sw $7,160($sp)
 	li	$2, 3
-$END4:
 	lui	$3, %hi(de)
 	lw	$3, %lo(de)($3)
 	lui	$3, %hi(de)
 	sw	$2, %lo(de)($3)
 	li	$2, 1
-$END5:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,112($sp)
-	lw	$fp,116($sp)
-	addiu	$sp,$sp,120
+	lw	$31,140($sp)
+	lw	$fp,144($sp)
+	addiu	$sp,$sp,148
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,112($sp)
-	lw $fp,116($sp)
-	addiu $sp,$sp,120
+	lw $31,140($sp)
+	lw $fp,144($sp)
+	addiu $sp,$sp,148
 	j $31
 
 	nop
@@ -93,17 +93,18 @@ $END5:
 	.ent	main
 	.type	main, @function
 main:
-
-$END7:
-$END8:	.set noreorder
+	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-120
-	sw $fp,116($sp)
-	sw $31,112($sp)
+	addiu $sp,$sp,-148
+	sw $fp,144($sp)
+	sw $31,140($sp)
 	move $fp,$sp
 
+	sw $4,148($sp)
+	sw $5,152($sp)
+	sw $6,156($sp)
+	sw $7,160($sp)
 	li	$2, 5
-$END10:
 	sw $1,108($sp)
 	sw $2,104($sp)
 	sw $3,100($sp)
@@ -129,7 +130,6 @@ $END10:
 	sw $23,20($sp)
 	sw $24,16($sp)
 	sw $25,12($sp)
-	sw $31,8($sp)
 	.option pic
 	jal f
 	nop
@@ -158,25 +158,22 @@ $END10:
 	lw $22,24($sp)
 	lw $23,20($sp)
 	lw $24,16($sp)
-	lw $31,12($sp)
 	move $2, $25
-$END11:
 	lui	$2, %hi(de)
 	lw	$2, %lo(de)($2)
-$END12:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,112($sp)
-	lw	$fp,116($sp)
-	addiu	$sp,$sp,120
+	lw	$31,140($sp)
+	lw	$fp,144($sp)
+	addiu	$sp,$sp,148
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,112($sp)
-	lw $fp,116($sp)
-	addiu $sp,$sp,120
+	lw $31,140($sp)
+	lw $fp,144($sp)
+	addiu $sp,$sp,148
 	j $31
 
 	nop

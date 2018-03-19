@@ -7,7 +7,6 @@
 	.abicalls
 
 
-$END0:
 
 	.data
 	.globl	a
@@ -50,61 +49,59 @@ main:
 	beq	$2,$0,$ELSE2
 	nop
 $IF2:
-$END3:
-	b $END2
+	b $END_cond2
 	nop
 $ELSE2:
-$END4:
-	b $END2
+	b $END_cond2
 	nop
-$END2:	.set noreorder
+$END_cond2:	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-120
-	sw $fp,116($sp)
-	sw $31,112($sp)
+	addiu $sp,$sp,-148
+	sw $fp,144($sp)
+	sw $31,140($sp)
 	move $fp,$sp
 
+	sw $4,148($sp)
+	sw $5,152($sp)
+	sw $6,156($sp)
+	sw $7,160($sp)
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
 	li	$3, 0
 	slt	$2, $2, $3
-$END7:
-	beq	$2,$0,$ELSE6
+	beq	$2,$0,$ELSE5
 	nop
-$IF6:
+$IF5:
 	li	$2, 0
-$END8:
 	lui	$3, %hi(a)
 	lw	$3, %lo(a)($3)
 	lui	$3, %hi(a)
 	sw	$2, %lo(a)($3)
-	b $END6
+	b $END_cond5
 	nop
-$ELSE6:
+$ELSE5:
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
 	li	$3, 9
 	seq	$2, $2, $3
-$END9:
-	b $END6
+	b $END_cond5
 	nop
-$END6:
+$END_cond5:
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
-$END10:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,112($sp)
-	lw	$fp,116($sp)
-	addiu	$sp,$sp,120
+	lw	$31,140($sp)
+	lw	$fp,144($sp)
+	addiu	$sp,$sp,148
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,112($sp)
-	lw $fp,116($sp)
-	addiu $sp,$sp,120
+	lw $31,140($sp)
+	lw $fp,144($sp)
+	addiu $sp,$sp,148
 	j $31
 
 	nop

@@ -52,7 +52,7 @@ struct Context{
 	std::string funct_id = "";
 	std::vector<bindings> Variables;
 	bindings variable;
-	int totalStackArea = 12+104; //For the whole stack
+	int totalStackArea = 24+104; //For the whole stack ------------------modified
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
 	std::string AssignmentOperator = "df";
@@ -82,7 +82,7 @@ struct Context{
 	std::vector<std::string> Scopes;
 	int argument_no = 0;
 	bool parameter = false;
-	int max_offset = 0;
+	int max_offset = 16;   // modified
 	bool is_function_call = false;
 
 	char UnaryOperator;
@@ -104,9 +104,19 @@ struct Context{
 	std::string SHORTCIRCUIT;
 	std::string SHORTCIRCUIT2;
 
-	int eval[1000];
-};
+	int labels = 1;
 
+	int eval[1000];
+	std::vector<int> end_labels;
+	int lab =1;
+	bool SWreading = 0;
+	int case_counter = 0;
+	int no_cases = 0;
+};
+inline std::string labgen(Context& contxt)
+{
+	return std::to_string(contxt.labels++);
+}
 
 inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt){
 
@@ -292,6 +302,7 @@ inline void print_scopes(Context& contxt, std::ofstream& f){
 }
 
 inline std::string labelGenScope(Context& contxt) {
+
 
 	contxt.LastScope.push_back(std::to_string(contxt.LastScope.size()));
 	

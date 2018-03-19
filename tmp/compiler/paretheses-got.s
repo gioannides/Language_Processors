@@ -17,53 +17,51 @@
 main:
 	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-120
-	sw $fp,116($sp)
-	sw $31,112($sp)
+	addiu $sp,$sp,-148
+	sw $fp,144($sp)
+	sw $31,140($sp)
 	move $fp,$sp
 
+	sw $4,148($sp)
+	sw $5,152($sp)
+	sw $6,156($sp)
+	sw $7,160($sp)
 	li	$2, 122
 	li	$3, 6
 	li	$4, 7
 	add	$3, $3, $4
-$END4:
 	add	$2, $2, $3
 	li	$3, 322
 	add	$2, $2, $3
 	li	$3, 1
 	add	$2, $2, $3
-$END3:
 	li	$3, 12
 	li	$4, 22
 	li	$5, 12
 	li	$6, 89
 	add	$5, $5, $6
-$END7:
 	add	$4, $4, $5
 	li	$5, 34
 	add	$4, $4, $5
-$END6:
 	div	$3, $4
 	mflo	$3
 	li	$4, 1
 	add	$3, $3, $4
-$END5:
 	mult	$2, $3
 	mflo	$2
-$END2:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,112($sp)
-	lw	$fp,116($sp)
-	addiu	$sp,$sp,120
+	lw	$31,140($sp)
+	lw	$fp,144($sp)
+	addiu	$sp,$sp,148
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,112($sp)
-	lw $fp,116($sp)
-	addiu $sp,$sp,120
+	lw $31,140($sp)
+	lw $fp,144($sp)
+	addiu $sp,$sp,148
 	j $31
 
 	nop

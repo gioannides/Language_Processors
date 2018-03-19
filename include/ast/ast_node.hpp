@@ -1349,11 +1349,14 @@ class JumpStatement : public Node {
 			}			
 			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "break" && AssignmentExpressionPtr == NULL && !contxt.reading) {
 
-				if( contxt.LastScope.size() != 0 && contxt.BreakTracker.size() != 0){
-					file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
-					contxt.BreakTracker.pop_back();
-					file << std::endl << "\tnop";
+				//if( contxt.LastScope.size() != 0 && contxt.BreakTracker.size() != 0){
+				if(!contxt.SWreading && contxt.end_labels.size()>0){
+					file << std::endl << "\tb $label" << contxt.end_labels[contxt.end_labels.size()-1] ;
+					//file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
+				//	contxt.BreakTracker.pop_back();
+					file << std::endl << "\tnop\n";
 				}
+				//}
 			}
 			else if( IDENTIFIER == NULL && JUMP_TYPE != NULL && *JUMP_TYPE == "return" && !contxt.reading) {				
 			
@@ -1425,8 +1428,9 @@ class IterationStatement : public Node {
 
 	
 class SelectionStatement : public Node {
-
+	
 	public:
+
 		Expression* AssignmentExpressionPtr;
 		Statement* StatementPtr;
 		Statement* StatementPtr2;
@@ -1630,14 +1634,14 @@ class FunctionDefinition : public Node {
 			}
 			//std::cout << "start of compund" << contxt.funct_id << std::endl;
 			if( CompoundStatementPtr != NULL ) { // function_def.area is calculated here
-				contxt.totalStackArea = 12+104;
+				contxt.totalStackArea = 24+104;
 				contxt.reading = true;						// this flag is used to prevent writing asm on file<< while reading ahead
 				CompoundStatementPtr->render_asm(file,contxt);  // ...(file,initialized,function)
 				contxt.reading = false;
 			}
 			//std:: cout << "\nmax_offset" << contxt.max_offset << " " <<  contxt.funct_id <<"\n";
 			contxt.totalStackArea+=contxt.max_offset;
-			contxt.max_offset=0;
+			contxt.max_offset=16;
 			//print_scopes(contxt, file);
 			if(contxt.Scopes.size()>=1){
 				for (int k=0; k<contxt.Variables.size(); k++)
@@ -1645,8 +1649,8 @@ class FunctionDefinition : public Node {
 					{			
 						if(contxt.Scopes[j]==contxt.Variables[k].scope)
 						{
-							contxt.Variables[k].param_offset = contxt.Variables[k].offset;
-							contxt.Variables[k].offset += contxt.totalStackArea+4;
+							contxt.Variables[k].param_offset = contxt.Variables[k].offset-4;
+							contxt.Variables[k].offset += contxt.totalStackArea;
 						}
 					}
 				}
@@ -1665,10 +1669,10 @@ class FunctionDefinition : public Node {
 			file << std::endl << "\tsw $31," << contxt.totalStackArea-4 <<"($sp)";
 			file << std::endl << "\tmove $fp,$sp\n";
 
-			// for(int i=4; i<=7; i++) //shift by 4 all the parameters
-			// {
-			// 	file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
-			// }
+			 for(int i=4; i<=7; i++) //shift by 4 all the parameters
+			 {
+			 	file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
+			 }
 
 			contxt.variable.offset=contxt.totalStackArea-4;
 			if( CompoundStatementPtr != NULL ) {
@@ -1980,7 +1984,7 @@ inline void Statement::render_asm(std::ofstream& file,Context& contxt) {
 			else if( CompoundStatementPtr != NULL) {
 				CompoundStatementPtr->render_asm(file,contxt);
 			}
-		if( !contxt.ReadingSwitch){
+		if( !contxt.SWreading){
 			if( ExpressionStatementPtr != NULL) {		
 				ExpressionStatementPtr->render_asm(file,contxt);
 			}
@@ -2002,12 +2006,13 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 			std::string label_id = labelGen(contxt);
 			std::string WHILE = "$WHILE" + label_id;
 			std::string DO = "$DO" + label_id;
-			std::string END = "$END" + label_id;
+			std::string END = "$END_iter" + label_id;
 			std::string FOR = "$FOR" + label_id;
 			std::string BEGIN_ = "$BEGIN" + label_id;
 
 
-			if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
+			if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) 
+			{
 				contxt.BreakCounter++;
 				file << std::endl << BEGIN_ << ":";
 				
@@ -2088,7 +2093,8 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.BreakCounter--;
 			}
 
-			else if(ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL){
+			else if(ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "for" && ExpressionStatementPtr != NULL && ExpressionStatementPtr2 != NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL)
+			{
 				contxt.BreakCounter++;
 				ExpressionStatementPtr->render_asm(file,contxt);
 
@@ -2134,8 +2140,8 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 			std::string label_id = labelGen(contxt);
 			std::string ELSE = "$ELSE" + label_id;
 			std::string IF = "$IF" + label_id;
-			std::string END = "$END" + label_id;
-			std::string SWITCH = "$SWITCH" + label_id;
+			std::string END = "$END_sel" + label_id;
+			
 			
 
 			if( SELECTIVE_IF != NULL && SELECTIVE_SWITCH == NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {
@@ -2173,51 +2179,83 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 			}
 						
 
-			else if( SELECTIVE_IF == NULL && SELECTIVE_SWITCH != NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {					std::string label_idS;
-					std::string SWITCH = "$SWITCH";
-					contxt.LastScope.push_back(SWITCH);
+			else if( SELECTIVE_IF == NULL && SELECTIVE_SWITCH != NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) 
+		 	{				
+
+		 		//	std::string label_idS;
+		 		contxt.Regs++;
+				contxt.lab++;
+				int l=contxt.lab;
+				//int l;
+				// if(!contxt.SWreading){
+				// 	l=contxt.lab;
+				// }
+				//std::string SWITCH_END = "$SWITCH_END" + label_id;
+				contxt.end_labels.push_back(l);
+				AssignmentExpressionPtr->render_asm(file, contxt);
+				contxt.Regs++;
 				
-					
-
-					if( contxt.BreakTracker.size() != 0 && contxt.LastScope.size() > 0 && contxt.SwitchControl != 1 && !contxt.inCase){
-							file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
-							//contxt.BreakTracker.pop_back();
-							file << std::endl << "\tnop";
-					}
-
-					
-					contxt.SwitchControl++;
-					contxt.BreakCounter++;
-
-				if( contxt.SwitchControl == 1 || contxt.inCase){
-
-					
-
-					contxt.rhs_of_expression = true;
-					AssignmentExpressionPtr->render_asm(file,contxt);
-					contxt.rhs_of_expression = false;			
-
-					contxt.BreakTracker.push_back(contxt.BreakCounter);
-					contxt.Regs++;
-					contxt.ReadingSwitch = true;
-					StatementPtr->render_asm(file,contxt);
-					contxt.ReadingSwitch = false;
-					contxt.Regs--;			
-
-					
-				//	label_idS = labelGen(contxt);
-					//SWITCH = "$SWITCH" + label_idS;
-					
-
-					contxt.EndSwitchLoop.push_back(SWITCH);
-					contxt.Regs++;
-					StatementPtr->render_asm(file,contxt);
-					contxt.Regs--;
-				
-					
-					
-					
+				contxt.SWreading=true;				
+				StatementPtr->render_asm(file, contxt);
+				contxt.SWreading=false;
+				contxt.Regs--;
+				if(!contxt.reading){
+				file << "\n\tb $label" << l;
+				file << "\n\tnop\n";
+				} 
+				contxt.no_cases=0;
+				contxt.case_counter=l;
+				StatementPtr->render_asm(file, contxt);
+				if(!contxt.reading){
+					file << "\n$label" << l << ":\n";
 				}
+				//file << SWITCH_END << ":";
+				contxt.end_labels.pop_back();
+				// 	contxt.LastScope.push_back(SWITCH);
+				contxt.case_counter-=(contxt.no_cases-1);
+				contxt.lab--;
+				contxt.Regs--;
+					
+
+				// 	if( contxt.BreakTracker.size() != 0 && contxt.LastScope.size() > 0 && contxt.SwitchControl != 1 && !contxt.inCase){
+				// 			file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
+				// 			//contxt.BreakTracker.pop_back();
+				// 			file << std::endl << "\tnop";
+				// 	}
+
+					
+				// 	contxt.SwitchControl++;
+				// 	contxt.BreakCounter++;
+
+				// if( contxt.SwitchControl == 1 || contxt.inCase){
+
+					
+
+				// 	contxt.rhs_of_expression = true;
+				// 	AssignmentExpressionPtr->render_asm(file,contxt);
+				// 	contxt.rhs_of_expression = false;			
+
+				// 	contxt.BreakTracker.push_back(contxt.BreakCounter);
+				// 	contxt.Regs++;
+				// 	contxt.ReadingSwitch = true;
+				// 	StatementPtr->render_asm(file,contxt);
+				// 	contxt.ReadingSwitch = false;
+				// 	contxt.Regs--;			
+
+					
+				// //	label_idS = labelGen(contxt);
+				// 	//SWITCH = "$SWITCH" + label_idS;
+					
+
+				// 	contxt.EndSwitchLoop.push_back(SWITCH);
+				// 	contxt.Regs++;
+				// 	StatementPtr->render_asm(file,contxt);
+				// 	contxt.Regs--;
+				
+					
+					
+					
+				// }
 
 
 				
@@ -2225,17 +2263,17 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 			
 					
 					
-				if(contxt.SwitchControl!=0){
-					contxt.SwitchControl--;
-				}
-					contxt.BreakCounter--;
+				// if(contxt.SwitchControl!=0){
+				// 	contxt.SwitchControl--;
+				// }
+				// 	contxt.BreakCounter--;
 					
 				
 					
 			}
-			if(contxt.LastScope.size() > 0 && !contxt.ReadingSwitch && contxt.VectorSize >= contxt.Cases.size() && contxt.VectorSize != 0){
-				file << std::endl << contxt.LastScope[contxt.LastScope.size()-1] << ":";
-			}
+			// if(contxt.LastScope.size() > 0 && !contxt.ReadingSwitch && contxt.VectorSize >= contxt.Cases.size() && contxt.VectorSize != 0){
+			// 	file << std::endl << contxt.LastScope[contxt.LastScope.size()-1] << ":";
+			// }
 			//contxt.inCase = false;
 		}
 
@@ -2249,37 +2287,50 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 				
 
 			if( LABELED_TYPE != NULL && ConstantExpressionPtr != NULL && *LABELED_TYPE == "case" && StatementPtr != NULL) {
+				//std::string label_id = labelGen(contxt); //this might cause problems with uniqueness
+				int case_no=contxt.case_counter++;
 				
-				if(!contxt.ReadingSwitch){
+				
+				if(contxt.SWreading){
+				ConstantExpressionPtr->render_asm(file, contxt);
+				file << std::endl << "\tbeq $" << contxt.Regs << ",$" << contxt.Regs+1 << ",$CASE" << contxt.lab << case_no-1;
+				file << std::endl << "\tnop\n";
+				}
+				else {
+				file << std::endl << "$CASE" << contxt.lab << case_no << ":";
+				StatementPtr->render_asm(file, contxt);
+				}
+				contxt.no_cases++;
+				// if(!contxt.ReadingSwitch){
 					
-					if( contxt.Cases.size() != 0 && contxt.VectorSize < contxt.Cases.size()){
-						file <<  std::endl << contxt.Cases[contxt.VectorSize] << ":";
-						contxt.VectorSize++;
+				// 	if( contxt.Cases.size() != 0 && contxt.VectorSize < contxt.Cases.size()){
+				// 		file <<  std::endl << contxt.Cases[contxt.VectorSize] << ":";
+				// 		contxt.VectorSize++;
 						
 						
-						StatementPtr->render_asm(file,contxt);
-					}					
+				// 		StatementPtr->render_asm(file,contxt);
+				// 	}					
 					
 					
-				}
-				else if(contxt.ReadingSwitch){
+				// }
+				// else if(contxt.ReadingSwitch){
 					
-					contxt.inCase = true;
-					std::string label_id = labelGen(contxt);	
-					std::string CASE = "$CASE" + label_id ;
+				// 	contxt.inCase = true;
+				// 	std::string label_id = labelGen(contxt);	
+				// 	std::string CASE = "$CASE" + label_id ;
 					
-						contxt.rhs_of_expression = true;
-						ConstantExpressionPtr->render_asm(file,contxt); //li in register 3
-						contxt.rhs_of_expression = false;
+				// 		contxt.rhs_of_expression = true;
+				// 		ConstantExpressionPtr->render_asm(file,contxt); //li in register 3
+				// 		contxt.rhs_of_expression = false;
 
-						file << std::endl << "\tbeq\t$2,$3," << CASE;  //beq
+				// 		file << std::endl << "\tbeq\t$2,$3," << CASE;  //beq
 
-						contxt.Cases.push_back(CASE);
-						file << std::endl << "\tnop";				//nop
-					contxt.SwitchControl = 0;
-					contxt.inCase = false;
+				// 		contxt.Cases.push_back(CASE);
+				// 		file << std::endl << "\tnop";				//nop
+				// 	contxt.SwitchControl = 0;
+				// 	contxt.inCase = false;
 					
-				}
+				// }
 				
 				
 			}

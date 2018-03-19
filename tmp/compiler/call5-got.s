@@ -17,28 +17,31 @@
 test_add:
 	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-120
-	sw $fp,116($sp)
-	sw $31,112($sp)
+	addiu $sp,$sp,-148
+	sw $fp,144($sp)
+	sw $31,140($sp)
 	move $fp,$sp
 
-	lw	$2, 124($sp) #a
-	lw	$3, 128($sp) #b
+	sw $4,148($sp)
+	sw $5,152($sp)
+	sw $6,156($sp)
+	sw $7,160($sp)
+	lw	$2, 148($sp) #a
+	lw	$3, 152($sp) #b
 	add	$2, $2, $3
-$END2:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,112($sp)
-	lw	$fp,116($sp)
-	addiu	$sp,$sp,120
+	lw	$31,140($sp)
+	lw	$fp,144($sp)
+	addiu	$sp,$sp,148
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,112($sp)
-	lw $fp,116($sp)
-	addiu $sp,$sp,120
+	lw $31,140($sp)
+	lw $fp,144($sp)
+	addiu $sp,$sp,148
 	j $31
 
 	nop
@@ -59,11 +62,15 @@ $END2:
 main:
 	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-120
-	sw $fp,116($sp)
-	sw $31,112($sp)
+	addiu $sp,$sp,-148
+	sw $fp,144($sp)
+	sw $31,140($sp)
 	move $fp,$sp
 
+	sw $4,148($sp)
+	sw $5,152($sp)
+	sw $6,156($sp)
+	sw $7,160($sp)
 	sw $1,108($sp)
 	sw $2,104($sp)
 	sw $3,100($sp)
@@ -89,15 +96,12 @@ main:
 	sw $23,20($sp)
 	sw $24,16($sp)
 	sw $25,12($sp)
-	sw $31,8($sp)
 	li	$2, 4
-$END6:
-	sw	$2, 4($sp) #a
+	sw	$2, 0($sp) #a
 
 	move	$4, $2 #load parameter 1
 	li	$2, 54
-$END7:
-	sw	$2, 8($sp) #b
+	sw	$2, 4($sp) #b
 
 	move	$5, $2 #load parameter 2
 	.option pic
@@ -128,22 +132,20 @@ $END7:
 	lw $22,24($sp)
 	lw $23,20($sp)
 	lw $24,16($sp)
-	lw $31,12($sp)
 	move $2, $25
-$END5:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,112($sp)
-	lw	$fp,116($sp)
-	addiu	$sp,$sp,120
+	lw	$31,140($sp)
+	lw	$fp,144($sp)
+	addiu	$sp,$sp,148
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,112($sp)
-	lw $fp,116($sp)
-	addiu $sp,$sp,120
+	lw $31,140($sp)
+	lw $fp,144($sp)
+	addiu $sp,$sp,148
 	j $31
 
 	nop

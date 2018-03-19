@@ -7,7 +7,6 @@
 	.abicalls
 
 
-$END0:
 
 	.data
 	.globl	a
@@ -46,86 +45,81 @@ a:
 	.ent	main
 	.type	main, @function
 main:
-
-$END2:	.set noreorder
+	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-124
-	sw $fp,120($sp)
-	sw $31,116($sp)
+	addiu $sp,$sp,-152
+	sw $fp,148($sp)
+	sw $31,144($sp)
 	move $fp,$sp
 
+	sw $4,152($sp)
+	sw $5,156($sp)
+	sw $6,160($sp)
+	sw $7,164($sp)
 	lui	$2, %hi(a)
 	lw	$2, %lo(a)($2)
 	li	$3, 97
 	add	$2, $2, $3
-$END4:
-	sw	$2,112($sp) #x
+	sw	$2,140($sp) #x
 
-$DO5:
-$DO7:
-$DO9:
+$DO2:
+$DO4:
+$DO6:
 	li	$2, 1
-$END11:
-	lw	$3, 112($sp) #x
+	lw	$3, 140($sp) #x
 
 	add	$2, $2, $3
-	sw	$2,112($sp) #x
+	sw	$2,140($sp) #x
 
 	li	$2, 0
-$END12:
-	beq	$2,$0,$END9
+	beq	$2,$0,$END_iter6
 	nop
-	b $DO9
+	b $DO6
 	nop
-$END9:
+$END_iter6:
 	li	$2, 2
-$END13:
-	lw	$3, 112($sp) #x
+	lw	$3, 140($sp) #x
 
 	sub	$2, $3, $2
-	sw	$2,112($sp) #x
+	sw	$2,140($sp) #x
 
-	lw	$2, 112($sp) #x
+	lw	$2, 140($sp) #x
 	li	$3, 50
 	sgt	$2, $2, $3
-$END14:
-	beq	$2,$0,$END7
+	beq	$2,$0,$END_iter4
 	nop
-	b $DO7
+	b $DO4
 	nop
-$END7:
-	lw	$2, 112($sp) #x
+$END_iter4:
+	lw	$2, 140($sp) #x
 	li	$3, 1
 	sub	$2, $2, $3
-$END15:
-	lw	$3, 112($sp) #x
+	lw	$3, 140($sp) #x
 
-	sw	$2,112($sp) #x
+	sw	$2,140($sp) #x
 
-	lw	$2, 112($sp) #x
+	lw	$2, 140($sp) #x
 	li	$3, 1
 	sgt	$2, $2, $3
-$END16:
-	beq	$2,$0,$END5
+	beq	$2,$0,$END_iter2
 	nop
-	b $DO5
+	b $DO2
 	nop
-$END5:
-	lw	$2, 112($sp) #x
-$END17:
+$END_iter2:
+	lw	$2, 140($sp) #x
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,144($sp)
+	lw	$fp,148($sp)
+	addiu	$sp,$sp,152
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,116($sp)
-	lw $fp,120($sp)
-	addiu $sp,$sp,124
+	lw $31,144($sp)
+	lw $fp,148($sp)
+	addiu $sp,$sp,152
 	j $31
 
 	nop

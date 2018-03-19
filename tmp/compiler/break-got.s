@@ -15,63 +15,57 @@
 	.ent	main
 	.type	main, @function
 main:
-
-$END1:
-$END2:	.set noreorder
+	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-132
-	sw $fp,128($sp)
-	sw $31,124($sp)
+	addiu $sp,$sp,-160
+	sw $fp,156($sp)
+	sw $31,152($sp)
 	move $fp,$sp
 
-	sw	$0, 120($sp) #b
+	sw $4,160($sp)
+	sw $5,164($sp)
+	sw $6,168($sp)
+	sw $7,172($sp)
+	sw	$0, 148($sp) #b
 
 	li	$2, 9
-$END4:
-	sw	$2,116($sp) #a
+	sw	$2,144($sp) #a
 
 	li	$2, 2
-$END5:
-	sw	$2,112($sp) #c
+	sw	$2,140($sp) #c
 
-$BEGIN6:
-	lw	$2, 116($sp) #a
-$END7:
-	beq	$2,$0,$END6
+$BEGIN2:
+	lw	$2, 144($sp) #a
+	beq	$2,$0,$END_iter2
 	nop
-$WHILE6:
-	lw	$2, 120($sp) #b
-$END9:
-	lw	$3, 116($sp) #a
+$WHILE2:
+	lw	$2, 148($sp) #b
+	lw	$3, 144($sp) #a
 
-	sw	$2,116($sp) #a
+	sw	$2,144($sp) #a
 
-	b	$END6
-	nop
 	li	$2, 465
-$END10:
-	lw	$3, 112($sp) #c
+	lw	$3, 140($sp) #c
 
-	sw	$2,112($sp) #c
+	sw	$2,140($sp) #c
 
-	b $BEGIN6
+	b $BEGIN2
 	nop
-$END6:
-	lw	$2, 112($sp) #c
-$END11:
+$END_iter2:
+	lw	$2, 140($sp) #c
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,124($sp)
-	lw	$fp,128($sp)
-	addiu	$sp,$sp,132
+	lw	$31,152($sp)
+	lw	$fp,156($sp)
+	addiu	$sp,$sp,160
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,124($sp)
-	lw $fp,128($sp)
-	addiu $sp,$sp,132
+	lw $31,152($sp)
+	lw $fp,156($sp)
+	addiu $sp,$sp,160
 	j $31
 
 	nop

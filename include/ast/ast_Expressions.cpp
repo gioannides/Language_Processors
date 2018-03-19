@@ -237,7 +237,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							contxt.regType[contxt.Regs]='u';
 						}
 						else if(contxt.float_){
-							std::string label_id = labelGen(contxt);
+							std::string label_id = labgen(contxt);
 							std::string END = "$ENDLT" + label_id;
 							std::string NOT_LESS = "$NOT_LT" + label_id;
 
@@ -263,7 +263,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							contxt.regType[contxt.Regs]='u';
 						}
 						else if(contxt.float_){
-							std::string label_id = labelGen(contxt);
+							std::string label_id = labgen(contxt);
 							std::string END = "$ENDGT" + label_id;
 							std::string NOT_GREATER = "$NOT_GT" + label_id;
 
@@ -289,7 +289,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							contxt.regType[contxt.Regs]='u';
 						}
 						else if(contxt.float_){
-							std::string label_id = labelGen(contxt);
+							std::string label_id = labgen(contxt);
 							std::string END = "$ENDLE" + label_id;
 							std::string NOT_LE = "$NOT_LE" + label_id;
 
@@ -315,7 +315,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							contxt.regType[contxt.Regs]='u';
 						}
 						else if(contxt.float_){
-							std::string label_id = labelGen(contxt);
+							std::string label_id = labgen(contxt);
 							std::string END = "$ENDGE" + label_id;
 							std::string NOT_GE = "$NOT_GE" + label_id;
 
@@ -379,7 +379,7 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);	
 					if( *OPERATOR == "==" ){
 						if(contxt.float_){
-							std::string label_id = labelGen(contxt);
+							std::string label_id = labgen(contxt);
 							std::string END = "$ENDEQ" + label_id;
 							std::string NOT_EQ = "$NOT_EQ" + label_id;
 
@@ -403,7 +403,7 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 					else if(  *OPERATOR == "!=" ){
 
 						if(contxt.float_){
-							std::string label_id = labelGen(contxt);
+							std::string label_id = labgen(contxt);
 							std::string END = "$ENDEQ" + label_id;
 							std::string NOT_EQ = "$NOT_EQ" + label_id;
 
@@ -533,7 +533,7 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 
 				std::string SHORTCIRCUIT, label_id;
-				label_id = labelGenLogical(contxt);
+				label_id = labgen(contxt);
 				SHORTCIRCUIT = "$SHORTCIRCUIT_AND" + label_id;
 				file << std::endl << "\tsne $" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
 				file << std::endl << "\tbeq $0,$" << contxt.Regs+1 << "," << SHORTCIRCUIT;  
@@ -568,7 +568,7 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 				LogicalOrExpressionPtr->render_asm(file,contxt);
 				
 				std::string SHORTCIRCUIT, PASS, label_id;
-				label_id = labelGenLogical(contxt);
+				label_id = labgen(contxt);
 				SHORTCIRCUIT = "$SHORTCIRCUIT_OR" + label_id;
 				file <<  std::endl << "\tsne $"  << contxt.Regs+1  << ",$0,$" << contxt.Regs+1;
 				file<<   std::endl << "\tbne $" << contxt.Regs+1 << ",$0," << SHORTCIRCUIT; 
@@ -654,7 +654,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						{
 							file << "\n\tsw $" << i << "," << offset-(i*4) << "($sp)";
 						}
-						file << "\n\tsw $31," << offset-(i*4) << "($sp)"; 
+						//file << "\n\tsw $31," << offset-(i*4) << "($sp)"; 
 					}
 					contxt.is_function_call=true;
 					//contxt.lhs_of_assignment=true;
@@ -678,7 +678,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						{
 							file << "\n\tlw $" << i << "," << offset-(i*4) << "($sp)";
 						}
-						file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
+						//file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
 						file << "\n\tmove $" << contxt.Regs+1 << ", $25"; 
 					}
 				}
@@ -892,10 +892,10 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 					
 inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contxt) {
 
-			std::string label_id = labelGen(contxt);
+			std::string label_id = labgen(contxt);
 			std::string ELSE = "$ELSE" + label_id;
 			std::string IF = "$IF" + label_id;
-			std::string END = "$END" + label_id;
+			std::string END = "$END_cond" + label_id;
 			
 			
 			if( LogicalORExpression != NULL && ExpressioN == NULL && ConditionalExpressionPtr == NULL) {
@@ -921,8 +921,9 @@ inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contx
 				contxt.rhs_of_expression = false;
 				file << "\n\tb " << END;
 				file << std::endl << "\tnop";
+				file << std::endl << END << ":";
 			}
-			file << std::endl << END << ":";
+			
 			
 }
 				
@@ -966,7 +967,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 							file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", " << contxt.Variables[ki+contxt.argument_no-1].param_offset << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << "\n";	contxt.regType[contxt.Regs+1]='f';
 						}
 						
-						if(contxt.argument_no<=4)
+						if(contxt.argument_no<=4)//contxt.Regs++ in
 						{
 							if(contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
 							{

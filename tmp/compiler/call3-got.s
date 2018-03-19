@@ -17,36 +17,39 @@
 test_add:
 	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-120
-	sw $fp,116($sp)
-	sw $31,112($sp)
+	addiu $sp,$sp,-148
+	sw $fp,144($sp)
+	sw $31,140($sp)
 	move $fp,$sp
 
-	lw	$2, 124($sp) #a
-	lw	$3, 128($sp) #b
+	sw $4,148($sp)
+	sw $5,152($sp)
+	sw $6,156($sp)
+	sw $7,160($sp)
+	lw	$2, 148($sp) #a
+	lw	$3, 152($sp) #b
 	add	$2, $2, $3
-	lw	$3, 132($sp) #c
+	lw	$3, 156($sp) #c
 	add	$2, $2, $3
-	lw	$3, 136($sp) #d
+	lw	$3, 160($sp) #d
 	add	$2, $2, $3
-	lw	$3, 140($sp) #e
+	lw	$3, 164($sp) #e
 	add	$2, $2, $3
-	lw	$3, 144($sp) #f
+	lw	$3, 168($sp) #f
 	add	$2, $2, $3
-$END2:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,112($sp)
-	lw	$fp,116($sp)
-	addiu	$sp,$sp,120
+	lw	$31,140($sp)
+	lw	$fp,144($sp)
+	addiu	$sp,$sp,148
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,112($sp)
-	lw $fp,116($sp)
-	addiu $sp,$sp,120
+	lw $31,140($sp)
+	lw $fp,144($sp)
+	addiu $sp,$sp,148
 	j $31
 
 	nop
@@ -65,121 +68,112 @@ $END2:
 	.ent	main
 	.type	main, @function
 main:
-
-$END4:
-$END5:	.set noreorder
+	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-128
-	sw $fp,124($sp)
-	sw $31,120($sp)
+	addiu $sp,$sp,-156
+	sw $fp,152($sp)
+	sw $31,148($sp)
 	move $fp,$sp
 
+	sw $4,156($sp)
+	sw $5,160($sp)
+	sw $6,164($sp)
+	sw $7,168($sp)
 	li	$2, 5
-$END7:
-	sw	$2,116($sp) #i
+	sw	$2,144($sp) #i
 
 	li	$2, 10
-$END8:
-	sw	$2,112($sp) #z
+	sw	$2,140($sp) #z
 
-	sw $1,108($sp)
-	sw $2,104($sp)
-	sw $3,100($sp)
-	sw $4,96($sp)
-	sw $5,92($sp)
-	sw $6,88($sp)
-	sw $7,84($sp)
-	sw $8,80($sp)
-	sw $9,76($sp)
-	sw $10,72($sp)
-	sw $11,68($sp)
-	sw $12,64($sp)
-	sw $13,60($sp)
-	sw $14,56($sp)
-	sw $15,52($sp)
-	sw $16,48($sp)
-	sw $17,44($sp)
-	sw $18,40($sp)
-	sw $19,36($sp)
-	sw $20,32($sp)
-	sw $21,28($sp)
-	sw $22,24($sp)
-	sw $23,20($sp)
-	sw $24,16($sp)
-	sw $25,12($sp)
-	sw $31,8($sp)
-	lw	$2, 116($sp) #i
-$END10:
-	sw	$2, 4($sp) #a
+	sw $1,136($sp)
+	sw $2,132($sp)
+	sw $3,128($sp)
+	sw $4,124($sp)
+	sw $5,120($sp)
+	sw $6,116($sp)
+	sw $7,112($sp)
+	sw $8,108($sp)
+	sw $9,104($sp)
+	sw $10,100($sp)
+	sw $11,96($sp)
+	sw $12,92($sp)
+	sw $13,88($sp)
+	sw $14,84($sp)
+	sw $15,80($sp)
+	sw $16,76($sp)
+	sw $17,72($sp)
+	sw $18,68($sp)
+	sw $19,64($sp)
+	sw $20,60($sp)
+	sw $21,56($sp)
+	sw $22,52($sp)
+	sw $23,48($sp)
+	sw $24,44($sp)
+	sw $25,40($sp)
+	lw	$2, 144($sp) #i
+	sw	$2, 0($sp) #a
 
 	move	$4, $2 #load parameter 1
-	lw	$2, 112($sp) #z
-$END11:
-	sw	$2, 8($sp) #b
+	lw	$2, 140($sp) #z
+	sw	$2, 4($sp) #b
 
 	move	$5, $2 #load parameter 2
 	li	$2, 3
-$END12:
-	sw	$2, 12($sp) #c
+	sw	$2, 8($sp) #c
 
 	move	$6, $2 #load parameter 3
 	li	$2, 4
-$END13:
-	sw	$2, 16($sp) #d
+	sw	$2, 12($sp) #d
 
 	move	$7, $2 #load parameter 4
 	li	$2, 5
-$END14:
-	sw	$2, 20($sp) #e
+	sw	$2, 16($sp) #e
 
 	li	$2, 6
-$END15:
-	sw	$2, 24($sp) #f
+	sw	$2, 20($sp) #f
 
 	.option pic
 	jal test_add
 	nop
 	move	$25, $2
-	lw $1,108($sp)
-	lw $2,104($sp)
-	lw $3,100($sp)
-	lw $4,96($sp)
-	lw $5,92($sp)
-	lw $6,88($sp)
-	lw $7,84($sp)
-	lw $8,80($sp)
-	lw $9,76($sp)
-	lw $10,72($sp)
-	lw $11,68($sp)
-	lw $12,64($sp)
-	lw $13,60($sp)
-	lw $14,56($sp)
-	lw $15,52($sp)
-	lw $16,48($sp)
-	lw $17,44($sp)
-	lw $18,40($sp)
-	lw $19,36($sp)
-	lw $20,32($sp)
-	lw $21,28($sp)
-	lw $22,24($sp)
-	lw $23,20($sp)
-	lw $24,16($sp)
-	lw $31,12($sp)
+	lw $1,136($sp)
+	lw $2,132($sp)
+	lw $3,128($sp)
+	lw $4,124($sp)
+	lw $5,120($sp)
+	lw $6,116($sp)
+	lw $7,112($sp)
+	lw $8,108($sp)
+	lw $9,104($sp)
+	lw $10,100($sp)
+	lw $11,96($sp)
+	lw $12,92($sp)
+	lw $13,88($sp)
+	lw $14,84($sp)
+	lw $15,80($sp)
+	lw $16,76($sp)
+	lw $17,72($sp)
+	lw $18,68($sp)
+	lw $19,64($sp)
+	lw $20,60($sp)
+	lw $21,56($sp)
+	lw $22,52($sp)
+	lw $23,48($sp)
+	lw $24,44($sp)
 	move $2, $25
-$END9:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,120($sp)
-	lw	$fp,124($sp)
-	addiu	$sp,$sp,128
+	lw	$31,148($sp)
+	lw	$fp,152($sp)
+	addiu	$sp,$sp,156
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,120($sp)
-	lw $fp,124($sp)
-	addiu $sp,$sp,128
+	lw $31,148($sp)
+	lw $fp,152($sp)
+	addiu $sp,$sp,156
 	j $31
 
 	nop

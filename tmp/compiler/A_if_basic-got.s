@@ -15,44 +15,44 @@
 	.ent	main
 	.type	main, @function
 main:
-
-$END1:	.set noreorder
+	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-124
-	sw $fp,120($sp)
-	sw $31,116($sp)
+	addiu $sp,$sp,-152
+	sw $fp,148($sp)
+	sw $31,144($sp)
 	move $fp,$sp
 
+	sw $4,152($sp)
+	sw $5,156($sp)
+	sw $6,160($sp)
+	sw $7,164($sp)
 	li	$2, 1
-$END3:
-	sw	$2,112($sp) #x
+	sw	$2,140($sp) #x
 
 	li	$2, 4
-$END4:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,144($sp)
+	lw	$fp,148($sp)
+	addiu	$sp,$sp,152
 	j	$31
 
 	nop
 
 	li	$2, 5
-$END5:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,116($sp)
-	lw	$fp,120($sp)
-	addiu	$sp,$sp,124
+	lw	$31,144($sp)
+	lw	$fp,148($sp)
+	addiu	$sp,$sp,152
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,116($sp)
-	lw $fp,120($sp)
-	addiu $sp,$sp,124
+	lw $31,144($sp)
+	lw $fp,148($sp)
+	addiu $sp,$sp,152
 	j $31
 
 	nop
