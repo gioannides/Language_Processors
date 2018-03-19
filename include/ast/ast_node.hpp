@@ -891,7 +891,30 @@ class StorageClassSpecifiers : public Node {
 		~StorageClassSpecifiers() {}
 
 
-		void render_asm(std::ofstream& file,Context& contxt) {}
+		void render_asm(std::ofstream& file,Context& contxt) {
+			if(TYPES != NULL){
+
+				if(*TYPES == "extern"){
+					contxt.variable.StorageClass = "extern";	
+				}
+
+				else if( *TYPES == "static"){
+					contxt.variable.StorageClass = "extern";
+
+				}
+				
+				else if(*TYPES == "register"){
+					contxt.variable.StorageClass = "extern";
+				}
+
+				else if(*TYPES == "typedef"){
+					contxt.variable.StorageClass = "extern";
+				}
+
+			}
+		
+
+		}
 };
 
 /* NEW STUFF */
@@ -941,7 +964,8 @@ class SpecifierQualifierList : public Node {
 
 
 		~SpecifierQualifierList() {}
-
+	
+		void render_asm(std::ofstream& file, Context& contxt) ; 
 
 };
 
@@ -1123,6 +1147,17 @@ class TypeName : public Node {
 
 		~TypeName() {}
 
+		void render_asm(std::ofstream& file,Context& contxt){
+		
+			if(SpecifierQualifierListPtr != NULL){
+
+				SpecifierQualifierListPtr->render_asm(file,contxt);
+			}
+			/*else if(AbstractDeclaratorPtr != NULL){
+				AbstractDeclaratorPtr->render_asm(file,contxt);		TODO: IMPLEMENT IT
+			}*/
+		}
+
 
 };
 
@@ -1151,7 +1186,7 @@ class TypeSpecifier : public Node {
 
 		void render_asm(std::ofstream& file,Context& contxt) {
 
-			if( TYPES != NULL){
+			if( TYPES != NULL && !contxt.sizeof_){
 			std::string types = *TYPES;			// Require conversion to be used
 
 				if (types=="char"){
@@ -1189,7 +1224,7 @@ class TypeSpecifier : public Node {
 					contxt.is_unsigned = true;
 				}
 
-				if(contxt.functionReturnType){
+				if(contxt.functionReturnType && !contxt.sizeof_){
 
 					contxt.functionReturnTypetemp = *TYPES;
 
@@ -1209,6 +1244,36 @@ class TypeSpecifier : public Node {
 				// }
 
 			}
+			if(contxt.sizeof_ && TYPES != NULL){
+					if(*TYPES == "int"){
+						contxt.SizeOf = 4;
+					}
+					else if(*TYPES == "float"){
+						contxt.SizeOf = 4;
+					}
+					else if(*TYPES == "char"){
+						contxt.SizeOf = 1;
+					}
+					else if(*TYPES == "short"){
+						contxt.SizeOf = 2;
+					}
+					else if(*TYPES == "long"){
+						contxt.SizeOf = 8;
+					}
+					else if(*TYPES == "unsigned"){
+						contxt.SizeOf = 4;
+					}
+					else if(*TYPES == "signed"){
+						contxt.SizeOf = 4;
+					}
+					else if(*TYPES == "double"){
+						contxt.SizeOf = 8;
+					}
+					else if(*TYPES == "void"){
+						contxt.SizeOf = 1;
+					}				
+
+				}
 		}
 
 		~TypeSpecifier() {}
@@ -1262,9 +1327,10 @@ class DeclarationSpecifiers : public Node{
 		void render_asm(std::ofstream& file,Context& contxt) {
 
 			if(StorageClassSpec != NULL) {
-				//StorageClassSpec->render_asm(file,contxt);	 //TODO: may have to implement this
+				StorageClassSpec->render_asm(file,contxt);	 //TODO: may have to implement this
 			}
 			else if(TypeSpec != NULL) {
+				
 				TypeSpec->render_asm(file,contxt); 
 			}
 			else if(TypeQuaLifier != NULL) {
@@ -1860,7 +1926,12 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				}
 				else
 				{
-					contxt.variable.scope = contxt.Scopes[contxt.Scopes.size()-1]; //assign the variable the scope it is in
+					if(contxt.variable.StorageClass == "extern"){
+						contxt.variable.scope = "global";
+					}
+					else{
+						contxt.variable.scope = contxt.Scopes[contxt.Scopes.size()-1]; //assign the variable the scope it is in
+					}
 					contxt.variable.id = *IDENTIFIER;	//if the portect flag is on then we are already inside the function , not reading the function name
 					if( !contxt.initialized ) 
 					{			//if the local declaration is not initialized, set it to 0
@@ -2341,6 +2412,25 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 			}
 			
 
+		}
+
+
+inline void SpecifierQualifierList::render_asm(std::ofstream& file, Context& contxt) {
+
+			if(TypeSpecifierPtr != NULL && SpecifierQualifierListPtr == NULL && TypeQualifierPtr == NULL){
+				TypeSpecifierPtr->render_asm(file,contxt);
+			}
+			else if(TypeSpecifierPtr != NULL && SpecifierQualifierListPtr != NULL && TypeQualifierPtr == NULL){
+				TypeSpecifierPtr->render_asm(file,contxt);
+				SpecifierQualifierListPtr->render_asm(file,contxt);				
+			}
+			/*else if(TypeSpecifierPtr == NULL && SpecifierQualifierListPtr != NULL && TypeQualifierPtr != NULL){		TODO: IMPLEMENT THEM
+				TypeQualifierPtr->render_asm(file,contxt);
+				SpecifierQualifierListPtr->render_asm(file,contxt);				
+			}
+			else if(TypeSpecifierPtr == NULL && SpecifierQualifierListPtr = NULL && TypeQualifierPtr != NULL){
+				TypeQualifierPtr->render_asm(file,contxt);				
+			}*/
 		}
 
 

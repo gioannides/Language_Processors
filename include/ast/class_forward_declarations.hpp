@@ -17,6 +17,7 @@ struct bindings {
 		std::string scope = "";		//name of scope the variable is in
 		int offset = 0;			//the stack offset saved on the stack to load it from
 		std::string DataType;
+		std::string StorageClass;
 		int param_offset = 0;
 	};
 
@@ -30,6 +31,9 @@ struct Context{
 	bool rhs_of_expression=false;
 	bool lhs_of_assignment=false;
 	std::string op_name="";
+
+	bool sizeof_=false;
+	int SizeOf=0;
 
 	int declarations_in_a_list=1;
 
@@ -363,6 +367,104 @@ inline std::string labelGen(Context& contxt) {
 	contxt.Labels.push_back(std::to_string(contxt.allocate));
 	return contxt.Labels[contxt.Labels.size()-1];
 		
+}
+
+
+inline void findSize(Context& contxt,std::string IDENTIFIER){
+			int i,j;
+			bool found = false;
+			for(i=contxt.Variables.size()-1; i>=0; i--) {
+				for (j=contxt.Scopes.size()-1; j>=0; j--)
+				{
+					if(contxt.Variables[i].scope == contxt.Scopes[j] && IDENTIFIER == contxt.Variables[i].id) 
+					{
+						found = true;
+						if(contxt.Variables[i].DataType == "int"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "float"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "char"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 1;
+						}
+						else if(contxt.Variables[i].DataType == "short"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 2;
+						}
+						else if(contxt.Variables[i].DataType == "long"){
+							if( contxt.SizeOf < 8)
+								contxt.SizeOf = 8;
+						}
+						else if(contxt.Variables[i].DataType == "unsigned"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "signed"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "double"){
+							if( contxt.SizeOf < 8)
+								contxt.SizeOf = 8;
+						}
+						else if(contxt.Variables[i].DataType == "void"){
+							if( contxt.SizeOf < 1)
+								contxt.SizeOf = 1;
+						}				
+						i = -1;
+						j = -1;
+					}									
+				}
+			  }
+			  if(!found){
+				for(i=contxt.Variables.size()-1; i>=0; i--) {
+					if(contxt.Variables[i].scope == "global" && IDENTIFIER == contxt.Variables[i].id) 
+					{
+						if(contxt.Variables[i].DataType == "int"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "float"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "char"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 1;
+						}
+						else if(contxt.Variables[i].DataType == "short"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 2;
+						}
+						else if(contxt.Variables[i].DataType == "long"){
+							if( contxt.SizeOf < 8)
+								contxt.SizeOf = 8;
+						}
+						else if(contxt.Variables[i].DataType == "unsigned"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "signed"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "double"){
+							if( contxt.SizeOf < 8)
+								contxt.SizeOf = 8;
+						}
+						else if(contxt.Variables[i].DataType == "void"){
+							if( contxt.SizeOf < 1)
+								contxt.SizeOf = 1;
+						}				
+						i = -1;
+						j = -1;
+						}									
+					}
+			}
 }
 
 inline std::string GetBinary32( float value )
