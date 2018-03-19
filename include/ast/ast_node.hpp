@@ -1298,6 +1298,19 @@ class TypeQualifier : public Node {
 
 		~TypeQualifier() {}
 
+		void render_asm(std::ofstream& file, Context& Contxt) {
+
+			if(TYPES != NULL && contxt.sizeof_){
+
+				if(*TYPES == "const"){
+					contxt.SizeOf = 4;
+				}
+				else if(*TYPES == "volatile"){
+					contxt.SizeOf = 4;
+				}
+			}
+		}
+
 };
 
 
@@ -2424,13 +2437,13 @@ inline void SpecifierQualifierList::render_asm(std::ofstream& file, Context& con
 				TypeSpecifierPtr->render_asm(file,contxt);
 				SpecifierQualifierListPtr->render_asm(file,contxt);				
 			}
-			/*else if(TypeSpecifierPtr == NULL && SpecifierQualifierListPtr != NULL && TypeQualifierPtr != NULL){		TODO: IMPLEMENT THEM
+			else if(TypeSpecifierPtr == NULL && SpecifierQualifierListPtr != NULL && TypeQualifierPtr != NULL){		
 				TypeQualifierPtr->render_asm(file,contxt);
 				SpecifierQualifierListPtr->render_asm(file,contxt);				
 			}
-			else if(TypeSpecifierPtr == NULL && SpecifierQualifierListPtr = NULL && TypeQualifierPtr != NULL){
+			else if(TypeSpecifierPtr == NULL && SpecifierQualifierListPtr == NULL && TypeQualifierPtr != NULL){
 				TypeQualifierPtr->render_asm(file,contxt);				
-			}*/
+			}
 		}
 
 
