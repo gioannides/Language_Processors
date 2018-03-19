@@ -461,7 +461,7 @@ MULTIPLICATIVE_EXPRESSION: CAST_EXPRESSION							{ $$ = new MultiplicativeExpres
 
 
 POSTFIX_EXPRESSION: PRIMARY_EXPRESSION				      				{ $$ = new PostFixExpression(NULL,$1,NULL,NULL,NULL,NULL); }
-		  | POSTFIX_EXPRESSION '[' EXPRESSION ']'		     			{ $$ = new PostFixExpression($1,NULL,$3,NULL,NULL,NULL); }
+		  | POSTFIX_EXPRESSION '[' EXPRESSION ']'		     			{ $$ = new PostFixExpression($1,NULL,$3,NULL,NULL,NULL); } //array
 		  | POSTFIX_EXPRESSION '(' ')'			      				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,NULL,NULL); }
 		  | POSTFIX_EXPRESSION '(' ARGUMENT_EXPRESSION_LIST ')' 			{ $$ = new PostFixExpression($1,NULL,NULL,$3,NULL,NULL);}
 		  | POSTFIX_EXPRESSION '.' IDENTIFIER		     				{ $$ = new PostFixExpression($1,NULL,NULL,NULL,$3,$2); }

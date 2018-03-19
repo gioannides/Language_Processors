@@ -21,16 +21,31 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 				contxt.Regs++;			
 				CaStExpression->render_asm(file,contxt);
 				
+				/*if(contxt.enum_constant){
+					//postfix_ops(contxt, file);
+					if( *OPERATOR == "*" ){
+						contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs]*contxt.enumeval[contxt.Regs+1];
+					}
+					else if(*OPERATOR == "/"){
+						contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs]/contxt.enumeval[contxt.Regs+1];
+					}
+					else if (*OPERATOR == "%")
+					{
+						contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs]%contxt.enumeval[contxt.Regs+1];
+						
+					}
+					
+				//}*/
 
-				if(!contxt.function){
+				if(!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					//postfix_ops(contxt, file);
 					if( *OPERATOR == "*" ){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs]*contxt.eval[contxt.Regs+1];
-						
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] * contxt.eval_f[contxt.Regs+1];
 					}
 					else if(*OPERATOR == "/"){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs]/contxt.eval[contxt.Regs+1];
-						
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] / contxt.eval_f[contxt.Regs+1];
 					}
 					else if (*OPERATOR == "%")
 					{
@@ -39,7 +54,7 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 					}
 					
 				}
-				if (contxt.function){
+				if (contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 					if( *OPERATOR == "*" ){
 						if(contxt.is_unsigned){
@@ -113,18 +128,38 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 				AdditiveExpressionPtr->render_asm(file,contxt);	
 				contxt.Regs++;
 				MultiplicativeExpressioN->render_asm(file,contxt);
-				if(!contxt.function){
+				/*if(contxt.enum_constant){
+					if( *OPERATOR == "+" ){
+						contxt.enumeval[contxt.Regs]+=contxt.enumeval[contxt.Regs+1];
+						contxt.enumeval[contxt.Regs+1]=0;
+						contxt.enumeval[contxt.Regs]+=contxt.enumeval[contxt.Regs+1];
+						contxt.enumeval[contxt.Regs+1]=0;
+						
+					}
+					else if(*OPERATOR == "-"){
+						contxt.enumeval[contxt.Regs]-=contxt.enumeval[contxt.Regs+1];
+						contxt.enumeval[contxt.Regs+1]=0;
+						contxt.enumeval[contxt.Regs]-=contxt.enumeval[contxt.Regs+1];
+						contxt.enumeval[contxt.Regs+1]=0;
+					}
+				//}*/
+				if(!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					//postfix_ops(contxt, file);
 					if( *OPERATOR == "+" ){
 						contxt.eval[contxt.Regs]+=contxt.eval[contxt.Regs+1];
 						contxt.eval[contxt.Regs+1]=0;
+						contxt.eval_f[contxt.Regs]+=contxt.eval_f[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs+1]=0;
+						
 					}
 					else if(*OPERATOR == "-"){
 						contxt.eval[contxt.Regs]-=contxt.eval[contxt.Regs+1];
 						contxt.eval[contxt.Regs+1]=0;
+						contxt.eval_f[contxt.Regs]-=contxt.eval_f[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs+1]=0;
 					}
 				}
-				if (contxt.function){
+				if (contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 					if( *OPERATOR == "+" ){
 						if(contxt.is_unsigned){
@@ -178,8 +213,20 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 				ShiftExpressionPtr->render_asm(file,contxt);				
 				contxt.Regs++;
 				AdditiVeExpression->render_asm(file,contxt);
+
+				/*if(contxt.enum_constant){
+					if( *OPERATOR == "<<" ){
+						contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] << contxt.enumeval[contxt.Regs+1];
+						contxt.enumeval[contxt.Regs+1]=0;
+						
+					}
+					else if(*OPERATOR == ">>"){
+						contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] >> contxt.enumeval[contxt.Regs+1];
+						contxt.enumeval[contxt.Regs+1]=0;
+					}
+				//}*/
 								
-				if(!contxt.function){
+				if(!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					//postfix_ops(contxt, file);
 					if( *OPERATOR == "<<" ){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] << contxt.eval[contxt.Regs+1];
@@ -190,7 +237,7 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 						contxt.eval[contxt.Regs+1]=0;
 					}
 				}
-				if (contxt.function){
+				if (contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 					if( *OPERATOR == "<<" ){
@@ -228,7 +275,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 				contxt.Regs++;
 				SHiftExpression->render_asm(file,contxt);
 				
-				if (contxt.function){
+				if (contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					//postfix_ops(contxt, file);
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);	
 					if( *OPERATOR == "<" ){
@@ -237,7 +284,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							contxt.regType[contxt.Regs]='u';
 						}
 						else if(contxt.float_){
-							std::string label_id = labgen(contxt);
+							std::string label_id = labelGen(contxt);
 							std::string END = "$ENDLT" + label_id;
 							std::string NOT_LESS = "$NOT_LT" + label_id;
 
@@ -263,7 +310,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							contxt.regType[contxt.Regs]='u';
 						}
 						else if(contxt.float_){
-							std::string label_id = labgen(contxt);
+							std::string label_id = labelGen(contxt);
 							std::string END = "$ENDGT" + label_id;
 							std::string NOT_GREATER = "$NOT_GT" + label_id;
 
@@ -289,7 +336,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							contxt.regType[contxt.Regs]='u';
 						}
 						else if(contxt.float_){
-							std::string label_id = labgen(contxt);
+							std::string label_id = labelGen(contxt);
 							std::string END = "$ENDLE" + label_id;
 							std::string NOT_LE = "$NOT_LE" + label_id;
 
@@ -315,7 +362,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 							contxt.regType[contxt.Regs]='u';
 						}
 						else if(contxt.float_){
-							std::string label_id = labgen(contxt);
+							std::string label_id = labelGen(contxt);
 							std::string END = "$ENDGE" + label_id;
 							std::string NOT_GE = "$NOT_GE" + label_id;
 
@@ -337,22 +384,49 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 					}
 					
 				}
-				if(!contxt.function){
+				/*if(contxt.enum_constant){
+					if( *OPERATOR == "<" ){
+						contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] < contxt.enumeval[contxt.Regs+1];
+					}
+						
+					else if(*OPERATOR == ">"){
+						contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] > contxt.enumeval[contxt.Regs+1];
+						
+					}
+					else if(*OPERATOR == "<=")
+					{
+						contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] <= contxt.enumeval[contxt.Regs+1];
+						
+					}
+					else if(*OPERATOR == ">=")
+					{
+						contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] >= contxt.enumeval[contxt.Regs+1];
+						
+					}
+					contxt.enumeval[contxt.Regs+1] =0;
+					contxt.enumeval[contxt.Regs] = 0;
+				//}*/
+				if(!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					if( *OPERATOR == "<" ){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] < contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] < contxt.eval_f[contxt.Regs+1];
 					}
 					else if(*OPERATOR == ">"){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] > contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] > contxt.eval_f[contxt.Regs+1];
 					}
 					else if(*OPERATOR == "<=")
 					{
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] <= contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] <= contxt.eval_f[contxt.Regs+1];
 					}
 					else if(*OPERATOR == ">=")
 					{
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] >= contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] >= contxt.eval_f[contxt.Regs+1];
 					}
 					contxt.eval[contxt.Regs+1] =0;
+					contxt.eval_f[contxt.Regs] = 0;
 				}
 				contxt.Regs--;
 				
@@ -373,13 +447,23 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 				EqualityExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;	
 				RElationalExpression->render_asm(file,contxt);
+
+				/*if(*OPERATOR == "==" /*&& contxt.enum_constant)
+				//	{
+				//		contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] == contxt.enumeval[contxt.Regs+1];
+				//		
+				//	}*/
+				//	else if(*OPERATOR == "!="  /*&& contxt.enum_constant*/)
+				//	{
+				//		contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] != contxt.enumeval[contxt.Regs+1];
+				//	}*/
 				
-				if (contxt.function){
+				if (contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					//postfix_ops(contxt, file);
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);	
 					if( *OPERATOR == "==" ){
 						if(contxt.float_){
-							std::string label_id = labgen(contxt);
+							std::string label_id = labelGen(contxt);
 							std::string END = "$ENDEQ" + label_id;
 							std::string NOT_EQ = "$NOT_EQ" + label_id;
 
@@ -403,7 +487,7 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 					else if(  *OPERATOR == "!=" ){
 
 						if(contxt.float_){
-							std::string label_id = labgen(contxt);
+							std::string label_id = labelGen(contxt);
 							std::string END = "$ENDEQ" + label_id;
 							std::string NOT_EQ = "$NOT_EQ" + label_id;
 
@@ -429,13 +513,15 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 				}
 				else 
 				{
-					if(*OPERATOR == "==")
+					if(*OPERATOR == "=="  && !contxt.sizeof_ && !contxt.enum_constant)
 					{
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] == contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] == contxt.eval_f[contxt.Regs+1];
 					}
-					else if(*OPERATOR == "!=")
+					else if(*OPERATOR == "!="  && !contxt.sizeof_ && !contxt.enum_constant)
 					{
-						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] != contxt.eval[contxt.Regs+1];  
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] != contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] != contxt.eval_f[contxt.Regs+1]; 
 					}
 				}
 				contxt.Regs--;
@@ -455,7 +541,10 @@ inline void AndExpression::render_asm(std::ofstream& file,Context& contxt) {
 				
 				contxt.Regs++;
 				EqualitYExpression->render_asm(file,contxt);
-				if (contxt.function){
+				//if(contxt.enum_constant){
+					//	contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] & contxt.enumeval[contxt.Regs+1];
+				//}
+				if (contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 					file << std::endl << "\tand\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 					//postfix_ops(contxt, file);
@@ -463,7 +552,10 @@ inline void AndExpression::render_asm(std::ofstream& file,Context& contxt) {
 				}
 				else 
 				{
-					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] & contxt.eval[contxt.Regs+1];
+					if(!contxt.sizeof_ && !contxt.enum_constant){
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] & contxt.eval[contxt.Regs+1];
+					}
+					
 					
 				}
 				contxt.Regs--;
@@ -481,14 +573,19 @@ inline void ExclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 				ExclusiveOrExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;
 				ANDexpression->render_asm(file,contxt);
-				if (contxt.function){
+				//if(contxt.enum_constant){
+						//contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] ^ contxt.enumeval[contxt.Regs+1];
+				//}
+				if (contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 					file << std::endl << "\txor\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 					contxt.regType[contxt.Regs]='i';
 				}
 				else 
 				{
-					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] ^ contxt.eval[contxt.Regs+1];
+					if(!contxt.sizeof_ && !contxt.enum_constant){
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] ^ contxt.eval[contxt.Regs+1];
+					}
 					
 				}
 				contxt.Regs--;
@@ -507,16 +604,22 @@ inline void InclusiveOrExpression::render_asm(std::ofstream& file,Context& contx
 				InclusiveOrExpressionPtr->render_asm(file,contxt);
 				contxt.Regs++;
 				EXclusiveOrExpression->render_asm(file,contxt);
-				if (contxt.function)
+				//if(contxt.enum_constant){
+					//contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] | contxt.enumeval[contxt.Regs+1];
+				//}
+				if (contxt.function && !contxt.sizeof_ && !contxt.enum_constant )
 				{
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 					file << std::endl << "\tor\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs + 1;
-					//contxt.is_unsigned = false;
-					contxt.regType[contxt.Regs]='i';	
+					
+					contxt.regType[contxt.Regs]='i';
+					
 				}
 				else 
 				{
-					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] | contxt.eval[contxt.Regs+1];
+					if(!contxt.sizeof_ && !contxt.enum_constant){
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] | contxt.eval[contxt.Regs+1];
+					}
 				}
 				contxt.Regs--;
 			}
@@ -533,23 +636,31 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 
 				std::string SHORTCIRCUIT, label_id;
-				label_id = labgen(contxt);
+				label_id = labelGenLogical(contxt);
 				SHORTCIRCUIT = "$SHORTCIRCUIT_AND" + label_id;
 				file << std::endl << "\tsne $" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
 				file << std::endl << "\tbeq $0,$" << contxt.Regs+1 << "," << SHORTCIRCUIT;  
 				file<<   std::endl << "\tnop\t";
 				contxt.Regs++;
 				INclusiveOrExpression->render_asm(file,contxt);
-				if (contxt.function)
+				
+				//if(contxt.enum_constant){
+					//contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] && contxt.enumeval[contxt.Regs+1];
+				//}
+				if (contxt.function && !contxt.sizeof_ && !contxt.enum_constant)
 				{
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);			
 					file<<   std::endl << "\tsne $" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
 					file<< std::endl << "\tand $" << contxt.Regs << ",$" << contxt.Regs << ",$" << contxt.Regs+1;
 					contxt.regType[contxt.Regs]='i';
+					contxt.regType[contxt.Regs+1]='i';
 				}
 				else 
 				{
-					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] && contxt.eval[contxt.Regs+1];
+					if(!contxt.sizeof_ && !contxt.enum_constant){
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] && contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] && contxt.eval_f[contxt.Regs+1];
+					}
 				}
 				contxt.Regs--;
 				file << std::endl << SHORTCIRCUIT << ":";			
@@ -568,24 +679,31 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 				LogicalOrExpressionPtr->render_asm(file,contxt);
 				
 				std::string SHORTCIRCUIT, PASS, label_id;
-				label_id = labgen(contxt);
+				label_id = labelGenLogical(contxt);
 				SHORTCIRCUIT = "$SHORTCIRCUIT_OR" + label_id;
 				file <<  std::endl << "\tsne $"  << contxt.Regs+1  << ",$0,$" << contxt.Regs+1;
 				file<<   std::endl << "\tbne $" << contxt.Regs+1 << ",$0," << SHORTCIRCUIT; 
 				file<<   std::endl << "\tnop\t";
 				contxt.Regs++;
 				LogicalAndExpressionPtr->render_asm(file,contxt);
-				if (contxt.function){
+				//if(contxt.enum_constant){
+					//contxt.enumeval[contxt.Regs] = contxt.enumeval[contxt.Regs] || contxt.enumeval[contxt.Regs+1];
+				//}
+				if (contxt.function && !contxt.sizeof_ && !contxt.enum_constant){
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 					
 					file<<   std::endl << "\tsne $" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
 					postfix_ops(contxt, file);
 					file<< std::endl << "\tor $" << contxt.Regs << ",$" << contxt.Regs << ",$" << contxt.Regs+1;
 					contxt.regType[contxt.Regs]='i';
+					contxt.regType[contxt.Regs+1]='i';	
 				}
 				else 
 				{
-					contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] || contxt.eval[contxt.Regs+1];				
+					if(!contxt.sizeof_ && !contxt.enum_constant){
+						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] || contxt.eval[contxt.Regs+1];
+						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] || contxt.eval_f[contxt.Regs+1];
+					}				
 				}
 				contxt.Regs--;
 				file <<  std::endl << SHORTCIRCUIT << ":";
@@ -654,7 +772,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						{
 							file << "\n\tsw $" << i << "," << offset-(i*4) << "($sp)";
 						}
-						//file << "\n\tsw $31," << offset-(i*4) << "($sp)"; 
+						file << "\n\tsw $31," << offset-(i*4) << "($sp)"; 
 					}
 					contxt.is_function_call=true;
 					//contxt.lhs_of_assignment=true;
@@ -678,9 +796,13 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						{
 							file << "\n\tlw $" << i << "," << offset-(i*4) << "($sp)";
 						}
-						//file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
+						file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
 						file << "\n\tmove $" << contxt.Regs+1 << ", $25"; 
 					}
+				}
+				if(AssignmentExpressionPtr != NULL){
+					AssignmentExpressionPtr->render_asm(file,contxt);
+					PostFixExpressionPtr->render_asm(file,contxt);
 				}
 			}
 			if( PrimaryExpressionPtr != NULL ) {
@@ -699,14 +821,18 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 	}
 	else if( IDENTIFIER != NULL && !contxt.reading && contxt.function)			//this identifier is involved in expressions
 	{
-		if(contxt.Regs>=24)
+		if(contxt.sizeof_){
+			findSize(contxt,*IDENTIFIER);
+		}
+			
+		if(contxt.Regs>=24 && !contxt.SizeOf)
 		{
 			std::cout << std::endl << "buy more registers!" << std::endl; //ise palavos?
 		}
 		int found_0nothing_1local_2globl = 0;	
 		int good_index=0;			//this will determine whether the variable wanted is a global or a local
 		int i(0), j;				//must initialize the index i outside so it is accessible throughout here
-		if(contxt.is_function_call)
+		if(contxt.is_function_call && !contxt.SizeOf)
 		{
 			for (int i=0; i<contxt.functions_declared.size(); i++)
 			{
@@ -720,7 +846,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		}
 		else
 		{ 
-			if(contxt.Variables.size()&&contxt.Scopes.size())
+			if(contxt.Variables.size()&&contxt.Scopes.size() && !contxt.SizeOf)
 			{
 			for(i=contxt.Variables.size()-1; i>=0; i--) {
 				for (j=contxt.Scopes.size()-1; j>=0; j--)
@@ -742,7 +868,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				}
 			  }
 			}
-			if(!found_0nothing_1local_2globl ) {
+			if(!found_0nothing_1local_2globl && !contxt.SizeOf) {
 				for(i=0; i<contxt.Variables.size(); i++) {
 					if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
 						found_0nothing_1local_2globl=2;
@@ -759,7 +885,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				}
 		  	} 
 		  		
-			if(contxt.lhs_of_assignment)
+			if(contxt.lhs_of_assignment && !contxt.SizeOf)
 			{
 				if(found_0nothing_1local_2globl)
 				{
@@ -778,41 +904,92 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				}			
 				else
 				{
-					file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
+					//if(contxt.enum_constant){
+						bool found = false;
+						for( int i(0); i < contxt.Enum.size() && !found; i++){
+							for( int j(0); j < contxt.Enum[j].EnumList.size(); j++){
+								if(contxt.Enum[i].EnumList[j].IDENTIFIER == *IDENTIFIER){
+									file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].EnumList[j].value;
+									found = true;
+									break;
+								}
+							}
+						}
+					//}
+					//else{
+						file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
+					//}
 				}
 			}
 			else
 			{
-			 	if(found_0nothing_1local_2globl==1) 
+			 	if(found_0nothing_1local_2globl==1 && !contxt.SizeOf) 
 			 	{
 			 		load_locals(contxt, file, good_index);
 			    }
-     		    else if(found_0nothing_1local_2globl==2) 
+     		    else if(found_0nothing_1local_2globl==2 && !contxt.SizeOf) 
 				{
 					load_globals(contxt, file, good_index);	
 				}		
 				else
-				{
-					file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
+					
+				{	//	if(contxt.enum_constant){
+					//	std::cout << "was";
+						bool found = false;
+						for( int i(0); i < contxt.Enum.size() && !found; i++){
+							for( int j(0); j < contxt.Enum[j].EnumList.size(); j++){
+								if(contxt.Enum[i].EnumList[j].IDENTIFIER == *IDENTIFIER){
+									file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].EnumList[j].value;
+									found = true;
+									break;
+								}
+							}
+						}
+					//}
+
+						if(!contxt.sizeof_){
+							file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
+						}
 				}		
 			}	
 		}
 	}
-	else if( CONSTANT != NULL && !contxt.reading ) 
+	else if( CONSTANT != NULL && !contxt.reading && !contxt.SizeOf) 
 	{	
 		
 		
 		int64_t temp;
 		float temp_f;
+		bool is_char = false;
 
 		if( (*CONSTANT).find_first_of("'")==0 && contxt.variable.word_size == 1)
 		{
 			char tmp2;
-			tmp2 = (*CONSTANT)[1];
+			
+			if((*CONSTANT) == "'\\n'"){
+				tmp2 = '\n';}
+			else if((*CONSTANT) == "'\\r'"){
+				tmp2 = '\r';}
+			else if((*CONSTANT) == "'\\v'")
+				tmp2 = '\v';
+			else if((*CONSTANT) == "'\\t'")
+				tmp2 = '\t';
+			else if((*CONSTANT) == "'\\f'")
+				tmp2 = '\f';
+			else if((*CONSTANT) == "'\\b'")
+				tmp2 = '\b';
+			else if((*CONSTANT) == "'\\a'")
+				tmp2 = '\a';
+			else
+				tmp2 = (*CONSTANT)[1];
+
 			temp = int(tmp2);
+
+			is_char = true;
 
 		}
 		else {
+			
 			temp_f = (std::stod(*CONSTANT));
 		 	temp = (std::stod(*CONSTANT));
 		}
@@ -837,33 +1014,43 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				contxt.UnaryOperators.pop_back();									
 			}
 		}
-		if(contxt.variable.DataType != "float"){			
+		if(contxt.enum_constant){
+			//contxt.enumeval[contxt.Regs+1] = temp;
+		}
+		if(contxt.variable.DataType != "float" && !contxt.enum_constant){			
 			contxt.variable.value = temp;
 		}
-		else if(contxt.variable.DataType == "float"){
+		else if(contxt.variable.DataType == "float" && !contxt.enum_constant){
 			contxt.variable.value = temp_f;
 		}
+		
+		if(is_char){		
+			file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << temp;
+			contxt.regType[contxt.Regs+1]='i';
+		}
+					
 
-		if(!contxt.reading && contxt.function) //&& contxt.rhs_of_expression)
-		{
-			if(contxt.variable.DataType != "float"){
-				file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << temp;
-				contxt.regType[contxt.Regs+1]='i';
-			}
-			else if(contxt.variable.DataType == "float"){
+		if(!contxt.reading && contxt.function && !is_char && !contxt.enum_constant) 
+		{	
+			if(contxt.variable.DataType == "float" || (std::floor(std::stod(*CONSTANT))) != std::stod(*CONSTANT)){
 				file <<  std::endl << "\tli.s\t$f" << contxt.Regs+1 << ", " << temp_f; //TODO: CHECK OK
 				contxt.regType[contxt.Regs+1]='f';
 			}
+			else if(contxt.variable.DataType != "float" || (std::floor(std::stod(*CONSTANT))) == std::stod(*CONSTANT)){
+				file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << temp;
+				contxt.regType[contxt.Regs+1]='i';
+			}
 			
 		}
-		else if (!contxt.reading && !contxt.function) //&& contxt.rhs_of_expression)
+		else if (!contxt.reading && !contxt.function && !contxt.enum_constant) 
 		{
-			contxt.eval[contxt.Regs+1]=temp;		
+			contxt.eval[contxt.Regs+1]=temp;
+			contxt.eval_f[contxt.Regs+1] = temp_f;
 		}
 		
 	}
 				
-	else if( IDENTIFIER != NULL && contxt.reading && contxt.function)
+	else if( IDENTIFIER != NULL && contxt.reading && contxt.function && !contxt.SizeOf)
 	{	for (int i=0; i<contxt.functions_declared.size(); i++)
 		{
 			//std::cout << "\n\n\n merge!\n\n";
@@ -892,10 +1079,10 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 					
 inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contxt) {
 
-			std::string label_id = labgen(contxt);
+			std::string label_id = labelGen(contxt);
 			std::string ELSE = "$ELSE" + label_id;
 			std::string IF = "$IF" + label_id;
-			std::string END = "$END_cond" + label_id;
+			std::string END = "$END" + label_id;
 			
 			
 			if( LogicalORExpression != NULL && ExpressioN == NULL && ConditionalExpressionPtr == NULL) {
@@ -921,9 +1108,8 @@ inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contx
 				contxt.rhs_of_expression = false;
 				file << "\n\tb " << END;
 				file << std::endl << "\tnop";
-				file << std::endl << END << ":";
 			}
-			
+			file << std::endl << END << ":";
 			
 }
 				
@@ -967,7 +1153,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 							file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", " << contxt.Variables[ki+contxt.argument_no-1].param_offset << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << "\n";	contxt.regType[contxt.Regs+1]='f';
 						}
 						
-						if(contxt.argument_no<=4)//contxt.Regs++ in
+						if(contxt.argument_no<=4)
 						{
 							if(contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
 							{
@@ -1026,20 +1212,33 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 				}
 				else
 				{
-					if(UnaryOperatorPtr->render_asm(file,contxt) == '~'){
-						contxt.eval[contxt.Regs+1] = ~contxt.eval[contxt.Regs+1];
+					if(!contxt.enum_constant){
+						if(UnaryOperatorPtr->render_asm(file,contxt) == '~'){
+							contxt.eval[contxt.Regs+1] = ~contxt.eval[contxt.Regs+1];
+						}
+						else if(UnaryOperatorPtr->render_asm(file,contxt) == '!') {
+							contxt.eval[contxt.Regs+1] = !contxt.eval[contxt.Regs+1];
+						}
+						else if(UnaryOperatorPtr->render_asm(file,contxt) == '-') {
+							contxt.eval[contxt.Regs+1] = -contxt.eval[contxt.Regs+1];
+						}
 					}
-					else if(UnaryOperatorPtr->render_asm(file,contxt) == '!') {
-						contxt.eval[contxt.Regs+1] = !contxt.eval[contxt.Regs+1];
+					else{
+						if(UnaryOperatorPtr->render_asm(file,contxt) == '~'){
+							contxt.enumeval[contxt.Regs+1] = ~contxt.enumeval[contxt.Regs+1];
+						}
+						else if(UnaryOperatorPtr->render_asm(file,contxt) == '!') {
+							contxt.enumeval[contxt.Regs+1] = !contxt.enumeval[contxt.Regs+1];
+						}
+						else if(UnaryOperatorPtr->render_asm(file,contxt) == '-') {
+							contxt.enumeval[contxt.Regs+1] = -contxt.enumeval[contxt.Regs+1];
+						}
 					}
-					else if(UnaryOperatorPtr->render_asm(file,contxt) == '-') {
-						contxt.eval[contxt.Regs+1] = -contxt.eval[contxt.Regs+1];
-					}
-				}
 				
+				}
 		}
 				
-		else if( UnaryExpressionPtr != NULL && !contxt.reading){
+		if( UnaryExpressionPtr != NULL && !contxt.reading && TypeNamePtr == NULL){
 			 if( *OPERATOR == "--"){
 				contxt.AssignmentOperator = "--";
 				contxt.lhs_of_assignment = true;
@@ -1051,7 +1250,28 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 				contxt.lhs_of_assignment = true;
 				UnaryExpressionPtr->render_asm(file,contxt);
 				contxt.lhs_of_assignment = false;					
-			}	
+			}
+			else if( *OPERATOR == "sizeof"){
+				contxt.AssignmentOperator = "sizeof";
+				contxt.sizeof_=true;
+				UnaryExpressionPtr->render_asm(file,contxt);
+				contxt.sizeof_=false;
+				file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.SizeOf;
+				contxt.regType[contxt.Regs+1]='i';
+				contxt.SizeOf = 0;
+							
+			}		
+		}
+		if( OPERATOR != NULL && !contxt.reading && TypeNamePtr != NULL){
+			
+				contxt.AssignmentOperator = "sizeof";
+				contxt.sizeof_=true;
+				TypeNamePtr->render_asm(file,contxt);
+				contxt.sizeof_=false;
+				file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.SizeOf;
+				contxt.regType[contxt.Regs+1]='i';
+				contxt.SizeOf = 0;			
+					
 		}
 }
 
@@ -1064,6 +1284,7 @@ inline char UnaryOperator::render_asm(std::ofstream& file, Context& contxt) {
 
 
 inline void PrimaryExpression::AssignmentOperator(std::ofstream& file, int good_index, Context& contxt, int f) {
+if(!contxt.sizeof_){
 	typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 	contxt.Regs++;
 	if(f==1){
@@ -1225,4 +1446,5 @@ inline void PrimaryExpression::AssignmentOperator(std::ofstream& file, int good_
 	}
 			contxt.AssignmentOperator = "df";
 			contxt.Regs--;
+}
 }

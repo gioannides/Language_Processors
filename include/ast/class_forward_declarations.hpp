@@ -17,6 +17,7 @@ struct bindings {
 		std::string scope = "";		//name of scope the variable is in
 		int offset = 0;			//the stack offset saved on the stack to load it from
 		std::string DataType;
+		std::string StorageClass;
 		int param_offset = 0;
 	};
 
@@ -26,10 +27,35 @@ struct function_details{
 	std::string returnType = "";
 };
 
+struct EnumValues{
+
+	std::string IDENTIFIER;
+	int value;
+};
+
+struct Enumeration{
+
+	std::string EnumID;
+	std::vector<EnumValues> EnumList;
+
+};
+
+
 struct Context{
+	std::vector<Enumeration> Enum;
+	Enumeration EnumTemp;
+	EnumValues EnumValuesTemp;
+	int EnumCounter=0;
+	bool EnumExists = false;
+	bool enum_constant=false;
+	int enumeval[1000];
+
 	bool rhs_of_expression=false;
 	bool lhs_of_assignment=false;
 	std::string op_name="";
+
+	bool sizeof_=false;
+	int SizeOf=0;
 
 	int declarations_in_a_list=1;
 
@@ -52,7 +78,7 @@ struct Context{
 	std::string funct_id = "";
 	std::vector<bindings> Variables;
 	bindings variable;
-	int totalStackArea = 24+104; //For the whole stack ------------------modified
+	int totalStackArea = 12+104; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
 	std::string AssignmentOperator = "df";
@@ -80,9 +106,10 @@ struct Context{
 	std::vector<function_details> functions_declared;
 	function_details funcion_temp;
 	std::vector<std::string> Scopes;
+	std::vector<std::string>FunctionScopes;
 	int argument_no = 0;
 	bool parameter = false;
-	int max_offset = 16;   // modified
+	int max_offset = 0;
 	bool is_function_call = false;
 
 	char UnaryOperator;
@@ -95,6 +122,8 @@ struct Context{
 	
 	int BreakCounter=0;
 	std::vector<int>BreakTracker;
+	std::vector<int>ContinueTracker;
+	int ContinueCounter=0;
 	
 	int SwitchControl=0;
 	bool inCase=false;
@@ -104,38 +133,37 @@ struct Context{
 	std::string SHORTCIRCUIT;
 	std::string SHORTCIRCUIT2;
 
-	int labels = 1;
-
 	int eval[1000];
-	std::vector<int> end_labels;
-	int lab =1;
-	bool SWreading = 0;
-	int case_counter = 0;
-	int no_cases = 0;
+	float eval_f[1000];
+	int allocate=0;
 };
-inline std::string labgen(Context& contxt)
-{
-	return std::to_string(contxt.labels++);
+
+inline std::string labelGenEnum(Context& contxt) {
+	contxt.allocate++;
+	return (std::to_string(contxt.allocate));
 }
+
 
 inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt){
 
-	if(contxt.regType[reg1] != 'f' && contxt.regType[reg2] != 'f'){
-		return;
+	if(contxt.regType[reg1] != 'f' && contxt.regType[reg2] != 'f' && reg2 > 1 && reg1 > 1){
+		//do nothing
 	}
-	else if(contxt.regType[reg1] != contxt.regType[reg2]){
-		if(contxt.regType[reg1] == 'i' || contxt.regType[reg1] == 'u' || contxt.regType[reg1] == 'c' && contxt.regType[reg2] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << reg2 << ",$f" << reg2 << ",$" << reg2;
-			file << std::endl << "\tmfc1\t$f" << reg2 << ",$" << reg2;
+	else if(contxt.regType[reg1] != contxt.regType[reg2] && reg2 > 1 && reg1 > 1){
+		if(contxt.regType[reg1] != 'f'  && contxt.regType[reg2] == 'f'){
+			file << std::endl << "\tmtc1\t$" << reg1 << ",$f" << reg1;
+			file << std::endl << "\tcvt.s.w\t$f" << reg1 << ",$f" << reg1;
+			if(contxt.regType[reg1] == 'u'){
+				file << std::endl << "\tandi\t$" << reg1 << ",$" << reg1 << ",0xFF";
+			}
+		
+		}
+		else if(contxt.regType[reg1] == 'f' && contxt.regType[reg2] != 'f'){
+			file << std::endl << "\tmtc1\t$" << reg2 << ",$f" << reg2;
+			file << std::endl << "\tcvt.s.w\t$f" << reg2 << ",$f" << reg2;
 			if(contxt.regType[reg1] == 'u'){
 				file << std::endl << "\tandi\t$" << reg2 << ",$" << reg2 << ",0xFF";
 			}
-			return;
-		}
-		if(contxt.regType[reg1] == 'f' && contxt.regType[reg2] == 'i' || contxt.regType[reg2] == 'u' || contxt.regType[reg2] == 'c'){
-			file << std::endl << "\tmtc1\t$" << reg2 << ",$f" << reg2;
-			file << std::endl << "\tcvt.s.w\t$f" << reg2 << ",$f" << reg2;
-			return;
 		}
 	}
 
@@ -146,36 +174,78 @@ inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt
 inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 {
 	if(contxt.Variables[good_index].word_size==1) {
-					file << std::endl << "\tsb\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
-					contxt.regType[contxt.Regs+1]='c';
-				}				
-				else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
-					file << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-					contxt.regType[contxt.Regs+1]='i';
-				}
-				else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
-					file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";					contxt.regType[contxt.Regs+1]='f';
-				}
+		if(contxt.regType[contxt.Regs+1] == 'f'){
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			if(contxt.regType[contxt.Regs+1] == 'u'){
+				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
+			}
+		}
+		file << std::endl << "\tsb\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		contxt.regType[contxt.Regs+1]='c';
+	}				
+	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
+		if(contxt.regType[contxt.Regs+1] == 'f'){
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			if(contxt.regType[contxt.Regs+1] == 'u'){
+				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
+			}
+		}	
+		file << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+		contxt.regType[contxt.Regs+1]='i';
+	}
+	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK		
+		if(contxt.regType[contxt.Regs+1] != 'f'){
+			file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+		}
 
-				if(contxt.Variables[good_index].DataType == "unsigned") {
-					contxt.is_unsigned = true;
-				}
-				if(contxt.Variables[good_index].DataType == "float") {
-					contxt.float_ = true;
-				}
+		file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+		contxt.regType[contxt.Regs+1]='f';
+	}
+	if(contxt.Variables[good_index].DataType == "unsigned") {
+		contxt.is_unsigned = true;
+	}
+	if(contxt.Variables[good_index].DataType == "float") {
+		contxt.float_ = true;
+	}
 }
 inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 {
 	file << std::endl << "\tlui\t$" << contxt.Regs+2 << ", %hi(" << contxt.Variables[good_index].id << ")";
 	if(contxt.Variables[good_index].word_size==1) {
+		if(contxt.regType[contxt.Regs+1] == 'f'){
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			if(contxt.regType[contxt.Regs+1] == 'u'){
+				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
+			}
+		}
+					
 		file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 		contxt.regType[contxt.Regs+1]='c';
-		}
+	}
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
+
+		if(contxt.regType[contxt.Regs+1] == 'f'){
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			if(contxt.regType[contxt.Regs+1] == 'u'){
+				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
+			}
+		}	
+
 		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 		contxt.regType[contxt.Regs+1]='i';
 	}
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
+		
+		if(contxt.regType[contxt.Regs+1] != 'f'){
+			file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+		}
+
 		file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 		contxt.regType[contxt.Regs+1]='f';
 	}
@@ -186,6 +256,8 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 		contxt.float_ = true;
 	}
 }
+
+
 inline void load_locals(Context& contxt, std::ofstream& file, int good_index)
 {
 	if(contxt.Variables[good_index].word_size==1)  
@@ -302,16 +374,15 @@ inline void print_scopes(Context& contxt, std::ofstream& f){
 }
 
 inline std::string labelGenScope(Context& contxt) {
-
-
-	contxt.LastScope.push_back(std::to_string(contxt.LastScope.size()));
+	contxt.allocate++;
+	contxt.LastScope.push_back(std::to_string(contxt.allocate));
 	
 	return contxt.LastScope[contxt.LastScope.size()-1];
 }
 
 inline std::string labelGenLogical(Context& contxt) {
-
-	contxt.LogicalLabels.push_back(std::to_string(contxt.LogicalLabels.size()));
+	contxt.allocate++;
+	contxt.LogicalLabels.push_back(std::to_string(contxt.allocate));
 	return contxt.LogicalLabels[contxt.LogicalLabels.size()-1];
 		
 }
@@ -319,10 +390,108 @@ inline std::string labelGenLogical(Context& contxt) {
 
 
 inline std::string labelGen(Context& contxt) {
-
-	contxt.Labels.push_back(std::to_string(contxt.Labels.size()));
+	contxt.allocate++;
+	contxt.Labels.push_back(std::to_string(contxt.allocate));
 	return contxt.Labels[contxt.Labels.size()-1];
 		
+}
+
+
+inline void findSize(Context& contxt,std::string IDENTIFIER){
+			int i,j;
+			bool found = false;
+			for(i=contxt.Variables.size()-1; i>=0; i--) {
+				for (j=contxt.Scopes.size()-1; j>=0; j--)
+				{
+					if(contxt.Variables[i].scope == contxt.Scopes[j] && IDENTIFIER == contxt.Variables[i].id) 
+					{
+						found = true;
+						if(contxt.Variables[i].DataType == "int"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "float"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "char"){
+							if( contxt.SizeOf < 1)
+								contxt.SizeOf = 1;
+						}
+						else if(contxt.Variables[i].DataType == "short"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 2;
+						}
+						else if(contxt.Variables[i].DataType == "long"){
+							if( contxt.SizeOf < 8)
+								contxt.SizeOf = 8;
+						}
+						else if(contxt.Variables[i].DataType == "unsigned"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "signed"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "double"){
+							if( contxt.SizeOf < 8)
+								contxt.SizeOf = 8;
+						}
+						else if(contxt.Variables[i].DataType == "void"){
+							if( contxt.SizeOf < 1)
+								contxt.SizeOf = 1;
+						}				
+						i = -1;
+						j = -1;
+					}									
+				}
+			  }
+			  if(!found){
+				for(i=contxt.Variables.size()-1; i>=0; i--) {
+					if(contxt.Variables[i].scope == "global" && IDENTIFIER == contxt.Variables[i].id) 
+					{
+						if(contxt.Variables[i].DataType == "int"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "float"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "char"){
+							if( contxt.SizeOf < 1)
+								contxt.SizeOf = 1;
+						}
+						else if(contxt.Variables[i].DataType == "short"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 2;
+						}
+						else if(contxt.Variables[i].DataType == "long"){
+							if( contxt.SizeOf < 8)
+								contxt.SizeOf = 8;
+						}
+						else if(contxt.Variables[i].DataType == "unsigned"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "signed"){
+							if( contxt.SizeOf < 4)
+								contxt.SizeOf = 4;
+						}
+						else if(contxt.Variables[i].DataType == "double"){
+							if( contxt.SizeOf < 8)
+								contxt.SizeOf = 8;
+						}
+						else if(contxt.Variables[i].DataType == "void"){
+							if( contxt.SizeOf < 1)
+								contxt.SizeOf = 1;
+						}				
+						i = -1;
+						j = -1;
+						}									
+					}
+			}
 }
 
 inline std::string GetBinary32( float value )
