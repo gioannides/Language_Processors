@@ -388,7 +388,7 @@ inline void findSize(Context& contxt,std::string IDENTIFIER){
 								contxt.SizeOf = 4;
 						}
 						else if(contxt.Variables[i].DataType == "char"){
-							if( contxt.SizeOf < 4)
+							if( contxt.SizeOf < 1)
 								contxt.SizeOf = 1;
 						}
 						else if(contxt.Variables[i].DataType == "short"){
@@ -433,7 +433,7 @@ inline void findSize(Context& contxt,std::string IDENTIFIER){
 								contxt.SizeOf = 4;
 						}
 						else if(contxt.Variables[i].DataType == "char"){
-							if( contxt.SizeOf < 4)
+							if( contxt.SizeOf < 1)
 								contxt.SizeOf = 1;
 						}
 						else if(contxt.Variables[i].DataType == "short"){
