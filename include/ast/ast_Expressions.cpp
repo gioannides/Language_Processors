@@ -894,10 +894,13 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				contxt.UnaryOperators.pop_back();									
 			}
 		}
-		if(contxt.variable.DataType != "float"){			
+		if(contxt.enum_constant){
+			contxt.EnumValuesTemp.value = temp;
+		}
+		if(contxt.variable.DataType != "float" && !contxt.enum_constant){			
 			contxt.variable.value = temp;
 		}
-		else if(contxt.variable.DataType == "float"){
+		else if(contxt.variable.DataType == "float" && !contxt.enum_constant){
 			contxt.variable.value = temp_f;
 		}
 		
@@ -907,7 +910,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		}
 					
 
-		if(!contxt.reading && contxt.function && !is_char) 
+		if(!contxt.reading && contxt.function && !is_char && !contxt.enum_constant) 
 		{	
 			if(contxt.variable.DataType == "float" || (std::floor(std::stod(*CONSTANT))) != std::stod(*CONSTANT)){
 				file <<  std::endl << "\tli.s\t$f" << contxt.Regs+1 << ", " << temp_f; //TODO: CHECK OK
@@ -919,7 +922,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			}
 			
 		}
-		else if (!contxt.reading && !contxt.function) 
+		else if (!contxt.reading && !contxt.function && !contxt.enum_constant) 
 		{
 			contxt.eval[contxt.Regs+1]=temp;
 			contxt.eval_f[contxt.Regs+1] = temp_f;

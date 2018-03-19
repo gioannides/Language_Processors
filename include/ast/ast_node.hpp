@@ -899,16 +899,16 @@ class StorageClassSpecifiers : public Node {
 				}
 
 				else if( *TYPES == "static"){
-					contxt.variable.StorageClass = "extern";
+					contxt.variable.StorageClass = "static";
 
 				}
 				
 				else if(*TYPES == "register"){
-					contxt.variable.StorageClass = "extern";
+					contxt.variable.StorageClass = "register";
 				}
 
 				else if(*TYPES == "typedef"){
-					contxt.variable.StorageClass = "extern";
+					contxt.variable.StorageClass = "typedef";
 				}
 
 			}
@@ -1098,6 +1098,27 @@ class Enumerator : public Node {
 
 		~Enumerator() {}
 
+		void render_asm(std::ofstream& file, Context& contxt){
+			if(ConstantExpressionPtr != NULL){
+				
+				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
+				contxt.enum_constant = true;
+				ConstantExpressionPtr->render_asm(file,contxt);
+				contxt.enum_constant = false;
+			}
+			else{
+
+				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
+				contxt.EnumValuesTemp.value = contxt.EnumCounter;
+				contxt.EnumCounter++;
+			}
+		}
+		
+			
+
+
+		
+
 };
 
 
@@ -1112,6 +1133,18 @@ class EnumeratorList : public Node {
 		EnumeratorList(Enumerator* EnumeratorPtr , EnumeratorList* EnumeratorListPtr) : EnumeratorPtr(EnumeratorPtr) , EnumeratorListPtr(EnumeratorListPtr) {}
 
 		~EnumeratorList() {}
+
+
+		void render_asm(std::ofstream& file, Context& contxt){ 
+
+			if(EnumeratorListPtr != NULL){
+				EnumeratorListPtr->render_asm(file,contxt);
+			}
+			if( EnumeratorPtr != NULL){
+				EnumeratorPtr->render_asm(file,contxt);
+				contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);
+			}
+		}
 
 };
 
@@ -1133,6 +1166,25 @@ class EnumSpecifier : public Node {
 
 		~EnumSpecifier() {}
 
+		void render_asm(std::ofstream& file, Context& contxt){ 
+
+			if( IDENTIFIER == NULL ){
+				contxt.EnumTemp.EnumID = "$ENUM" + labelGenEnum(contxt);
+				ENumeratorList->render_asm(file,contxt);
+				contxt.Enum.push_back(contxt.EnumTemp);
+				contxt.EnumCounter = 0;
+				
+			}
+			else if( IDENTIFIER != NULL && ENumeratorList == NULL){
+				//do nothing
+			}
+			else if( IDENTIFIER != NULL && ENumeratorList != NULL){
+				contxt.EnumTemp.EnumID = *IDENTIFIER;
+				ENumeratorList->render_asm(file,contxt);
+				contxt.Enum.push_back(contxt.EnumTemp);
+				contxt.EnumCounter = 0;
+			}
+		}
 };
  
 

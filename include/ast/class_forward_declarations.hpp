@@ -27,7 +27,28 @@ struct function_details{
 	std::string returnType = "";
 };
 
+struct EnumValues{
+
+	std::string IDENTIFIER;
+	int value;
+};
+
+struct Enumeration{
+
+	std::string EnumID;
+	std::vector<EnumValues> EnumList;
+
+};
+
+
 struct Context{
+	std::vector<Enumeration> Enum;
+	Enumeration EnumTemp;
+	EnumValues EnumValuesTemp;
+	int EnumCounter=0;
+	bool EnumExists = false;
+	bool enum_constant=false;
+
 	bool rhs_of_expression=false;
 	bool lhs_of_assignment=false;
 	std::string op_name="";
@@ -84,6 +105,7 @@ struct Context{
 	std::vector<function_details> functions_declared;
 	function_details funcion_temp;
 	std::vector<std::string> Scopes;
+	std::vector<std::string>FunctionScopes;
 	int argument_no = 0;
 	bool parameter = false;
 	int max_offset = 0;
@@ -115,6 +137,10 @@ struct Context{
 	int allocate=0;
 };
 
+inline std::string labelGenEnum(Context& contxt) {
+	contxt.allocate++;
+	return (std::to_string(contxt.allocate));
+}
 
 
 inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt){
