@@ -1102,12 +1102,13 @@ class Enumerator : public Node {
 			if(ConstantExpressionPtr != NULL){
 				
 				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
-				contxt.enum_constant = true;
+				//contxt.enum_constant = true;
 				ConstantExpressionPtr->render_asm(file,contxt);
-				contxt.enum_constant = false;
+				//contxt.enum_constant = false;
+				//contxt.EnumValuesTemp.value = contxt.enumeval[contxt.Regs+1];
 			}
 			else{
-
+				
 				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
 				contxt.EnumValuesTemp.value = contxt.EnumCounter;
 				contxt.EnumCounter++;
@@ -1231,12 +1232,18 @@ class TypeSpecifier : public Node {
 
 		TypeSpecifier(StructOrUnionSpecifier* StructOrUnionSpecifierPtr) : StructOrUnionSpecifierPtr(StructOrUnionSpecifierPtr) {}
 
-		TypeSpecifier(EnumSpecifier* EnumSpec) : EnumSpecifierPtr(EnumSpecifierPtr) {}
+		TypeSpecifier(EnumSpecifier* EnumSpecifierPtr) : EnumSpecifierPtr(EnumSpecifierPtr) { }
 
 		TypeSpecifier(TypeName* TypeNamePtr) : TypeNamePtr(TypeNamePtr) {}
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {
+
+			if( EnumSpecifierPtr != NULL && !contxt.sizeof_ && TypeNamePtr == NULL){
+				contxt.enum_constant = true;
+				EnumSpecifierPtr->render_asm(file,contxt);
+				contxt.enum_constant = false;
+			}
 
 			if( TYPES != NULL && !contxt.sizeof_){
 			std::string types = *TYPES;			// Require conversion to be used

@@ -1,16 +1,11 @@
-int multiplyNumbers(int n)
-{
-    if (n >= 1)
-        return n*multiplyNumbers(n-1);
-    else
-        return 1;
-}
+int x = 1;
+int main(){
 
+	start:if(x < 6){
 
-int main()
-{
-    int n=3;
+		x+=5;
+		goto start;
+	}
 
-    return multiplyNumbers(n);
-    
+	return x;
 }

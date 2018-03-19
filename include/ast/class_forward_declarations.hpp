@@ -48,6 +48,7 @@ struct Context{
 	int EnumCounter=0;
 	bool EnumExists = false;
 	bool enum_constant=false;
+	int enumeval[1000];
 
 	bool rhs_of_expression=false;
 	bool lhs_of_assignment=false;
