@@ -1106,8 +1106,9 @@ class Enumerator : public Node {
 				ConstantExpressionPtr->render_asm(file,contxt);
 				if(contxt.EnumOperands.size()){
 					contxt.EnumValuesTemp.value = contxt.EnumOperands[contxt.EnumOperands.size()-1];
+					
+					std::cout << contxt.EnumOperands[contxt.EnumOperands.size()-1] << std::endl;
 					contxt.EnumOperands.pop_back();
-					//std::cout << contxt.EnumOperands[contxt.EnumOperands.size()-1] << std::endl;
 				}
 			}
 			else if( ConstantExpressionPtr == NULL){
@@ -1191,7 +1192,7 @@ class EnumSpecifier : public Node {
 				contxt.EnumTemp.EnumID = *IDENTIFIER;
 				ENumeratorList->render_asm(file,contxt);
 				contxt.Enum.push_back(contxt.EnumTemp);
-				std::cout << contxt.EnumValuesTemp.IDENTIFIER << " " << contxt.EnumValuesTemp.value << std::endl;
+				//std::cout << contxt.EnumValuesTemp.IDENTIFIER << " " << contxt.EnumValuesTemp.value << std::endl;
 				
 				contxt.EnumCounter = 0;
 			}
