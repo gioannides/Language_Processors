@@ -6,9 +6,7 @@
 	.module nooddspreg
 	.abicalls
 
-#FunctDef
 
-#new function
 	.text
 	.align	2
 	.globl	func
@@ -54,9 +52,7 @@ $END3:
 	.size func, .-func
 
 
-#FunctDef
 
-#new function
 	.text
 	.align	2
 	.globl	gunv
@@ -102,9 +98,7 @@ $END6:
 	.size gunv, .-gunv
 
 
-#FunctDef
 
-#new function
 	.text
 	.align	2
 	.globl	main
@@ -120,88 +114,48 @@ $END10:
 $END11:
 $END12:
 $END14:
-	sw $2, 0($sp) #argument no: 1
 $END15:
-	sw $2, 4($sp) #argument no: 2
 $END16:
-	sw $2, 8($sp) #argument no: 3
 $END17:
-	sw $2, 12($sp) #argument no: 4
 $END18:
-	sw $2, 16($sp) #argument no: 5
 $END19:
-	sw $2, 20($sp) #argument no: 6
 $END20:
-	sw $2, 24($sp) #argument no: 7
 $END21:
-	sw $2, 28($sp) #argument no: 8
 $END22:
-	sw $2, 32($sp) #argument no: 9
 $END23:
-	sw $2, 36($sp) #argument no: 10
 $END13:
 $END25:
-	sw $2, 0($sp) #argument no: 1
 $END26:
-	sw $2, 4($sp) #argument no: 2
 $END27:
-	sw $2, 8($sp) #argument no: 3
 $END28:
-	sw $2, 12($sp) #argument no: 4
 $END29:
-	sw $2, 16($sp) #argument no: 5
 $END30:
-	sw $2, 20($sp) #argument no: 6
 $END31:
-	sw $2, 24($sp) #argument no: 7
 $END32:
-	sw $2, 28($sp) #argument no: 8
 $END33:
-	sw $2, 32($sp) #argument no: 9
 $END34:
-	sw $2, 36($sp) #argument no: 10
 $END24:
 $END36:
-	sw $2, 0($sp) #argument no: 1
 $END37:
-	sw $2, 4($sp) #argument no: 2
 $END38:
-	sw $2, 8($sp) #argument no: 3
 $END39:
-	sw $2, 12($sp) #argument no: 4
 $END40:
-	sw $2, 16($sp) #argument no: 5
 $END41:
-	sw $2, 20($sp) #argument no: 6
 $END42:
-	sw $2, 24($sp) #argument no: 7
 $END43:
-	sw $2, 28($sp) #argument no: 8
 $END44:
-	sw $2, 32($sp) #argument no: 9
 $END45:
-	sw $2, 36($sp) #argument no: 10
 $END35:
 $END47:
-	sw $2, 0($sp) #argument no: 1
 $END48:
-	sw $2, 4($sp) #argument no: 2
 $END49:
-	sw $2, 8($sp) #argument no: 3
 $END50:
-	sw $2, 12($sp) #argument no: 4
 $END51:
-	sw $2, 16($sp) #argument no: 5
 $END52:
-	sw $2, 20($sp) #argument no: 6
 $END53:
-	sw $2, 24($sp) #argument no: 7
 $END54:
-	sw $2, 28($sp) #argument no: 8
 $END55:
-	sw $2, 32($sp) #argument no: 9
 $END56:
-	sw $2, 36($sp) #argument no: 10
 $END46:	.set noreorder
 	.set nomacro
 	addiu $sp,$sp,-184
@@ -259,6 +213,7 @@ $END62:
 	sw $22,64($sp)
 	sw $23,60($sp)
 	sw $24,56($sp)
+	sw $25,52($sp)
 	lb	$2, 152($sp) #yu
 $END64:
 	sb	$2, 0($sp) #r
@@ -356,6 +311,7 @@ $END63:
 	sw $22,64($sp)
 	sw $23,60($sp)
 	sw $24,56($sp)
+	sw $25,52($sp)
 	lb	$2, 152($sp) #yu
 $END75:
 	sb	$2, 0($sp) #r
@@ -453,6 +409,7 @@ $END74:
 	sw $22,64($sp)
 	sw $23,60($sp)
 	sw $24,56($sp)
+	sw $25,52($sp)
 	lb	$2, 152($sp) #yu
 $END86:
 	sb	$2, 0($sp) #r
@@ -550,6 +507,7 @@ $END85:
 	sw $22,64($sp)
 	sw $23,60($sp)
 	sw $24,56($sp)
+	sw $25,52($sp)
 	lb	$2, 152($sp) #yu
 $END97:
 	sb	$2, 0($sp) #r
@@ -636,9 +594,7 @@ $END96:
 	.size main, .-main
 
 
-#FunctDef
 
-#new function
 	.text
 	.align	2
 	.globl	functd

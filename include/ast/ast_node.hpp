@@ -1840,7 +1840,7 @@ class FunctionDefinition : public Node {
 			}
 			//std:: cout << "\nmax_offset" << contxt.max_offset << " " <<  contxt.funct_id <<"\n";
 			contxt.totalStackArea+=contxt.max_offset;
-			contxt.max_offset=0;
+			contxt.max_offset=16;
 			//print_scopes(contxt, file);
 			if(contxt.Scopes.size()>=1){
 				for (int k=0; k<contxt.Variables.size(); k++)
@@ -1868,10 +1868,10 @@ class FunctionDefinition : public Node {
 			file << std::endl << "\tsw $31," << contxt.totalStackArea-4 <<"($sp)";
 			file << std::endl << "\tmove $fp,$sp\n";
 
-			// for(int i=4; i<=7; i++) //shift by 4 all the parameters
-			// {
-			// 	file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
-			// }
+			for(int i=4; i<=7; i++) //shift by 4 all the parameters
+			{
+				file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
+			}
 
 			contxt.variable.offset=contxt.totalStackArea-4;
 			if( CompoundStatementPtr != NULL ) {

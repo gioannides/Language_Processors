@@ -122,7 +122,7 @@ struct Context{
 	std::vector<std::string>FunctionScopes;
 	int argument_no = 0;
 	bool parameter = false;
-	int max_offset = 0;
+	int max_offset = 16;
 	bool is_function_call = false;
 
 	char UnaryOperator;

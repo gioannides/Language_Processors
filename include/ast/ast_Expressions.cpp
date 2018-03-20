@@ -863,7 +863,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						{
 							file << "\n\tsw $" << i << "," << offset-(i*4) << "($sp)";
 						}
-						file << "\n\tsw $31," << offset-(i*4) << "($sp)"; 
+						//file << "\n\tsw $31," << offset-(i*4) << "($sp)"; 
 					}
 					contxt.is_function_call=true;
 					//contxt.lhs_of_assignment=true;
@@ -887,7 +887,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						{
 							file << "\n\tlw $" << i << "," << offset-(i*4) << "($sp)";
 						}
-						file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
+						//file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
 						file << "\n\tmove $" << contxt.Regs+1 << ", $25"; 
 					}
 				}

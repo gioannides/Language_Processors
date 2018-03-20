@@ -38,7 +38,6 @@ x:
 #0
 
 
-new function
 	.text
 	.align	2
 	.globl	main
