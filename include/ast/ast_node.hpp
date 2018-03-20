@@ -908,7 +908,7 @@ class StorageClassSpecifiers : public Node {
 				}
 
 				else if(*TYPES == "typedef"){
-					contxt.variable.StorageClass = "typedef";
+					contxt.typedefs_ = true;
 				}
 
 			}
@@ -1102,17 +1102,22 @@ class Enumerator : public Node {
 			if(ConstantExpressionPtr != NULL){
 				
 				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
-				//contxt.enum_constant = true;
+				contxt.enum_constant = true;
 				ConstantExpressionPtr->render_asm(file,contxt);
-				//contxt.enum_constant = false;
-				//contxt.EnumValuesTemp.value = contxt.enumeval[contxt.Regs+1];
+				if(contxt.EnumOperands.size()){
+					contxt.EnumValuesTemp.value = contxt.EnumOperands[contxt.EnumOperands.size()-1];
+					contxt.EnumOperands.pop_back();
+					//std::cout << contxt.EnumOperands[contxt.EnumOperands.size()-1] << std::endl;
+				}
 			}
-			else{
+			else if( ConstantExpressionPtr == NULL){
 				
 				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
 				contxt.EnumValuesTemp.value = contxt.EnumCounter;
 				contxt.EnumCounter++;
 			}
+			contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);
+			
 		}
 		
 			
@@ -1140,11 +1145,13 @@ class EnumeratorList : public Node {
 
 			if(EnumeratorListPtr != NULL){
 				EnumeratorListPtr->render_asm(file,contxt);
+				
 			}
 			if( EnumeratorPtr != NULL){
 				EnumeratorPtr->render_asm(file,contxt);
-				contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);
+				
 			}
+			
 		}
 
 };
@@ -1173,6 +1180,7 @@ class EnumSpecifier : public Node {
 				contxt.EnumTemp.EnumID = "$ENUM" + labelGenEnum(contxt);
 				ENumeratorList->render_asm(file,contxt);
 				contxt.Enum.push_back(contxt.EnumTemp);
+				
 				contxt.EnumCounter = 0;
 				
 			}
@@ -1183,8 +1191,12 @@ class EnumSpecifier : public Node {
 				contxt.EnumTemp.EnumID = *IDENTIFIER;
 				ENumeratorList->render_asm(file,contxt);
 				contxt.Enum.push_back(contxt.EnumTemp);
+				std::cout << contxt.EnumValuesTemp.IDENTIFIER << " " << contxt.EnumValuesTemp.value << std::endl;
+				
 				contxt.EnumCounter = 0;
 			}
+			
+			
 		}
 };
  
@@ -1224,7 +1236,6 @@ class TypeSpecifier : public Node {
 		std::string* TYPES;
 		StructOrUnionSpecifier* StructOrUnionSpecifierPtr;
 		EnumSpecifier* EnumSpecifierPtr;
-		TypeName* TypeNamePtr;
 		
 	public:
 
@@ -1234,18 +1245,17 @@ class TypeSpecifier : public Node {
 
 		TypeSpecifier(EnumSpecifier* EnumSpecifierPtr) : EnumSpecifierPtr(EnumSpecifierPtr) { }
 
-		TypeSpecifier(TypeName* TypeNamePtr) : TypeNamePtr(TypeNamePtr) {}
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {
 
-			if( EnumSpecifierPtr != NULL && !contxt.sizeof_ && TypeNamePtr == NULL){
+			if( EnumSpecifierPtr != NULL && !contxt.sizeof_){
 				contxt.enum_constant = true;
 				EnumSpecifierPtr->render_asm(file,contxt);
 				contxt.enum_constant = false;
 			}
 
-			if( TYPES != NULL && !contxt.sizeof_){
+			if( TYPES != NULL && !contxt.sizeof_ && !contxt.typedefs_){
 			std::string types = *TYPES;			// Require conversion to be used
 
 				if (types=="char"){
@@ -1261,7 +1271,7 @@ class TypeSpecifier : public Node {
 					contxt.variable.DataType = "int";
 				}	
 				else if (types=="long"){
-					contxt.variable.word_size = 4;
+					contxt.variable.word_size = 8;
 					contxt.variable.DataType = "long";
 				}
 				else if (types=="float"){
@@ -1283,10 +1293,39 @@ class TypeSpecifier : public Node {
 					contxt.is_unsigned = true;
 				}
 
-				if(contxt.functionReturnType && !contxt.sizeof_){
+				if(contxt.functionReturnType && !contxt.sizeof_ && !contxt.typedefs_){
 
 					contxt.functionReturnTypetemp = *TYPES;
 
+				}
+				
+				if( TYPES != NULL && !contxt.sizeof_ && contxt.typedefs_){
+					std::string types = *TYPES;			
+
+					if (types=="char"){
+						contxt.TypeDef.TypeSpec = "char";
+					}
+					else if (types=="short"){
+						contxt.TypeDef.TypeSpec = "short";	
+					}
+					else if (types=="int"){
+						contxt.TypeDef.TypeSpec = "int";	
+					}	
+					else if (types=="long"){
+						contxt.TypeDef.TypeSpec = "long";	
+					}
+					else if (types=="float"){
+						contxt.TypeDef.TypeSpec = "float";	
+					}
+					else if (types=="double"){
+						contxt.TypeDef.TypeSpec = "double";	
+					}	
+					else if (types=="signed"){
+						contxt.TypeDef.TypeSpec = "signed";	
+					}	
+					else if (types=="unsigned"){
+						contxt.TypeDef.TypeSpec = "unsigned";
+					}
 				}
 
 				// if(contxt.reading) { //this is predicting total stack frame for all paramters/local declarations in function body
@@ -1385,12 +1424,13 @@ class DeclarationSpecifiers : public Node{
 		StorageClassSpecifiers* StorageClassSpec;
 		TypeSpecifier* TypeSpec;
 		TypeQualifier* TypeQuaLifier;
+		DeclarationSpecifiers* DeclarationSpecifiersPtr;
 
 	public:
 
-		DeclarationSpecifiers( StorageClassSpecifiers* StorageClassSpec, TypeSpecifier* TypeSpec, TypeQualifier* TypeQuaLifier) :
+		DeclarationSpecifiers( StorageClassSpecifiers* StorageClassSpec, TypeSpecifier* TypeSpec, TypeQualifier* TypeQuaLifier, DeclarationSpecifiers* DeclarationSpecifiersPtr) :
 
-					StorageClassSpec(StorageClassSpec) , TypeSpec(TypeSpec), TypeQuaLifier(TypeQuaLifier) {}
+					StorageClassSpec(StorageClassSpec) , TypeSpec(TypeSpec), TypeQuaLifier(TypeQuaLifier) , DeclarationSpecifiersPtr(DeclarationSpecifiersPtr) {}
 
 
 		~DeclarationSpecifiers() {}
@@ -1398,16 +1438,35 @@ class DeclarationSpecifiers : public Node{
 
 		void render_asm(std::ofstream& file,Context& contxt) {
 
-			if(StorageClassSpec != NULL) {
+			if(StorageClassSpec != NULL && DeclarationSpecifiersPtr == NULL) {
 				StorageClassSpec->render_asm(file,contxt);	 //TODO: may have to implement this
+				if(contxt.typedefs_){
+					contxt.TypeAssoc.push_back(contxt.TypeDef);
+					contxt.typedefs_ = false;
+				}		
 			}
-			else if(TypeSpec != NULL) {
+			else if(StorageClassSpec != NULL && DeclarationSpecifiersPtr != NULL) {
 				
-				TypeSpec->render_asm(file,contxt); 
+				DeclarationSpecifiersPtr->render_asm(file,contxt);
+				StorageClassSpec->render_asm(file,contxt);				
+					
+			}			
+			else if(TypeSpec != NULL && DeclarationSpecifiersPtr == NULL) {
+				
+				TypeSpec->render_asm(file,contxt);
 			}
-			else if(TypeQuaLifier != NULL) {
+			else if(TypeSpec != NULL && DeclarationSpecifiersPtr != NULL) {
+				
+				DeclarationSpecifiersPtr->render_asm(file,contxt);
+					
+				TypeSpec->render_asm(file,contxt); 
+				
+			}
+			else if(TypeQuaLifier != NULL && DeclarationSpecifiersPtr == NULL) {
 				//TypeQuaLifier->render_asm(file,contxt); //TODO: may have to implement this
 			}
+
+				
 		}
 
 };
@@ -1444,6 +1503,8 @@ class Declaration : public Node {
 			if( DeclList != NULL) {
 				DeclList->render_asm(file,contxt);  // Obtain name and value of the variable
 			}
+
+			
 			
 		}
 	
@@ -1903,12 +1964,24 @@ class TranslationUnit : public Node{
 
 	
 	ExternalDeclaration* ExternalDecl;
+	TranslationUnit* TranslationUnitPtr;
 
 	public:
 
-    		TranslationUnit(ExternalDeclaration* ExternalDecl) :  ExternalDecl(ExternalDecl) {}
+    		TranslationUnit(ExternalDeclaration* ExternalDecl, TranslationUnit* TranslationUnitPtr) :  ExternalDecl(ExternalDecl) , TranslationUnitPtr(TranslationUnitPtr){}
 
 		virtual void print_py(std::string file_name) const ;
+		void print_py(std::ofstream& file) ;
+
+		void render_asm(std::ofstream& file, Context& contxt) {
+
+			if(TranslationUnitPtr != NULL){
+				TranslationUnitPtr->render_asm(file,contxt);
+			}
+			if( ExternalDecl != NULL){
+				ExternalDecl->render_asm(file,contxt);
+			}
+		}
 
 		virtual void render_asm(std::string file_name) const {
 
@@ -1931,8 +2004,12 @@ class TranslationUnit : public Node{
 			file << "\t.module fp=32" << std::endl;
 			file << "\t.module nooddspreg" << std::endl;
 			file << "\t.abicalls" << std::endl;
-			
-			ExternalDecl->render_asm(file,contxt);
+			if(TranslationUnitPtr != NULL){
+				TranslationUnitPtr->render_asm(file,contxt);
+			}
+			if( ExternalDecl != NULL){
+				ExternalDecl->render_asm(file,contxt);
+			}
 			//print_variables(contxt, file);
 			// for (int i=0; i<contxt.functions_declared.size(); i++)
 			// {
@@ -1966,6 +2043,13 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				//std::cout << "print this once" << std::endl; 
 				DirectDeclaratorPtr->render_asm(file,contxt);
 			}
+	
+			if( IDENTIFIER != NULL && contxt.typedefs_){
+				contxt.TypeDef.DummyName = *IDENTIFIER;
+				return;
+
+			}		
+			
 			if((contxt.function && IDENTIFIER !=NULL && !contxt.reading && !contxt.protect)&&!contxt.parameter){
 				//std::cout << "new function id : " << *IDENTIFIER ;
 				contxt.funct_id=*IDENTIFIER;		// the names of the param might wnd up here!

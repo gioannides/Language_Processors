@@ -30,13 +30,20 @@ struct function_details{
 struct EnumValues{
 
 	std::string IDENTIFIER;
-	int value;
+	double value;
 };
 
 struct Enumeration{
 
 	std::string EnumID;
 	std::vector<EnumValues> EnumList;
+
+};
+
+struct typedefs{
+
+	std::string TypeSpec;
+	std::string DummyName;
 
 };
 
@@ -48,7 +55,13 @@ struct Context{
 	int EnumCounter=0;
 	bool EnumExists = false;
 	bool enum_constant=false;
-	int enumeval[1000];
+	std::vector<int> EnumOperands;
+
+
+	std::vector<typedefs> TypeAssoc;
+	typedefs TypeDef;
+	bool typedefs_=false;
+
 
 	bool rhs_of_expression=false;
 	bool lhs_of_assignment=false;

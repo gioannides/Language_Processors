@@ -9,3 +9,20 @@ problems :
 7) switch case
 
 load parameters and store arguments;
+8) function declarations (they should be skipped)
+9) global declarations and function definition (global functions don't get updated in function calls)
+10) loading arguments for function calls where the function was not defined(allocate 4 words byy default, use argument no rather then param_offset)
+11) f(g(9)); f,g two functions
+
+
+int totalStackArea = 12+104;
+int max_offset = 16;
+//in function def:
+for(int i=4; i<=7; i++) //shift by 4 all the parameters
+{
+	file << std::endl << "\tsw $" << i <<  ", " << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
+}
+if(contxt.argument_flag)
+{
+	file << std::endl << "\tsw $" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #argument no: " << contxt.argument_no;
+}

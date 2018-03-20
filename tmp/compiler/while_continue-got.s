@@ -7,6 +7,7 @@
 	.abicalls
 
 
+$END1:
 
 	.data
 	.globl	x
@@ -37,6 +38,7 @@ x:
 #0
 
 
+new function
 	.text
 	.align	2
 	.globl	main
@@ -45,75 +47,102 @@ x:
 	.ent	main
 	.type	main, @function
 main:
-	.set noreorder
+
+$END3:
+$END4:
+$END5:	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-156
-	sw $fp,152($sp)
-	sw $31,148($sp)
+	addiu $sp,$sp,-148
+	sw $fp,144($sp)
+	sw $31,140($sp)
 	move $fp,$sp
 
-	sw $4,156($sp)
-	sw $5,160($sp)
-	sw $6,164($sp)
-	sw $7,168($sp)
+	sw $4,148($sp)
+	sw $5,152($sp)
+	sw $6,156($sp)
+	sw $7,160($sp)
 	li	$2, 0
-	sw	$2,144($sp) #y
+$END7:
+	sw	$2,136($sp) #y
 
 	li	$2, 0
-	li	$3, 9
-	sub	$2, $2, $3
-	sw	$2,140($sp) #x
+$END8:
+	sw	$2,132($sp) #z
 
-$BEGIN2:
-	lw	$2, 140($sp) #x
-	li	$3, 5
+	li	$2, 1
+$END9:
+	sw	$2,128($sp) #x
+
+$BEGIN10:
+	lw	$2, 128($sp) #x
+	li	$3, 3
 	slt	$2, $2, $3
-	beq	$2,$0,$END_iter2
+$END11:
+$BEGIN210:	beq	$2,$0,$END10
 	nop
-$WHILE2:
-	lw	$2, 140($sp) #x
+$WHILE10:
+	lw	$2, 128($sp) #x
 	li	$3, 1
 	add	$2, $2, $3
-	lw	$3, 140($sp) #x
+$END13:
+	lw	$3, 128($sp) #x
 
-	sw	$2,140($sp) #x
+	sw	$2,128($sp) #x
 
-	lw	$2, 140($sp) #x
-	li	$3, 1
+	lw	$2, 128($sp) #x
+	li	$3, 2
+	slt	$2, $2, $3
+$END15:
+	beq	$2,$0,$END14
+	nop
+$IF14:
+	lw	$2, 132($sp) #z
+	li	$3, 0
 	seq	$2, $2, $3
-	beq	$2,$0,$END_sel4
+$END18:
+	beq	$2,$0,$END17
 	nop
-$IF4:
-	lw	$2, 140($sp) #x
-	li	$3, 5
+$IF17:
+	lw	$2, 128($sp) #x
+	li	$3, 3
 	slt	$2, $2, $3
-	b $BEGIN2
+$END20:
+	b $BEGIN210
 	nop
-$END_sel4:
-	lw	$2, 144($sp) #y
-	lw	$3, 140($sp) #x
+$END17:
+	lw	$2, 128($sp) #x
+	li	$3, 3
+	slt	$2, $2, $3
+$END21:
+	b $BEGIN210
+	nop
+$END14:
+	lw	$2, 136($sp) #y
+	lw	$3, 128($sp) #x
 	add	$2, $2, $3
-	lw	$3, 144($sp) #y
+$END22:
+	lw	$3, 136($sp) #y
 
-	sw	$2,144($sp) #y
+	sw	$2,136($sp) #y
 
-	b $BEGIN2
+	b $BEGIN10
 	nop
-$END_iter2:
-	lw	$2, 144($sp) #y
+$END10:
+	lw	$2, 136($sp) #y
+$END23:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,148($sp)
-	lw	$fp,152($sp)
-	addiu	$sp,$sp,156
+	lw	$31,140($sp)
+	lw	$fp,144($sp)
+	addiu	$sp,$sp,148
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,148($sp)
-	lw $fp,152($sp)
-	addiu $sp,$sp,156
+	lw $31,140($sp)
+	lw $fp,144($sp)
+	addiu $sp,$sp,148
 	j $31
 
 	nop

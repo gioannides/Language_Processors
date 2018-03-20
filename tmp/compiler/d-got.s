@@ -6,7 +6,9 @@
 	.module nooddspreg
 	.abicalls
 
+FunctDef
 
+new function
 	.text
 	.align	2
 	.globl	main
@@ -16,55 +18,58 @@
 	.type	main, @function
 main:
 
-$END1:
 $END2:
-$END3:	.set	noreorder
-	.set	nomacro
-	addiu	$sp,$sp,-128
-	sw	$fp,124($sp)
-	sw	$31,120($sp)
-	move	$fp,$sp
+$END3:	.set noreorder
+	.set nomacro
+	addiu $sp,$sp,-140
+	sw $fp,136($sp)
+	sw $31,132($sp)
+	move $fp,$sp
 
+	sw $4,140($sp)
+	sw $5,144($sp)
+	sw $6,148($sp)
+	sw $7,152($sp)
 	li	$2, 3
 	li	$3, 5
 	mult	$2, $3
 	mflo	$2
 $END5:
-	sw	$2, 116($sp) #a
+	sw	$2,128($sp) #a
 
 	li	$2, 9
 $END7:
-	lw	$3, 116($sp) #a
+	lw	$3, 128($sp) #a
 
-	sw	$2,116($sp) #a
+	sw	$2,128($sp) #a
 
 	li	$3, 8
 	add	$2, $2, $3
 $END6:
-	lw	$3, 116($sp) #a
+	lw	$3, 128($sp) #a
 
-	sw	$2,116($sp) #a
+	sw	$2,128($sp) #a
 
-	lw	$2, 116($sp) #a
+	lw	$2, 128($sp) #a
 $END8:
 	move	$2,$2
 	move	$sp,$fp
-	lw	$31,120($sp)
-	lw	$fp,124($sp)
-	addiu	$sp,$sp,128
+	lw	$31,132($sp)
+	lw	$fp,136($sp)
+	addiu	$sp,$sp,140
 	j	$31
 
 	nop
 
-	move	$sp,$fp
-	lw	$31,120($sp)
-	lw	$fp,124($sp)
-	addiu	$sp,$sp,128
-	j	$31
+	move $sp,$fp
+	lw $31,132($sp)
+	lw $fp,136($sp)
+	addiu $sp,$sp,140
+	j $31
 
 	nop
-	.set	 macro
-	.set	 reorder
-	.end	 main
-	.size	 main, .-main
+	.set macro
+	.set reorder
+	.end main
+	.size main, .-main
 

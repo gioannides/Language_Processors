@@ -9,6 +9,7 @@
   extern const TranslationUnit *g_root; // A way of getting the AST out
 
 
+
   //! This is to fix problems when generating C++
   // We are declaring the functions provided by Flex, so
   // that Bison generated code can call them.
@@ -29,9 +30,7 @@
 	DeclarationSpecifiers* DeclarationSpecifierS;
 	TypeQualifier* TypeQuaLifier;
 	TypeSpecifier* TypeSpeCifier;
-	StructOrUnionSpecifier* StructOrUnionSpecifieR;
-	
-	
+	StructOrUnionSpecifier* StructOrUnionSpecifieR;	
 	StructDeclaration* StructDecLaration;
 	StructDeclaratorList* StructDeclaratoRList;
 	StorageClassSpecifiers* StorageClassSpecifierS;
@@ -101,7 +100,7 @@
 %token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
 %token STRUCT UNION ENUM ELLIPSIS PREPROCESSOR
 
-%token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+%token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN TYPE_NAME_
 
 
 %type <PointerPtr> POINTER
@@ -166,7 +165,7 @@
 %type <UnaryOperatorPtr> UNARY_OPERATOR
 %type <ExpressionPtr> EXPRESSION
 
-%type <text> IDENTIFIER TYPEDEF EXTERN STATIC AUTO REGISTER VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED CONST VOLATILE STRUCT UNION ENUM  
+%type <text> IDENTIFIER TYPEDEF EXTERN STATIC AUTO REGISTER VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED CONST VOLATILE STRUCT UNION ENUM TYPE_NAME_
 %type <text> MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN SIZEOF OR_OP
 %type <text> '&' '!' LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP '=' LT GT ASSIGNMENT_OPERATOR INC_OP DEC_OP '.' CONSTANT STRING_LITERAL PTR_OP SEMICOLON
 %type <text> '{' '}' ':' ',' CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN AND_OP '|' '^' PLUS MINUS  MULTIPLY MODULO DIVIDE ELLIPSIS PREPROCESSOR TILDE
@@ -176,24 +175,20 @@
 %precedence ELSE
 
 
-%start TRANSLATION_UNIT 
-
+%start ROOT 
 
 %%
 
+ROOT: TRANSLATION_UNIT { g_root = $1;}
 
-TRANSLATION_UNIT: EXTERNAL_DECLARATION								{ g_root = new TranslationUnit($1); }
-    		| TRANSLATION_UNIT EXTERNAL_DECLARATION 					{ g_root = new TranslationUnit($2); }
+TRANSLATION_UNIT: EXTERNAL_DECLARATION								{ $$ = new TranslationUnit($1,NULL); }
+    		| TRANSLATION_UNIT EXTERNAL_DECLARATION 					{ $$ = new TranslationUnit($2,$1); }
 
 
 
 
 EXTERNAL_DECLARATION: FUNCTION_DEFINITION							{ $$ = new ExternalDeclaration($1,NULL,NULL,NULL) ; }
 		     |DECLARATION								{ $$ = new ExternalDeclaration(NULL,$1,NULL,NULL) ; }
-		     |EXTERNAL_DECLARATION FUNCTION_DEFINITION					{ $$ = new ExternalDeclaration($2,NULL,$1,NULL) ; }
-		     |EXTERNAL_DECLARATION DECLARATION						{ $$ = new ExternalDeclaration(NULL,$2,$1,NULL) ; }
-		     |EXTERNAL_DECLARATION PREPROCESSOR						{ $$ = new ExternalDeclaration(NULL,NULL,$1,$2); }
-		     |PREPROCESSOR								{ $$ = new ExternalDeclaration(NULL,NULL,NULL,$1); }
 
 
 
@@ -213,12 +208,12 @@ DECLARATION : DECLARATION_SPECIFIERS SEMICOLON 							{ $$ = new Declaration($1,
 
 
 
-DECLARATION_SPECIFIERS: STORAGE_CLASS_SPECIFIERS						{ $$ = new DeclarationSpecifiers($1,NULL,NULL) ;}
-			| DECLARATION_SPECIFIERS STORAGE_CLASS_SPECIFIERS 			{ $$ = new DeclarationSpecifiers($2,NULL,NULL) ;}
-			| TYPE_SPECIFIER							{ $$ = new DeclarationSpecifiers(NULL,$1,NULL) ;}
-			| DECLARATION_SPECIFIERS TYPE_SPECIFIER 				{ $$ = new DeclarationSpecifiers(NULL,$2,NULL) ;}
-			| TYPE_QUALIFIER							{ $$ = new DeclarationSpecifiers(NULL,NULL,$1) ;}
-			| DECLARATION_SPECIFIERS TYPE_QUALIFIER 				{ $$ = new DeclarationSpecifiers(NULL,NULL,$2) ;}
+DECLARATION_SPECIFIERS: STORAGE_CLASS_SPECIFIERS						{ $$ = new DeclarationSpecifiers($1,NULL,NULL,NULL) ;}
+			| DECLARATION_SPECIFIERS STORAGE_CLASS_SPECIFIERS 			{ $$ = new DeclarationSpecifiers($2,NULL,NULL,$1) ;}
+			| TYPE_SPECIFIER							{ $$ = new DeclarationSpecifiers(NULL,$1,NULL,NULL) ;}
+			| DECLARATION_SPECIFIERS TYPE_SPECIFIER 				{ $$ = new DeclarationSpecifiers(NULL,$2,NULL,$1) ;}
+			| TYPE_QUALIFIER							{ $$ = new DeclarationSpecifiers(NULL,NULL,$1,NULL) ;}
+			| DECLARATION_SPECIFIERS TYPE_QUALIFIER 				{ $$ = new DeclarationSpecifiers(NULL,NULL,$2,$1) ;}
 
 
 
@@ -234,7 +229,7 @@ STORAGE_CLASS_SPECIFIERS: TYPEDEF								{ $$ = new StorageClassSpecifiers( $1) 
 
 	
 
-TYPE_SPECIFIER: VOID										{ $$ = new TypeSpecifier($1); } 
+TYPE_SPECIFIER:   VOID										{ $$ = new TypeSpecifier($1); } 
 		| CHAR										{ $$ = new TypeSpecifier($1); } 
 		| SHORT										{ $$ = new TypeSpecifier($1); }
 		| INT										{ $$ = new TypeSpecifier($1); } 
@@ -245,7 +240,7 @@ TYPE_SPECIFIER: VOID										{ $$ = new TypeSpecifier($1); }
 		| UNSIGNED									{ $$ = new TypeSpecifier($1); } 
 		| STRUCT_OR_UNION_SPECIFIER							{ $$ = new TypeSpecifier($1); } 
 		| ENUM_SPECIFIER								{ $$ = new TypeSpecifier($1); } 
-		| TYPE_NAME									{ $$ = new TypeSpecifier($1); } 
+		| TYPE_NAME_									{ $$ = new TypeSpecifier($1); }
 
 
 
