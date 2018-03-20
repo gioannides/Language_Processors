@@ -30,7 +30,7 @@ struct function_details{
 struct EnumValues{
 
 	std::string IDENTIFIER;
-	int value;
+	double value;
 };
 
 struct Enumeration{
@@ -55,7 +55,7 @@ struct Context{
 	int EnumCounter=0;
 	bool EnumExists = false;
 	bool enum_constant=false;
-	int enumeval[1000];
+	std::vector<int> EnumOperands;
 
 
 	std::vector<typedefs> TypeAssoc;

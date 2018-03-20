@@ -1102,17 +1102,22 @@ class Enumerator : public Node {
 			if(ConstantExpressionPtr != NULL){
 				
 				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
-				//contxt.enum_constant = true;
+				contxt.enum_constant = true;
 				ConstantExpressionPtr->render_asm(file,contxt);
-				//contxt.enum_constant = false;
-				//contxt.EnumValuesTemp.value = contxt.enumeval[contxt.Regs+1];
+				if(contxt.EnumOperands.size()){
+					contxt.EnumValuesTemp.value = contxt.EnumOperands[contxt.EnumOperands.size()-1];
+					contxt.EnumOperands.pop_back();
+					//std::cout << contxt.EnumOperands[contxt.EnumOperands.size()-1] << std::endl;
+				}
 			}
-			else{
+			else if( ConstantExpressionPtr == NULL){
 				
 				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
 				contxt.EnumValuesTemp.value = contxt.EnumCounter;
 				contxt.EnumCounter++;
 			}
+			contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);
+			
 		}
 		
 			
@@ -1140,11 +1145,13 @@ class EnumeratorList : public Node {
 
 			if(EnumeratorListPtr != NULL){
 				EnumeratorListPtr->render_asm(file,contxt);
+				
 			}
 			if( EnumeratorPtr != NULL){
 				EnumeratorPtr->render_asm(file,contxt);
-				contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);
+				
 			}
+			
 		}
 
 };
@@ -1173,6 +1180,7 @@ class EnumSpecifier : public Node {
 				contxt.EnumTemp.EnumID = "$ENUM" + labelGenEnum(contxt);
 				ENumeratorList->render_asm(file,contxt);
 				contxt.Enum.push_back(contxt.EnumTemp);
+				
 				contxt.EnumCounter = 0;
 				
 			}
@@ -1183,8 +1191,12 @@ class EnumSpecifier : public Node {
 				contxt.EnumTemp.EnumID = *IDENTIFIER;
 				ENumeratorList->render_asm(file,contxt);
 				contxt.Enum.push_back(contxt.EnumTemp);
+				std::cout << contxt.EnumValuesTemp.IDENTIFIER << " " << contxt.EnumValuesTemp.value << std::endl;
+				
 				contxt.EnumCounter = 0;
 			}
+			
+			
 		}
 };
  

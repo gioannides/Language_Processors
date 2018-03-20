@@ -139,10 +139,15 @@ extern "C" int fileno(FILE *stream);
 "while"			{  return token(WHILE); }
 
 [A-Za-z_]([A-Za-z_]|[0-9])* 						{ 
-									if(contxt.typedefs_) { 
-										contxt.TypeDef.DummyName = *(yytext);
+									if(contxt.typedefs_) {
+										int i=0;
+										while( yytext[i] != NULL){
+											contxt.TypeDef.DummyName += yytext[i];
+											i++;
+										}
 										contxt.TypeAssoc.push_back(contxt.TypeDef);
 										contxt.typedefs_ = false;
+										contxt.TypeDef.DummyName = "";
 									} 
 										return type();
 									}
