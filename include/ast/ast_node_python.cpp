@@ -467,6 +467,18 @@ inline void ExternalDeclaration::print_py(std::ofstream& file) {
 				
 		}
 
+inline void TranslationUnit::print_py(std::ofstream& file)  {
+
+				if(TranslationUnitPtr != NULL){
+					TranslationUnitPtr->print_py(file);
+				}
+				if( ExternalDecl != NULL){
+					ExternalDecl->print_py(file);
+				}
+
+				
+
+}
 
 
 
@@ -476,7 +488,12 @@ inline void TranslationUnit::print_py(std::string file_name) const {
 				
 				std::ofstream file;
 				file.open(file_name.c_str());
-				ExternalDecl->print_py(file);
+				if(TranslationUnitPtr != NULL){
+					TranslationUnitPtr->print_py(file);
+				}
+				if( ExternalDecl != NULL){
+					ExternalDecl->print_py(file);
+				}
 
 			if(main_){
 				file << std::endl << std::endl << "if __name__ == " << "\"__main__\"" << ":"; 

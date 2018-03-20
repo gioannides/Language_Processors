@@ -10,7 +10,8 @@
 #include "C_parser.tab.hpp"
 #include <stdlib.h>		
 #include <string>
-#include <iostream>		
+#include <iostream>
+#include "../include/ast/class_forward_declarations.hpp"		
 
 
 void yyerror (char const *s);
@@ -19,6 +20,7 @@ extern FILE *yyout;
 
 int token(int T);
 int vtoken(int T);
+int type();
 
 int LineNo = 1;			//Used for debugging
 
@@ -40,7 +42,11 @@ extern "C" int fileno(FILE *stream);
 
 "case"			{  return token(CASE); }
 
-"char"			{  return token(CHAR); }
+"char"			{ if(contxt.typedefs_) {
+				 contxt.TypeDef.TypeSpec = "char";
+			} 
+				return token(CHAR);
+			}
 
 "const"			{  return token(CONST); }
 
@@ -50,7 +56,11 @@ extern "C" int fileno(FILE *stream);
 
 "do"			{  return token(DO); }
 
-"double"		{  return token(DOUBLE); }
+"double"		{  if(contxt.typedefs_) { 
+				contxt.TypeDef.TypeSpec = "double";
+			   } 
+			    return token(DOUBLE);
+			}
 
 "else"			{  return token(ELSE); }
 
@@ -58,7 +68,11 @@ extern "C" int fileno(FILE *stream);
 
 "extern"		{  return token(EXTERN); }
 
-"float"			{  return token(FLOAT); }
+"float"			{ if(contxt.typedefs_) { 
+				contxt.TypeDef.TypeSpec = "float";
+			  } 
+			  return token(FLOAT);
+			}
 
 "for"			{  return token(FOR); }
 
@@ -66,17 +80,33 @@ extern "C" int fileno(FILE *stream);
 
 "if"			{  return token(IF); }
 
-"int"			{  return token(INT); }
+"int"			{  if(contxt.typedefs_) { 
+				contxt.TypeDef.TypeSpec = "int";
+			   } 
+			     return token(INT);
+			}
 
-"long"			{  return token(LONG); }
+"long"			{ if(contxt.typedefs_) { 
+				contxt.TypeDef.TypeSpec = "long";
+			  } 
+				return token(LONG);
+			}
 
 "register"		{  return token(REGISTER); }
 
 "return"		{  return token(RETURN); }
 
-"short"			{  return token(SHORT); }
+"short"			{  if(contxt.typedefs_) { 
+				contxt.TypeDef.TypeSpec = "short";
+			   } 
+			    return token(SHORT);
+			}
 
-"signed"		{  return token(SIGNED); }
+"signed"		{  if(contxt.typedefs_) { 
+				contxt.TypeDef.TypeSpec = "signed";
+			   } 
+				return token(SIGNED);
+			}
 
 "sizeof"		{  return token(SIZEOF); }
 
@@ -86,19 +116,36 @@ extern "C" int fileno(FILE *stream);
 
 "switch"		{  return token(SWITCH); }
 
-"typedef"		{  return token(TYPEDEF); }
+"typedef"		{ contxt.typedefs_ = true;
+			  return token(TYPEDEF);
+			}
 
 "union"			{  return token(UNION); }
 
-"unsigned"		{  return token(UNSIGNED); }
+"unsigned"		{  if(contxt.typedefs_) { 
+				contxt.TypeDef.TypeSpec = "unsigned";
+			   }
+			   return token(UNSIGNED);
+			}
 
-"void"			{  return token(VOID); }
+"void"			{  if(contxt.typedefs_) { 
+				contxt.TypeDef.TypeSpec = "void";
+			} 
+			  return token(VOID);
+			}
 
 "volatile"		{  return token(VOLATILE); }
 
 "while"			{  return token(WHILE); }
 
-[A-Za-z_][A-Za-z_0-9]*							{  return token(IDENTIFIER); }
+[A-Za-z_]([A-Za-z_]|[0-9])* 						{ 
+									if(contxt.typedefs_) { 
+										contxt.TypeDef.DummyName = *(yytext);
+										contxt.TypeAssoc.push_back(contxt.TypeDef);
+										contxt.typedefs_ = false;
+									} 
+										return type();
+									}
 
 0[xX][a-fA-F0-9]+((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))?		{  return token(CONSTANT); }
 
@@ -227,11 +274,52 @@ void yyerror (char const *s)
 {
   	fprintf (stderr, "Error: %s\n", s); /* s is the text that wasn't matched */
 	std::cerr << "Terminated At line: " << LineNo << " due to Syntax/Lexical error" << std::endl;
+	
   	exit(1);
 }
 
+int type(){
+	yylval.text = new std::string(yytext);
+	for(int i(0); i < contxt.TypeAssoc.size(); i++){
+		
+		if(*(yylval.text) == contxt.TypeAssoc[i].DummyName){
+			if(contxt.TypeAssoc[i].TypeSpec == "int"){
+				yylval.text = new std::string("int");
+				return TYPE_NAME_;}
+			if(contxt.TypeAssoc[i].TypeSpec == "char"){
+				yylval.text = new std::string("char");
+				return TYPE_NAME_;}
+			if(contxt.TypeAssoc[i].TypeSpec == "float"){
+				yylval.text = new std::string("float");
+				return TYPE_NAME_;}
+			if(contxt.TypeAssoc[i].TypeSpec == "double"){
+				yylval.text = new std::string("double");
+				return TYPE_NAME_;}
+			if(contxt.TypeAssoc[i].TypeSpec == "short"){
+				yylval.text = new std::string("short");
+				return TYPE_NAME_;}
+			if(contxt.TypeAssoc[i].TypeSpec == "long"){
+				yylval.text = new std::string("long");
+				return TYPE_NAME_;}
+			if(contxt.TypeAssoc[i].TypeSpec == "unsigned"){
+				yylval.text = new std::string("unsigned");
+				return TYPE_NAME_;}
+			if(contxt.TypeAssoc[i].TypeSpec == "signed"){
+				yylval.text = new std::string("signed");
+				return TYPE_NAME_;}
+			if(contxt.TypeAssoc[i].TypeSpec == "void"){
+				yylval.text = new std::string("void");
+				return TYPE_NAME_;}					
+		}				
+	}
+		
+	return IDENTIFIER;
+}
+	
+
 int token(int T) {
-		yylval.text = new std::string(yytext);
+		yylval.text = new std::string(yytext);		
+		
 		return T;
 }
 

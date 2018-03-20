@@ -40,6 +40,13 @@ struct Enumeration{
 
 };
 
+struct typedefs{
+
+	std::string TypeSpec;
+	std::string DummyName;
+
+};
+
 
 struct Context{
 	std::vector<Enumeration> Enum;
@@ -49,6 +56,12 @@ struct Context{
 	bool EnumExists = false;
 	bool enum_constant=false;
 	int enumeval[1000];
+
+
+	std::vector<typedefs> TypeAssoc;
+	typedefs TypeDef;
+	bool typedefs_=false;
+
 
 	bool rhs_of_expression=false;
 	bool lhs_of_assignment=false;
