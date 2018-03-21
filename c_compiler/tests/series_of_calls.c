@@ -31,7 +31,7 @@ return j()+1;
 
 int j(){
 
-return '\n';
+return 10;
 
 }
 

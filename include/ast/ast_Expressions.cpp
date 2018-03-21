@@ -904,6 +904,10 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 }
 inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 {
+	if(IDENTIFIER!=NULL)
+	{
+		file << "# id" << *IDENTIFIER << "- f_call" << contxt.is_function_call << "- reading" << contxt.reading << "- function" << contxt.function << "- SizeOf:" << contxt.sizeof_ << "- lhs_of_assignment:" << contxt.lhs_of_assignment << "\n";
+	}
 	if( AssignmentExpressionPtr != NULL && !contxt.reading ) 
 	{
 		
@@ -978,6 +982,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		  		
 			if(contxt.lhs_of_assignment && !contxt.SizeOf && !contxt.enum_constant)
 			{
+				file << "# lhs_of_assignment is set\n";
 				if(found_0nothing_1local_2globl)
 				{
 					if(contxt.AssignmentOperator != "df" && contxt.AssignmentOperator != "=")
@@ -1015,6 +1020,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			}
 			else
 			{
+
 			 	if(found_0nothing_1local_2globl==1 && !contxt.SizeOf && !contxt.enum_constant) 
 			 	{
 			 		load_locals(contxt, file, good_index);

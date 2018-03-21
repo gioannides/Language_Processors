@@ -1863,6 +1863,7 @@ class FunctionDefinition : public Node {
 				CompoundStatementPtr->render_asm(file,contxt);  // ...(file,initialized,function)
 				contxt.reading = false;
 			}
+			contxt.is_function_call=false;	
 			//std:: cout << "\nmax_offset" << contxt.max_offset << " " <<  contxt.funct_id <<"\n";
 			contxt.totalStackArea+=contxt.max_offset;
 			contxt.max_offset=16;
@@ -2054,13 +2055,13 @@ class TranslationUnit : public Node{
 			if( ExternalDecl != NULL){
 				ExternalDecl->render_asm(file,contxt);
 			}
-			//print_variables(contxt, file);
+			
 			// for (int i=0; i<contxt.functions_declared.size(); i++)
 			// {
 			// 	std::cout << contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size; 
 			// }
-			// print_scopes(contxt,file);
-			// print_variables(contxt,file);
+			 // print_scopes(contxt,file);
+			 // print_variables(contxt,file);
 			// print_declared(contxt, file);
 		}
 

@@ -31,7 +31,8 @@ $END2:	.set noreorder
 
 	li	$2, 56
 $END4:
-	sb	$2,128($sp) #z
+	sb	$2,128($sp) #z# idz- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
+
 	lb	$2, 128($sp) #z
 $END5:
 	move	$2,$2

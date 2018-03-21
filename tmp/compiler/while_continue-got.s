@@ -72,21 +72,26 @@ $END8:
 $END9:
 	sw	$2,128($sp) #x
 
-$BEGIN10:
+$BEGIN10:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
+
 	lw	$2, 128($sp) #x
 	li	$3, 3
 	slt	$2, $2, $3
 $END11:
 $BEGIN210:	beq	$2,$0,$END10
 	nop
-$WHILE10:
+$WHILE10:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
+
 	lw	$2, 128($sp) #x
 	li	$3, 1
 	add	$2, $2, $3
-$END13:
+$END13:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:1
+# lhs_of_assignment is set
+
 	lw	$3, 128($sp) #x
 
 	sw	$2,128($sp) #x
+# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
 
 	lw	$2, 128($sp) #x
 	li	$3, 2
@@ -94,39 +99,47 @@ $END13:
 $END15:
 	beq	$2,$0,$END14
 	nop
-$IF14:
+$IF14:# idz- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
+
 	lw	$2, 132($sp) #z
 	li	$3, 0
 	seq	$2, $2, $3
 $END18:
 	beq	$2,$0,$END17
 	nop
-$IF17:
+$IF17:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
+
 	lw	$2, 128($sp) #x
 	li	$3, 3
 	slt	$2, $2, $3
 $END20:
 	b $BEGIN210
 	nop
-$END17:
+$END17:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
+
 	lw	$2, 128($sp) #x
 	li	$3, 3
 	slt	$2, $2, $3
 $END21:
 	b $BEGIN210
 	nop
-$END14:
-	lw	$2, 136($sp) #y
+$END14:# idy- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
+
+	lw	$2, 136($sp) #y# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
+
 	lw	$3, 128($sp) #x
 	add	$2, $2, $3
-$END22:
+$END22:# idy- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:1
+# lhs_of_assignment is set
+
 	lw	$3, 136($sp) #y
 
 	sw	$2,136($sp) #y
 
 	b $BEGIN10
 	nop
-$END10:
+$END10:# idy- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
+
 	lw	$2, 136($sp) #y
 $END23:
 	move	$2,$2

@@ -12,7 +12,7 @@ return x;
 
 int main(){
 
-	char x = '\n';
+	char x = 10;
 
 	
 
