@@ -1106,8 +1106,9 @@ class Enumerator : public Node {
 				ConstantExpressionPtr->render_asm(file,contxt);
 				if(contxt.EnumOperands.size()){
 					contxt.EnumValuesTemp.value = contxt.EnumOperands[contxt.EnumOperands.size()-1];
+					
+					std::cout << contxt.EnumOperands[contxt.EnumOperands.size()-1] << std::endl;
 					contxt.EnumOperands.pop_back();
-					//std::cout << contxt.EnumOperands[contxt.EnumOperands.size()-1] << std::endl;
 				}
 			}
 			else if( ConstantExpressionPtr == NULL){
@@ -1191,7 +1192,7 @@ class EnumSpecifier : public Node {
 				contxt.EnumTemp.EnumID = *IDENTIFIER;
 				ENumeratorList->render_asm(file,contxt);
 				contxt.Enum.push_back(contxt.EnumTemp);
-				std::cout << contxt.EnumValuesTemp.IDENTIFIER << " " << contxt.EnumValuesTemp.value << std::endl;
+				//std::cout << contxt.EnumValuesTemp.IDENTIFIER << " " << contxt.EnumValuesTemp.value << std::endl;
 				
 				contxt.EnumCounter = 0;
 			}
@@ -1572,9 +1573,6 @@ class JumpStatement : public Node {
 							}
 							file << std::endl << "\tmov.s\t$f0," << "$f" << contxt.Regs+1;
 						}
-							file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
-							file << std::endl << "\tmfc1\t$2," << "$f" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
-							file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;
 							file << std::endl << "\tmove\t$sp,$fp";
 							file << std::endl << "\tlw\t$31," << contxt.totalStackArea-4 <<"($sp)";
 							file << std::endl << "\tlw\t$fp," << contxt.totalStackArea << "($sp)";
@@ -1868,9 +1866,24 @@ class FunctionDefinition : public Node {
 			file << std::endl << "\tsw $31," << contxt.totalStackArea-4 <<"($sp)";
 			file << std::endl << "\tmove $fp,$sp\n";
 
-			for(int i=4; i<=7; i++) //shift by 4 all the parameters
-			{
-				file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
+			if(!contxt.float_){
+				for(int i=4; i<=7; i++) //shift by 4 all the parameters
+				{
+
+					file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
+				}
+			}
+			else if(contxt.float_){
+				int j=12;
+				for(int i=4; i<=7; i++){
+					if(i<=5){
+						file << std::endl << "\tswc1 $f" << j <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
+						j+=2;
+					}
+					else{
+						file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
+					}
+				}
 			}
 
 			contxt.variable.offset=contxt.totalStackArea-4;
@@ -2141,10 +2154,15 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 							{
 								file << std::endl << "\tsb\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
 							}
-							else
+							else if( contxt.Variables[good_index].word_size==4 && !contxt.float_)
 							{
 								file << std::endl << "\tsw\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
 							}
+							else if( contxt.Variables[good_index].word_size==4 && contxt.float_)
+							{
+								file << std::endl << "\tswc1\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
+							}
+							
 						}
 					}
 					else if(found_local==2) 
