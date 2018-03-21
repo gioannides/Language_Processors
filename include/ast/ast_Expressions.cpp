@@ -321,6 +321,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 
 							file << std::endl << "\tc.lt.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
 							file << std::endl << "\tbc1t\t" << NOT_LESS;
+							file << std::endl << "\tnop\t";
 							contxt.regType[contxt.Regs]='f';
 							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
 							file << std::endl << "\tb\t" << END;
@@ -347,6 +348,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 
 							file << std::endl << "\tc.lt.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1;
 							file << std::endl << "\tbc1t\t" << NOT_GREATER;
+							file << std::endl << "\tnop\t";
 							contxt.regType[contxt.Regs]='f';
 							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
 							file << std::endl << "\tb\t" << END;
@@ -373,6 +375,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 
 							file << std::endl << "\tc.le.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
 							file << std::endl << "\tbc1t\t" << NOT_LE;
+							file << std::endl << "\tnop\t";
 							contxt.regType[contxt.Regs]='f';
 							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
 							file << std::endl << "\tb\t" << END;
@@ -399,6 +402,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 
 							file << std::endl << "\tc.le.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1;
 							file << std::endl << "\tbc1t\t" << NOT_GE;
+							file << std::endl << "\tnop\t";
 							contxt.regType[contxt.Regs]='f';
 							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
 							file << std::endl << "\tb\t" << END;
@@ -535,6 +539,7 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 
 							file << std::endl << "\tc.eq.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1;
 							file << std::endl << "\tbc1f\t" << NOT_EQ;
+							file << std::endl << "\tnop\t";
 							contxt.regType[contxt.Regs]='f';
 							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
 							file << std::endl << "\tb\t" << END;
@@ -559,6 +564,7 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 
 							file << std::endl << "\tc.eq.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1;
 							file << std::endl << "\tbc1t\t" << NOT_EQ;
+							file << std::endl << "\tnop\t";
 							contxt.regType[contxt.Regs]='f';
 							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
 							file << std::endl << "\tb\t" << END;
@@ -1458,7 +1464,7 @@ if(!contxt.sizeof_){
 				contxt.regType[contxt.Regs]='u';
 						}
 			else if(contxt.float_){
-				file << std::endl << "\tdiv.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+				file << std::endl << "\tdiv.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
 				contxt.regType[contxt.Regs]='f';
 			}					
 			else{
@@ -1499,7 +1505,7 @@ if(!contxt.sizeof_){
 				contxt.regType[contxt.Regs]='u';
 			}
 			else if(contxt.float_){
-				file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+				file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
 				contxt.regType[contxt.Regs]='f';
 			}	
 			else{

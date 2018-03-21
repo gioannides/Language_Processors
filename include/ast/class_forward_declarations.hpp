@@ -328,11 +328,18 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 	int index = contxt.good_i;
 	if(contxt.AssignmentOperator == "++" && contxt.is_postfix && !contxt.reading)
 	{ 
-		//std::cout << std::endl << "got here" << std::endl;
-		f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", 1 #++"; //maybe +2
-		//if(contxt.Variables[contxt.good_i].word_size==1) {
-		//	f << std::endl << "\tsb\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id;			
-		//}				
+		if(!contxt.float_){
+			f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", 1 #++"; //maybe +2
+			contxt.regType[contxt.Regs]='i';
+		}
+		else{
+			f << std::endl << "\tli.s\t$f" << contxt.Regs+1 << ",1";
+			contxt.regType[contxt.Regs+1]='f';
+			f << std::endl << "\tadd.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+			contxt.regType[contxt.Regs]='f';
+
+		}
+					
 		if(contxt.Variables[contxt.good_i].scope=="global")
 		{
 			store_globals(contxt, f, index);
@@ -342,14 +349,24 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 			store_locals(contxt, f, index);
 			//f << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id << "\n";
 		}
-		//f << "\n\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[contxt.good_i].offset << "($sp)" << " #" << contxt.Variables[contxt.good_i].id;
+		
 		contxt.is_postfix=false;
 	}
 	else if (contxt.AssignmentOperator == "--" && contxt.is_postfix && !contxt.reading)
 	{
-		//std::cout << std::endl << "got here" << std::endl;
+		if(!contxt.float_){
 
-		f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", -1 #--";
+			f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", -1 #--";
+			contxt.regType[contxt.Regs]='i';
+		}
+	
+		else{
+			f << std::endl << "\tli.s\t$f" << contxt.Regs+1 << ",-1";
+			contxt.regType[contxt.Regs+1]='f';
+			f << std::endl << "\tadd.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+			contxt.regType[contxt.Regs]='f';
+
+		}
 		
 		if(contxt.Variables[contxt.good_i].scope=="global")
 		{
@@ -358,9 +375,9 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 		else 
 		{
 			store_locals(contxt, f, index);
-			//f << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id << "\n";
+			
 		}
-		//f << "\n\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[contxt.good_i].offset << "($sp)" << " #" << contxt.Variables[contxt.good_i].id;
+		
 		contxt.is_postfix=false;
 	} 
 	contxt.Regs--;

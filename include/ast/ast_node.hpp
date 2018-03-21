@@ -1584,7 +1584,7 @@ class JumpStatement : public Node {
 					else if(contxt.functions_declared[i].returnType != "float" && contxt.functions_declared[i].name == contxt.funct_id ){
 						if( AssignmentExpressionPtr != NULL && !contxt.reading){
 							if( contxt.regType[contxt.Regs+1] == 'f'){
-								file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+								file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 								file << std::endl << "\tmfc1\t$2," << "$f" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
 							}
 							file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;
