@@ -216,46 +216,46 @@ $END62:
 	sw $25,52($sp)
 	lb	$2, 152($sp) #yu
 $END64:
-	sb	$2, 0($sp) #r
+	sb	$2, 0($sp) #r 0
 	move	$4, $2 #load parameter 1
 	lw	$2, 168($sp) #y
 $END65:
-	sw	$2, 4($sp) #t
+	sw	$2, 4($sp) #t 4
 
 	move	$5, $2 #load parameter 2
 	lw	$2, 164($sp) #z
 $END66:
-	sw	$2, 8($sp) #w
+	sw	$2, 8($sp) #w 8
 
 	move	$6, $2 #load parameter 3
 	lw	$2, 160($sp) #a
 $END67:
-	sw	$2, 12($sp) #j
+	sw	$2, 12($sp) #j 12
 
 	move	$7, $2 #load parameter 4
 	lw	$2, 156($sp) #f
 $END68:
-	sw	$2, 16($sp) #o
+	sw	$2, 16($sp) #o 16
 
 	lw	$2, 160($sp) #a
 $END69:
-	sw	$2, 20($sp) #p
+	sw	$2, 20($sp) #p 20
 
 	lw	$2, 172($sp) #x
 $END70:
-	sw	$2, 24($sp) #h
+	sw	$2, 24($sp) #h 24
 
 	lw	$2, 172($sp) #x
 $END71:
-	sw	$2, 28($sp) #o1
+	sw	$2, 28($sp) #o1 28
 
 	lw	$2, 172($sp) #x
 $END72:
-	sw	$2, 32($sp) #p1
+	sw	$2, 32($sp) #p1 32
 
 	lw	$2, 156($sp) #f
 $END73:
-	sw	$2, 36($sp) #h1
+	sw	$2, 36($sp) #h1 36
 
 	.option pic
 	jal gunv
@@ -314,46 +314,46 @@ $END63:
 	sw $25,52($sp)
 	lb	$2, 152($sp) #yu
 $END75:
-	sb	$2, 0($sp) #r
+	sb	$2, 0($sp) #r 0
 	move	$4, $2 #load parameter 1
 	lw	$2, 168($sp) #y
 $END76:
-	sw	$2, 4($sp) #t
+	sw	$2, 4($sp) #t 4
 
 	move	$5, $2 #load parameter 2
 	lw	$2, 164($sp) #z
 $END77:
-	sw	$2, 8($sp) #w
+	sw	$2, 8($sp) #w 8
 
 	move	$6, $2 #load parameter 3
 	lw	$2, 160($sp) #a
 $END78:
-	sw	$2, 12($sp) #j
+	sw	$2, 12($sp) #j 12
 
 	move	$7, $2 #load parameter 4
 	lw	$2, 156($sp) #f
 $END79:
-	sw	$2, 16($sp) #o
+	sw	$2, 16($sp) #o 16
 
 	lw	$2, 160($sp) #a
 $END80:
-	sw	$2, 20($sp) #p
+	sw	$2, 20($sp) #p 20
 
 	lw	$2, 172($sp) #x
 $END81:
-	sw	$2, 24($sp) #h
+	sw	$2, 24($sp) #h 24
 
 	lw	$2, 172($sp) #x
 $END82:
-	sw	$2, 28($sp) #o1
+	sw	$2, 28($sp) #o1 28
 
 	lw	$2, 172($sp) #x
 $END83:
-	sw	$2, 32($sp) #p1
+	sw	$2, 32($sp) #p1 32
 
 	lw	$2, 156($sp) #f
 $END84:
-	sw	$2, 36($sp) #h1
+	sw	$2, 36($sp) #h1 36
 
 	.option pic
 	jal func
@@ -412,46 +412,46 @@ $END74:
 	sw $25,52($sp)
 	lb	$2, 152($sp) #yu
 $END86:
-	sb	$2, 0($sp) #r
+	sb	$2, 0($sp) #r 0
 	move	$4, $2 #load parameter 1
 	lw	$2, 168($sp) #y
 $END87:
-	sw	$2, 4($sp) #t
+	sw	$2, 4($sp) #t 4
 
 	move	$5, $2 #load parameter 2
 	lw	$2, 164($sp) #z
 $END88:
-	sw	$2, 8($sp) #w
+	sw	$2, 8($sp) #w 8
 
 	move	$6, $2 #load parameter 3
 	lw	$2, 160($sp) #a
 $END89:
-	sw	$2, 12($sp) #j
+	sw	$2, 12($sp) #j 12
 
 	move	$7, $2 #load parameter 4
 	lw	$2, 156($sp) #f
 $END90:
-	sw	$2, 16($sp) #o
+	sw	$2, 16($sp) #o 16
 
 	lw	$2, 160($sp) #a
 $END91:
-	sw	$2, 20($sp) #p
+	sw	$2, 20($sp) #p 20
 
 	lw	$2, 172($sp) #x
 $END92:
-	sw	$2, 24($sp) #h
+	sw	$2, 24($sp) #h 24
 
 	lw	$2, 172($sp) #x
 $END93:
-	sw	$2, 28($sp) #o1
+	sw	$2, 28($sp) #o1 28
 
 	lw	$2, 172($sp) #x
 $END94:
-	sw	$2, 32($sp) #p1
+	sw	$2, 32($sp) #p1 32
 
 	lw	$2, 156($sp) #f
 $END95:
-	sw	$2, 36($sp) #h1
+	sw	$2, 36($sp) #h1 36
 
 	.option pic
 	jal gunv
@@ -510,46 +510,46 @@ $END85:
 	sw $25,52($sp)
 	lb	$2, 152($sp) #yu
 $END97:
-	sb	$2, 0($sp) #r
+	sb	$2, 0($sp) #r 0
 	move	$4, $2 #load parameter 1
 	lw	$2, 168($sp) #y
 $END98:
-	sw	$2, 4($sp) #t
+	sw	$2, 4($sp) #t 4
 
 	move	$5, $2 #load parameter 2
 	lw	$2, 164($sp) #z
 $END99:
-	sw	$2, 8($sp) #w
+	sw	$2, 8($sp) #w 8
 
 	move	$6, $2 #load parameter 3
 	lw	$2, 160($sp) #a
 $END100:
-	sw	$2, 12($sp) #j
+	sw	$2, 12($sp) #j 12
 
 	move	$7, $2 #load parameter 4
 	lw	$2, 156($sp) #f
 $END101:
-	sw	$2, 16($sp) #o
+	sw	$2, 16($sp) #o 16
 
 	lw	$2, 160($sp) #a
 $END102:
-	sw	$2, 20($sp) #p
+	sw	$2, 20($sp) #p 20
 
 	lw	$2, 172($sp) #x
 $END103:
-	sw	$2, 24($sp) #h
+	sw	$2, 24($sp) #h 24
 
 	lw	$2, 172($sp) #x
 $END104:
-	sw	$2, 28($sp) #o1
+	sw	$2, 28($sp) #o1 28
 
 	lw	$2, 172($sp) #x
 $END105:
-	sw	$2, 32($sp) #p1
+	sw	$2, 32($sp) #p1 32
 
 	lw	$2, 156($sp) #f
 $END106:
-	sw	$2, 36($sp) #h1
+	sw	$2, 36($sp) #h1 36
 
 	.option pic
 	jal gunv
