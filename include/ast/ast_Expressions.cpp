@@ -859,7 +859,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						if (offset<=0 || offset > contxt.totalStackArea-4){
 							offset=112;
 						}
-						for(i=1; i<=25; i++)
+						for(i=1; i<25; i++)
 						{
 							file << "\n\tsw $" << i << "," << offset-(i*4) << "($sp)";
 						}
@@ -1229,7 +1229,6 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 			}				
 			else if(ConditionalExpressionPtr != NULL) {
 				ConditionalExpressionPtr->render_asm(file,contxt);		//THIS IS FOR IF STATEMENTS/ LOGICAL / ARITHMETIC OPERATIONS / ASSIGNEMENTS
-				
 			}
 			if(contxt.argument_no)
 			{
@@ -1240,15 +1239,18 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 					{ 
 						if(contxt.Variables[ki+contxt.argument_no-1].word_size==1) 
 						{
-							file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", " << contxt.Variables[ki+contxt.argument_no-1].param_offset << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id;		contxt.regType[contxt.Regs+1]='c';
+							file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4;		
+							contxt.regType[contxt.Regs+1]='c';
 						}				
 						else if(contxt.Variables[ki+contxt.argument_no-1].word_size==4 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
-						{
-							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[ki+contxt.argument_no-1].param_offset << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << "\n";	contxt.regType[contxt.Regs+1]='i';
+						{ 	
+							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
+							contxt.regType[contxt.Regs+1]='i';
 						}
 						else if(contxt.Variables[ki+contxt.argument_no-1].word_size==4 && contxt.Variables[ki+contxt.argument_no-1].DataType == "float")
 						{
-							file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", " << contxt.Variables[ki+contxt.argument_no-1].param_offset << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << "\n";	contxt.regType[contxt.Regs+1]='f';
+							file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
+							contxt.regType[contxt.Regs+1]='f';
 						}
 						
 						if(contxt.argument_no<=4)

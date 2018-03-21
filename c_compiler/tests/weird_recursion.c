@@ -16,7 +16,7 @@ int main(){
 
 	
 
-	return ((f(x)?f(3):f(4)));
+	return ((f(x)?f(3):f(14)));
 
 }
 

@@ -149,6 +149,7 @@ struct Context{
 	int eval[1000];
 	float eval_f[1000];
 	int allocate=0;
+	bool function_dec =false;
 };
 
 inline std::string labelGenEnum(Context& contxt) {
@@ -381,6 +382,18 @@ inline void print_scopes(Context& contxt, std::ofstream& f){
 		for(int i=contxt.Scopes.size()-1; i>=0; i--)
 		{
 			std::cout << contxt.Scopes[i] << " - ";
+		}
+		std::cout << std::endl;
+	}
+}
+inline void print_declared(Context& contxt, std::ofstream& f){
+	if(contxt.functions_declared.size()>0)
+	{
+		std::cout << std::endl;
+		for(int i=contxt.functions_declared.size()-1; i>=0; i--)
+		{
+			std::cout << contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size << std::endl;
+			f << "# "<< contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size << std::endl;
 		}
 		std::cout << std::endl;
 	}

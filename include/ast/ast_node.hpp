@@ -618,14 +618,16 @@ class DirectDeclarator : public Node {
 		IdentifierList* IDentifierList;
 		DirectDeclarator* DirectDeclaratorPtr;
 		Declarator* DeclaratorPtr;
+		int round1_square2_closed3=0;
 
 	public:
 		std::string* IDENTIFIER;
 
-		DirectDeclarator( std::string* IDENTIFIER, ConstantExpression* ConstantExpRession, ParameterTypeList* ParameterTypeLiSt, IdentifierList* IDentifierList, DirectDeclarator* DirectDeclaratorPtr, Declarator* DeclaratorPtr) :
+		DirectDeclarator( std::string* IDENTIFIER, ConstantExpression* ConstantExpRession, ParameterTypeList* ParameterTypeLiSt, IdentifierList* IDentifierList, DirectDeclarator* DirectDeclaratorPtr, Declarator* DeclaratorPtr, int round1_square2_closed3) :
 	
 				IDENTIFIER(IDENTIFIER) , ConstantExpRession(ConstantExpRession), ParameterTypeLiSt(ParameterTypeLiSt), IDentifierList(IDentifierList),
-				DirectDeclaratorPtr(DirectDeclaratorPtr) , DeclaratorPtr(DeclaratorPtr) {
+				DirectDeclaratorPtr(DirectDeclaratorPtr) , DeclaratorPtr(DeclaratorPtr) , round1_square2_closed3(round1_square2_closed3){
+
 				}
 
 		void print_py(std::ofstream& file, bool initialized=false, bool function=false) ;
@@ -830,7 +832,7 @@ class InitDeclaratorList : public Node {
 				
 			}
 			InitDecLarator->render_asm(file,contxt);
-			if(!contxt.function) {
+			if(!contxt.function && !contxt.function_dec) {
 				 	
 				file << std::endl << "\n\t.data";
 				file << std::endl << "\t.globl\t" << contxt.variable.id;
@@ -1504,6 +1506,23 @@ class Declaration : public Node {
 			if( DeclList != NULL) {
 				DeclList->render_asm(file,contxt);  // Obtain name and value of the variable
 			}
+			if(contxt.function_dec)
+			{
+				contxt.funcion_temp.returnType=contxt.functionReturnTypetemp; 
+				contxt.funcion_temp.name=contxt.funct_id;
+				contxt.functions_declared.push_back(contxt.funcion_temp);
+				contxt.funcion_temp.paramters_size=0;
+				contxt.function_dec=false;
+				contxt.function=false;
+				file << std::endl << "# function declaration";
+				if(contxt.Scopes.size()>0){
+					contxt.Scopes.pop_back(); //assign the variable the scope it is in
+				}
+				else 
+				{
+					//std::cout << "PROBLEMS with Scopes" << std::endl;
+				}
+			}
 
 			
 			
@@ -1774,7 +1793,13 @@ class CompoundStatement : public Node {
 					StatementListPtr->render_asm(file,contxt);
 				//}
 			}	
-			contxt.Scopes.pop_back();
+			if(contxt.Scopes.size()>0){
+					contxt.Scopes.pop_back(); //assign the variable the scope it is in
+				}
+				else 
+				{
+					std::cout << "PROBLEMS with Scopes" << std::endl;
+				}
 		}
 };
 
@@ -1798,11 +1823,13 @@ class FunctionDefinition : public Node {
 
 		void render_asm(std::ofstream& file, Context& contxt) {
 			
+			contxt.function_dec=false;
 			if( DeclarationSpecifiersPtr != NULL ) {
 				contxt.functionReturnType = true;
 				DeclarationSpecifiersPtr->render_asm(file,contxt);			//check the return type
 				contxt.functionReturnType = false;
 			}
+			contxt.funcion_temp.returnType=contxt.functionReturnTypetemp; 
 
 			if( DeclaratorPtr != NULL ) {				//function_def.name and function_def.no_parameters are assigned here
 				
@@ -1822,8 +1849,8 @@ class FunctionDefinition : public Node {
 				contxt.protect = true;
 			}
 			//contxt.Scopes.push_back(contxt.funct_id);
+			//contxt.funcion_temp.returnType=contxt.functionReturnTypetemp; 
 			contxt.funcion_temp.name=contxt.funct_id;
-			contxt.funcion_temp.returnType=contxt.functionReturnTypetemp;
 			contxt.functions_declared.push_back(contxt.funcion_temp);
 			contxt.funcion_temp.paramters_size=0;
 			if( DeclarationListPtr != NULL ) {   			//( functions having const-correctness for example )
@@ -1905,9 +1932,13 @@ class FunctionDefinition : public Node {
 			file << "\t.size " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;
 			//contxt.totalStackArea = 8;
 			//print_variables(contxt, file);
-			if(contxt.Scopes.size() != 0){
-				contxt.Scopes.pop_back();
-			}
+			if(contxt.Scopes.size()>0){
+					contxt.Scopes.pop_back(); //assign the variable the scope it is in
+				}
+				else 
+				{
+					//std::cout << "PROBLEMS with Scopes" << std::endl;
+				}
 		}	
 };
 
@@ -2028,7 +2059,9 @@ class TranslationUnit : public Node{
 			// {
 			// 	std::cout << contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size; 
 			// }
-			//print_variables(contxt,file);
+			// print_scopes(contxt,file);
+			// print_variables(contxt,file);
+			// print_declared(contxt, file);
 		}
 
 		 virtual ~TranslationUnit() {}
@@ -2051,11 +2084,31 @@ inline void DeclarationList::render_asm(std::ofstream& file,Context& contxt) {
 
 inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 
-	
-			if( DirectDeclaratorPtr != NULL) {
+			if(contxt.function)
+					{
+						round1_square2_closed3=0;
+					}
+			if(round1_square2_closed3) 
+			{
+				//file << std::endl << *BracketPtr << " llooooookkkk heereee";
+
+				if(round1_square2_closed3==1) //this is a  function declaration
+				{
+					contxt.function=true;	//we are in a function
+					contxt.function_dec=true;	//we are declaring a function
+					//contxt.funct_id=*(DirectDeclaratorPtr->IDENTIFIER);	
+					DirectDeclaratorPtr->render_asm(file,contxt); //this will: contxt.funct_id=*IDENTIFIER
+					round1_square2_closed3=0;
+				}
+			}else if( DirectDeclaratorPtr != NULL) {
 				//std::cout << "print this once" << std::endl; 
 				DirectDeclaratorPtr->render_asm(file,contxt);
 			}
+			if( ParameterTypeLiSt != NULL) 
+				{
+					//std::cout << "go to parameter type list" << std::endl;
+					ParameterTypeLiSt->render_asm(file,contxt);
+				}
 	
 			if( IDENTIFIER != NULL && contxt.typedefs_){
 				contxt.TypeDef.DummyName = *IDENTIFIER;
@@ -2063,10 +2116,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 
 			}		
 			
-			if((contxt.function && IDENTIFIER !=NULL && !contxt.reading && !contxt.protect)&&!contxt.parameter){
-				//std::cout << "new function id : " << *IDENTIFIER ;
-				contxt.funct_id=*IDENTIFIER;		// the names of the param might wnd up here!
-			}
+			
 			if((!contxt.function && IDENTIFIER != NULL && !contxt.reading && !contxt.protect)) 			//if we are not in a function then this must be a global declaration
 			{
 				//std::cout << "it shouldn't be global!" << std::endl;
@@ -2079,16 +2129,16 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					contxt.Variables.push_back(contxt.variable);
 
 				}
-				else if(contxt.Variables[contxt.Variables.size()-1].id!=*IDENTIFIER)
+				else if(contxt.Variables.size()>0 && contxt.Variables[contxt.Variables.size()-1].id!=*IDENTIFIER)
 				{	
 					contxt.Variables.push_back(contxt.variable);
 				}  
 				//print_variables(contxt,file);
 			}
-			else if((contxt.function && IDENTIFIER != NULL && !contxt.reading)||contxt.parameter)
+			else if((contxt.function && IDENTIFIER != NULL && !contxt.reading)||contxt.parameter) //for parameters and local functions
 			{		//if we are in a function and the identifier is not null and protect flag is off
 				
-				if( !contxt.protect && !contxt.parameter) 
+				if( !contxt.protect && !contxt.parameter)// we only push the id of the functions that are defined 
 				{				//then this is a function name we are reading					
 					contxt.funct_id = *IDENTIFIER;		//obtain the scope we are currently in	
 					contxt.Scopes.push_back(contxt.funct_id);
@@ -2099,16 +2149,19 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 						contxt.variable.scope = "global";
 					}
 					else{
-						contxt.variable.scope = contxt.Scopes[contxt.Scopes.size()-1]; //assign the variable the scope it is in
+						if(contxt.Scopes.size()>0){
+							contxt.variable.scope = contxt.Scopes[contxt.Scopes.size()-1]; //assign the variable the scope it is in
+						}
+						
 					}
 					contxt.variable.id = *IDENTIFIER;	//if the portect flag is on then we are already inside the function , not reading the function name
 					if( !contxt.initialized ) 
 					{			//if the local declaration is not initialized, set it to 0
 						contxt.variable.value = 0;
 					}
-						contxt.Variables.push_back(contxt.variable);
-					}
+					contxt.Variables.push_back(contxt.variable);
 				}
+			}
 				int found_local = 0;	
 				int good_index = 0;		//this will determine whether the variable wanted is a global or a local
 				int i, j;				//must initialize the index i outside so it is accessible throughout here
@@ -2117,7 +2170,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					for (j=contxt.Scopes.size()-1; j>=0; j--)
 					{
 						for(i=contxt.Variables.size()-1; i>=0; i--) {
-							if(contxt.Variables[i].scope == contxt.Scopes[j] && *IDENTIFIER == contxt.Variables[i].id) 
+							if(contxt.Variables[i].scope == contxt.Scopes[j] && IDENTIFIER!=NULL && *IDENTIFIER == contxt.Variables[i].id) 
 							{
 								good_index = i;
 								contxt.good_i = good_index;
@@ -2132,7 +2185,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				{
 					for(i=0; i<contxt.Variables.size(); i++) 
 					{
-						if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) 
+						if(contxt.Variables[i].scope == "global" && IDENTIFIER!=NULL && *IDENTIFIER == contxt.Variables[i].id) 
 						{
 							found_local=2;
 							good_index = i;
@@ -2172,16 +2225,14 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 								
 					else
 					{
-						file << std::endl << "VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
+						if(IDENTIFIER!=NULL){
+							file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
+						}
 					}
 				}		
 				
 
-					if( ParameterTypeLiSt != NULL) 
-					{
-						//std::cout << "go to parameter type list" << std::endl;
-						ParameterTypeLiSt->render_asm(file,contxt);
-					}
+					
 
 				
 				
@@ -2453,14 +2504,14 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 			}
 						
 
-			else if( SELECTIVE_IF == NULL && SELECTIVE_SWITCH != NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {					std::string label_idS;
-					std::string SWITCH = "$SWITCH";
+			else if( SELECTIVE_IF == NULL && SELECTIVE_SWITCH != NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {					
+					std::string label_idS;
 					contxt.LastScope.push_back(SWITCH);
 				
 					
 
 					if( contxt.BreakTracker.size() != 0 && contxt.LastScope.size() > 0 && contxt.SwitchControl != 1 && !contxt.inCase){
-							file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
+							//////file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
 							//contxt.BreakTracker.pop_back();
 							file << std::endl << "\tnop";
 					}
