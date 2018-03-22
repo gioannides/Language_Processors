@@ -116,7 +116,9 @@ $END8:
 $END9:
 $END10:
 $END11:
-$END12:# idgunv- f_call1- reading1- function1- SizeOf:0- lhs_of_assignment:0
+$END12:
+# global not initialized
+# idgunv- f_call1- reading1- function1- SizeOf:0- lhs_of_assignment:0
 # idyu- f_call1- reading1- function1- SizeOf:0- lhs_of_assignment:0
 
 $END14:# idy- f_call1- reading1- function1- SizeOf:0- lhs_of_assignment:0
@@ -235,6 +237,8 @@ $END61:
 $END62:
 	sw	$2,156($sp) #f
 
+# global not initialized
+
 	sb	$0, 152($sp) #yu
 
 	sw $1,148($sp)
@@ -316,7 +320,8 @@ $END73:
 	sw	$2, 36($sp) #h1 36
 
 	.option pic
-	jal gunv
+	la $25,gunv
+	jalr $25
 	nop
 	move	$25, $2
 	lw $1,148($sp)
@@ -424,7 +429,8 @@ $END84:
 	sw	$2, 36($sp) #h1 36
 
 	.option pic
-	jal func
+	la $25,func
+	jalr $25
 	nop
 	move	$25, $2
 	lw $1,148($sp)
@@ -532,7 +538,8 @@ $END95:
 	sw	$2, 36($sp) #h1 36
 
 	.option pic
-	jal gunv
+	la $25,gunv
+	jalr $25
 	nop
 	move	$25, $2
 	lw $1,148($sp)
@@ -640,7 +647,8 @@ $END106:
 	sw	$2, 36($sp) #h1 36
 
 	.option pic
-	jal gunv
+	la $25,gunv
+	jalr $25
 	nop
 	move	$25, $2
 	lw $1,148($sp)
@@ -691,6 +699,8 @@ $END96:
 	.ent	functd
 	.type	functd, @function
 functd:
+
+# global not initialized
 	.set noreorder
 	.set nomacro
 	addiu $sp,$sp,-140
@@ -702,6 +712,8 @@ functd:
 	sw $5,144($sp)
 	sw $6,148($sp)
 	sw $7,152($sp)
+# global not initialized
+
 	sw	$0, 128($sp) #d
 
 	move $sp,$fp

@@ -688,14 +688,42 @@ class Initializer : public Node {
 
 	
 		void render_asm(std::ofstream& file,Context& contxt) {
-
+			
 			if(InitializerListPtr != NULL ) {
 				InitializerListPtr->render_asm(file,contxt);
 			}
-
+			
 			if( AssignmentExpressionPtr != NULL) {
-				
+				contxt.no_of_initial_values++;
 				AssignmentExpressionPtr->render_asm(file,contxt);
+				if(!contxt.function && !contxt.function_dec) {
+				 	
+				
+				if( contxt.variable.word_size > 4 ){					
+					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
+				}
+				else if( (contxt.variable.word_size==4) && contxt.variable.DataType!="float"){
+					file << std::endl << "\t.word\t" << contxt.eval[contxt.Regs+1]; //contxt.variable.value;
+				}
+				else if( (contxt.variable.word_size==4) && contxt.variable.DataType=="float"){
+					file << std::endl << "\t.float\t" << contxt.eval_f[contxt.Regs+1]; //contxt.variable.value;
+					contxt.float_ = false;
+				}
+				else if(contxt.variable.word_size==2){
+					file << std::endl << "\t.half\t" << contxt.variable.value;
+				}
+				else if(contxt.variable.word_size==1){
+					file << std::endl << "\t.byte\t" << contxt.eval[contxt.Regs+1];
+				}
+				        // reset the value of the global
+				for(int i=contxt.Regs; i<=20; i++)
+				{
+					file << "\n#" << contxt.eval[i];
+					contxt.eval[i] = 0; 
+				}
+				//contxt.global_array=false;
+				
+				}
 			}
 		}
 			
@@ -738,7 +766,8 @@ class InitDeclarator : public Node {
 					contxt.variable.offset = contxt.totalStackArea - contxt.variable.offset - 8; 
 				}
 			
-			if( InitiaLizer != NULL && DecLarator != NULL) {
+			if( InitiaLizer != NULL && DecLarator != NULL) 
+			{
 				contxt.initialized = true;
 				
 				/*for(int i=0; i<contxt.Variables.size(); i++) {	//Predict the signedness of LHS, made DirectDeclarator members public...
@@ -749,25 +778,93 @@ class InitDeclarator : public Node {
 						}
 					}
 				}*/
-
-			
-				contxt.rhs_of_expression = true;
+				if(contxt.function||contxt.function_dec){			
+				
 				InitiaLizer->render_asm(file,contxt);
-				contxt.rhs_of_expression = false;
-
+				
 				contxt.lhs_of_assignment = true;
 				DecLarator->render_asm(file,contxt);	// The boolean variable was 'initialized' set to false by default
 				contxt.lhs_of_assignment = false;
+				}
+				else 
+				{
+					file << std::endl << "# global initialized" << std::endl;
+					contxt.no_of_initial_values=0;			
 				
+					//contxt.lhs_of_assignment = true;
+					DecLarator->render_asm(file,contxt); 
+					//contxt.lhs_of_assignment = false;
+
+					contxt.no_array_elements = contxt.eval[contxt.Regs+1];
+					if(!contxt.no_array_elements)
+						contxt.no_array_elements=1;
+					file << std::endl << "\n\t.data";
+					file << std::endl << "\t.globl\t" << contxt.variable.id;
+					if( log2(contxt.variable.word_size) )
+					{
+						file << std::endl << "\t.align\t" << log2(contxt.variable.word_size);
+					}
+					file << std::endl << "\t.type\t" << contxt.variable.id << ", @object";
+					file << std::endl << "\t.size\t" << contxt.variable.id << ", " << contxt.variable.word_size*contxt.no_array_elements;
+					file << std::endl << contxt.variable.id << ":";
+				
+					//contxt.rhs_of_expression = true;
+					InitiaLizer->render_asm(file,contxt); // print .word in here
+					//contxt.rhs_of_expression = false;
+					if(contxt.no_array_elements-contxt.no_of_initial_values>0){
+						file << std::endl << "\t.space\t" << (contxt.no_array_elements-contxt.no_of_initial_values)*contxt.variable.word_size;
+					}
+				}
 				contxt.initialized = false;
 				
 			}
 			else if(DecLarator != NULL &&  InitiaLizer == NULL){
+				file << std::endl << "# global not initialized" << std::endl;
 				contxt.initialized = false;
 				contxt.lhs_of_assignment=true;
 				DecLarator->render_asm(file,contxt);
 				contxt.lhs_of_assignment=false;
-				//contxt.is_unsigned = false;
+				if(!contxt.function&&!contxt.function_dec){
+					contxt.no_of_initial_values=1;	
+					contxt.no_array_elements = contxt.eval[contxt.Regs+1];
+					if(!contxt.no_array_elements)
+						contxt.no_array_elements=1;
+					file << std::endl << "\n\t.data";
+					file << std::endl << "\t.globl\t" << contxt.variable.id;
+					if( log2(contxt.variable.word_size) )
+					{
+						file << std::endl << "\t.align\t" << log2(contxt.variable.word_size);
+					}
+					file << std::endl << "\t.type\t" << contxt.variable.id << ", @object";
+					file << std::endl << "\t.size\t" << contxt.variable.id << ", " << contxt.variable.word_size*contxt.no_array_elements;
+					file << std::endl << contxt.variable.id << ":";
+				if( contxt.variable.word_size > 4 ){					
+					file << std::endl << "\t.double\t" << 0 ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
+				}
+				else if( (contxt.variable.word_size==4) && contxt.variable.DataType!="float"){
+					file << std::endl << "\t.word\t" << 0; //contxt.variable.value;
+				}
+				else if( (contxt.variable.word_size==4) && contxt.variable.DataType=="float"){
+					file << std::endl << "\t.float\t" << 0; //contxt.variable.value;
+					contxt.float_ = false;
+				}
+				else if(contxt.variable.word_size==2){
+					file << std::endl << "\t.half\t" << 0;
+				}
+				else if(contxt.variable.word_size==1){
+					file << std::endl << "\t.byte\t" << 0;
+				}
+				        // reset the value of the global
+				for(int i=contxt.Regs; i<=20; i++)
+				{
+					//file << "\n#" << contxt.eval[i];
+					contxt.eval[i] = 0; 
+				}
+					//file << std::endl << contxt.variable.id << ":";
+					if(contxt.no_array_elements-contxt.no_of_initial_values>0){
+						file << std::endl << "\t.space\t" << (contxt.no_array_elements-contxt.no_of_initial_values)*contxt.variable.word_size;
+					}
+				}
 			}
 			contxt.is_unsigned = false;
 			contxt.float_ = false;
@@ -832,39 +929,7 @@ class InitDeclaratorList : public Node {
 				
 			}
 			InitDecLarator->render_asm(file,contxt);
-			if(!contxt.function && !contxt.function_dec) {
-				 	
-				file << std::endl << "\n\t.data";
-				file << std::endl << "\t.globl\t" << contxt.variable.id;
-				if( log2(contxt.variable.word_size) ){
-					file << std::endl << "\t.align\t" << log2(contxt.variable.word_size);
-				}
-				file << std::endl << "\t.type\t" << contxt.variable.id << ", @object";
-				file << std::endl << "\t.size\t" << contxt.variable.id << ", " << contxt.variable.word_size;
-				file << std::endl << contxt.variable.id << ":";
-				if( contxt.variable.word_size > 4 ){					
-					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
-				}
-				else if( (contxt.variable.word_size==4) && contxt.variable.DataType!="float"){
-					file << std::endl << "\t.word\t" << contxt.eval[contxt.Regs+1]; //contxt.variable.value;
-				}
-				else if( (contxt.variable.word_size==4) && contxt.variable.DataType=="float"){
-					file << std::endl << "\t.float\t" << contxt.eval_f[contxt.Regs+1]; //contxt.variable.value;
-					contxt.float_ = false;
-				}
-				else if(contxt.variable.word_size==2){
-					file << std::endl << "\t.half\t" << contxt.variable.value;
-				}
-				else if(contxt.variable.word_size==1){
-					file << std::endl << "\t.byte\t" << contxt.eval[contxt.Regs+1];
-				}
-				        // reset the value of the global
-				for(int i=contxt.Regs; i<=20; i++)
-				{
-					file << "\n#" << contxt.eval[i]; 
-				}
-				
-			}
+			
 
 		}
 
@@ -2086,20 +2151,32 @@ inline void DeclarationList::render_asm(std::ofstream& file,Context& contxt) {
 inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 
 			if(contxt.function)
-					{
-						round1_square2_closed3=0;
-					}
+			{
+				round1_square2_closed3=0;
+			}
 			if(round1_square2_closed3) 
 			{
 				//file << std::endl << *BracketPtr << " llooooookkkk heereee";
 
 				if(round1_square2_closed3==1) //this is a  function declaration
 				{
+					round1_square2_closed3=0;
 					contxt.function=true;	//we are in a function
 					contxt.function_dec=true;	//we are declaring a function
 					//contxt.funct_id=*(DirectDeclaratorPtr->IDENTIFIER);	
 					DirectDeclaratorPtr->render_asm(file,contxt); //this will: contxt.funct_id=*IDENTIFIER
 					round1_square2_closed3=0;
+				}
+				if(round1_square2_closed3==2)
+				{
+					round1_square2_closed3=0;
+					contxt.global_array=true;
+					contxt.count_array_initializers=0;
+					if(ConstantExpRession!=NULL)
+					{
+						ConstantExpRession->render_asm(file,contxt);
+						contxt.no_array_elements=contxt.eval[contxt.Regs+1];
+					}
 				}
 			}else if( DirectDeclaratorPtr != NULL) {
 				//std::cout << "print this once" << std::endl; 

@@ -7,7 +7,8 @@
 	.abicalls
 
 
-$END1:
+# global initialized
+
 
 	.data
 	.globl	x
@@ -15,6 +16,7 @@ $END1:
 	.type	x, @object
 	.size	x, 4
 x:
+$END1:
 	.word	5
 #0
 #5

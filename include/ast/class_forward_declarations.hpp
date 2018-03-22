@@ -150,6 +150,11 @@ struct Context{
 	float eval_f[1000];
 	int allocate=0;
 	bool function_dec =false;
+
+	int no_of_initial_values = 0;
+	bool global_array = false;
+	int count_array_initializers = 0;
+	int no_array_elements = 1;
 };
 
 inline std::string labelGenEnum(Context& contxt) {

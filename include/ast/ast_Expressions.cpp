@@ -715,13 +715,14 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 			
 			else if(LogicalAndExpressionPtr != NULL && !contxt.reading && INclusiveOrExpression != NULL && AND_OP != NULL) { 
 				LogicalAndExpressionPtr->render_asm(file,contxt);
-
 				std::string SHORTCIRCUIT, label_id;
 				label_id = labelGenLogical(contxt);
 				SHORTCIRCUIT = "$SHORTCIRCUIT_AND" + label_id;
+				if(contxt.function){
+				
 				file << std::endl << "\tsne $" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
 				file << std::endl << "\tbeq $0,$" << contxt.Regs+1 << "," << SHORTCIRCUIT;  
-				file<<   std::endl << "\tnop\t";
+				file<<   std::endl << "\tnop\t";}
 				contxt.Regs++;
 				INclusiveOrExpression->render_asm(file,contxt);
 				
@@ -767,9 +768,11 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 				std::string SHORTCIRCUIT, PASS, label_id;
 				label_id = labelGenLogical(contxt);
 				SHORTCIRCUIT = "$SHORTCIRCUIT_OR" + label_id;
+				if(contxt.function){
+				
 				file <<  std::endl << "\tsne $"  << contxt.Regs+1  << ",$0,$" << contxt.Regs+1;
 				file<<   std::endl << "\tbne $" << contxt.Regs+1 << ",$0," << SHORTCIRCUIT; 
-				file<<   std::endl << "\tnop\t";
+				file<<   std::endl << "\tnop\t";}
 				contxt.Regs++;
 				LogicalAndExpressionPtr->render_asm(file,contxt);
 				if(contxt.enum_constant){
@@ -857,7 +860,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 							}
 						}
 						if (offset<=0 || offset > contxt.totalStackArea-4){
-							offset=112;
+							offset=116;
 						}
 						for(i=1; i<25; i++)
 						{
@@ -877,7 +880,11 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 					}
 					if(!contxt.reading && contxt.Scopes.size()){
 						file << "\n\t.option pic";
-						file << std::endl << "\tjal " << contxt.Scopes[contxt.Scopes.size()-1];
+						// file << std::endl << "\tlui\t$" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
+						// file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
+						file <<  std::endl << "\tla $25," << contxt.Scopes[contxt.Scopes.size()-1];
+						file << std::endl << "\tjalr $25";
+						//file << std::endl << "\tjal " << contxt.Scopes[contxt.Scopes.size()-1];
 						file << std::endl << "\tnop";
 						contxt.Scopes.pop_back();
 					}
