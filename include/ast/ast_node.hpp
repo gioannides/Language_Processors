@@ -694,8 +694,9 @@ class Initializer : public Node {
 			}
 			
 			if( AssignmentExpressionPtr != NULL) {
-				contxt.no_of_initial_values++;
+				
 				AssignmentExpressionPtr->render_asm(file,contxt);
+				contxt.no_of_initial_values++;
 				if(!contxt.function && !contxt.function_dec) {
 				 	
 				
@@ -796,8 +797,9 @@ class InitDeclarator : public Node {
 					//contxt.lhs_of_assignment = false;
 
 					contxt.no_array_elements = contxt.eval[contxt.Regs+1];
-					if(!contxt.no_array_elements)
+					if(!contxt.no_array_elements){
 						contxt.no_array_elements=1;
+					}
 					file << std::endl << "\n\t.data";
 					file << std::endl << "\t.globl\t" << contxt.variable.id;
 					if( log2(contxt.variable.word_size) )
@@ -828,7 +830,7 @@ class InitDeclarator : public Node {
 					contxt.no_of_initial_values=1;	
 					contxt.no_array_elements = contxt.eval[contxt.Regs+1];
 					if(!contxt.no_array_elements)
-						contxt.no_array_elements=1;
+						contxt.no_array_elements=1; //maybe 
 					file << std::endl << "\n\t.data";
 					file << std::endl << "\t.globl\t" << contxt.variable.id;
 					if( log2(contxt.variable.word_size) )
@@ -2126,7 +2128,7 @@ class TranslationUnit : public Node{
 			// 	std::cout << contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size; 
 			// }
 			 // print_scopes(contxt,file);
-			 // print_variables(contxt,file);
+			// print_variables(contxt,file);
 			// print_declared(contxt, file);
 		}
 
@@ -2169,6 +2171,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				}
 				if(round1_square2_closed3==2)
 				{
+					DirectDeclaratorPtr->render_asm(file,contxt);
 					round1_square2_closed3=0;
 					contxt.global_array=true;
 					contxt.count_array_initializers=0;
