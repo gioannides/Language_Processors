@@ -1065,38 +1065,55 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 	else if( CONSTANT != NULL && !contxt.reading && !contxt.SizeOf) 
 	{	
 		
-		
+		char tmp2;
 		int64_t temp;
 		float temp_f;
 		bool is_char = false;
 
-		if( (*CONSTANT).find_first_of("'")==0 && contxt.variable.word_size == 1)
-		{
-			char tmp2;
+		if((*CONSTANT) == "'\\n'"){
+			tmp2 = '\n';
+			is_char = true;
+		}
+		else if((*CONSTANT) == "'\\r'"){
+			tmp2 = '\r';
+			is_char = true;
+		}
+		else if((*CONSTANT) == "'\\v'"){
+			tmp2 = '\v';
+			is_char = true;
+		}
+		else if((*CONSTANT) == "'\\t'"){
+			tmp2 = '\t';
+			is_char = true;
+		}
+		else if((*CONSTANT) == "'\\f'"){
+			tmp2 = '\f';
+			is_char = true;
+		}
+		else if((*CONSTANT) == "'\\b'"){
+			tmp2 = '\b';
+			is_char = true;
+		}
+		else if((*CONSTANT) == "'\\a'"){
+			tmp2 = '\a';
+			is_char = true;
+		}
 			
-			if((*CONSTANT) == "'\\n'"){
-				tmp2 = '\n';}
-			else if((*CONSTANT) == "'\\r'"){
-				tmp2 = '\r';}
-			else if((*CONSTANT) == "'\\v'")
-				tmp2 = '\v';
-			else if((*CONSTANT) == "'\\t'")
-				tmp2 = '\t';
-			else if((*CONSTANT) == "'\\f'")
-				tmp2 = '\f';
-			else if((*CONSTANT) == "'\\b'")
-				tmp2 = '\b';
-			else if((*CONSTANT) == "'\\a'")
-				tmp2 = '\a';
-			else
-				tmp2 = (*CONSTANT)[1];
+		if(is_char){
+			temp = (int)tmp2;
+			temp_f = (int)tmp2;
+		}
+			
 
-			temp = int(tmp2);
-
+		if( (*CONSTANT).find_first_of("'")==0 && contxt.variable.word_size == 1 && !is_char)
+		{
+			tmp2 = (*CONSTANT)[1];
+			temp = (int)tmp2;
+			temp_f = (int)tmp2;
 			is_char = true;
 
 		}
-		else {
+		else if(!is_char){
 			
 			temp_f = (std::stod(*CONSTANT));
 		 	temp = (std::stod(*CONSTANT));

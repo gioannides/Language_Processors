@@ -296,7 +296,20 @@ inline void Initializer::print_py(std::ofstream& file) {
 			AssignmentExpressionPtr->print_py(file);
 
 		}
+inline void InitializerList::print_py(std::ofstream& file){
 
+			if( InitializerListPtr != NULL){
+			
+				InitializerListPtr->print_py(file);
+			}
+
+			if( InitializerPtr != NULL) {
+	
+				InitializerPtr->print_py(file);
+			
+			}
+
+		}
 
 
 
