@@ -55,6 +55,7 @@
 	MultiplicativeExpression* MUltiplicativeExpression;
 	CastExpression* CAstExpression;
 	Initializer* InitializerPtr;
+	InitializerList* InitializerListPtr;
 	AssignmentExpression* AssignmentExpressionPtr;
 	UnaryExpression* UnaryExpressionPtr;
 	PostFixExpression* PostFixExpressionPtr;
@@ -125,7 +126,8 @@
 %type <PostFixExpressionPtr> POSTFIX_EXPRESSION
 %type <UnaryExpressionPtr> UNARY_EXPRESSION
 %type <AssignmentExpressionPtr> ASSIGNMENT_EXPRESSION
-%type <InitializerPtr> INITIALIZER INITIALIZER_LIST
+%type <InitializerPtr> INITIALIZER 
+%type <InitializerListPtr> INITIALIZER_LIST
 %type <DirectDeclaratorPtr> DIRECT_DECLARATOR
 %type <CAstExpression> CAST_EXPRESSION
 %type <MUltiplicativeExpression> MULTIPLICATIVE_EXPRESSION
@@ -495,8 +497,8 @@ INITIALIZER: ASSIGNMENT_EXPRESSION		 						{ $$ = new Initializer($1,NULL); }
 
 
 
-INITIALIZER_LIST: INITIALIZER									{ $$ = $1; } 
-		| INITIALIZER_LIST ',' INITIALIZER						{ $$ = $3; }
+INITIALIZER_LIST: INITIALIZER									{ $$ = new Initializer(NULL,$1); } 
+		| INITIALIZER_LIST ',' INITIALIZER						{ $$ = new Initializer($1,$2); }
 
 
 
