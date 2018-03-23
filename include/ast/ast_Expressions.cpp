@@ -1011,6 +1011,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 						bool found = false;
 						for( int i(0); i < contxt.Enum.size() && !found; i++){
 							for( int j(0); j < contxt.Enum[j].EnumList.size(); j++){
+								
 								if(contxt.Enum[i].EnumList[j].IDENTIFIER == *IDENTIFIER){
 									file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].EnumList[j].value;
 									found = true;
@@ -1043,7 +1044,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 						bool found = false;
 						for( int i(0); i < contxt.Enum.size() && !found; i++){
 							for( int j(0); j < contxt.Enum[j].EnumList.size(); j++){
-								
+								std::cout << contxt.Enum[i].EnumList[j].IDENTIFIER << " " << contxt.Enum[i].EnumList[j].value << std::endl;
 								if(contxt.Enum[i].EnumList[j].IDENTIFIER == *IDENTIFIER){
 									file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].EnumList[j].value;
 									found = true;
@@ -1051,6 +1052,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 								}
 							}
 						}
+					
 					contxt.enum_constant = false;
 					//}    
 						
@@ -1285,11 +1287,11 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 						
 						if(contxt.argument_no<=4)
 						{
-							if((contxt.Variables.size() > 0) && (contxt.Variables.size() >= (ki+contxt.argument_no-1)) && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
+							if((contxt.Variables.size() > 0) &&  (ki+contxt.argument_no-1) >=0 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
 							{
 								file << std::endl << "\tmove\t$" << contxt.argument_no+3 << ", $" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
 							}
-							else if(contxt.Variables.size() > 0 && contxt.Variables.size() >= (ki+contxt.argument_no-1) && contxt.Variables[ki+contxt.argument_no-1].DataType == "float")
+							else if(contxt.Variables.size() > 0 &&  (ki+contxt.argument_no-1) >= 0 && contxt.Variables[ki+contxt.argument_no-1].DataType == "float")
 							{
 								file << std::endl << "\tmov.s\t$f" << contxt.argument_no+3 << ", $f" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
 							}

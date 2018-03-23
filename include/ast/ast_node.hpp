@@ -2606,11 +2606,7 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				
 					
 
-					if( contxt.BreakTracker.size() != 0 && contxt.LastScope.size() > 0 && contxt.SwitchControl != 1 && !contxt.inCase){
-							//////file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
-							//contxt.BreakTracker.pop_back();
-							file << std::endl << "\tnop";
-					}
+					
 					
 					
 					
@@ -2629,9 +2625,13 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 					contxt.BreakTracker.push_back(contxt.BreakCounter);
 					contxt.Regs++;
 					contxt.ReadingSwitch = true;
-					//label_idS = labelGen(contxt);
-					//SWITCH = "$SWITCH" + label_idS;
+					
 					StatementPtr->render_asm(file,contxt);
+					if( contxt.LastScope.size() != 0 && contxt.BreakTracker.size() != 0 && contxt.ReadingSwitch){
+						file << std::endl << "\tb\t" << contxt.LastScope[contxt.LastScope.size()-1];		//The label of the loopend
+						//contxt.BreakTracker.pop_back();
+						file << std::endl << "\tnop";
+					}
 					contxt.ReadingSwitch = false;
 					contxt.Regs--;			
 
@@ -2721,6 +2721,7 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 						file << std::endl << "\tnop";				//nop
 					contxt.SwitchControl = 0;
 					contxt.inCase = false;
+					
 					
 				}
 				
