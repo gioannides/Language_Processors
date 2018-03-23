@@ -12,11 +12,11 @@ return x;
 
 int main(){
 
-	char x = '\n';
+	char x = 10;
 
 	
 
-	return ((f(x)?f(3):f(4)));
+	return ((f(x)?f(3):f(14)));
 
 }
 

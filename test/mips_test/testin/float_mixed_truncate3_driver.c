@@ -1,11 +1,11 @@
-float operations(float a, float b, float x);
+int operations(float a, float b, float c);
 
 int main(){
 	float a = 40.456;
 	float b = 2.345;
-	float x = 3;
-	float result = a+=x;
-	if(result == operations(a,b,x)){
+	float  c = 3;
+	int result = a+=b+=c;
+	if(result == operations(a,b,c)){
 		return 30;
 	}
 	return 75;

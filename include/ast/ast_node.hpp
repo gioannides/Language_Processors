@@ -444,6 +444,7 @@ class ConstantExpression : public Node {
 
 		}
 
+
 		~ConstantExpression() {}
 
 };
@@ -744,7 +745,7 @@ class Initializer : public Node {
 					file << "\n#" << contxt.eval[i];
 					contxt.eval[i] = 0; 
 				}
-				//contxt.global_array=false;
+				
 				
 				}
 			}
@@ -811,9 +812,8 @@ class InitDeclarator : public Node {
 				}
 				else 
 				{
-					file << std::endl << "# global initialized" << std::endl;
-					contxt.no_of_initial_values=0;			
-				
+					//file << std::endl << "# global initialized" << std::endl;
+					contxt.no_of_initial_values=0;							
 					//contxt.lhs_of_assignment = true;
 					DecLarator->render_asm(file,contxt); 
 					//contxt.lhs_of_assignment = false;
@@ -842,7 +842,7 @@ class InitDeclarator : public Node {
 				
 			}
 			else if(DecLarator != NULL &&  InitiaLizer == NULL){
-				file << std::endl << "# global not initialized" << std::endl;
+				//file << std::endl << "# global not initialized" << std::endl;
 				contxt.initialized = false;
 				contxt.lhs_of_assignment=true;
 				DecLarator->render_asm(file,contxt);
@@ -1976,25 +1976,35 @@ class FunctionDefinition : public Node {
 			file << std::endl << "\tsw $fp," << contxt.totalStackArea << "($sp)";
 			file << std::endl << "\tsw $31," << contxt.totalStackArea-4 <<"($sp)";
 			file << std::endl << "\tmove $fp,$sp\n";
+			// file << std::endl << "\tlui $28,%hi(__gnu_local_gp)";
+			// file << std::endl << "\taddiu $28,$28,%lo(__gnu_local_gp)";
 
-			if(contxt.functionReturnTypetemp != "float"){
-				for(int i=4; i<=7; i++) //shift by 4 all the parameters
+			
+			int floatt=0;
+			for(int i=0; i<contxt.Variables.size(); i++)
+			{
+				if(contxt.Variables[i].param_offset==0 && contxt.Variables[i].scope==contxt.funct_id && contxt.Variables[i].DataType == "float")
 				{
-
-					file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
+					floatt++;
+				}
+				if(floatt==1 && contxt.Variables[i].param_offset==4 && contxt.Variables[i].scope==contxt.funct_id && contxt.Variables[i].DataType == "float")
+				{
+					floatt++;	
 				}
 			}
-			else if(contxt.functionReturnTypetemp == "float"){
-				int j=12;
-				for(int i=4; i<=7; i++){
-					if(i<=5){
-						file << std::endl << "\tswc1 $f" << j <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
-						j+=2;
-					}
-					else{
-						file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
-					}
-				}
+			if(floatt)
+			{
+				file << std::endl << "\tswc1\t$f12," <<  contxt.totalStackArea + 4*(4-3) << "($sp)"; 
+			}
+			if(floatt==2)
+			{
+				file << std::endl << "\tswc1 $f14, " << contxt.totalStackArea + 4*(5-3) << "($sp)"; 
+			}
+
+			
+			for(int i=4+floatt; i<=7; i++) //shift by 4 all the parameters
+			{
+				file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
 			}
 
 			contxt.variable.offset=contxt.totalStackArea-4;
@@ -2187,8 +2197,9 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				}
 				if(round1_square2_closed3==2)
 				{
+					DirectDeclaratorPtr->render_asm(file, contxt);
 					round1_square2_closed3=0;
-					contxt.global_array=true;
+				
 					contxt.count_array_initializers=0;
 					if(ConstantExpRession!=NULL)
 					{
@@ -2420,7 +2431,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2" << ",$0," << END;
+					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
 					file << std::endl << "\tnop";
 				}
 				file << std::endl << WHILE << ":";
@@ -2463,7 +2474,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	
 				{
-					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2" << ",$0," << END;
+					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
 					file << std::endl << "\tnop";				
 					file << "\n\tb " << DO;
 					file << std::endl << "\tnop";
@@ -2490,7 +2501,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				ExpressionStatementPtr2->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2"<< ",$0," << END;
+					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
 					file << std::endl << "\tnop";
 				}
 
@@ -2527,7 +2538,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				ExpressionStatementPtr2->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2" << ",$0," << END;
+					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
 					file << std::endl << "\tnop";					
 				}
 				contxt.TestConditionContinue = AssignmentExpressionPtr; //In case of a continue
@@ -2571,7 +2582,7 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << "\tbeq\t$2" << ",$0," << END;
+					file << std::endl << "\tbeq\t$2,$0," << END;
 					file << std::endl << "\tnop";
 				}
 				file << std::endl << IF << ":";
@@ -2585,7 +2596,7 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << "\tbeq\t$2" << ",$0," << ELSE;
+					file << std::endl << "\tbeq\t$2,$0," << ELSE;
 					file << std::endl << "\tnop";
 				}
 				file << std::endl << IF << ":";
@@ -2599,16 +2610,11 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				file << std::endl << END << ":"; 
 			}
 						
-	
+
 			else if( SELECTIVE_IF == NULL && SELECTIVE_SWITCH != NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {					
 					
 				
-				
-					
-
-					
-					
-					
+							
 					
 					contxt.SwitchControl++;
 					contxt.BreakCounter++;
@@ -2675,9 +2681,7 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 
 inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 
-			
-							
-				
+		
 				
 				
 

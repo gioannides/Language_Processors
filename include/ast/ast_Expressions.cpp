@@ -56,7 +56,7 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 					
 				}
 
-				if(!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
+				if((!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant)){
 					//postfix_ops(contxt, file);
 					if( *OPERATOR == "*" ){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs]*contxt.eval[contxt.Regs+1];
@@ -166,7 +166,7 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 						}
 					}
 				}
-				if(!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
+				if((!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant)){
 					//postfix_ops(contxt, file);
 					if( *OPERATOR == "+" ){
 						contxt.eval[contxt.Regs]+=contxt.eval[contxt.Regs+1];
@@ -257,7 +257,7 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 					}
 				}
 								
-				if(!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
+				if((!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant)){
 					//postfix_ops(contxt, file);
 					if( *OPERATOR == "<<" ){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] << contxt.eval[contxt.Regs+1];
@@ -459,7 +459,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 					//contxt.enumeval[contxt.Regs+1] =0;
 					//contxt.enumeval[contxt.Regs] = 0;
 				}
-				if(!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
+				if((!contxt.function  && !contxt.sizeof_ && !contxt.enum_constant)){
 					if( *OPERATOR == "<" ){
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] < contxt.eval[contxt.Regs+1];
 						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] < contxt.eval_f[contxt.Regs+1];
@@ -579,12 +579,12 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 				}
 				else 
 				{
-					if(*OPERATOR == "=="  && !contxt.sizeof_ && !contxt.enum_constant)
+					if(*OPERATOR == "=="  && ((!contxt.sizeof_ && !contxt.enum_constant)))
 					{
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] == contxt.eval[contxt.Regs+1];
 						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] == contxt.eval_f[contxt.Regs+1];
 					}
-					else if(*OPERATOR == "!="  && !contxt.sizeof_ && !contxt.enum_constant)
+					else if(*OPERATOR == "!="  && ((!contxt.sizeof_ && !contxt.enum_constant)))
 					{
 						contxt.eval[contxt.Regs] = contxt.eval[contxt.Regs] != contxt.eval[contxt.Regs+1];
 						contxt.eval_f[contxt.Regs] = contxt.eval_f[contxt.Regs] != contxt.eval_f[contxt.Regs+1]; 
@@ -835,6 +835,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 				if(OPERATOR != NULL && IDENTIFIER == NULL) 
 				{
 					contxt.AssignmentOperator = *OPERATOR;
+
 					if(!contxt.reading)
 					{
 						contxt.is_postfix= true;
@@ -870,8 +871,8 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 					}
 					contxt.is_function_call=true;
 					//contxt.lhs_of_assignment=true;
-				PostFixExpressionPtr->render_asm(file,contxt);
-				//contxt.lhs_of_assignment=false;
+					PostFixExpressionPtr->render_asm(file,contxt);
+					//contxt.lhs_of_assignment=false;
 					if(ArgumentExpressionListPtr != NULL){
 					    contxt.argument_no = 0;
 						ArgumentExpressionListPtr->render_asm(file, contxt);
@@ -899,8 +900,34 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 					}
 				}
 				if(AssignmentExpressionPtr != NULL){
+					contxt.is_array=true;
+					bool temp_lhs=contxt.lhs_of_assignment;
+					contxt.lhs_of_assignment=0;
+					if(!contxt.reading){
+						file << std::endl << "\tsw $25, " << contxt.totalStackArea << "($sp)";
+						file << std::endl << "\tmove $25, $0"; 
+					}
+					contxt.Regs++;
 					AssignmentExpressionPtr->render_asm(file,contxt);
+					contxt.lhs_of_assignment=temp_lhs;
+					if(!contxt.reading){
+					file << std:: endl <<"\tmove $25, $" << contxt.Regs+1; // move the value of the 
+					}//multiply $25 by word size here;--------------------------------------------
+					contxt.Regs--;
+					//contxt.global_offset=contxt.eval[contxt.Regs+1];
+					//for(int i=0; i<7; i++){
+					//	file << std::endl << "# " << contxt.eval[i];
+					//}
+					contxt.nested_arrays++;
+					
 					PostFixExpressionPtr->render_asm(file,contxt);
+					
+					if(!contxt.reading){
+					file << std::endl << "\tlw $25, " << contxt.totalStackArea << "($sp)";
+					}
+					contxt.nested_arrays--;
+					contxt.is_array=false;
+
 				}
 			}
 			if( PrimaryExpressionPtr != NULL ) {
@@ -986,10 +1013,14 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 					}	
 				}
 		  	} 
-		  		
+			if(found_0nothing_1local_2globl && contxt.is_array)
+			{
+				file << std::endl << "\tli $24, " << contxt.Variables[good_index].word_size;
+				file << std::endl << "\tmul $25, $24";
+			}	  		
 			if(contxt.lhs_of_assignment && !contxt.SizeOf && !contxt.enum_constant)
 			{
-				file << "# lhs_of_assignment is set\n";
+				//file << "# lhs_of_assignment is set\n";
 				if(found_0nothing_1local_2globl)
 				{
 					if(contxt.AssignmentOperator != "df" && contxt.AssignmentOperator != "=")
@@ -1011,7 +1042,6 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 						bool found = false;
 						for( int i(0); i < contxt.Enum.size() && !found; i++){
 							for( int j(0); j < contxt.Enum[j].EnumList.size(); j++){
-								
 								if(contxt.Enum[i].EnumList[j].IDENTIFIER == *IDENTIFIER){
 									file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].EnumList[j].value;
 									found = true;
@@ -1044,7 +1074,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 						bool found = false;
 						for( int i(0); i < contxt.Enum.size() && !found; i++){
 							for( int j(0); j < contxt.Enum[j].EnumList.size(); j++){
-								std::cout << contxt.Enum[i].EnumList[j].IDENTIFIER << " " << contxt.Enum[i].EnumList[j].value << std::endl;
+								
 								if(contxt.Enum[i].EnumList[j].IDENTIFIER == *IDENTIFIER){
 									file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].EnumList[j].value;
 									found = true;
@@ -1052,7 +1082,6 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 								}
 							}
 						}
-					
 					contxt.enum_constant = false;
 					//}    
 						
@@ -1171,8 +1200,9 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			}
 			
 		}
-		else if (!contxt.reading && !contxt.function && !contxt.enum_constant) 
+		if ((!contxt.reading && !contxt.function && !contxt.enum_constant))
 		{
+			//file << std::endl << "# this is where you start evaluating " << temp ;
 			contxt.eval[contxt.Regs+1]=temp;
 			contxt.eval_f[contxt.Regs+1] = temp_f;
 		}
@@ -1239,7 +1269,9 @@ inline void ConditionalExpression::render_asm(std::ofstream& file,Context& contx
 				file << "\n\tb " << END;
 				file << std::endl << "\tnop";
 			}
-			file << std::endl << END << ":";
+			if(contxt.function){
+				file << std::endl << END << ":";
+			}
 			
 }
 				
@@ -1269,17 +1301,17 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 				{
 					if(contxt.Scopes.size() && contxt.Scopes[contxt.Scopes.size()-1]==contxt.Variables[ki].scope)
 					{ 
-						if(contxt.Variables[ki+contxt.argument_no-1].word_size==1) 
+						if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].word_size==1) 
 						{
 							file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4;		
 							contxt.regType[contxt.Regs+1]='c';
 						}				
-						else if(contxt.Variables[ki+contxt.argument_no-1].word_size==4 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
+						else if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].word_size==4 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
 						{ 	
 							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
 							contxt.regType[contxt.Regs+1]='i';
 						}
-						else if(contxt.Variables[ki+contxt.argument_no-1].word_size==4 && contxt.Variables[ki+contxt.argument_no-1].DataType == "float")
+						else if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].word_size==4 && contxt.Variables[ki+contxt.argument_no-1].DataType == "float")
 						{
 							file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
 							contxt.regType[contxt.Regs+1]='f';
@@ -1287,11 +1319,11 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 						
 						if(contxt.argument_no<=4)
 						{
-							if((contxt.Variables.size() > 0) &&  (ki+contxt.argument_no-1) >=0 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
+							if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
 							{
 								file << std::endl << "\tmove\t$" << contxt.argument_no+3 << ", $" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
 							}
-							else if(contxt.Variables.size() > 0 &&  (ki+contxt.argument_no-1) >= 0 && contxt.Variables[ki+contxt.argument_no-1].DataType == "float")
+							else 
 							{
 								file << std::endl << "\tmov.s\t$f" << contxt.argument_no+3 << ", $f" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
 							}
@@ -1436,37 +1468,11 @@ if(!contxt.sizeof_){
 	contxt.Regs++;
 	if(f==1){
 
-		if(contxt.Variables[good_index].word_size==1) {
-			file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
-			contxt.regType[contxt.Regs+1]='c';
-		}				
-		else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
-			file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-			contxt.regType[contxt.Regs+1]='i';
-		}
-		else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){
-			file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
-			contxt.regType[contxt.Regs+1]='f';
-		}
+		load_locals(contxt, file, good_index);
 	}
 	else if(f==2)
 	{
-			file << std::endl << "\tlui\t$" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
-			if(contxt.Variables[good_index].word_size==1) 
-			{
-				file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
-				contxt.regType[contxt.Regs+1]='c';
-			}
-			else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float")
-			{
-				file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";
-				contxt.regType[contxt.Regs+1]='i';                           	
-   			}
-			else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float")
-			{
-				file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")"; 
-				contxt.regType[contxt.Regs+1]='f';                          	
-   			}
+		load_globals(contxt, file, good_index);
 	}
 	if(contxt.AssignmentOperator == "*="){
 		if(contxt.is_unsigned){
