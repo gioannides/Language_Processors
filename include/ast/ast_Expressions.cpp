@@ -1285,13 +1285,13 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 						
 						if(contxt.argument_no<=4)
 						{
-							if(contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
+							if((contxt.Variables.size() > 0) && (contxt.Variables.size() >= (ki+contxt.argument_no-1)) && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
 							{
 								file << std::endl << "\tmove\t$" << contxt.argument_no+3 << ", $" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
 							}
-							else 
+							else if(contxt.Variables.size() > 0 && contxt.Variables.size() >= (ki+contxt.argument_no-1) && contxt.Variables[ki+contxt.argument_no-1].DataType == "float")
 							{
-								file << std::endl << "\tmove\t$f" << contxt.argument_no+3 << ", $f" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
+								file << std::endl << "\tmov.s\t$f" << contxt.argument_no+3 << ", $f" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
 							}
 						}
 						ki=contxt.Variables.size();

@@ -10,6 +10,7 @@ class AssignmentExpression;
 class Expression;
 class InitializerList;
 class Initializer;
+class ConstantExpression;
 
 struct bindings {
 		int word_size = 0;
@@ -49,6 +50,12 @@ struct typedefs{
 
 };
 
+struct Switch{
+
+	ConstantExpression* ConstantTemp;
+	std::string CaseID;
+
+};
 
 struct Context{
 	std::vector<Enumeration> Enum;
@@ -110,7 +117,7 @@ struct Context{
 
 	std::vector<std::string> EndSwitchLoop;
 	std::vector<std::string> Labels;
-	std::vector<std::string> Cases;
+	std::vector<Switch> Cases;
 	bool no_return = true;
 	bool ReadingSwitch = false;
 	int CaseVectorSize =0;
@@ -141,7 +148,11 @@ struct Context{
 	int ContinueCounter=0;
 	
 	int SwitchControl=0;
-	bool inCase=false;
+	std::vector<Switch> SwitchCase;
+	Switch SwitchTemp;
+	int inCase=0;
+
+
 	int VectorSize=0;
 	bool is_postfix = false;
 	int good_i = 0;
@@ -196,7 +207,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 {
 	if(contxt.Variables[good_index].word_size==1) {
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -207,7 +218,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 	}				
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -237,7 +248,7 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 	file << std::endl << "\tlui\t$" << contxt.Regs+2 << ", %hi(" << contxt.Variables[good_index].id << ")";
 	if(contxt.Variables[good_index].word_size==1) {
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -250,7 +261,7 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
 
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -620,7 +631,7 @@ class JumpStatement;
 class ExpressionStatement;
 class CompoundStatement;
 class Declarator;
-class ConstantExpression;
+
 class ExpressionStatement;
 
 class Pointer;
