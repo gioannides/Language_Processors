@@ -38,19 +38,15 @@ $END5:
 
 	li	$2, 9
 $END7:# ida- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:1
-# lhs_of_assignment is set
 
 	lw	$3, 128($sp) #a
-
 	sw	$2,128($sp) #a
 
 	li	$3, 8
 	add	$2, $2, $3
 $END6:# ida- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:1
-# lhs_of_assignment is set
 
 	lw	$3, 128($sp) #a
-
 	sw	$2,128($sp) #a
 # ida- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
 

@@ -63,6 +63,7 @@ class ArgumentExpressionList : public Node {
 
 
 
+
 class PostFixExpression : public Node {
 
 	public:
@@ -667,20 +668,27 @@ class Declarator : public Node {
 
 
 
+class InitializerList : public Node{
 
-class InitializerList : public Node {
-public:
-	InitializerList* InitializerListPtr;
-	Initializer* InitializerPtr;
+	private:
+		InitializerList* InitializerListPtr;
+		Initializer* InitializerPtr;
 
-	InitializerList(InitializerList* InitializerListPtr, Initializer* InitializerPtr) 
-	: InitializerListPtr(InitializerListPtr), InitializerPtr(InitializerPtr){} 
+	public:
+		InitializerList(InitializerList* InitializerListPtr , Initializer* InitializerPtr) : InitializerListPtr(InitializerListPtr) , InitializerPtr(InitializerPtr) {}
 
-	~InitializerList(){}
 
-	void print_py(std::ofstream& file);
-	void render_asm(std::ofstream& file, Context& contxt);
+		~InitializerList() {}
+
+
+		void render_asm(std::ofstream& file,Context& contxt) ;
+
+
+		void print_py(std::ofstream& file) ;
+
+
 };
+		
 
 
 
@@ -699,7 +707,47 @@ class Initializer : public Node {
 		void print_py(std::ofstream& file) ;
 
 	
-		void render_asm(std::ofstream& file,Context& contxt);
+		void render_asm(std::ofstream& file,Context& contxt) {
+			
+			if(InitializerListPtr != NULL ) {
+				InitializerListPtr->render_asm(file,contxt);
+			}
+			
+			if( AssignmentExpressionPtr != NULL) {
+				contxt.no_of_initial_values++;
+				AssignmentExpressionPtr->render_asm(file,contxt);
+				if(!contxt.function && !contxt.function_dec) {
+				 	
+				
+				if( contxt.variable.word_size > 4 ){					
+					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
+				}
+				else if( (contxt.variable.word_size==4) && contxt.variable.DataType!="float"){
+					file << std::endl << "\t.word\t" << contxt.eval[contxt.Regs+1]; //contxt.variable.value;
+				}
+				else if( (contxt.variable.word_size==4) && contxt.variable.DataType=="float"){
+					file << std::endl << "\t.float\t" << contxt.eval_f[contxt.Regs+1]; //contxt.variable.value;
+					contxt.float_ = false;
+				}
+				else if(contxt.variable.word_size==2){
+					file << std::endl << "\t.half\t" << contxt.variable.value;
+				}
+				else if(contxt.variable.word_size==1){
+					file << std::endl << "\t.byte\t" << contxt.eval[contxt.Regs+1];
+				}
+				        // reset the value of the global
+				for(int i=contxt.Regs; i<=20; i++)
+				{
+					file << "\n#" << contxt.eval[i];
+					contxt.eval[i] = 0; 
+				}
+				
+				
+				}
+			}
+		}
+			
+
 };
 
 
@@ -760,17 +808,15 @@ class InitDeclarator : public Node {
 				}
 				else 
 				{
-					file << std::endl << "# global initialized" << std::endl;
-					contxt.no_of_initial_values=0;			
-				
+					//file << std::endl << "# global initialized" << std::endl;
+					contxt.no_of_initial_values=0;							
 					//contxt.lhs_of_assignment = true;
 					DecLarator->render_asm(file,contxt); 
 					//contxt.lhs_of_assignment = false;
 
 					contxt.no_array_elements = contxt.eval[contxt.Regs+1];
-					if(!contxt.no_array_elements){
+					if(!contxt.no_array_elements)
 						contxt.no_array_elements=1;
-					}
 					file << std::endl << "\n\t.data";
 					file << std::endl << "\t.globl\t" << contxt.variable.id;
 					if( log2(contxt.variable.word_size) )
@@ -792,7 +838,7 @@ class InitDeclarator : public Node {
 				
 			}
 			else if(DecLarator != NULL &&  InitiaLizer == NULL){
-				file << std::endl << "# global not initialized" << std::endl;
+				//file << std::endl << "# global not initialized" << std::endl;
 				contxt.initialized = false;
 				contxt.lhs_of_assignment=true;
 				DecLarator->render_asm(file,contxt);
@@ -801,7 +847,7 @@ class InitDeclarator : public Node {
 					contxt.no_of_initial_values=1;	
 					contxt.no_array_elements = contxt.eval[contxt.Regs+1];
 					if(!contxt.no_array_elements)
-						contxt.no_array_elements=1; //maybe 
+						contxt.no_array_elements=1;
 					file << std::endl << "\n\t.data";
 					file << std::endl << "\t.globl\t" << contxt.variable.id;
 					if( log2(contxt.variable.word_size) )
@@ -1280,12 +1326,7 @@ class TypeSpecifier : public Node {
 		
 	public:
 
-		TypeSpecifier(std::string* TYPES) : TYPES(TYPES) {}
-
-		TypeSpecifier(StructOrUnionSpecifier* StructOrUnionSpecifierPtr) : StructOrUnionSpecifierPtr(StructOrUnionSpecifierPtr) {}
-
-		TypeSpecifier(EnumSpecifier* EnumSpecifierPtr) : EnumSpecifierPtr(EnumSpecifierPtr) { }
-
+		TypeSpecifier(std::string* TYPES, StructOrUnionSpecifier* StructOrUnionSpecifierPtr,EnumSpecifier* EnumSpecifierPtr ) : TYPES(TYPES) , StructOrUnionSpecifierPtr(StructOrUnionSpecifierPtr) , EnumSpecifierPtr(EnumSpecifierPtr) {}
 
 
 		void render_asm(std::ofstream& file,Context& contxt) {
@@ -1931,15 +1972,17 @@ class FunctionDefinition : public Node {
 			file << std::endl << "\tsw $fp," << contxt.totalStackArea << "($sp)";
 			file << std::endl << "\tsw $31," << contxt.totalStackArea-4 <<"($sp)";
 			file << std::endl << "\tmove $fp,$sp\n";
+			// file << std::endl << "\tlui $28,%hi(__gnu_local_gp)";
+			// file << std::endl << "\taddiu $28,$28,%lo(__gnu_local_gp)";
 
-			if(!contxt.float_){
+			if(contxt.functionReturnTypetemp != "float"){
 				for(int i=4; i<=7; i++) //shift by 4 all the parameters
 				{
 
 					file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
 				}
 			}
-			else if(contxt.float_){
+			else if(contxt.functionReturnTypetemp == "float"){
 				int j=12;
 				for(int i=4; i<=7; i++){
 					if(i<=5){
@@ -2099,7 +2142,7 @@ class TranslationUnit : public Node{
 			// 	std::cout << contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size; 
 			// }
 			 // print_scopes(contxt,file);
-			 print_variables(contxt,file);
+			 // print_variables(contxt,file);
 			// print_declared(contxt, file);
 		}
 
@@ -2120,63 +2163,9 @@ inline void DeclarationList::render_asm(std::ofstream& file,Context& contxt) {
 			DeclarationPtr->render_asm(file,contxt);
 }
 
-inline void Initializer::render_asm(std::ofstream& file,Context& contxt) {
-			
-			if(InitializerListPtr != NULL ) {
-				contxt.no_of_initial_values++;
-				InitializerListPtr->render_asm(file,contxt);
-			}
-			
-			if( AssignmentExpressionPtr != NULL) {
-				
-				AssignmentExpressionPtr->render_asm(file,contxt);
-				
-				if(!contxt.function && !contxt.function_dec) {
-				 	
-				
-				if( contxt.variable.word_size > 4 ){					
-					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
-				}
-				else if( (contxt.variable.word_size==4) && contxt.variable.DataType!="float"){
-					file << std::endl << "\t.word\t" << contxt.eval[contxt.Regs+1]; //contxt.variable.value;
-				}
-				else if( (contxt.variable.word_size==4) && contxt.variable.DataType=="float"){
-					file << std::endl << "\t.float\t" << contxt.eval_f[contxt.Regs+1]; //contxt.variable.value;
-					contxt.float_ = false;
-				}
-				else if(contxt.variable.word_size==2){
-					file << std::endl << "\t.half\t" << contxt.variable.value;
-				}
-				else if(contxt.variable.word_size==1){
-					file << std::endl << "\t.byte\t" << contxt.eval[contxt.Regs+1];
-				}
-				        // reset the value of the global
-				for(int i=contxt.Regs; i<=20; i++)
-				{
-					file << "\n#" << contxt.eval[i];
-					contxt.eval[i] = 0; 
-				}
-				//contxt.global_array=false;
-				
-				}
-			}
-		}
-
-inline void InitializerList::render_asm(std::ofstream& file, Context& contxt)
-	{
-		if(InitializerListPtr!=NULL)
-		{
-			InitializerListPtr->render_asm(file, contxt);
-		}
-		if(InitializerPtr!=NULL)
-		{
-			InitializerPtr->render_asm(file, contxt);
-		}
-	}
-
 
 inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
-			std::cout << std::endl << "directDec";
+
 			if(contxt.function)
 			{
 				round1_square2_closed3=0;
@@ -2195,18 +2184,16 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 					round1_square2_closed3=0;
 				}
 				if(round1_square2_closed3==2)
-				{	
-					DirectDeclaratorPtr->render_asm(file,contxt);
-					std::cout << std::endl << !contxt.function << " - " << !contxt.reading << " - " << !contxt.protect;
+				{
+					DirectDeclaratorPtr->render_asm(file, contxt);
 					round1_square2_closed3=0;
-					contxt.global_array=true;
+				
 					contxt.count_array_initializers=0;
 					if(ConstantExpRession!=NULL)
 					{
 						ConstantExpRession->render_asm(file,contxt);
 						contxt.no_array_elements=contxt.eval[contxt.Regs+1];
 					}
-					//std::cout << std::endl << !contxt.function << " - " << !contxt.reading << " - " << !contxt.protect;
 				}
 			}else if( DirectDeclaratorPtr != NULL) {
 				//std::cout << "print this once" << std::endl; 
@@ -2216,7 +2203,6 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				{
 					//std::cout << "go to parameter type list" << std::endl;
 					ParameterTypeLiSt->render_asm(file,contxt);
-					//std::cout << std::endl << !contxt.function << " - " << !contxt.reading << " - " << !contxt.protect;
 				}
 	
 			if( IDENTIFIER != NULL && contxt.typedefs_){
@@ -2224,11 +2210,11 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				return;
 
 			}		
-			std::cout << std::endl << !contxt.function << " - " << !contxt.reading << " - " << !contxt.protect << " - " ;
+			
 			
 			if((!contxt.function && IDENTIFIER != NULL && !contxt.reading && !contxt.protect)) 			//if we are not in a function then this must be a global declaration
 			{
-				std::cout << "it should be global!" << std::endl;
+				//std::cout << "it shouldn't be global!" << std::endl;
 				contxt.variable.id = *IDENTIFIER;
 				if( !contxt.initialized ) {				//if it is not initialized then set it to 0
 					contxt.variable.value = 0;
@@ -2246,7 +2232,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 			}
 			else if((contxt.function && IDENTIFIER != NULL && !contxt.reading)||contxt.parameter) //for parameters and local functions
 			{		//if we are in a function and the identifier is not null and protect flag is off
-				//std::cout << "local push back" << std::endl;
+				
 				if( !contxt.protect && !contxt.parameter)// we only push the id of the functions that are defined 
 				{				//then this is a function name we are reading					
 					contxt.funct_id = *IDENTIFIER;		//obtain the scope we are currently in	
@@ -2765,6 +2751,22 @@ inline void SpecifierQualifierList::render_asm(std::ofstream& file, Context& con
 			else if(TypeSpecifierPtr == NULL && SpecifierQualifierListPtr == NULL && TypeQualifierPtr != NULL){
 				TypeQualifierPtr->render_asm(file,contxt);				
 			}
+		}
+
+
+inline void InitializerList::render_asm(std::ofstream& file,Context& contxt) {
+
+			if( InitializerListPtr != NULL){
+			
+				InitializerListPtr->render_asm(file,contxt);
+			}
+
+			if( InitializerPtr != NULL) {
+	
+				InitializerPtr->render_asm(file,contxt);
+			
+			}
+
 		}
 
 

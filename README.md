@@ -26,3 +26,8 @@ if(contxt.argument_flag)
 {
 	file << std::endl << "\tsw $" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #argument no: " << contxt.argument_no;
 }
+
+12)set values to 0
+a[a[1]];
+save restore $25
+set to 0 after each op

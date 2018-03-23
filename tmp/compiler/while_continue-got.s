@@ -7,8 +7,6 @@
 	.abicalls
 
 
-# global initialized
-
 
 	.data
 	.globl	x
@@ -16,7 +14,6 @@
 	.type	x, @object
 	.size	x, 4
 x:
-$END1:
 	.word	5
 #0
 #5
@@ -88,10 +85,8 @@ $WHILE10:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
 	li	$3, 1
 	add	$2, $2, $3
 $END13:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:1
-# lhs_of_assignment is set
 
 	lw	$3, 128($sp) #x
-
 	sw	$2,128($sp) #x
 # idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
 
@@ -132,10 +127,8 @@ $END14:# idy- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
 	lw	$3, 128($sp) #x
 	add	$2, $2, $3
 $END22:# idy- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:1
-# lhs_of_assignment is set
 
 	lw	$3, 136($sp) #y
-
 	sw	$2,136($sp) #y
 
 	b $BEGIN10

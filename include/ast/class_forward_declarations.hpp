@@ -154,9 +154,11 @@ struct Context{
 	bool function_dec =false;
 
 	int no_of_initial_values = 0;
-	bool global_array = false;
+	int global_offset = 0;
 	int count_array_initializers = 0;
 	int no_array_elements = 1;
+	int nested_arrays=0;
+	bool is_array =false;
 };
 
 inline std::string labelGenEnum(Context& contxt) {
@@ -196,7 +198,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 {
 	if(contxt.Variables[good_index].word_size==1) {
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -207,7 +209,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 	}				
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -235,29 +237,33 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 {
 	file << std::endl << "\tlui\t$" << contxt.Regs+2 << ", %hi(" << contxt.Variables[good_index].id << ")";
+		file << std::endl << "\tla $" << contxt.Regs+2 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+	if(contxt.nested_arrays){	
+		file << std::endl << "\tadd $" << contxt.Regs+2 << ", $" << contxt.Regs+2 << ", $25";
+	}
 	if(contxt.Variables[good_index].word_size==1) {
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
 			}
 		}
-					
-		file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+		file << std::endl << "\tsb $" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ")";			
+		//file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 		contxt.regType[contxt.Regs+1]='c';
 	}
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
 
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
 			}
 		}	
-
-		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+		file << std::endl << "\tsw $" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ")";
+		//file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 		contxt.regType[contxt.Regs+1]='i';
 	}
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
@@ -266,8 +272,8 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 			file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 		}
-
-		file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+		file << std::endl << "\tswc1 $" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ")";
+		//file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 		contxt.regType[contxt.Regs+1]='f';
 	}
 	if(contxt.Variables[good_index].DataType == "unsigned") {
@@ -307,20 +313,26 @@ inline void load_locals(Context& contxt, std::ofstream& file, int good_index)
 }
 inline void load_globals(Context& contxt, std::ofstream& file, int good_index)
 {
-	file << std::endl << "\tlui\t$" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
+	file << std::endl << "\tlui $" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
+	file << std::endl << "\tla $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
+	if(contxt.nested_arrays){
+		file << std::endl << "\tadd $" << contxt.Regs+1 << ", $" << contxt.Regs+1 << ", $25";				
+	}
 				if(contxt.Variables[good_index].word_size==1) 
 				{
-					file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
+					file << std::endl << "\tlb $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
+					//file << std::endl << "\tlb $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
 					contxt.regType[contxt.Regs+1]='c';
 				}
 				else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float")
 				{
-					file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
+					file << std::endl << "\tlw $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
+					//file << std::endl << "\tlw $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
 					contxt.regType[contxt.Regs+1]='i';
    				}
 				else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float") //TODO: CHECK OK
-				{
-					file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";     
+				{	file << std::endl << "\tlwc1 $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
+					//file << std::endl << "\tlwc1 $f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";     
 		                       	file << std::endl << "\tnop\t";
 					contxt.regType[contxt.Regs+1]='f';
    				}

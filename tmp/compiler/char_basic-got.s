@@ -16,8 +16,6 @@
 	.type	main, @function
 main:
 
-# global not initialized
-
 $END2:	.set noreorder
 	.set nomacro
 	addiu $sp,$sp,-144
@@ -29,8 +27,6 @@ $END2:	.set noreorder
 	sw $5,148($sp)
 	sw $6,152($sp)
 	sw $7,156($sp)
-# global not initialized
-
 	sw	$0, 132($sp) #k
 
 	li	$2, 56
