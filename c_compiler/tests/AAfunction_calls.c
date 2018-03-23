@@ -1,4 +1,3 @@
-
 int func(char r,int t, int w, int j, int o, int p, int h, int o1, int p1, int h1)                                                              
 {                                                                                                                                               return h1+p1;                                                                                                                                 
 }                                                                                                                                              

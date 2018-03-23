@@ -8,7 +8,8 @@
 #include <string.h>
 class AssignmentExpression;
 class Expression;
-
+class InitializerList;
+class Initializer;
 
 struct bindings {
 		int word_size = 0;
@@ -42,6 +43,7 @@ struct Enumeration{
 
 struct typedefs{
 
+	int Scope=0;
 	std::string TypeSpec;
 	std::string DummyName;
 
@@ -56,7 +58,7 @@ struct Context{
 	bool EnumExists = false;
 	bool enum_constant=false;
 	std::vector<int> EnumOperands;
-
+	int newScope=0;
 
 	std::vector<typedefs> TypeAssoc;
 	typedefs TypeDef;
@@ -149,6 +151,12 @@ struct Context{
 	int eval[1000];
 	float eval_f[1000];
 	int allocate=0;
+	bool function_dec =false;
+
+	int no_of_initial_values = 0;
+	bool global_array = false;
+	int count_array_initializers = 0;
+	int no_array_elements = 1;
 };
 
 inline std::string labelGenEnum(Context& contxt) {
@@ -188,7 +196,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 {
 	if(contxt.Variables[good_index].word_size==1) {
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -199,7 +207,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 	}				
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -229,7 +237,7 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 	file << std::endl << "\tlui\t$" << contxt.Regs+2 << ", %hi(" << contxt.Variables[good_index].id << ")";
 	if(contxt.Variables[good_index].word_size==1) {
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -242,7 +250,7 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
 
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -286,6 +294,7 @@ inline void load_locals(Context& contxt, std::ofstream& file, int good_index)
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float") //TODO: CHECK OK
 	{
 		file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		file << std::endl << "\tnop\t";
 		contxt.regType[contxt.Regs+1]='f';		
 	}
 	if(contxt.Variables[good_index].DataType == "unsigned") 
@@ -311,7 +320,8 @@ inline void load_globals(Context& contxt, std::ofstream& file, int good_index)
    				}
 				else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float") //TODO: CHECK OK
 				{
-					file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
+					file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";     
+		                       	file << std::endl << "\tnop\t";
 					contxt.regType[contxt.Regs+1]='f';
    				}
    				if(contxt.Variables[good_index].DataType == "unsigned") 
@@ -328,18 +338,11 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 	int index = contxt.good_i;
 	if(contxt.AssignmentOperator == "++" && contxt.is_postfix && !contxt.reading)
 	{ 
-		if(!contxt.float_){
-			f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", 1 #++"; //maybe +2
-			contxt.regType[contxt.Regs]='i';
-		}
-		else{
-			f << std::endl << "\tli.s\t$f" << contxt.Regs+1 << ",1";
-			contxt.regType[contxt.Regs+1]='f';
-			f << std::endl << "\tadd.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
-			contxt.regType[contxt.Regs]='f';
-
-		}
-					
+		//std::cout << std::endl << "got here" << std::endl;
+		f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", 1 #++"; //maybe +2
+		//if(contxt.Variables[contxt.good_i].word_size==1) {
+		//	f << std::endl << "\tsb\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id;			
+		//}				
 		if(contxt.Variables[contxt.good_i].scope=="global")
 		{
 			store_globals(contxt, f, index);
@@ -349,24 +352,14 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 			store_locals(contxt, f, index);
 			//f << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id << "\n";
 		}
-		
+		//f << "\n\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[contxt.good_i].offset << "($sp)" << " #" << contxt.Variables[contxt.good_i].id;
 		contxt.is_postfix=false;
 	}
 	else if (contxt.AssignmentOperator == "--" && contxt.is_postfix && !contxt.reading)
 	{
-		if(!contxt.float_){
+		//std::cout << std::endl << "got here" << std::endl;
 
-			f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", -1 #--";
-			contxt.regType[contxt.Regs]='i';
-		}
-	
-		else{
-			f << std::endl << "\tli.s\t$f" << contxt.Regs+1 << ",-1";
-			contxt.regType[contxt.Regs+1]='f';
-			f << std::endl << "\tadd.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
-			contxt.regType[contxt.Regs]='f';
-
-		}
+		f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", -1 #--";
 		
 		if(contxt.Variables[contxt.good_i].scope=="global")
 		{
@@ -375,9 +368,9 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 		else 
 		{
 			store_locals(contxt, f, index);
-			
+			//f << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id << "\n";
 		}
-		
+		//f << "\n\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[contxt.good_i].offset << "($sp)" << " #" << contxt.Variables[contxt.good_i].id;
 		contxt.is_postfix=false;
 	} 
 	contxt.Regs--;
@@ -398,6 +391,18 @@ inline void print_scopes(Context& contxt, std::ofstream& f){
 		for(int i=contxt.Scopes.size()-1; i>=0; i--)
 		{
 			std::cout << contxt.Scopes[i] << " - ";
+		}
+		std::cout << std::endl;
+	}
+}
+inline void print_declared(Context& contxt, std::ofstream& f){
+	if(contxt.functions_declared.size()>0)
+	{
+		std::cout << std::endl;
+		for(int i=contxt.functions_declared.size()-1; i>=0; i--)
+		{
+			std::cout << contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size << std::endl;
+			f << "# "<< contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size << std::endl;
 		}
 		std::cout << std::endl;
 	}
@@ -567,19 +572,7 @@ static bool ParameterVariable = false;
 static int biasedOffset = 0;
 
 
-inline void useReg(std::ofstream& file,std::string operation, int register_no=2) {				//USE THIS FOR USING REGISTERS, HAVE TO RECALL AFTER YOU ARE DONE.
 
-	if(operation == "start") {	
-		file << std::endl << "\taddiu\t $sp,$sp,-4";
-		file << std::endl << "\tsw\t" << "$" << register_no << ",0($sp)";
-		biasedOffset += 4;
-	}
-	else{
-		file << std::endl << "\tlw\t" << "$" << register_no << ",0($sp)";
-		file << std::endl << "\taddiu\t $sp,$sp,4";
-		biasedOffset -= 4;		
-	}
-}
 
 
 

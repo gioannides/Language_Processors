@@ -138,17 +138,47 @@ extern "C" int fileno(FILE *stream);
 
 "while"			{  return token(WHILE); }
 
-[A-Za-z_]([A-Za-z_]|[0-9])* 						{ 
+[A-Za-z_]([A-Za-z_]|[0-9])* 						{
+									
 									if(contxt.typedefs_) {
+										
 										int i=0;
+										contxt.TypeDef.DummyName = "";
+										contxt.TypeDef.Scope = contxt.newScope;
 										while( yytext[i] != NULL){
 											contxt.TypeDef.DummyName += yytext[i];
 											i++;
 										}
-										contxt.TypeAssoc.push_back(contxt.TypeDef);
-										contxt.typedefs_ = false;
-										contxt.TypeDef.DummyName = "";
-									} 
+										if(contxt.TypeDef.TypeSpec != "int" || "short" || "long" || "char" || "void" || "unsigned" || "signed" || "double" ){
+
+											for(int i(0); i < contxt.TypeAssoc.size(); i++){
+											
+												if(contxt.TypeAssoc[i].DummyName == contxt.TypeDef.DummyName){
+													
+													contxt.TypeDef.TypeSpec = contxt.TypeAssoc[i].TypeSpec;
+												}
+											}
+										}
+										
+										if(contxt.TypeDef.TypeSpec.size() && contxt.TypeAssoc.size() && contxt.TypeAssoc[contxt.TypeAssoc.size()-1].DummyName != contxt.TypeDef.DummyName){
+											contxt.TypeAssoc.push_back(contxt.TypeDef);
+											contxt.typedefs_ = false;
+											
+											contxt.TypeDef.TypeSpec = ""; 
+											
+										}
+										else if( contxt.TypeDef.TypeSpec.size() && !contxt.TypeAssoc.size()){
+												
+											contxt.TypeAssoc.push_back(contxt.TypeDef);
+											contxt.typedefs_ = false;
+											
+											contxt.TypeDef.TypeSpec = ""; 
+										}
+										
+										
+										return type();
+									}
+										
 										return type();
 									}
 
@@ -220,9 +250,9 @@ extern "C" int fileno(FILE *stream);
 
 ";"			{  return(SEMICOLON); }
 
-("{"|"<%")		{  return('{'); }
+("{"|"<%")		{  contxt.newScope++; return('{'); }
 
-("}"|"%>")		{  return('}'); }
+("}"|"%>")		{  contxt.newScope--;return('}'); }
 
 ","			{  return(','); }
 
@@ -284,40 +314,57 @@ void yyerror (char const *s)
 }
 
 int type(){
-	yylval.text = new std::string(yytext);
+	int i=0;
+	std::string temp;
+	while( yytext[i] != NULL){
+		temp += yytext[i];
+		i++;
+	}
+	
 	for(int i(0); i < contxt.TypeAssoc.size(); i++){
 		
-		if(*(yylval.text) == contxt.TypeAssoc[i].DummyName){
-			if(contxt.TypeAssoc[i].TypeSpec == "int"){
-				yylval.text = new std::string("int");
-				return TYPE_NAME_;}
+		if( temp == contxt.TypeAssoc[i].DummyName && contxt.newScope == contxt.TypeAssoc[i].Scope){
+			
+			
+			if(contxt.TypeAssoc[i].TypeSpec == "int" ){
+				temp = "";
+				return INT;}
 			if(contxt.TypeAssoc[i].TypeSpec == "char"){
+				temp = "";
 				yylval.text = new std::string("char");
-				return TYPE_NAME_;}
+				return CHAR;}
 			if(contxt.TypeAssoc[i].TypeSpec == "float"){
+				temp = "";
 				yylval.text = new std::string("float");
-				return TYPE_NAME_;}
+				return FLOAT;}
 			if(contxt.TypeAssoc[i].TypeSpec == "double"){
+				temp = "";
 				yylval.text = new std::string("double");
-				return TYPE_NAME_;}
+				return DOUBLE;}
 			if(contxt.TypeAssoc[i].TypeSpec == "short"){
+				temp = "";
 				yylval.text = new std::string("short");
-				return TYPE_NAME_;}
+				return SHORT;}
 			if(contxt.TypeAssoc[i].TypeSpec == "long"){
+				temp = "";
 				yylval.text = new std::string("long");
-				return TYPE_NAME_;}
+				return LONG;}
 			if(contxt.TypeAssoc[i].TypeSpec == "unsigned"){
+				temp = "";
 				yylval.text = new std::string("unsigned");
-				return TYPE_NAME_;}
+				return UNSIGNED;}
 			if(contxt.TypeAssoc[i].TypeSpec == "signed"){
+				temp = "";
 				yylval.text = new std::string("signed");
-				return TYPE_NAME_;}
+				return SIGNED;}
 			if(contxt.TypeAssoc[i].TypeSpec == "void"){
+				temp = "";
 				yylval.text = new std::string("void");
-				return TYPE_NAME_;}					
+				return VOID;}					
 		}				
 	}
-		
+	yylval.text = new std::string(yytext);
+	temp = "";
 	return IDENTIFIER;
 }
 	

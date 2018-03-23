@@ -87,6 +87,7 @@
 	TypeQualifierList* TypeQualifierListPtr;
 	UnaryOperator* UnaryOperatorPtr;
 	Expression* ExpressionPtr;
+	InitializerList* InitializerListPtr;
 }
 
 
@@ -125,7 +126,7 @@
 %type <PostFixExpressionPtr> POSTFIX_EXPRESSION
 %type <UnaryExpressionPtr> UNARY_EXPRESSION
 %type <AssignmentExpressionPtr> ASSIGNMENT_EXPRESSION
-%type <InitializerPtr> INITIALIZER INITIALIZER_LIST
+%type <InitializerPtr> INITIALIZER 
 %type <DirectDeclaratorPtr> DIRECT_DECLARATOR
 %type <CAstExpression> CAST_EXPRESSION
 %type <MUltiplicativeExpression> MULTIPLICATIVE_EXPRESSION
@@ -164,11 +165,12 @@
 %type <StructDeclaratorPtr> STRUCT_DECLARATOR
 %type <UnaryOperatorPtr> UNARY_OPERATOR
 %type <ExpressionPtr> EXPRESSION
+%type <InitializerListPtr> INITIALIZER_LIST
 
 %type <text> IDENTIFIER TYPEDEF EXTERN STATIC AUTO REGISTER VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED CONST VOLATILE STRUCT UNION ENUM TYPE_NAME_
 %type <text> MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN SIZEOF OR_OP
 %type <text> '&' '!' LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP '=' LT GT ASSIGNMENT_OPERATOR INC_OP DEC_OP '.' CONSTANT STRING_LITERAL PTR_OP SEMICOLON
-%type <text> '{' '}' ':' ',' CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN AND_OP '|' '^' PLUS MINUS  MULTIPLY MODULO DIVIDE ELLIPSIS PREPROCESSOR TILDE
+%type <text> '{' '}' ':' ',' CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN AND_OP '|' '^' PLUS MINUS  MULTIPLY MODULO DIVIDE ELLIPSIS PREPROCESSOR TILDE '(' ')' '[' ']'
 
 
 %precedence IF
@@ -229,18 +231,18 @@ STORAGE_CLASS_SPECIFIERS: TYPEDEF								{ $$ = new StorageClassSpecifiers( $1) 
 
 	
 
-TYPE_SPECIFIER:   VOID										{ $$ = new TypeSpecifier($1); } 
-		| CHAR										{ $$ = new TypeSpecifier($1); } 
-		| SHORT										{ $$ = new TypeSpecifier($1); }
-		| INT										{ $$ = new TypeSpecifier($1); } 
-		| LONG										{ $$ = new TypeSpecifier($1); } 
-		| FLOAT										{ $$ = new TypeSpecifier($1); } 
-		| DOUBLE									{ $$ = new TypeSpecifier($1); } 
-		| SIGNED									{ $$ = new TypeSpecifier($1); } 
-		| UNSIGNED									{ $$ = new TypeSpecifier($1); } 
-		| STRUCT_OR_UNION_SPECIFIER							{ $$ = new TypeSpecifier($1); } 
-		| ENUM_SPECIFIER								{ $$ = new TypeSpecifier($1); } 
-		| TYPE_NAME_									{ $$ = new TypeSpecifier($1); }
+TYPE_SPECIFIER:   VOID										{ $$ = new TypeSpecifier($1,NULL,NULL); } 
+		| CHAR										{ $$ = new TypeSpecifier($1,NULL,NULL); } 
+		| SHORT										{ $$ = new TypeSpecifier($1,NULL,NULL); } 
+		| INT										{ $$ = new TypeSpecifier($1,NULL,NULL); } 
+		| LONG										{ $$ = new TypeSpecifier($1,NULL,NULL); } 
+		| FLOAT										{ $$ = new TypeSpecifier($1,NULL,NULL); } 
+		| DOUBLE									{ $$ = new TypeSpecifier($1,NULL,NULL); } 
+		| SIGNED									{ $$ = new TypeSpecifier($1,NULL,NULL); } 
+		| UNSIGNED									{ $$ = new TypeSpecifier($1,NULL,NULL); } 
+		| TYPE_NAME_									{ $$ = new TypeSpecifier($1,NULL,NULL); } 
+		| STRUCT_OR_UNION_SPECIFIER							{ $$ = new TypeSpecifier(NULL,$1,NULL); } 
+		| ENUM_SPECIFIER								{ $$ = new TypeSpecifier(NULL,NULL,$1); } 
 
 
 
@@ -272,19 +274,19 @@ DECLARATION_LIST: DECLARATION									{ $$ = new DeclarationList($1,NULL) ; }
 
 DECLARATOR: POINTER DIRECT_DECLARATOR								{ $$ = new Declarator($1,$2,NULL);}	//DONE			
 	  | DIRECT_DECLARATOR									{ $$ = new Declarator(NULL,$1,NULL);}					//DONE
-	  | '(' DECLARATOR ')'									{ $$ = new Declarator(NULL,NULL,$2);}
+	 
 	
 
 
 
 
-DIRECT_DECLARATOR: IDENTIFIER									{ $$ = new DirectDeclarator($1,NULL,NULL,NULL,NULL,NULL); }
-		| '(' DECLARATOR ')'								{ $$ = new DirectDeclarator(NULL,NULL,NULL,NULL,NULL,$2); }
-		| DIRECT_DECLARATOR '[' CONSTANT_EXPRESSION ']'					{ $$ = new DirectDeclarator(NULL,$3,NULL,NULL,$1,NULL);   }//DONE
-		| DIRECT_DECLARATOR '[' ']'							{ $$ = $1;   }
-		| DIRECT_DECLARATOR '(' PARAMETER_TYPE_LIST ')'					{ $$ = new DirectDeclarator(NULL,NULL,$3,NULL,$1,NULL);   }//DONE 
-		| DIRECT_DECLARATOR '(' IDENTIFIER_LIST ')'					{ $$ = new DirectDeclarator(NULL,NULL,NULL,$3,$1,NULL);   }//DONE
-		| DIRECT_DECLARATOR '(' ')'							{ $$ = $1; }//DONE
+DIRECT_DECLARATOR: IDENTIFIER								{ $$ = new DirectDeclarator($1,NULL,NULL,NULL,NULL,NULL,0); }
+		| '(' DECLARATOR ')'							{ $$ = new DirectDeclarator(NULL,NULL,NULL,NULL,NULL,$2,3); }
+		| DIRECT_DECLARATOR '[' CONSTANT_EXPRESSION ']'				{ $$ = new DirectDeclarator(NULL,$3,NULL,NULL,$1,NULL,2);   }//DONE
+		| DIRECT_DECLARATOR '[' ']'						{ $$ = new DirectDeclarator(NULL,NULL,NULL,NULL,$1,NULL,2);   }
+		| DIRECT_DECLARATOR '(' PARAMETER_TYPE_LIST ')'				{ $$ = new DirectDeclarator(NULL,NULL,$3,NULL,$1,NULL,1);   }//DONE 
+		| DIRECT_DECLARATOR '(' IDENTIFIER_LIST ')'				{ $$ = new DirectDeclarator(NULL,NULL,NULL,$3,$1,NULL,1);   }//DONE
+		| DIRECT_DECLARATOR '(' ')'						{ $$ = new DirectDeclarator(NULL,NULL,NULL,NULL,$1,NULL,1); }//DONE
 
 
 CONSTANT_EXPRESSION: CONDITIONAL_EXPRESSION							{ $$ = new ConstantExpression($1); }//DONE COMPLETELY
@@ -495,8 +497,8 @@ INITIALIZER: ASSIGNMENT_EXPRESSION		 						{ $$ = new Initializer($1,NULL); }
 
 
 
-INITIALIZER_LIST: INITIALIZER									{ $$ = $1; } 
-		| INITIALIZER_LIST ',' INITIALIZER						{ $$ = $3; }
+INITIALIZER_LIST: INITIALIZER									{ $$ = new InitializerList(NULL,$1); } 
+		| INITIALIZER_LIST ',' INITIALIZER						{ $$ = new InitializerList($1,$3); }
 
 
 
