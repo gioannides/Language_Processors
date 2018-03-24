@@ -954,14 +954,14 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			findSize(contxt,*IDENTIFIER);
 		}
 			
-		if(contxt.Regs>=24 && !contxt.SizeOf)
+		if(contxt.Regs>=24 && !contxt.sizeof_)
 		{
-			std::cout << std::endl << "buy more registers!" << std::endl; //ise palavos?
+			std::cout << std::endl << "buy more registers!" << std::endl; 
 		}
 		int found_0nothing_1local_2globl = 0;	
 		int good_index=0;			//this will determine whether the variable wanted is a global or a local
 		int i(0), j;				//must initialize the index i outside so it is accessible throughout here
-		if(contxt.is_function_call && !contxt.SizeOf)
+		if(contxt.is_function_call && !contxt.sizeof_)
 		{
 			for (int i=0; i<contxt.functions_declared.size(); i++)
 			{
@@ -975,7 +975,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		}
 		else
 		{ 
-			if(contxt.Variables.size()&&contxt.Scopes.size() && !contxt.SizeOf && !contxt.enum_constant)
+			if(contxt.Variables.size()&&contxt.Scopes.size() && !contxt.sizeof_ && !contxt.enum_constant)
 			{
 			for(i=contxt.Variables.size()-1; i>=0; i--) {
 				for (j=contxt.Scopes.size()-1; j>=0; j--)
@@ -997,7 +997,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				}
 			  }
 			}
-			if(!found_0nothing_1local_2globl && !contxt.SizeOf && !contxt.enum_constant) {
+			if(!found_0nothing_1local_2globl && !contxt.sizeof_ && !contxt.enum_constant) {
 				for(i=0; i<contxt.Variables.size(); i++) {
 					if(contxt.Variables[i].scope == "global" && *IDENTIFIER == contxt.Variables[i].id) {
 						found_0nothing_1local_2globl=2;
@@ -1018,7 +1018,11 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				file << std::endl << "\tli $24, " << contxt.Variables[good_index].word_size;
 				file << std::endl << "\tmul $25, $24";
 			}	  		
+<<<<<<< HEAD
 			if(contxt.lhs_of_assignment && !contxt.SizeOf && !contxt.enum_constant)
+=======
+			if(contxt.lhs_of_assignment && !contxt.sizeof_ && !contxt.enum_constant)
+>>>>>>> 1494c7bd9b7d9492dbdacd87a682a7d0dad649fc
 			{
 				//file << "# lhs_of_assignment is set\n";
 				if(found_0nothing_1local_2globl)
@@ -1038,19 +1042,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				}			
 				else
 				{
-					//if(contxt.enum_constant){
-						bool found = false;
-						for( int i(0); i < contxt.Enum.size() && !found; i++){
-							for( int j(0); j < contxt.Enum[j].EnumList.size(); j++){
-								if(contxt.Enum[i].EnumList[j].IDENTIFIER == *IDENTIFIER){
-									file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].EnumList[j].value;
-									found = true;
-									break;
-								}
-							}
-						}
-						contxt.enum_constant = false;
-					//}
+						
 					//else{
 						file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 					//}
@@ -1059,30 +1051,42 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			else
 			{
 
-			 	if(found_0nothing_1local_2globl==1 && !contxt.SizeOf && !contxt.enum_constant) 
+			 	if(found_0nothing_1local_2globl==1 && !contxt.sizeof_ && !contxt.enum_constant) 
 			 	{
 			 		load_locals(contxt, file, good_index);
-			    }
-     		    else if(found_0nothing_1local_2globl==2 && !contxt.SizeOf && !contxt.enum_constant) 
+			  	}
+     		   		 else if(found_0nothing_1local_2globl==2 && !contxt.sizeof_ && !contxt.enum_constant) 
 				{
 					load_globals(contxt, file, good_index);	
 				}		
 				else
 					
-				{	//	if(contxt.enum_constant){
-					//	std::cout << "was";
+				{	if(!contxt.enum_constant){	
 						bool found = false;
-						for( int i(0); i < contxt.Enum.size() && !found; i++){
-							for( int j(0); j < contxt.Enum[j].EnumList.size(); j++){
+						for( int i(0); i < contxt.Enum.size(); i++){
+							//std::cout <<  contxt.Enum[i].ScopeID << " " <<  contxt.Enum[i].IDENTIFIER << " " <<  contxt.Enum[i].value << std::endl;
+							if(contxt.Enum[i].IDENTIFIER == *IDENTIFIER && contxt.Enum[i].ScopeID == contxt.funct_id){
+								file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].value;
 								
-								if(contxt.Enum[i].EnumList[j].IDENTIFIER == *IDENTIFIER){
-									file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].EnumList[j].value;
+								found = true;
+								break;
+							}
+						}
+						if(!found){
+							for( int i(0); i < contxt.Enum.size(); i++){
+								if(contxt.Enum[i].IDENTIFIER == *IDENTIFIER && contxt.Enum[i].ScopeID == "global"){
+									file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].value;
 									found = true;
 									break;
 								}
 							}
 						}
-					contxt.enum_constant = false;
+					}
+
+				}
+
+			}
+					
 					//}    
 						
 
@@ -1090,11 +1094,13 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 							file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 						}
 				}		
-			}	
-		}
-	}
-	else if( CONSTANT != NULL && !contxt.reading && !contxt.SizeOf) 
+		}	
+		
+	
+	else if( CONSTANT != NULL && !contxt.reading ) 
 	{	
+
+	
 		
 		char tmp2;
 		int64_t temp;
@@ -1133,21 +1139,43 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		if(is_char){
 			temp = (int)tmp2;
 			temp_f = (int)tmp2;
+			if(contxt.sizeof_){
+				if(contxt.SizeOf < 8){
+					contxt.SizeOf = 4;
+					return;
+				}
+			}
 		}
 			
 
-		if( (*CONSTANT).find_first_of("'")==0 && contxt.variable.word_size == 1 && !is_char)
+		if( (*CONSTANT).find_first_of("'")==0 /*&& contxt.variable.word_size == 1*/ && !is_char)
 		{
 			tmp2 = (*CONSTANT)[1];
 			temp = (int)tmp2;
 			temp_f = (int)tmp2;
 			is_char = true;
+			if(contxt.sizeof_){
+				contxt.SizeOf = 4;
+				return;
+			}
 
 		}
 		else if(!is_char){
 			
 			temp_f = (std::stod(*CONSTANT));
 		 	temp = (std::stod(*CONSTANT));
+			if(contxt.sizeof_){
+				if((std::floor(std::stod(*CONSTANT))) != std::stod(*CONSTANT)){
+					contxt.SizeOf = 8;
+					return;
+				}
+				else{
+					if(contxt.SizeOf < 8){
+						contxt.SizeOf = 4;
+						return;
+					}
+				}
+			}
 		}
 		
 		if(contxt.function && contxt.UnaryOperators.size() != 0 && contxt.variable.DataType != "float")
@@ -1209,7 +1237,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		
 	}
 				
-	else if( IDENTIFIER != NULL && contxt.reading && contxt.function && !contxt.SizeOf)
+	else if( IDENTIFIER != NULL && contxt.reading && contxt.function && !contxt.sizeof_)
 	{	for (int i=0; i<contxt.functions_declared.size(); i++)
 		{
 			//std::cout << "\n\n\n merge!\n\n";
@@ -1311,6 +1339,14 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
 							contxt.regType[contxt.Regs+1]='i';
 						}
+<<<<<<< HEAD
+=======
+						else if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].word_size==2 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
+						{ 	
+							file << std::endl << "\tsh\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
+							contxt.regType[contxt.Regs+1]='i';
+						}
+>>>>>>> 1494c7bd9b7d9492dbdacd87a682a7d0dad649fc
 						else if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].word_size==4 && contxt.Variables[ki+contxt.argument_no-1].DataType == "float")
 						{
 							file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
@@ -1325,7 +1361,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 							}
 							else 
 							{
-								file << std::endl << "\tmove\t$f" << contxt.argument_no+3 << ", $f" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
+								file << std::endl << "\tmov.s\t$f" << contxt.argument_no+3 << ", $f" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
 							}
 						}
 						ki=contxt.Variables.size();

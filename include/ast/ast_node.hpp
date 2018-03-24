@@ -437,9 +437,13 @@ class ConstantExpression : public Node {
 		
 		void render_asm(std::ofstream& file, Context& contxt) {
 
-			ConditionalExpressionPtr->render_asm(file,contxt);
+			if(ConditionalExpressionPtr != NULL){
+
+				ConditionalExpressionPtr->render_asm(file,contxt);
+			}
 
 		}
+
 
 		~ConstantExpression() {}
 
@@ -1187,23 +1191,28 @@ class Enumerator : public Node {
 		void render_asm(std::ofstream& file, Context& contxt){
 			if(ConstantExpressionPtr != NULL){
 				
-				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
+				
 				contxt.enum_constant = true;
 				ConstantExpressionPtr->render_asm(file,contxt);
+				contxt.enum_constant = false;
 				if(contxt.EnumOperands.size()){
-					contxt.EnumValuesTemp.value = contxt.EnumOperands[contxt.EnumOperands.size()-1];
-					
-					std::cout << contxt.EnumOperands[contxt.EnumOperands.size()-1] << std::endl;
+					contxt.EnumTemp.value = contxt.EnumOperands[contxt.EnumOperands.size()-1];
+					contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
+					contxt.Enum.push_back(contxt.EnumTemp);	
+					//std::cout << contxt.EnumTemp.value << " " <<  contxt.EnumTemp.IDENTIFIER   << std::endl;
 					contxt.EnumOperands.pop_back();
 				}
+				
 			}
 			else if( ConstantExpressionPtr == NULL){
 				
-				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
-				contxt.EnumValuesTemp.value = contxt.EnumCounter;
+				contxt.EnumTemp.IDENTIFIER = *IDENTIFIER;
+				contxt.EnumTemp.value = contxt.EnumCounter;
+				//std::cout << contxt.EnumCounter << std::endl;
 				contxt.EnumCounter++;
+				contxt.Enum.push_back(contxt.EnumTemp);	
 			}
-			contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);
+			//contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);
 			
 		}
 		
@@ -1234,10 +1243,13 @@ class EnumeratorList : public Node {
 				EnumeratorListPtr->render_asm(file,contxt);
 				
 			}
+			
 			if( EnumeratorPtr != NULL){
-				EnumeratorPtr->render_asm(file,contxt);
 				
+				EnumeratorPtr->render_asm(file,contxt);
+							
 			}
+			
 			
 		}
 
@@ -1264,7 +1276,12 @@ class EnumSpecifier : public Node {
 		void render_asm(std::ofstream& file, Context& contxt){ 
 
 			if( IDENTIFIER == NULL ){
-				contxt.EnumTemp.EnumID = "$ENUM" + labelGenEnum(contxt);
+				if(contxt.function){
+					contxt.EnumTemp.ScopeID = contxt.funct_id;
+				}
+				else{	
+					contxt.EnumTemp.ScopeID = "global";
+				}
 				ENumeratorList->render_asm(file,contxt);
 				contxt.Enum.push_back(contxt.EnumTemp);
 				
@@ -1275,9 +1292,15 @@ class EnumSpecifier : public Node {
 				//do nothing
 			}
 			else if( IDENTIFIER != NULL && ENumeratorList != NULL){
-				contxt.EnumTemp.EnumID = *IDENTIFIER;
+				if(contxt.function){
+					contxt.EnumTemp.ScopeID = contxt.funct_id;
+				}
+				else{	
+					contxt.EnumTemp.ScopeID = "global";
+				}
+
 				ENumeratorList->render_asm(file,contxt);
-				contxt.Enum.push_back(contxt.EnumTemp);
+				
 				//std::cout << contxt.EnumValuesTemp.IDENTIFIER << " " << contxt.EnumValuesTemp.value << std::endl;
 				
 				contxt.EnumCounter = 0;
@@ -1451,7 +1474,20 @@ class TypeSpecifier : public Node {
 					}
 					else if(*TYPES == "void"){
 						contxt.SizeOf = 1;
+					}
+					else if ((*TYPES).find("short") != std::string::npos) {
+    						contxt.SizeOf = 2;
+					}
+					else if ((*TYPES).find("long") != std::string::npos) {
+    						contxt.SizeOf = 8;
+					}
+					else if ((*TYPES).find("double") != std::string::npos) {
+    						contxt.SizeOf = 8;
+					}
+					else if ((*TYPES).find("int") != std::string::npos) {
+    						contxt.SizeOf = 8;
 					}				
+				
 
 				}
 		}
@@ -1975,24 +2011,32 @@ class FunctionDefinition : public Node {
 			// file << std::endl << "\tlui $28,%hi(__gnu_local_gp)";
 			// file << std::endl << "\taddiu $28,$28,%lo(__gnu_local_gp)";
 
-			if(contxt.functionReturnTypetemp != "float"){
-				for(int i=4; i<=7; i++) //shift by 4 all the parameters
+			
+			int floatt=0;
+			for(int i=0; i<contxt.Variables.size(); i++)
+			{
+				if(contxt.Variables[i].param_offset==0 && contxt.Variables[i].scope==contxt.funct_id && contxt.Variables[i].DataType == "float")
 				{
-
-					file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
+					floatt++;
+				}
+				if(floatt==1 && contxt.Variables[i].param_offset==4 && contxt.Variables[i].scope==contxt.funct_id && contxt.Variables[i].DataType == "float")
+				{
+					floatt++;	
 				}
 			}
-			else if(contxt.functionReturnTypetemp == "float"){
-				int j=12;
-				for(int i=4; i<=7; i++){
-					if(i<=5){
-						file << std::endl << "\tswc1 $f" << j <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
-						j+=2;
-					}
-					else{
-						file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
-					}
-				}
+			if(floatt)
+			{
+				file << std::endl << "\tswc1\t$f12," <<  contxt.totalStackArea + 4*(4-3) << "($sp)"; 
+			}
+			if(floatt==2)
+			{
+				file << std::endl << "\tswc1 $f14, " << contxt.totalStackArea + 4*(5-3) << "($sp)"; 
+			}
+
+			
+			for(int i=4+floatt; i<=7; i++) //shift by 4 all the parameters
+			{
+				file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
 			}
 
 			contxt.variable.offset=contxt.totalStackArea-4;
@@ -2306,6 +2350,10 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 							{
 								file << std::endl << "\tsw\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
 							}
+							else if( contxt.Variables[good_index].word_size==2 && !contxt.float_)
+							{
+								file << std::endl << "\tsh\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
+							}
 							else if( contxt.Variables[good_index].word_size==4 && contxt.float_)
 							{
 								file << std::endl << "\tswc1\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
@@ -2600,25 +2648,18 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 						
 
 			else if( SELECTIVE_IF == NULL && SELECTIVE_SWITCH != NULL && SELECTIVE_ELSE == NULL && AssignmentExpressionPtr != NULL && StatementPtr != NULL && StatementPtr2 == NULL) {					
-					std::string label_idS;
-					contxt.LastScope.push_back(SWITCH);
-				
 					
-
-					if( contxt.BreakTracker.size() != 0 && contxt.LastScope.size() > 0 && contxt.SwitchControl != 1 && !contxt.inCase){
-							//////file << std::endl << "\tb\t" << contxt.LastScope[contxt.BreakTracker.size()-1];		//The label of the loopend
-							//contxt.BreakTracker.pop_back();
-							file << std::endl << "\tnop";
-					}
-
+				
+							
 					
 					contxt.SwitchControl++;
 					contxt.BreakCounter++;
+					contxt.LastScope.push_back(END);
 
 				if( contxt.SwitchControl == 1 || contxt.inCase){
 
 					
-
+					
 					contxt.rhs_of_expression = true;
 					AssignmentExpressionPtr->render_asm(file,contxt);
 					contxt.rhs_of_expression = false;			
@@ -2626,28 +2667,34 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 					contxt.BreakTracker.push_back(contxt.BreakCounter);
 					contxt.Regs++;
 					contxt.ReadingSwitch = true;
+					
 					StatementPtr->render_asm(file,contxt);
+					if( contxt.LastScope.size() != 0 && contxt.BreakTracker.size() != 0 && contxt.ReadingSwitch){
+						file << std::endl << "\tb\t" << contxt.LastScope[contxt.LastScope.size()-1];		//The label of the loopend
+						//contxt.BreakTracker.pop_back();
+						file << std::endl << "\tnop";
+					}
 					contxt.ReadingSwitch = false;
 					contxt.Regs--;			
 
 					
-				//	label_idS = labelGen(contxt);
-					//SWITCH = "$SWITCH" + label_idS;
 					
-
+					
+					
 					contxt.EndSwitchLoop.push_back(SWITCH);
 					contxt.Regs++;
 					StatementPtr->render_asm(file,contxt);
 					contxt.Regs--;
-				
+					
 					
 					
 					
 				}
-
-
 				
 
+				
+				contxt.LastScope.pop_back();
+				file << std::endl << END << ":";
 			
 					
 					
@@ -2659,18 +2706,18 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				
 					
 			}
-			if(contxt.LastScope.size() > 0 && !contxt.ReadingSwitch && contxt.VectorSize >= contxt.Cases.size() && contxt.VectorSize != 0){
-				file << std::endl << contxt.LastScope[contxt.LastScope.size()-1] << ":";
-			}
+			//if(contxt.LastScope.size() > 0 && !contxt.ReadingSwitch && contxt.VectorSize >= contxt.Cases.size() && contxt.VectorSize != 0){
+			//	file << std::endl << contxt.LastScope[contxt.LastScope.size()-1] << ":";
+			//}
 			//contxt.inCase = false;
+				
+		
 		}
 
 
 inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 
-			
-							
-				
+		
 				
 				
 
@@ -2679,8 +2726,15 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 				if(!contxt.ReadingSwitch){
 					
 					if( contxt.Cases.size() != 0 && contxt.VectorSize < contxt.Cases.size()){
-						file <<  std::endl << contxt.Cases[contxt.VectorSize] << ":";
-						contxt.VectorSize++;
+						for(int i(0); i < contxt.Cases.size(); i++){
+
+							if(contxt.Cases[i].ConstantTemp == ConstantExpressionPtr){
+								file <<  std::endl << contxt.Cases[i].CaseID << ":";
+								contxt.VectorSize++;
+								break;
+							}
+
+						}
 						
 						
 						StatementPtr->render_asm(file,contxt);
@@ -2694,16 +2748,20 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 					std::string label_id = labelGen(contxt);	
 					std::string CASE = "$CASE" + label_id ;
 					
+						contxt.SwitchTemp.ConstantTemp = ConstantExpressionPtr;
+						contxt.SwitchTemp.CaseID = CASE;
+
 						contxt.rhs_of_expression = true;
 						ConstantExpressionPtr->render_asm(file,contxt); //li in register 3
 						contxt.rhs_of_expression = false;
 
-						file << std::endl << "\tbeq\t$2,$3," << CASE;  //beq
+						file << std::endl << "\tbeq\t$" << contxt.Regs << ",$" << contxt.Regs+1 << "," << CASE;  //beq
 
-						contxt.Cases.push_back(CASE);
+						contxt.Cases.push_back(contxt.SwitchTemp);
 						file << std::endl << "\tnop";				//nop
 					contxt.SwitchControl = 0;
 					contxt.inCase = false;
+					
 					
 				}
 				
@@ -2723,10 +2781,41 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 			else if( LABELED_TYPE != NULL && ConstantExpressionPtr == NULL && *LABELED_TYPE == "default" && StatementPtr != NULL) {				
 				
 				if(!contxt.ReadingSwitch){
-					std::string label_id = labelGen(contxt);
-					std::string DEFAULT = "$DEFAULT" + label_id ;				
-					file <<  std::endl << DEFAULT << ":";				
-					StatementPtr->render_asm(file,contxt);
+					
+					if( contxt.Cases.size() != 0 && contxt.VectorSize < contxt.Cases.size()){
+						for(int i(0); i < contxt.Cases.size(); i++){
+
+							if(contxt.Cases[i].ConstantTemp == NULL){
+								file <<  std::endl << contxt.Cases[i].CaseID << ":";
+								contxt.VectorSize++;
+								break;
+							}
+
+						}
+						
+						
+						StatementPtr->render_asm(file,contxt);
+					}					
+					
+					
+				}
+				else if(contxt.ReadingSwitch){
+					
+					contxt.inCase = true;
+					std::string label_id = labelGen(contxt);	
+					std::string DEFAULT = "$DEFAULT" + label_id ;
+					
+						contxt.SwitchTemp.ConstantTemp = NULL;
+						contxt.SwitchTemp.CaseID = DEFAULT;
+
+
+						file << std::endl << "\tb\t" << DEFAULT;  //beq
+
+						contxt.Cases.push_back(contxt.SwitchTemp);
+						file << std::endl << "\tnop";				//nop
+					contxt.SwitchControl = 0;
+					contxt.inCase = false;
+					
 				}
 					
 			}
