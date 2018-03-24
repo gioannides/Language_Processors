@@ -37,9 +37,10 @@ struct EnumValues{
 
 struct Enumeration{
 
-	std::string EnumID;
-	std::vector<EnumValues> EnumList;
-
+	std::string ScopeID;
+	std::string IDENTIFIER;
+	//std::vector<EnumValues> EnumList;
+	double value;
 };
 
 struct typedefs{
@@ -218,6 +219,19 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 		}
 		file << std::endl << "\tsb\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
 		contxt.regType[contxt.Regs+1]='c';
+	}
+	else if(contxt.Variables[good_index].word_size==2 && contxt.Variables[good_index].DataType != "float"){
+		if(contxt.regType[contxt.Regs+1] == 'f'){
+			file << std::endl << ".set macro" << std::endl;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << ".set nomacro" << std::endl;
+			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			if(contxt.regType[contxt.Regs+1] == 'u'){
+				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
+			}
+		}	
+		file << std::endl << "\tsh\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+		contxt.regType[contxt.Regs+1]='i';
 	}				
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
 		if(contxt.regType[contxt.Regs+1] == 'f'){
@@ -284,6 +298,21 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 		//file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 		contxt.regType[contxt.Regs+1]='i';
 	}
+	else if(contxt.Variables[good_index].word_size==2 && contxt.Variables[good_index].DataType != "float"){
+
+		if(contxt.regType[contxt.Regs+1] == 'f'){
+			file << std::endl << ".set macro" << std::endl;
+			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+			file << std::endl << ".set nomacro" << std::endl;
+			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			if(contxt.regType[contxt.Regs+1] == 'u'){
+				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
+			}
+		}	
+		file << std::endl << "\tsh $" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ")";
+		//file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
+		contxt.regType[contxt.Regs+1]='i';
+	}
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
 		
 		if(contxt.regType[contxt.Regs+1] != 'f'){
@@ -313,6 +342,11 @@ inline void load_locals(Context& contxt, std::ofstream& file, int good_index)
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float")
 	{
 		file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;			
+		contxt.regType[contxt.Regs+1]='i';					
+	}
+	else if(contxt.Variables[good_index].word_size==2 && contxt.Variables[good_index].DataType != "float")
+	{
+		file << std::endl << "\tlh\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;			
 		contxt.regType[contxt.Regs+1]='i';					
 	}
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float") //TODO: CHECK OK
@@ -345,6 +379,12 @@ inline void load_globals(Context& contxt, std::ofstream& file, int good_index)
 				else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float")
 				{
 					file << std::endl << "\tlw $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
+					//file << std::endl << "\tlw $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
+					contxt.regType[contxt.Regs+1]='i';
+   				}
+				else if(contxt.Variables[good_index].word_size==2 && contxt.Variables[good_index].DataType != "float")
+				{
+					file << std::endl << "\tlh $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
 					//file << std::endl << "\tlw $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
 					contxt.regType[contxt.Regs+1]='i';
    				}
@@ -465,13 +505,17 @@ inline std::string labelGen(Context& contxt) {
 inline void findSize(Context& contxt,std::string IDENTIFIER){
 			int i,j;
 			bool found = false;
+			
 			for(i=contxt.Variables.size()-1; i>=0; i--) {
 				for (j=contxt.Scopes.size()-1; j>=0; j--)
 				{
 					if(contxt.Variables[i].scope == contxt.Scopes[j] && IDENTIFIER == contxt.Variables[i].id) 
 					{
 						found = true;
-						if(contxt.Variables[i].DataType == "int"){
+						if(contxt.lhs_of_assignment){
+							contxt.SizeOf = contxt.Variables[i].word_size;
+						}
+						else if(contxt.Variables[i].DataType == "int"){
 							if( contxt.SizeOf < 4)
 								contxt.SizeOf = 4;
 						}
@@ -484,7 +528,7 @@ inline void findSize(Context& contxt,std::string IDENTIFIER){
 								contxt.SizeOf = 1;
 						}
 						else if(contxt.Variables[i].DataType == "short"){
-							if( contxt.SizeOf < 4)
+							if( contxt.SizeOf < 2)
 								contxt.SizeOf = 2;
 						}
 						else if(contxt.Variables[i].DataType == "long"){
@@ -516,7 +560,11 @@ inline void findSize(Context& contxt,std::string IDENTIFIER){
 				for(i=contxt.Variables.size()-1; i>=0; i--) {
 					if(contxt.Variables[i].scope == "global" && IDENTIFIER == contxt.Variables[i].id) 
 					{
-						if(contxt.Variables[i].DataType == "int"){
+
+						if(contxt.lhs_of_assignment){
+							contxt.SizeOf = contxt.Variables[i].word_size;
+						}
+						else if(contxt.Variables[i].DataType == "int"){
 							if( contxt.SizeOf < 4)
 								contxt.SizeOf = 4;
 						}
@@ -529,7 +577,7 @@ inline void findSize(Context& contxt,std::string IDENTIFIER){
 								contxt.SizeOf = 1;
 						}
 						else if(contxt.Variables[i].DataType == "short"){
-							if( contxt.SizeOf < 4)
+							if( contxt.SizeOf < 2)
 								contxt.SizeOf = 2;
 						}
 						else if(contxt.Variables[i].DataType == "long"){

@@ -1191,23 +1191,28 @@ class Enumerator : public Node {
 		void render_asm(std::ofstream& file, Context& contxt){
 			if(ConstantExpressionPtr != NULL){
 				
-				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
+				
 				contxt.enum_constant = true;
 				ConstantExpressionPtr->render_asm(file,contxt);
+				contxt.enum_constant = false;
 				if(contxt.EnumOperands.size()){
-					contxt.EnumValuesTemp.value = contxt.EnumOperands[contxt.EnumOperands.size()-1];
-					
-					std::cout << contxt.EnumOperands[contxt.EnumOperands.size()-1] << std::endl;
+					contxt.EnumTemp.value = contxt.EnumOperands[contxt.EnumOperands.size()-1];
+					contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
+					contxt.Enum.push_back(contxt.EnumTemp);	
+					//std::cout << contxt.EnumTemp.value << " " <<  contxt.EnumTemp.IDENTIFIER   << std::endl;
 					contxt.EnumOperands.pop_back();
 				}
+				
 			}
 			else if( ConstantExpressionPtr == NULL){
 				
-				contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
-				contxt.EnumValuesTemp.value = contxt.EnumCounter;
+				contxt.EnumTemp.IDENTIFIER = *IDENTIFIER;
+				contxt.EnumTemp.value = contxt.EnumCounter;
+				//std::cout << contxt.EnumCounter << std::endl;
 				contxt.EnumCounter++;
+				contxt.Enum.push_back(contxt.EnumTemp);	
 			}
-			contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);
+			//contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);
 			
 		}
 		
@@ -1238,10 +1243,13 @@ class EnumeratorList : public Node {
 				EnumeratorListPtr->render_asm(file,contxt);
 				
 			}
+			
 			if( EnumeratorPtr != NULL){
-				EnumeratorPtr->render_asm(file,contxt);
 				
+				EnumeratorPtr->render_asm(file,contxt);
+							
 			}
+			
 			
 		}
 
@@ -1268,7 +1276,12 @@ class EnumSpecifier : public Node {
 		void render_asm(std::ofstream& file, Context& contxt){ 
 
 			if( IDENTIFIER == NULL ){
-				contxt.EnumTemp.EnumID = "$ENUM" + labelGenEnum(contxt);
+				if(contxt.function){
+					contxt.EnumTemp.ScopeID = contxt.funct_id;
+				}
+				else{	
+					contxt.EnumTemp.ScopeID = "global";
+				}
 				ENumeratorList->render_asm(file,contxt);
 				contxt.Enum.push_back(contxt.EnumTemp);
 				
@@ -1279,9 +1292,15 @@ class EnumSpecifier : public Node {
 				//do nothing
 			}
 			else if( IDENTIFIER != NULL && ENumeratorList != NULL){
-				contxt.EnumTemp.EnumID = *IDENTIFIER;
+				if(contxt.function){
+					contxt.EnumTemp.ScopeID = contxt.funct_id;
+				}
+				else{	
+					contxt.EnumTemp.ScopeID = "global";
+				}
+
 				ENumeratorList->render_asm(file,contxt);
-				contxt.Enum.push_back(contxt.EnumTemp);
+				
 				//std::cout << contxt.EnumValuesTemp.IDENTIFIER << " " << contxt.EnumValuesTemp.value << std::endl;
 				
 				contxt.EnumCounter = 0;
@@ -1455,7 +1474,20 @@ class TypeSpecifier : public Node {
 					}
 					else if(*TYPES == "void"){
 						contxt.SizeOf = 1;
+					}
+					else if ((*TYPES).find("short") != std::string::npos) {
+    						contxt.SizeOf = 2;
+					}
+					else if ((*TYPES).find("long") != std::string::npos) {
+    						contxt.SizeOf = 8;
+					}
+					else if ((*TYPES).find("double") != std::string::npos) {
+    						contxt.SizeOf = 8;
+					}
+					else if ((*TYPES).find("int") != std::string::npos) {
+    						contxt.SizeOf = 8;
 					}				
+				
 
 				}
 		}
@@ -2317,6 +2349,10 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 							else if( contxt.Variables[good_index].word_size==4 && !contxt.float_)
 							{
 								file << std::endl << "\tsw\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
+							}
+							else if( contxt.Variables[good_index].word_size==2 && !contxt.float_)
+							{
+								file << std::endl << "\tsh\t$0, " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n"; 
 							}
 							else if( contxt.Variables[good_index].word_size==4 && contxt.float_)
 							{
