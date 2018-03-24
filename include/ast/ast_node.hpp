@@ -1092,6 +1092,12 @@ class Pointer : public Node {
 
 		~Pointer() {}
 
+		void render_asm(std::ofstream& file, Context& contxt){
+
+
+
+		}
+
 };
 
 class StructDeclaration : public Node {
@@ -1354,13 +1360,44 @@ class TypeSpecifier : public Node {
 
 		void render_asm(std::ofstream& file,Context& contxt) {
 
-			if( EnumSpecifierPtr != NULL && !contxt.sizeof_){
+
+			if( TYPES != NULL && !contxt.sizeof_ && !contxt.typedefs_ && contxt.Cast){
+					std::string types = *TYPES;			
+
+					
+					if (types=="char"){
+						contxt.CastType = "char"; 
+					}
+					else if (types=="short"){
+						contxt.CastType = "short";	
+					}
+					else if (types=="int"){
+						contxt.CastType = "int";	
+					}	
+					else if (types=="long"){
+						contxt.CastType = "long";	
+					}
+					else if (types=="float"){
+						contxt.CastType = "float";	
+					}
+					else if (types=="double"){
+						contxt.CastType = "double";	
+					}	
+					else if (types=="signed"){
+						contxt.CastType = "signed";	
+					}	
+					else if (types=="unsigned"){
+						contxt.CastType = "unsigned";
+					}
+				}
+
+			else if( EnumSpecifierPtr != NULL && !contxt.sizeof_ && !contxt.Cast){
 				contxt.enum_constant = true;
 				EnumSpecifierPtr->render_asm(file,contxt);
 				contxt.enum_constant = false;
 			}
 
-			if( TYPES != NULL && !contxt.sizeof_ && !contxt.typedefs_){
+			else if( TYPES != NULL && !contxt.sizeof_ && !contxt.typedefs_  && !contxt.Cast){
 			std::string types = *TYPES;			// Require conversion to be used
 
 				if (types=="char"){
@@ -1398,13 +1435,15 @@ class TypeSpecifier : public Node {
 					contxt.is_unsigned = true;
 				}
 
-				if(contxt.functionReturnType && !contxt.sizeof_ && !contxt.typedefs_){
+				else if(contxt.functionReturnType && !contxt.sizeof_ && !contxt.typedefs_ && !contxt.Cast){
 
 					contxt.functionReturnTypetemp = *TYPES;
 
 				}
+
 				
-				if( TYPES != NULL && !contxt.sizeof_ && contxt.typedefs_){
+				
+				else if( TYPES != NULL && !contxt.sizeof_ && contxt.typedefs_  && !contxt.Cast){
 					std::string types = *TYPES;			
 
 					if (types=="char"){
@@ -1447,7 +1486,7 @@ class TypeSpecifier : public Node {
 				// }
 
 			}
-			if(contxt.sizeof_ && TYPES != NULL){
+			else if(contxt.sizeof_ && TYPES != NULL && !contxt.Cast){
 					if(*TYPES == "int"){
 						contxt.SizeOf = 4;
 					}
