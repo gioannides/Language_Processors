@@ -1418,6 +1418,17 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 					file << std::endl << "\tsub\t$" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1 << "#-"; 
 					contxt.regType[contxt.Regs+1]='i';
 					}
+					else if(UnaryOperatorPtr->render_asm(file,contxt) == '&') {
+						file << std::endl << "\taddi $" << contxt.Regs+1 << ", $sp, " << contxt.Variables[contxt.good_i].offset << "# memory address " << contxt.Variables[contxt.good_i].id; 
+						//file << std::endl << "\tmove $" << contxt.Regs+1 << ", $" << contxt.Regs+1;
+						contxt.regType[contxt.Regs+1]='i';
+					}
+					else if(UnaryOperatorPtr->render_asm(file,contxt) == '*')
+					{
+						file << std::endl << "\tlw $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id; 
+						contxt.regType[contxt.Regs+1]='i';
+					}
+
 				}
 				else
 				{

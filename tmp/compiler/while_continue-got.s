@@ -71,93 +71,60 @@ $END8:
 $END9:
 	sw	$2,128($sp) #x
 
-$BEGIN10:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
+$BEGIN10:
 	lw	$2, 128($sp) #x
-#VARIABLE : xNOT DECLARED!!!
-
 	li	$3, 3
 	slt	$2, $2, $3
 $END11:
 $BEGIN210:	beq	$2,$0,$END10
 	nop
-$WHILE10:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
+$WHILE10:
 	lw	$2, 128($sp) #x
-#VARIABLE : xNOT DECLARED!!!
-
 	li	$3, 1
 	add	$2, $2, $3
-$END13:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:1
-
+$END13:
 	lw	$3, 128($sp) #x
 	sw	$2,128($sp) #x
 
-#VARIABLE : xNOT DECLARED!!!
-# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
 	lw	$2, 128($sp) #x
-#VARIABLE : xNOT DECLARED!!!
-
 	li	$3, 2
 	slt	$2, $2, $3
 $END15:
 	beq	$2,$0,$END14
 	nop
-$IF14:# idz- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
+$IF14:
 	lw	$2, 132($sp) #z
-#VARIABLE : zNOT DECLARED!!!
-
 	li	$3, 0
 	seq	$2, $2, $3
 $END18:
 	beq	$2,$0,$END17
 	nop
-$IF17:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
+$IF17:
 	lw	$2, 128($sp) #x
-#VARIABLE : xNOT DECLARED!!!
-
 	li	$3, 3
 	slt	$2, $2, $3
 $END20:
 	b $BEGIN210
 	nop
-$END17:# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
+$END17:
 	lw	$2, 128($sp) #x
-#VARIABLE : xNOT DECLARED!!!
-
 	li	$3, 3
 	slt	$2, $2, $3
 $END21:
 	b $BEGIN210
 	nop
-$END14:# idy- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
+$END14:
 	lw	$2, 136($sp) #y
-#VARIABLE : yNOT DECLARED!!!
-# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
 	lw	$3, 128($sp) #x
-#VARIABLE : xNOT DECLARED!!!
-
 	add	$2, $2, $3
-$END22:# idy- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:1
-
+$END22:
 	lw	$3, 136($sp) #y
 	sw	$2,136($sp) #y
 
-#VARIABLE : yNOT DECLARED!!!
-
 	b $BEGIN10
 	nop
-$END10:# idy- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
+$END10:
 	lw	$2, 136($sp) #y
-#VARIABLE : yNOT DECLARED!!!
-
 $END23:
 	move	$2,$2
 	move	$sp,$fp
