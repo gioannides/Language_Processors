@@ -2228,7 +2228,7 @@ class TranslationUnit : public Node{
 			// }
 			 // print_scopes(contxt,file);
 			 // print_variables(contxt,file);
-			// print_declared(contxt, file);
+			//print_declared(contxt, file);
 		}
 
 		 virtual ~TranslationUnit() {}

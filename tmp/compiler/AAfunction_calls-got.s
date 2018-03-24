@@ -114,48 +114,128 @@ $END10:
 $END11:
 $END12:
 $END14:
+# merge
+
 $END15:
+# merge
+
 $END16:
+# merge
+
 $END17:
+# merge
+
 $END18:
+# merge
+
 $END19:
+# merge
+
 $END20:
+# merge
+
 $END21:
+# merge
+
 $END22:
+# merge
+
 $END23:
+# merge
+
 $END13:
 $END25:
+# merge
+
 $END26:
+# merge
+
 $END27:
+# merge
+
 $END28:
+# merge
+
 $END29:
+# merge
+
 $END30:
+# merge
+
 $END31:
+# merge
+
 $END32:
+# merge
+
 $END33:
+# merge
+
 $END34:
+# merge
+
 $END24:
 $END36:
+# merge
+
 $END37:
+# merge
+
 $END38:
+# merge
+
 $END39:
+# merge
+
 $END40:
+# merge
+
 $END41:
+# merge
+
 $END42:
+# merge
+
 $END43:
+# merge
+
 $END44:
+# merge
+
 $END45:
+# merge
+
 $END35:
 $END47:
+# merge
+
 $END48:
+# merge
+
 $END49:
+# merge
+
 $END50:
+# merge
+
 $END51:
+# merge
+
 $END52:
+# merge
+
 $END53:
+# merge
+
 $END54:
+# merge
+
 $END55:
+# merge
+
 $END56:
+# merge
+
 $END46:	.set noreorder
 	.set nomacro
 	addiu $sp,$sp,-184
@@ -189,71 +269,91 @@ $END62:
 
 	sb	$0, 152($sp) #yu
 
-	sw $1,148($sp)
-	sw $2,144($sp)
-	sw $3,140($sp)
-	sw $4,136($sp)
-	sw $5,132($sp)
-	sw $6,128($sp)
-	sw $7,124($sp)
-	sw $8,120($sp)
-	sw $9,116($sp)
-	sw $10,112($sp)
-	sw $11,108($sp)
-	sw $12,104($sp)
-	sw $13,100($sp)
-	sw $14,96($sp)
-	sw $15,92($sp)
-	sw $16,88($sp)
-	sw $17,84($sp)
-	sw $18,80($sp)
-	sw $19,76($sp)
-	sw $20,72($sp)
-	sw $21,68($sp)
-	sw $22,64($sp)
-	sw $23,60($sp)
-	sw $24,56($sp)
+	sw $1, 148($sp)
+	sw $2, 144($sp)
+	sw $3, 140($sp)
+	sw $4, 136($sp)
+	sw $5, 132($sp)
+	sw $6, 128($sp)
+	sw $7, 124($sp)
+	sw $8, 120($sp)
+	sw $9, 116($sp)
+	sw $10, 112($sp)
+	sw $11, 108($sp)
+	sw $12, 104($sp)
+	sw $13, 100($sp)
+	sw $14, 96($sp)
+	sw $15, 92($sp)
+	sw $16, 88($sp)
+	sw $17, 84($sp)
+	sw $18, 80($sp)
+	sw $19, 76($sp)
+	sw $20, 72($sp)
+	sw $21, 68($sp)
+	sw $22, 64($sp)
+	sw $23, 60($sp)
+	sw $24, 56($sp)
 	lb	$2, 152($sp) #yu
 $END64:
-	sb	$2, 0($sp) #r 0
+# merge
+
+	sw	$2, 0($sp) #r 0
 	move	$4, $2 #load parameter 1
 	lw	$2, 168($sp) #y
 $END65:
+# merge
+
 	sw	$2, 4($sp) #t 4
 
 	move	$5, $2 #load parameter 2
 	lw	$2, 164($sp) #z
 $END66:
+# merge
+
 	sw	$2, 8($sp) #w 8
 
 	move	$6, $2 #load parameter 3
 	lw	$2, 160($sp) #a
 $END67:
+# merge
+
 	sw	$2, 12($sp) #j 12
 
 	move	$7, $2 #load parameter 4
 	lw	$2, 156($sp) #f
 $END68:
+# merge
+
 	sw	$2, 16($sp) #o 16
 
 	lw	$2, 160($sp) #a
 $END69:
+# merge
+
 	sw	$2, 20($sp) #p 20
 
 	lw	$2, 172($sp) #x
 $END70:
+# merge
+
 	sw	$2, 24($sp) #h 24
 
 	lw	$2, 172($sp) #x
 $END71:
+# merge
+
 	sw	$2, 28($sp) #o1 28
 
 	lw	$2, 172($sp) #x
 $END72:
+# merge
+
 	sw	$2, 32($sp) #p1 32
 
 	lw	$2, 156($sp) #f
 $END73:
+# merge
+
 	sw	$2, 36($sp) #h1 36
 
 	.option pic
@@ -287,71 +387,91 @@ $END73:
 	lw $24,56($sp)
 	move $2, $25
 $END63:
-	sw $1,148($sp)
-	sw $2,144($sp)
-	sw $3,140($sp)
-	sw $4,136($sp)
-	sw $5,132($sp)
-	sw $6,128($sp)
-	sw $7,124($sp)
-	sw $8,120($sp)
-	sw $9,116($sp)
-	sw $10,112($sp)
-	sw $11,108($sp)
-	sw $12,104($sp)
-	sw $13,100($sp)
-	sw $14,96($sp)
-	sw $15,92($sp)
-	sw $16,88($sp)
-	sw $17,84($sp)
-	sw $18,80($sp)
-	sw $19,76($sp)
-	sw $20,72($sp)
-	sw $21,68($sp)
-	sw $22,64($sp)
-	sw $23,60($sp)
-	sw $24,56($sp)
+	sw $1, 148($sp)
+	sw $2, 144($sp)
+	sw $3, 140($sp)
+	sw $4, 136($sp)
+	sw $5, 132($sp)
+	sw $6, 128($sp)
+	sw $7, 124($sp)
+	sw $8, 120($sp)
+	sw $9, 116($sp)
+	sw $10, 112($sp)
+	sw $11, 108($sp)
+	sw $12, 104($sp)
+	sw $13, 100($sp)
+	sw $14, 96($sp)
+	sw $15, 92($sp)
+	sw $16, 88($sp)
+	sw $17, 84($sp)
+	sw $18, 80($sp)
+	sw $19, 76($sp)
+	sw $20, 72($sp)
+	sw $21, 68($sp)
+	sw $22, 64($sp)
+	sw $23, 60($sp)
+	sw $24, 56($sp)
 	lb	$2, 152($sp) #yu
 $END75:
-	sb	$2, 0($sp) #r 0
+# merge
+
+	sw	$2, 0($sp) #r 0
 	move	$4, $2 #load parameter 1
 	lw	$2, 168($sp) #y
 $END76:
+# merge
+
 	sw	$2, 4($sp) #t 4
 
 	move	$5, $2 #load parameter 2
 	lw	$2, 164($sp) #z
 $END77:
+# merge
+
 	sw	$2, 8($sp) #w 8
 
 	move	$6, $2 #load parameter 3
 	lw	$2, 160($sp) #a
 $END78:
+# merge
+
 	sw	$2, 12($sp) #j 12
 
 	move	$7, $2 #load parameter 4
 	lw	$2, 156($sp) #f
 $END79:
+# merge
+
 	sw	$2, 16($sp) #o 16
 
 	lw	$2, 160($sp) #a
 $END80:
+# merge
+
 	sw	$2, 20($sp) #p 20
 
 	lw	$2, 172($sp) #x
 $END81:
+# merge
+
 	sw	$2, 24($sp) #h 24
 
 	lw	$2, 172($sp) #x
 $END82:
+# merge
+
 	sw	$2, 28($sp) #o1 28
 
 	lw	$2, 172($sp) #x
 $END83:
+# merge
+
 	sw	$2, 32($sp) #p1 32
 
 	lw	$2, 156($sp) #f
 $END84:
+# merge
+
 	sw	$2, 36($sp) #h1 36
 
 	.option pic
@@ -385,71 +505,91 @@ $END84:
 	lw $24,56($sp)
 	move $2, $25
 $END74:
-	sw $1,148($sp)
-	sw $2,144($sp)
-	sw $3,140($sp)
-	sw $4,136($sp)
-	sw $5,132($sp)
-	sw $6,128($sp)
-	sw $7,124($sp)
-	sw $8,120($sp)
-	sw $9,116($sp)
-	sw $10,112($sp)
-	sw $11,108($sp)
-	sw $12,104($sp)
-	sw $13,100($sp)
-	sw $14,96($sp)
-	sw $15,92($sp)
-	sw $16,88($sp)
-	sw $17,84($sp)
-	sw $18,80($sp)
-	sw $19,76($sp)
-	sw $20,72($sp)
-	sw $21,68($sp)
-	sw $22,64($sp)
-	sw $23,60($sp)
-	sw $24,56($sp)
+	sw $1, 148($sp)
+	sw $2, 144($sp)
+	sw $3, 140($sp)
+	sw $4, 136($sp)
+	sw $5, 132($sp)
+	sw $6, 128($sp)
+	sw $7, 124($sp)
+	sw $8, 120($sp)
+	sw $9, 116($sp)
+	sw $10, 112($sp)
+	sw $11, 108($sp)
+	sw $12, 104($sp)
+	sw $13, 100($sp)
+	sw $14, 96($sp)
+	sw $15, 92($sp)
+	sw $16, 88($sp)
+	sw $17, 84($sp)
+	sw $18, 80($sp)
+	sw $19, 76($sp)
+	sw $20, 72($sp)
+	sw $21, 68($sp)
+	sw $22, 64($sp)
+	sw $23, 60($sp)
+	sw $24, 56($sp)
 	lb	$2, 152($sp) #yu
 $END86:
-	sb	$2, 0($sp) #r 0
+# merge
+
+	sw	$2, 0($sp) #r 0
 	move	$4, $2 #load parameter 1
 	lw	$2, 168($sp) #y
 $END87:
+# merge
+
 	sw	$2, 4($sp) #t 4
 
 	move	$5, $2 #load parameter 2
 	lw	$2, 164($sp) #z
 $END88:
+# merge
+
 	sw	$2, 8($sp) #w 8
 
 	move	$6, $2 #load parameter 3
 	lw	$2, 160($sp) #a
 $END89:
+# merge
+
 	sw	$2, 12($sp) #j 12
 
 	move	$7, $2 #load parameter 4
 	lw	$2, 156($sp) #f
 $END90:
+# merge
+
 	sw	$2, 16($sp) #o 16
 
 	lw	$2, 160($sp) #a
 $END91:
+# merge
+
 	sw	$2, 20($sp) #p 20
 
 	lw	$2, 172($sp) #x
 $END92:
+# merge
+
 	sw	$2, 24($sp) #h 24
 
 	lw	$2, 172($sp) #x
 $END93:
+# merge
+
 	sw	$2, 28($sp) #o1 28
 
 	lw	$2, 172($sp) #x
 $END94:
+# merge
+
 	sw	$2, 32($sp) #p1 32
 
 	lw	$2, 156($sp) #f
 $END95:
+# merge
+
 	sw	$2, 36($sp) #h1 36
 
 	.option pic
@@ -483,71 +623,91 @@ $END95:
 	lw $24,56($sp)
 	move $2, $25
 $END85:
-	sw $1,148($sp)
-	sw $2,144($sp)
-	sw $3,140($sp)
-	sw $4,136($sp)
-	sw $5,132($sp)
-	sw $6,128($sp)
-	sw $7,124($sp)
-	sw $8,120($sp)
-	sw $9,116($sp)
-	sw $10,112($sp)
-	sw $11,108($sp)
-	sw $12,104($sp)
-	sw $13,100($sp)
-	sw $14,96($sp)
-	sw $15,92($sp)
-	sw $16,88($sp)
-	sw $17,84($sp)
-	sw $18,80($sp)
-	sw $19,76($sp)
-	sw $20,72($sp)
-	sw $21,68($sp)
-	sw $22,64($sp)
-	sw $23,60($sp)
-	sw $24,56($sp)
+	sw $1, 148($sp)
+	sw $2, 144($sp)
+	sw $3, 140($sp)
+	sw $4, 136($sp)
+	sw $5, 132($sp)
+	sw $6, 128($sp)
+	sw $7, 124($sp)
+	sw $8, 120($sp)
+	sw $9, 116($sp)
+	sw $10, 112($sp)
+	sw $11, 108($sp)
+	sw $12, 104($sp)
+	sw $13, 100($sp)
+	sw $14, 96($sp)
+	sw $15, 92($sp)
+	sw $16, 88($sp)
+	sw $17, 84($sp)
+	sw $18, 80($sp)
+	sw $19, 76($sp)
+	sw $20, 72($sp)
+	sw $21, 68($sp)
+	sw $22, 64($sp)
+	sw $23, 60($sp)
+	sw $24, 56($sp)
 	lb	$2, 152($sp) #yu
 $END97:
-	sb	$2, 0($sp) #r 0
+# merge
+
+	sw	$2, 0($sp) #r 0
 	move	$4, $2 #load parameter 1
 	lw	$2, 168($sp) #y
 $END98:
+# merge
+
 	sw	$2, 4($sp) #t 4
 
 	move	$5, $2 #load parameter 2
 	lw	$2, 164($sp) #z
 $END99:
+# merge
+
 	sw	$2, 8($sp) #w 8
 
 	move	$6, $2 #load parameter 3
 	lw	$2, 160($sp) #a
 $END100:
+# merge
+
 	sw	$2, 12($sp) #j 12
 
 	move	$7, $2 #load parameter 4
 	lw	$2, 156($sp) #f
 $END101:
+# merge
+
 	sw	$2, 16($sp) #o 16
 
 	lw	$2, 160($sp) #a
 $END102:
+# merge
+
 	sw	$2, 20($sp) #p 20
 
 	lw	$2, 172($sp) #x
 $END103:
+# merge
+
 	sw	$2, 24($sp) #h 24
 
 	lw	$2, 172($sp) #x
 $END104:
+# merge
+
 	sw	$2, 28($sp) #o1 28
 
 	lw	$2, 172($sp) #x
 $END105:
+# merge
+
 	sw	$2, 32($sp) #p1 32
 
 	lw	$2, 156($sp) #f
 $END106:
+# merge
+
 	sw	$2, 36($sp) #h1 36
 
 	.option pic

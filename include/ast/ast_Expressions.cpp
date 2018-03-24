@@ -828,7 +828,7 @@ inline void ArgumentExpressionList::render_asm(std::ofstream& file,Context& cont
 			{
 				ArgumentExpressionListPtr->render_asm(file, contxt);
 			}
-			contxt.argument_no++;
+			contxt.argument_no[contxt.argument_no.size()-1]++;
 			//contxt.rhs_of_expression=true;
 			AssignmentExpressionPtr->render_asm(file, contxt);
 			//contxt.rhs_of_expression=false;
@@ -848,7 +848,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 					{
 						contxt.is_postfix= true;
 					}					
-				PostFixExpressionPtr->render_asm(file,contxt);
+					PostFixExpressionPtr->render_asm(file,contxt);
 				}
 				
 				if(OPERATOR == NULL && AssignmentExpressionPtr == NULL && PrimaryExpressionPtr == NULL && IDENTIFIER == NULL)
@@ -873,20 +873,56 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						}
 						for(i=1; i<25; i++)
 						{
-							file << "\n\tsw $" << i << "," << offset-(i*4) << "($sp)";
+							file << "\n\tsw $" << i << ", " << offset-(i*4) << "($sp)";
 						}
 						//file << "\n\tsw $31," << offset-(i*4) << "($sp)"; 
 					}
+					contxt.nested_function_calls++;
 					contxt.is_function_call=true;
-					//contxt.lhs_of_assignment=true;
+					
+					
 					PostFixExpressionPtr->render_asm(file,contxt);
-					//contxt.lhs_of_assignment=false;
+					
+					int search=0;
+					for ( search=0; search<contxt.functions_declared.size(); search++)
+					{
+						if(contxt.functions_declared[search].name == contxt.Scopes[contxt.Scopes.size()-1])
+						{
+							break;
+						}
+					}
+					int off;
+					if(contxt.functions_declared[search].paramters_size > 16)
+					{	
+						off = contxt.functions_declared[search].paramters_size;
+					}
+						else 
+					{
+						off = 16;
+					}
+
+					if(contxt.nested_function_calls>1 && !contxt.reading)
+					{
+						file << std::endl << "\taddiu $sp, $sp, -" << off;
+						for(i=contxt.Variables.size()-1; i>=0; i--) {
+							for (j=contxt.Scopes.size()-1; j>=0; j--)
+							{
+								if(contxt.Variables[i].scope == contxt.Scopes[j])
+								{									
+									contxt.Variables[i].offset += off;
+								}
+							}
+						}
+					}
+					
 					if(ArgumentExpressionListPtr != NULL){
-					    contxt.argument_no = 0;
+					    contxt.argument_no.push_back(0);
 						ArgumentExpressionListPtr->render_asm(file, contxt);
-						contxt.argument_no = 0;
+						contxt.argument_no.pop_back();
 						//file << "the problem comes now!";
 					}
+					
+
 					if(!contxt.reading && contxt.Scopes.size()){
 						file << "\n\t.option pic";
 						// file << std::endl << "\tlui\t$" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
@@ -897,6 +933,19 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						file << std::endl << "\tnop";
 						contxt.Scopes.pop_back();
 					}
+					if(contxt.nested_function_calls>1 && !contxt.reading)
+					{
+						file << std::endl << "\taddiu $sp, $sp, " << off;
+						for(i=contxt.Variables.size()-1; i>=0; i--) {
+							for (j=contxt.Scopes.size()-1; j>=0; j--)
+							{
+								if(contxt.Variables[i].scope == contxt.Scopes[j])
+								{									
+									contxt.Variables[i].offset -= off;
+								}
+							}
+						}
+					}
 					if(!contxt.reading){
 						file << "\n\tmove\t$25, $2"; 
 						for(i=1; i<25; i++)
@@ -906,6 +955,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						//file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
 						file << "\n\tmove $" << contxt.Regs+1 << ", $25"; 
 					}
+					contxt.nested_function_calls--;
 				}
 				if(AssignmentExpressionPtr != NULL){
 					contxt.is_array=true;
@@ -952,9 +1002,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 	}*/
 	if( AssignmentExpressionPtr != NULL && !contxt.reading ) 
 	{
-		
-		AssignmentExpressionPtr->render_asm(file,contxt);
-		
+		AssignmentExpressionPtr->render_asm(file,contxt);		
 	}
 	else if( IDENTIFIER != NULL && !contxt.reading && contxt.function)			//this identifier is involved in expressions
 	{
@@ -962,7 +1010,6 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			findSize(contxt,*IDENTIFIER);
 		}
 
-		
 		if(contxt.Regs>=24 && !contxt.sizeof_)
 		{
 			std::cout << std::endl << "buy more registers!" << std::endl; 
@@ -1334,43 +1381,46 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 			else if(ConditionalExpressionPtr != NULL) {
 				ConditionalExpressionPtr->render_asm(file,contxt);		//THIS IS FOR IF STATEMENTS/ LOGICAL / ARITHMETIC OPERATIONS / ASSIGNEMENTS
 			}
-			if(contxt.argument_no)
+			if(contxt.argument_no.size()>=1 && contxt.argument_no[contxt.argument_no.size()-1])
 			{
+				file << "\n# merge\n";
 				int ki=0;
 				while(ki<contxt.Variables.size())
 				{
-					if(contxt.Scopes.size() && contxt.Scopes[contxt.Scopes.size()-1]==contxt.Variables[ki].scope)
+					if(contxt.Scopes.size()-contxt.nested_function_calls && contxt.Scopes[contxt.Scopes.size()-contxt.nested_function_calls]==contxt.Variables[ki].scope)
 					{ 
-						if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].word_size==1) 
+						int u=contxt.argument_no[contxt.argument_no.size()-1]-1;
+						//file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #";
+						if((ki+u)>=0 && contxt.Variables[ki+u].word_size==1) 
 						{
-							file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4;		
+							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << u*4 << "($sp) #" << contxt.Variables[ki+u].id << " " << (u)*4;		
 							contxt.regType[contxt.Regs+1]='c';
 						}				
-						else if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].word_size==4 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
+						else if((ki+u)>=0 && contxt.Variables[ki+u].word_size==4 && contxt.Variables[ki+u].DataType != "float")
 						{ 	
-							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
+							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << (u)*4 << "($sp) #" << contxt.Variables[ki+u].id << " " << (u)*4 << "\n";	
 							contxt.regType[contxt.Regs+1]='i';
 						}
-						else if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].word_size==2 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
+						else if((ki+u)>=0 && contxt.Variables[ki+u].word_size==2 && contxt.Variables[ki+u].DataType != "float")
 						{ 	
-							file << std::endl << "\tsh\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
+							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << u*4 << "($sp) #" << contxt.Variables[ki+u].id << " " << (u)*4 << "\n";	
 							contxt.regType[contxt.Regs+1]='i';
 						}
-						else if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].word_size==4 && contxt.Variables[ki+contxt.argument_no-1].DataType == "float")
+						else if((ki+u)>=0 && contxt.Variables[ki+u].word_size==4 && contxt.Variables[ki+u].DataType == "float")
 						{
-							file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
+							file << std::endl << "\tsw\t$f" << contxt.Regs+1 << ", " << (u)*4 << "($sp) #" << contxt.Variables[ki+u].id << " " << u*4 << "\n";	
 							contxt.regType[contxt.Regs+1]='f';
 						}
 						
-						if(contxt.argument_no<=4)
+						if(u<4)
 						{
-							if((ki+contxt.argument_no-1)>=0 /*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
+							if((ki+u)>=0 /*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
 							{
-								file << std::endl << "\tmove\t$" << contxt.argument_no+3 << ", $" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
+								file << std::endl << "\tmove\t$" << u+4 << ", $" << contxt.Regs+1 << " #load parameter " << u+1; 
 							}
 							else 
 							{
-								file << std::endl << "\tmov.s\t$f" << contxt.argument_no+3 << ", $f" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
+								file << std::endl << "\tmov.s\t$f" << u+4 << ", $f" << contxt.Regs+1 << " #load parameter " << u+1; 
 							}
 						}
 						ki=contxt.Variables.size();

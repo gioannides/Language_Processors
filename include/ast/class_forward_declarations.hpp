@@ -136,7 +136,7 @@ struct Context{
 	function_details funcion_temp;
 	std::vector<std::string> Scopes;
 	std::vector<std::string>FunctionScopes;
-	int argument_no = 0;
+	std::vector <int> argument_no;
 	bool parameter = false;
 	int max_offset = 16;
 	bool is_function_call = false;
@@ -175,6 +175,8 @@ struct Context{
 	int no_array_elements = 1;
 	int nested_arrays=0;
 	bool is_array =false;
+
+	int nested_function_calls = 0;
 };
 
 inline std::string labelGenEnum(Context& contxt) {
