@@ -1072,7 +1072,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			if(found_0nothing_1local_2globl && contxt.is_array)
 			{
 				file << std::endl << "\tli $24, " << contxt.Variables[good_index].word_size;
-				file << std::endl << "\tmul $25, $24, $25";
+				file << std::endl << "\tmul $25, $24";
 			}	  		
 			if(contxt.lhs_of_assignment && !contxt.sizeof_ && !contxt.enum_constant)
 			{
@@ -1469,13 +1469,22 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 					contxt.regType[contxt.Regs+1]='i';
 					}
 					else if(UnaryOperatorPtr->render_asm(file,contxt) == '&') {
-						file << std::endl << "\taddi $" << contxt.Regs+1 << ", $sp, " << contxt.Variables[contxt.good_i].offset << "# memory address " << contxt.Variables[contxt.good_i].id; 
-						//file << std::endl << "\tmove $" << contxt.Regs+1 << ", $" << contxt.Regs+1;
-						contxt.regType[contxt.Regs+1]='i';
+						file << std::endl << "\taddiu $" << contxt.Regs+1 << ", $sp, " << contxt.Variables[contxt.good_i].offset << "# memory address " << contxt.Variables[contxt.good_i].id;
+						contxt.regType[contxt.Regs+1]='u';
+						
 					}
 					else if(UnaryOperatorPtr->render_asm(file,contxt) == '*')
 					{
-						file << std::endl << "\tlw $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id; 
+						if(contxt.Variables[contxt.good_i].DataType == "char"){
+							file << std::endl << "\tlb $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+						}
+						else if(contxt.Variables[contxt.good_i].DataType == "int" || "unsigned" || "signed"){
+							file << std::endl << "\tlw $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+						}
+					 	else if(contxt.Variables[contxt.good_i].DataType == "short"){
+							file << std::endl << "\tlh $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+						}
+						
 						contxt.regType[contxt.Regs+1]='i';
 					}
 

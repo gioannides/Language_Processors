@@ -651,13 +651,13 @@ class DirectDeclarator : public Node {
 class Declarator : public Node {
 
 	public:
-		Pointer* PoinTer;
+		Pointer* PointerPtr;
 		DirectDeclarator* DirectDecLarator;
 		Declarator* DeclaratorPtr;
 
 	public:
 	
-		Declarator(Pointer* PoinTer, DirectDeclarator* DirectDecLarator, Declarator* DeclaratorPtr) : PoinTer(PoinTer) , DirectDecLarator(DirectDecLarator)  , DeclaratorPtr(DeclaratorPtr) {}
+		Declarator(Pointer* PointerPtr, DirectDeclarator* DirectDecLarator, Declarator* DeclaratorPtr) : PointerPtr(PointerPtr) , DirectDecLarator(DirectDecLarator)  , DeclaratorPtr(DeclaratorPtr) {}
 
 		void print_py(std::ofstream& file, bool initialized=false, bool function=false) ;
 
@@ -1094,7 +1094,7 @@ class Pointer : public Node {
 
 		void render_asm(std::ofstream& file, Context& contxt){
 
-
+			contxt.variable.word_size = 4;
 
 		}
 
@@ -1195,37 +1195,38 @@ class Enumerator : public Node {
 		~Enumerator() {}
 
 		void render_asm(std::ofstream& file, Context& contxt){
-			if(ConstantExpressionPtr != NULL && !contxt.reading){
+			if(ConstantExpressionPtr != NULL){
 				
 				
 				contxt.enum_constant = true;
 				ConstantExpressionPtr->render_asm(file,contxt);
 				contxt.enum_constant = false;
-				if(contxt.EnumOperands.size())
-				{
-					contxt.EnumCounter = contxt.EnumOperands[contxt.EnumOperands.size()-1];
+				if(contxt.EnumOperands.size()){
 					contxt.EnumTemp.value = contxt.EnumOperands[contxt.EnumOperands.size()-1];
-					contxt.EnumTemp.IDENTIFIER = *IDENTIFIER;
+					contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
 					contxt.Enum.push_back(contxt.EnumTemp);	
-					
-					//std::cout << "\n" << contxt.EnumCounter << "\n";
 					//std::cout << contxt.EnumTemp.value << " " <<  contxt.EnumTemp.IDENTIFIER   << std::endl;
-					for (int i=0; i<=contxt.EnumOperands.size(); i++){
-						contxt.EnumOperands[i]=0;
-					}
-				}				
+					contxt.EnumOperands.pop_back();
+				}
+				
 			}
-			else if( ConstantExpressionPtr == NULL)
-			{	
-
+			else if( ConstantExpressionPtr == NULL){
+				
 				contxt.EnumTemp.IDENTIFIER = *IDENTIFIER;
 				contxt.EnumTemp.value = contxt.EnumCounter;
 				//std::cout << contxt.EnumCounter << std::endl;
-				//contxt.EnumCounter++;
+				contxt.EnumCounter++;
 				contxt.Enum.push_back(contxt.EnumTemp);	
 			}
-			//contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);			
+			//contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);
+			
 		}
+		
+			
+
+
+		
+
 };
 
 
@@ -1249,11 +1250,9 @@ class EnumeratorList : public Node {
 				
 			}
 			
-			if( EnumeratorPtr != NULL && !contxt.reading){
+			if( EnumeratorPtr != NULL){
 				
 				EnumeratorPtr->render_asm(file,contxt);
-				std::cout << "\n" << contxt.EnumCounter << "\n";
-				contxt.EnumCounter++;
 							
 			}
 			
@@ -1281,25 +1280,8 @@ class EnumSpecifier : public Node {
 		~EnumSpecifier() {}
 
 		void render_asm(std::ofstream& file, Context& contxt){ 
-			contxt.EnumCounter = 0;
-			if( IDENTIFIER == NULL )
-			{
-				if(contxt.function)
-				{
-					contxt.EnumTemp.ScopeID = contxt.funct_id;
-				}
-				else
-				{	
-					contxt.EnumTemp.ScopeID = "global";
-				}
-				ENumeratorList->render_asm(file,contxt);
-			//	contxt.Enum.push_back(contxt.EnumTemp);				
-			}
-			else if( IDENTIFIER != NULL && ENumeratorList == NULL){
-				//do nothing
-			}
-			else if( IDENTIFIER != NULL && ENumeratorList != NULL)
-			{
+
+			if( IDENTIFIER == NULL ){
 				if(contxt.function){
 					contxt.EnumTemp.ScopeID = contxt.funct_id;
 				}
@@ -1307,8 +1289,27 @@ class EnumSpecifier : public Node {
 					contxt.EnumTemp.ScopeID = "global";
 				}
 				ENumeratorList->render_asm(file,contxt);
+				contxt.Enum.push_back(contxt.EnumTemp);
+				
+				contxt.EnumCounter = 0;
+				
+			}
+			else if( IDENTIFIER != NULL && ENumeratorList == NULL){
+				//do nothing
+			}
+			else if( IDENTIFIER != NULL && ENumeratorList != NULL){
+				if(contxt.function){
+					contxt.EnumTemp.ScopeID = contxt.funct_id;
+				}
+				else{	
+					contxt.EnumTemp.ScopeID = "global";
+				}
+
+				ENumeratorList->render_asm(file,contxt);
 				
 				//std::cout << contxt.EnumValuesTemp.IDENTIFIER << " " << contxt.EnumValuesTemp.value << std::endl;
+				
+				contxt.EnumCounter = 0;
 			}
 			
 			
@@ -1396,44 +1397,61 @@ class TypeSpecifier : public Node {
 				contxt.enum_constant = false;
 			}
 
-			else if( TYPES != NULL && !contxt.sizeof_ && !contxt.typedefs_  && !contxt.Cast){
+			
+			else if( TYPES != NULL && !contxt.sizeof_ && !contxt.typedefs_  && !contxt.Cast ){
 			std::string types = *TYPES;			// Require conversion to be used
 
 				if (types=="char"){
-					contxt.variable.word_size = 1;				///it should be size=1, you need lb and sb
+					if(!contxt.variable.Pointer){
+						contxt.variable.word_size = 1;				///it should be size=1, you need lb and sb
+					}
 					contxt.variable.DataType = "char";
 				}
 				else if (types=="short"){
-					contxt.variable.word_size = 2;
+					if(!contxt.variable.Pointer){
+						contxt.variable.word_size = 2;				///it should be size=1, you need lb and sb
+					}
 					contxt.variable.DataType = "short";
 				}
 				else if (types=="int"){
-					contxt.variable.word_size = 4;
+					if(!contxt.variable.Pointer){
+						contxt.variable.word_size = 4;				///it should be size=1, you need lb and sb
+					}
 					contxt.variable.DataType = "int";
 				}	
 				else if (types=="long"){
-					contxt.variable.word_size = 8;
+					if(!contxt.variable.Pointer){
+						contxt.variable.word_size = 8;				///it should be size=1, you need lb and sb
+					}
 					contxt.variable.DataType = "long";
 				}
 				else if (types=="float"){
-					contxt.variable.word_size = 4;
+					if(!contxt.variable.Pointer){
+						contxt.variable.word_size = 4;				///it should be size=1, you need lb and sb
+					}
 					contxt.variable.DataType = "float";
 					contxt.float_ = true;
 				}
 				else if (types=="double"){
-					contxt.variable.word_size = 8;
+					if(!contxt.variable.Pointer){
+						contxt.variable.word_size = 8;				///it should be size=1, you need lb and sb
+					}
 					contxt.variable.DataType = "double";
 				}	
 				else if (types=="signed"){
-					contxt.variable.word_size = 4;
+					if(!contxt.variable.Pointer){
+						contxt.variable.word_size = 4;				///it should be size=1, you need lb and sb
+					}
 					contxt.variable.DataType = "signed";
 				}	
 				else if (types=="unsigned"){
-					contxt.variable.word_size = 4;
+					if(!contxt.variable.Pointer){
+						contxt.variable.word_size = 4;				///it should be size=1, you need lb and sb
+					}
 					contxt.variable.DataType = "unsigned";
 					contxt.is_unsigned = true;
 				}
-
+			}
 				else if(contxt.functionReturnType && !contxt.sizeof_ && !contxt.typedefs_ && !contxt.Cast){
 
 					contxt.functionReturnTypetemp = *TYPES;
@@ -1484,7 +1502,7 @@ class TypeSpecifier : public Node {
 				// 	contxt.variable.offset = contxt.StackOffset-contxt.variable.word_size;
 				// }
 
-			}
+			//}
 			else if(contxt.sizeof_ && TYPES != NULL && !contxt.Cast){
 					if(*TYPES == "int"){
 						contxt.SizeOf = 4;
@@ -2447,12 +2465,17 @@ inline void ParameterDeclaration::render_asm(std::ofstream& file, Context& contx
 
 
 inline void Declarator::render_asm(std::ofstream& file,Context& contxt) {
-			//file << "#fine";
-			if( DeclaratorPtr != NULL) {
-				DeclaratorPtr->render_asm(file,contxt);
+			if(  PointerPtr != NULL && DirectDecLarator != NULL){
+				
+				contxt.variable.Pointer = true;
+				PointerPtr->render_asm(file,contxt);
+				DirectDecLarator->render_asm(file,contxt);
+				contxt.variable.Pointer = false;
+				
 			}
-			if( DirectDecLarator != NULL){
-						//	std::cout << "declarator fine until here" << std::endl;
+			
+			else if( DirectDecLarator != NULL && PointerPtr == NULL){
+						
 				DirectDecLarator->render_asm(file,contxt);
 			}
 		}
