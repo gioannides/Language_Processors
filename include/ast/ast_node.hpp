@@ -1195,38 +1195,37 @@ class Enumerator : public Node {
 		~Enumerator() {}
 
 		void render_asm(std::ofstream& file, Context& contxt){
-			if(ConstantExpressionPtr != NULL){
+			if(ConstantExpressionPtr != NULL && !contxt.reading){
 				
 				
 				contxt.enum_constant = true;
 				ConstantExpressionPtr->render_asm(file,contxt);
 				contxt.enum_constant = false;
-				if(contxt.EnumOperands.size()){
+				if(contxt.EnumOperands.size())
+				{
+					contxt.EnumCounter = contxt.EnumOperands[contxt.EnumOperands.size()-1];
 					contxt.EnumTemp.value = contxt.EnumOperands[contxt.EnumOperands.size()-1];
-					contxt.EnumValuesTemp.IDENTIFIER = *IDENTIFIER;
+					contxt.EnumTemp.IDENTIFIER = *IDENTIFIER;
 					contxt.Enum.push_back(contxt.EnumTemp);	
+					
+					//std::cout << "\n" << contxt.EnumCounter << "\n";
 					//std::cout << contxt.EnumTemp.value << " " <<  contxt.EnumTemp.IDENTIFIER   << std::endl;
-					contxt.EnumOperands.pop_back();
-				}
-				
+					for (int i=0; i<=contxt.EnumOperands.size(); i++){
+						contxt.EnumOperands[i]=0;
+					}
+				}				
 			}
-			else if( ConstantExpressionPtr == NULL){
-				
+			else if( ConstantExpressionPtr == NULL)
+			{	
+
 				contxt.EnumTemp.IDENTIFIER = *IDENTIFIER;
 				contxt.EnumTemp.value = contxt.EnumCounter;
 				//std::cout << contxt.EnumCounter << std::endl;
-				contxt.EnumCounter++;
+				//contxt.EnumCounter++;
 				contxt.Enum.push_back(contxt.EnumTemp);	
 			}
-			//contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);
-			
+			//contxt.EnumTemp.EnumList.push_back(contxt.EnumValuesTemp);			
 		}
-		
-			
-
-
-		
-
 };
 
 
@@ -1250,9 +1249,11 @@ class EnumeratorList : public Node {
 				
 			}
 			
-			if( EnumeratorPtr != NULL){
+			if( EnumeratorPtr != NULL && !contxt.reading){
 				
 				EnumeratorPtr->render_asm(file,contxt);
+				std::cout << "\n" << contxt.EnumCounter << "\n";
+				contxt.EnumCounter++;
 							
 			}
 			
@@ -1280,36 +1281,34 @@ class EnumSpecifier : public Node {
 		~EnumSpecifier() {}
 
 		void render_asm(std::ofstream& file, Context& contxt){ 
-
-			if( IDENTIFIER == NULL ){
-				if(contxt.function){
+			contxt.EnumCounter = 0;
+			if( IDENTIFIER == NULL )
+			{
+				if(contxt.function)
+				{
 					contxt.EnumTemp.ScopeID = contxt.funct_id;
 				}
-				else{	
+				else
+				{	
 					contxt.EnumTemp.ScopeID = "global";
 				}
 				ENumeratorList->render_asm(file,contxt);
-				contxt.Enum.push_back(contxt.EnumTemp);
-				
-				contxt.EnumCounter = 0;
-				
+			//	contxt.Enum.push_back(contxt.EnumTemp);				
 			}
 			else if( IDENTIFIER != NULL && ENumeratorList == NULL){
 				//do nothing
 			}
-			else if( IDENTIFIER != NULL && ENumeratorList != NULL){
+			else if( IDENTIFIER != NULL && ENumeratorList != NULL)
+			{
 				if(contxt.function){
 					contxt.EnumTemp.ScopeID = contxt.funct_id;
 				}
 				else{	
 					contxt.EnumTemp.ScopeID = "global";
 				}
-
 				ENumeratorList->render_asm(file,contxt);
 				
 				//std::cout << contxt.EnumValuesTemp.IDENTIFIER << " " << contxt.EnumValuesTemp.value << std::endl;
-				
-				contxt.EnumCounter = 0;
 			}
 			
 			

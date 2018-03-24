@@ -1072,7 +1072,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			if(found_0nothing_1local_2globl && contxt.is_array)
 			{
 				file << std::endl << "\tli $24, " << contxt.Variables[good_index].word_size;
-				file << std::endl << "\tmul $25, $24";
+				file << std::endl << "\tmul $25, $24, $25";
 			}	  		
 			if(contxt.lhs_of_assignment && !contxt.sizeof_ && !contxt.enum_constant)
 			{

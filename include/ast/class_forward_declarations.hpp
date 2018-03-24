@@ -69,7 +69,7 @@ struct Context{
 	Enumeration EnumTemp;
 	EnumValues EnumValuesTemp;
 	int EnumCounter=0;
-	bool EnumExists = false;
+	//bool EnumExists = false;
 	bool enum_constant=false;
 	std::vector<int> EnumOperands;
 	int newScope=0;

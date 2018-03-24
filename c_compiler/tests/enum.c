@@ -1,7 +1,7 @@
 enum y{ e,r,t};
 
 int main(){
- enum x { RED, GREEN, BLUE};
+ enum x { RED=9+3*6, GREEN, BLUE=0};
 
-	return BLUE+RED+GREEN+e+r+t;
+	return RED+GREEN+BLUE+RED+e+r+t;
 }
