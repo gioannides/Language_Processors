@@ -1364,7 +1364,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 						
 						if(contxt.argument_no<=4)
 						{
-							if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
+							if((ki+contxt.argument_no-1)>=0 /*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
 							{
 								file << std::endl << "\tmove\t$" << contxt.argument_no+3 << ", $" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
 							}
@@ -1584,7 +1584,7 @@ if(!contxt.sizeof_){
 				contxt.regType[contxt.Regs]='u';
 			}
 			else if(contxt.float_){
-				file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+				file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
 				contxt.regType[contxt.Regs]='f';
 			}	
 			else{

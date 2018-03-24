@@ -206,6 +206,7 @@ inline void CastToType(std::ofstream& file, Context& contxt, std::string IDENTIF
 						file << std::endl << "\tsra\t$" << contxt.Regs+1 << "," << "$" << contxt.Regs+1 << ",16";
 						file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
 						file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						contxt.regType[contxt.Regs+1]='f';
 						
 					}
 					else if(contxt.Variables[i].DataType == "float" && contxt.CastType == "char" ){
@@ -218,17 +219,20 @@ inline void CastToType(std::ofstream& file, Context& contxt, std::string IDENTIF
 						file << std::endl << "\tsra\t$" << contxt.Regs+1 << "," << "$" << contxt.Regs+1 << ",24";
 						file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
 						file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						contxt.regType[contxt.Regs+1]='f';
 						
 					}
 					else if(contxt.Variables[i].DataType == "float" && (contxt.CastType == "int" || contxt.CastType == "unsigned" || contxt.CastType == "signed") ){
 						
 						file << std::endl << "\tcvt.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						contxt.regType[contxt.Regs+1]='f';
 						
 					}
 					else if( (contxt.Variables[i].DataType == "short" || contxt.Variables[i].DataType == "int" || contxt.Variables[i].DataType == "unsigned" ||contxt.Variables[i].DataType == "char" || contxt.Variables[i].DataType == "signed") && contxt.CastType == "float" ){
 						
 						file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
 						file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						contxt.regType[contxt.Regs+1]='f';
 						
 					}
 
@@ -236,12 +240,14 @@ inline void CastToType(std::ofstream& file, Context& contxt, std::string IDENTIF
 						
 						file << std::endl << "\tsll\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",16";
 						file << std::endl << "\tsra\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",16";
+						contxt.regType[contxt.Regs+1]='i';
 						
 					}
 					else if(contxt.Variables[i].DataType == "int" && contxt.CastType == "char" ){
 						
 						file << std::endl << "\tsll\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",24";
 						file << std::endl << "\tsra\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",24";
+						contxt.regType[contxt.Regs+1]='c';
 						
 					}
 					else if(contxt.Variables[i].DataType == "short" && contxt.CastType == "char" ){
@@ -250,6 +256,7 @@ inline void CastToType(std::ofstream& file, Context& contxt, std::string IDENTIF
 						file << std::endl << "\tsra\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",24";
 						file << std::endl << "\tsll\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",16";
 						file << std::endl << "\tsra\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",16";
+						contxt.regType[contxt.Regs+1]='c';
 						
 					}
 						i = -1;
