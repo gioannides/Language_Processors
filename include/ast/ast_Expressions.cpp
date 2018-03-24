@@ -1018,11 +1018,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				file << std::endl << "\tli $24, " << contxt.Variables[good_index].word_size;
 				file << std::endl << "\tmul $25, $24";
 			}	  		
-<<<<<<< HEAD
-			if(contxt.lhs_of_assignment && !contxt.SizeOf && !contxt.enum_constant)
-=======
 			if(contxt.lhs_of_assignment && !contxt.sizeof_ && !contxt.enum_constant)
->>>>>>> 1494c7bd9b7d9492dbdacd87a682a7d0dad649fc
 			{
 				//file << "# lhs_of_assignment is set\n";
 				if(found_0nothing_1local_2globl)
@@ -1339,14 +1335,11 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 							file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
 							contxt.regType[contxt.Regs+1]='i';
 						}
-<<<<<<< HEAD
-=======
 						else if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].word_size==2 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
 						{ 	
 							file << std::endl << "\tsh\t$" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	
 							contxt.regType[contxt.Regs+1]='i';
 						}
->>>>>>> 1494c7bd9b7d9492dbdacd87a682a7d0dad649fc
 						else if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].word_size==4 && contxt.Variables[ki+contxt.argument_no-1].DataType == "float")
 						{
 							file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", " << (contxt.argument_no-1)*4 << "($sp) #" << contxt.Variables[ki+contxt.argument_no-1].id << " " << (contxt.argument_no-1)*4 << "\n";	

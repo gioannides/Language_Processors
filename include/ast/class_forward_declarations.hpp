@@ -209,13 +209,9 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 {
 	if(contxt.Variables[good_index].word_size==1) {
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-<<<<<<< HEAD
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
-=======
 			file << std::endl << ".set macro" << std::endl;
 			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << ".set nomacro" << std::endl;
->>>>>>> 1494c7bd9b7d9492dbdacd87a682a7d0dad649fc
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -239,13 +235,9 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 	}				
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-<<<<<<< HEAD
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
-=======
 			file << std::endl << ".set macro" << std::endl;
 			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << ".set nomacro" << std::endl;
->>>>>>> 1494c7bd9b7d9492dbdacd87a682a7d0dad649fc
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -279,13 +271,9 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 	}
 	if(contxt.Variables[good_index].word_size==1) {
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-<<<<<<< HEAD
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
-=======
 			file << std::endl << ".set macro" << std::endl;
 			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << ".set nomacro" << std::endl;
->>>>>>> 1494c7bd9b7d9492dbdacd87a682a7d0dad649fc
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -298,13 +286,9 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType != "float"){
 
 		if(contxt.regType[contxt.Regs+1] == 'f'){
-<<<<<<< HEAD
-			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
-=======
 			file << std::endl << ".set macro" << std::endl;
 			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << ".set nomacro" << std::endl;
->>>>>>> 1494c7bd9b7d9492dbdacd87a682a7d0dad649fc
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
@@ -312,8 +296,6 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 		}	
 		file << std::endl << "\tsw $" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ")";
 		//file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
-<<<<<<< HEAD
-=======
 		contxt.regType[contxt.Regs+1]='i';
 	}
 	else if(contxt.Variables[good_index].word_size==2 && contxt.Variables[good_index].DataType != "float"){
@@ -329,7 +311,6 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 		}	
 		file << std::endl << "\tsh $" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ")";
 		//file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
->>>>>>> 1494c7bd9b7d9492dbdacd87a682a7d0dad649fc
 		contxt.regType[contxt.Regs+1]='i';
 	}
 	else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK
@@ -401,15 +382,12 @@ inline void load_globals(Context& contxt, std::ofstream& file, int good_index)
 					//file << std::endl << "\tlw $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
 					contxt.regType[contxt.Regs+1]='i';
    				}
-<<<<<<< HEAD
-=======
 				else if(contxt.Variables[good_index].word_size==2 && contxt.Variables[good_index].DataType != "float")
 				{
 					file << std::endl << "\tlh $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
 					//file << std::endl << "\tlw $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
 					contxt.regType[contxt.Regs+1]='i';
    				}
->>>>>>> 1494c7bd9b7d9492dbdacd87a682a7d0dad649fc
 				else if(contxt.Variables[good_index].word_size==4 && contxt.Variables[good_index].DataType == "float") //TODO: CHECK OK
 				{	file << std::endl << "\tlwc1 $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
 					//file << std::endl << "\tlwc1 $f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";     
