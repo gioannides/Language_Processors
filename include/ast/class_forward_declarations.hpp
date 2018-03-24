@@ -60,6 +60,11 @@ struct Switch{
 
 
 struct Context{
+
+	bool Cast=false;
+	std::string CastType = "";
+
+
 	std::vector<Enumeration> Enum;
 	Enumeration EnumTemp;
 	EnumValues EnumValuesTemp;
@@ -176,6 +181,96 @@ inline std::string labelGenEnum(Context& contxt) {
 	contxt.allocate++;
 	return (std::to_string(contxt.allocate));
 }
+
+
+
+
+inline void CastToType(std::ofstream& file, Context& contxt, std::string IDENTIFIER) {
+	int i,j;
+	for(i=contxt.Variables.size()-1; i>=0; i--) {
+				for (j=contxt.Scopes.size()-1; j>=0; j--)
+				{
+					if(contxt.Variables[i].scope == contxt.Scopes[j] && IDENTIFIER == contxt.Variables[i].id) 
+					{
+						
+					if(contxt.Variables[i].DataType == contxt.CastType){
+						//do nothing
+					}
+					else if(contxt.Variables[i].DataType == "float" && contxt.CastType == "short" ){
+						
+						file << std::endl << "\t.set macro\t";
+						file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+						file << std::endl << "\t.set nomacro\t";
+						file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
+						file << std::endl << "\tsll\t$" << contxt.Regs+1 << "," << "$" << contxt.Regs+1 << ",16";
+						file << std::endl << "\tsra\t$" << contxt.Regs+1 << "," << "$" << contxt.Regs+1 << ",16";
+						file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
+						file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						contxt.regType[contxt.Regs+1]='f';
+						
+					}
+					else if(contxt.Variables[i].DataType == "float" && contxt.CastType == "char" ){
+						
+						file << std::endl << "\t.set macro\t";
+						file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+						file << std::endl << "\t.set nomacro\t";
+						file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
+						file << std::endl << "\tsll\t$" << contxt.Regs+1 << "," << "$" << contxt.Regs+1 << ",24";
+						file << std::endl << "\tsra\t$" << contxt.Regs+1 << "," << "$" << contxt.Regs+1 << ",24";
+						file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
+						file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						contxt.regType[contxt.Regs+1]='f';
+						
+					}
+					else if(contxt.Variables[i].DataType == "float" && (contxt.CastType == "int" || contxt.CastType == "unsigned" || contxt.CastType == "signed") ){
+						
+						file << std::endl << "\tcvt.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						contxt.regType[contxt.Regs+1]='f';
+						
+					}
+					else if( (contxt.Variables[i].DataType == "short" || contxt.Variables[i].DataType == "int" || contxt.Variables[i].DataType == "unsigned" ||contxt.Variables[i].DataType == "char" || contxt.Variables[i].DataType == "signed") && contxt.CastType == "float" ){
+						
+						file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
+						file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						contxt.regType[contxt.Regs+1]='f';
+						
+					}
+
+					else if(contxt.Variables[i].DataType == "int" && contxt.CastType == "short" ){
+						
+						file << std::endl << "\tsll\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",16";
+						file << std::endl << "\tsra\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",16";
+						contxt.regType[contxt.Regs+1]='i';
+						
+					}
+					else if(contxt.Variables[i].DataType == "int" && contxt.CastType == "char" ){
+						
+						file << std::endl << "\tsll\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",24";
+						file << std::endl << "\tsra\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",24";
+						contxt.regType[contxt.Regs+1]='c';
+						
+					}
+					else if(contxt.Variables[i].DataType == "short" && contxt.CastType == "char" ){
+						
+						file << std::endl << "\tsll\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",24";
+						file << std::endl << "\tsra\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",24";
+						file << std::endl << "\tsll\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",16";
+						file << std::endl << "\tsra\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",16";
+						contxt.regType[contxt.Regs+1]='c';
+						
+					}
+						i = -1;
+						j = -1;
+			}									
+		}
+	  }
+}
+
+
+
+
+
+
 
 
 inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt){

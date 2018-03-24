@@ -6,6 +6,14 @@ inline void CastExpression::render_asm(std::ofstream& file,Context& contxt) {
 			if( UNaryExpression != NULL){
 				UNaryExpression->render_asm(file,contxt);
 			}
+			else if(CastExpressionPtr != NULL && TYpeName != NULL && UNaryExpression == NULL){
+
+				contxt.Cast = true;
+				TYpeName->render_asm(file,contxt);				
+				CastExpressionPtr->render_asm(file,contxt);
+				contxt.Cast = false;
+
+			}
 		}
 
 inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& contxt) {
@@ -938,10 +946,10 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 }
 inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)  
 {
-	if(IDENTIFIER!=NULL)
+	/*if(IDENTIFIER!=NULL)
 	{
 		file << "# id" << *IDENTIFIER << "- f_call" << contxt.is_function_call << "- reading" << contxt.reading << "- function" << contxt.function << "- SizeOf:" << contxt.sizeof_ << "- lhs_of_assignment:" << contxt.lhs_of_assignment << "\n";
-	}
+	}*/
 	if( AssignmentExpressionPtr != NULL && !contxt.reading ) 
 	{
 		
@@ -953,7 +961,8 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		if(contxt.sizeof_){
 			findSize(contxt,*IDENTIFIER);
 		}
-			
+
+		
 		if(contxt.Regs>=24 && !contxt.sizeof_)
 		{
 			std::cout << std::endl << "buy more registers!" << std::endl; 
@@ -1040,7 +1049,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				{
 						
 					//else{
-						file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
+						//file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 					//}
 				}
 			}
@@ -1050,10 +1059,17 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			 	if(found_0nothing_1local_2globl==1 && !contxt.sizeof_ && !contxt.enum_constant) 
 			 	{
 			 		load_locals(contxt, file, good_index);
+					if(contxt.Cast){
+						CastToType(file,contxt,*IDENTIFIER);
+					}			
 			  	}
      		   		 else if(found_0nothing_1local_2globl==2 && !contxt.sizeof_ && !contxt.enum_constant) 
 				{
-					load_globals(contxt, file, good_index);	
+					load_globals(contxt, file, good_index);
+					if(contxt.Cast){
+						CastToType(file,contxt,*IDENTIFIER);
+					}
+			
 				}		
 				else
 					
@@ -1087,7 +1103,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 						
 
 						if(!contxt.sizeof_){
-							file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
+							//file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 						}
 				}		
 		}	
@@ -1348,7 +1364,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 						
 						if(contxt.argument_no<=4)
 						{
-							if((ki+contxt.argument_no-1)>=0 && contxt.Variables[ki+contxt.argument_no-1].DataType != "float")
+							if((ki+contxt.argument_no-1)>=0 /*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
 							{
 								file << std::endl << "\tmove\t$" << contxt.argument_no+3 << ", $" << contxt.Regs+1 << " #load parameter " << contxt.argument_no; 
 							}
@@ -1568,7 +1584,7 @@ if(!contxt.sizeof_){
 				contxt.regType[contxt.Regs]='u';
 			}
 			else if(contxt.float_){
-				file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+				file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
 				contxt.regType[contxt.Regs]='f';
 			}	
 			else{
