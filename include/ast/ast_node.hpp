@@ -1215,7 +1215,7 @@ class Enumerator : public Node {
 					}
 				}				
 			}
-			else if( ConstantExpressionPtr == NULL)
+			else if( ConstantExpressionPtr == NULL && !contxt.reading)
 			{	
 
 				contxt.EnumTemp.IDENTIFIER = *IDENTIFIER;
@@ -1244,7 +1244,7 @@ class EnumeratorList : public Node {
 
 		void render_asm(std::ofstream& file, Context& contxt){ 
 
-			if(EnumeratorListPtr != NULL){
+			if(EnumeratorListPtr != NULL && !contxt.reading){
 				EnumeratorListPtr->render_asm(file,contxt);
 				
 			}

@@ -37,7 +37,6 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 					if( *OPERATOR == "*" ){
 						if(contxt.EnumOperands.size()>=2){
 							int result =  contxt.EnumOperands[contxt.EnumOperands.size()-1] * contxt.EnumOperands[contxt.EnumOperands.size()-2];
-							std::cout << result << std::endl;
 							contxt.EnumOperands.pop_back();
 							contxt.EnumOperands.pop_back();
 							contxt.EnumOperands.push_back(result);
@@ -45,7 +44,7 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 					}
 					else if(*OPERATOR == "/"){
 						if(contxt.EnumOperands.size()>=2){
-							int result =  contxt.EnumOperands[contxt.EnumOperands.size()-1] / contxt.EnumOperands[contxt.EnumOperands.size()-2];
+							int result =  contxt.EnumOperands[contxt.EnumOperands.size()-2] / contxt.EnumOperands[contxt.EnumOperands.size()-1];
 							contxt.EnumOperands.pop_back();
 							contxt.EnumOperands.pop_back();
 							contxt.EnumOperands.push_back(result);
@@ -54,7 +53,7 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 					else if (*OPERATOR == "%")
 					{
 						if(contxt.EnumOperands.size()>=2){
-							int result =  contxt.EnumOperands[contxt.EnumOperands.size()-1] % contxt.EnumOperands[contxt.EnumOperands.size()-2];
+							int result =  contxt.EnumOperands[contxt.EnumOperands.size()-2] % contxt.EnumOperands[contxt.EnumOperands.size()-1];
 							contxt.EnumOperands.pop_back();
 							contxt.EnumOperands.pop_back();
 							contxt.EnumOperands.push_back(result);
