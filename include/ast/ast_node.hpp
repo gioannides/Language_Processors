@@ -1094,7 +1094,19 @@ class Pointer : public Node {
 
 		void render_asm(std::ofstream& file, Context& contxt){
 
-			contxt.variable.word_size = 4;
+			if(PointerPtr == NULL && TypeQualifierListPtr == NULL){
+
+				contxt.PointerCounter++;
+				contxt.variable.word_size = 4;
+
+			}
+
+			else if(PointerPtr != NULL && TypeQualifierListPtr == NULL){
+
+				contxt.PointerCounter++;
+				contxt.variable.word_size = 4;
+				PointerPtr->render_asm(file,contxt);
+			}
 
 		}
 
@@ -1408,8 +1420,9 @@ class TypeSpecifier : public Node {
 
 			
 			else if( TYPES != NULL && !contxt.sizeof_ && !contxt.typedefs_  && !contxt.Cast ){
-			std::string types = *TYPES;			// Require conversion to be used
-
+				std::string types = *TYPES;			// Require conversion to be used
+				contxt.variable.PointerLevels = contxt.PointerCounter;
+				contxt.PointerCounter = 0;
 				if (types=="char"){
 					if(!contxt.variable.Pointer){
 						contxt.variable.word_size = 1;				///it should be size=1, you need lb and sb
@@ -2480,6 +2493,7 @@ inline void Declarator::render_asm(std::ofstream& file,Context& contxt) {
 				PointerPtr->render_asm(file,contxt);
 				DirectDecLarator->render_asm(file,contxt);
 				contxt.variable.Pointer = false;
+				contxt.variable.PointerLevels = 0;
 				
 			}
 			

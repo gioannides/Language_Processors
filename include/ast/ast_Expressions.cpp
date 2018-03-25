@@ -192,6 +192,19 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 				if (contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 					if( *OPERATOR == "+" ){
+						/*if(contxt.Variables[contxt.good_i].Pointer){
+							contxt.PointerArithemetic = true;
+							if(contxt.regType[contxt.Regs] !='f' ||  'u' || 'c' || 'i'){
+								for(int i(0); i < contxt.Variables[contxt.good_i].word_size/2; i++){
+									file << std::endl << "\taddu\t$" << contxt.Regs << ",$" << contxt.Regs << ",$" << contxt.Regs;
+								}
+							}
+							else{
+								for(int i(0); i < contxt.Variables[contxt.good_i].word_size/2; i++){
+									file << std::endl << "\taddu\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",$" << contxt.Regs+1;
+								}
+							}
+						}*/
 						if(contxt.is_unsigned){
 							file << std::endl << "\taddu\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 							contxt.regType[contxt.Regs]='u';
@@ -1468,23 +1481,47 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 					contxt.regType[contxt.Regs+1]='i';
 					}
 					else if(UnaryOperatorPtr->render_asm(file,contxt) == '&') {
-						file << std::endl << "\taddiu $" << contxt.Regs+1 << ", $sp, " << contxt.Variables[contxt.good_i].offset << "# memory address " << contxt.Variables[contxt.good_i].id;
-						contxt.regType[contxt.Regs+1]='u';
+						if(contxt.Variables[contxt.good_i].scope != "global"){
+							if(contxt.Variables[contxt.good_i].DataType != "float"){
+								file << std::endl << "\taddiu $" << contxt.Regs+1 << ", $sp, " << contxt.Variables[contxt.good_i].offset << "# memory address " << contxt.Variables[contxt.good_i].id;
+							contxt.regType[contxt.Regs+1]='u';
+							}
+							else{
+								file << std::endl << "\taddiu $" << contxt.Regs+1 << ", $sp, " << contxt.Variables[contxt.good_i].offset << "# memory address " << contxt.Variables[contxt.good_i].id;
+							contxt.regType[contxt.Regs+1]='u';
+							}
+						}
+						else{
+							 file << std::endl << "\tlui\t$" << contxt.Regs+1 << ",%hi" << "(" << contxt.Variables[contxt.good_i].id << ")"; 
+							file << std::endl << "\taddiu $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[contxt.good_i].id << ")" << "# memory address " << contxt.Variables[contxt.good_i].id;
+							contxt.regType[contxt.Regs+1]='u';
+
+						}
 						
 					}
 					else if(UnaryOperatorPtr->render_asm(file,contxt) == '*')
 					{
-						if(contxt.Variables[contxt.good_i].DataType == "char"){
+							
+						if(contxt.Variables[contxt.good_i].DataType == "char" && contxt.Variables[contxt.good_i].PointerLevels==0){
 							file << std::endl << "\tlb $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+							contxt.regType[contxt.Regs+1]='c';
 						}
-						else if(contxt.Variables[contxt.good_i].DataType == "int" || "unsigned" || "signed"){
-							file << std::endl << "\tlw $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
-						}
-					 	else if(contxt.Variables[contxt.good_i].DataType == "short"){
+						else if(contxt.Variables[contxt.good_i].DataType == "short" && contxt.Variables[contxt.good_i].PointerLevels==0){
 							file << std::endl << "\tlh $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+							contxt.regType[contxt.Regs+1]='i';
+						}
+						else if(contxt.Variables[contxt.good_i].DataType == "int" || contxt.Variables[contxt.good_i].DataType =="unsigned" || contxt.Variables[contxt.good_i].DataType =="signed" || contxt.Variables[contxt.good_i].PointerLevels > 0 ){
+							file << std::endl << "\tlw $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+							contxt.Variables[contxt.good_i].PointerLevels=contxt.Variables[contxt.good_i].PointerLevels-1;
+							contxt.regType[contxt.Regs+1]='i';
+						}
+					 	
+						else if(contxt.Variables[contxt.good_i].DataType == "float" && contxt.Variables[contxt.good_i].PointerLevels==0){
+							
+							file << std::endl << "\tlwc1 $f" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+							contxt.regType[contxt.Regs+1]='f';
 						}
 						
-						contxt.regType[contxt.Regs+1]='i';
 					}
 
 				}

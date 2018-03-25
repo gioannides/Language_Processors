@@ -22,6 +22,7 @@ struct bindings {
 		std::string StorageClass;
 		int param_offset = 0;
 		bool Pointer=false;
+		int PointerLevels=0;
 	};
 
 struct function_details{
@@ -61,6 +62,9 @@ struct Switch{
 
 
 struct Context{
+
+	int PointerCounter=0;
+	bool PointerArithmetic=false;
 
 	bool Cast=false;
 	std::string CastType = "";
@@ -306,10 +310,18 @@ inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt
 inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 {
 
-	if(contxt.Variables[good_index].Pointer){
-			file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;			
+	if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType != "float"){
+		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+			
 		contxt.regType[contxt.Regs+1]='i';
-}
+	}
+	else if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType == "float"){
+
+		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;	
+		
+		contxt.regType[contxt.Regs+1]='i';
+
+	}
 	else if(contxt.Variables[good_index].DataType == "char") {
 		if(contxt.regType[contxt.Regs+1] == 'f'){
 			file << std::endl << ".set macro" << std::endl;
@@ -437,10 +449,17 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 
 inline void load_locals(Context& contxt, std::ofstream& file, int good_index)
 {
-	if(contxt.Variables[good_index].Pointer){
-			file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;			
+	if(contxt.Variables[good_index].Pointer && contxt.Variables[good_index].DataType != "float"){
+		file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+			
 		contxt.regType[contxt.Regs+1]='i';
-}
+	}
+	else if(contxt.Variables[good_index].Pointer && contxt.Variables[good_index].DataType == "float"){
+		
+		file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		
+		contxt.regType[contxt.Regs+1]='i';
+	}
 	
 			
 	else if(contxt.Variables[good_index].DataType == "char" )  
@@ -474,6 +493,21 @@ inline void load_locals(Context& contxt, std::ofstream& file, int good_index)
 }
 inline void load_globals(Context& contxt, std::ofstream& file, int good_index)
 {
+
+	if(contxt.Variables[good_index].Pointer && contxt.Variables[good_index].DataType != "float"){
+	    file << std::endl << "\tlui\t$" << contxt.Regs+1 << ",%hi" << "(" << contxt.Variables[good_index].id << ")"; 
+	    file << std::endl << "\taddiu\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 <<  "%lo(" << contxt.Variables[good_index].id << ")";
+	    contxt.regType[contxt.Regs+1]='i';
+	    return;
+	}
+	else if(contxt.Variables[good_index].Pointer && contxt.Variables[good_index].DataType == "float"){
+		
+		 file << std::endl << "\tlui\t$" << contxt.Regs+1 << ",%hi" << "(" << contxt.Variables[good_index].id << ")"; 
+                 file << std::endl << "\taddiu\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 <<  "%lo(" << contxt.Variables[good_index].id << ")";
+	   	 contxt.regType[contxt.Regs+1]='f';
+	    return;
+	}
+	
 	file << std::endl << "\tlui $" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
 	file << std::endl << "\tla $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
 	if(contxt.nested_arrays){
