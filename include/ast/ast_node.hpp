@@ -1296,7 +1296,17 @@ class EnumSpecifier : public Node {
 			//	contxt.Enum.push_back(contxt.EnumTemp);				
 			}
 			else if( IDENTIFIER != NULL && ENumeratorList == NULL){
-				//do nothing
+				contxt.variable.id = *IDENTIFIER;
+				contxt.variable.DataType = "int";
+				contxt.variable.word_size = 4;
+				if(contxt.function){
+					contxt.variable.scope = contxt.funct_id;
+				}
+				else{
+					contxt.variable.scope = "global";
+				}
+				contxt.variable.value = 0;
+				contxt.variable.Pointer = false;
 			}
 			else if( IDENTIFIER != NULL && ENumeratorList != NULL)
 			{
