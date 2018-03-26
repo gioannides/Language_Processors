@@ -336,7 +336,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 					//postfix_ops(contxt, file);
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);	
 					if( *OPERATOR == "<" ){
-						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u' || contxt.Variables[contxt.good_i].DataType == "unsigned"){
+						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
 							file << std::endl << "\tsltu\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='u';
 						}
@@ -1594,13 +1594,13 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 						}
 						else if((ki+u)>=0 && contxt.Variables[ki+u].word_size==4 && contxt.Variables[ki+u].DataType == "float")
 						{
-							file << std::endl << "\tsw\t$f" << contxt.Regs+1 << ", " << (u)*4 << "($sp) #" << contxt.Variables[ki+u].id << " " << u*4 << "\n";	
+							file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", " << (u)*4 << "($sp) #" << contxt.Variables[ki+u].id << " " << u*4 << "\n";	
 							contxt.regType[contxt.Regs+1]='f';
 						}
 						
 						if(u<4)
 						{
-							if((ki+u)>=0 /*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
+							if((ki+u)>=0 && contxt.regType[u+4] != 'f'/*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
 							{
 								file << std::endl << "\tmove\t$" << u+4 << ", $" << contxt.Regs+1 << " #load parameter " << u+1; 
 							}
