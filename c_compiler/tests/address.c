@@ -1,7 +1,9 @@
 int main(){
 
-	char y = 'b';
-	char* x = &y;
-	
-	return *(x);
+	float y = 3;
+	float* x = &y;
+	float** z = &x;
+	float*** h = &z;
+
+	return ***(h);
 }

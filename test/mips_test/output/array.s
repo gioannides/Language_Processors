@@ -49,7 +49,7 @@ $END8:
 $END9:
 	move $25, $3
 	li $24, 4
-	mul $25, $24, $25
+	mul $25,$24,$25
 	lui $3, %hi(array)
 	la $3, %lo(array)($3)
 	add $3, $3, $25
@@ -67,7 +67,7 @@ $END10:
 $END11:
 	move $25, $3
 	li $24, 4
-	mul $25, $24, $25
+	mul $25,$24,$25
 	lui $3, %hi(array)
 	la $3, %lo(array)($3)
 	add $3, $3, $25
@@ -83,7 +83,7 @@ $END11:
 $END13:
 	move $25, $3
 	li $24, 4
-	mul $25, $24, $25
+	mul $25,$24,$25
 	lui $2, %hi(array)
 	la $2, %lo(array)($2)
 	add $2, $2, $25
@@ -95,7 +95,7 @@ $END13:
 $END14:
 	move $25, $4
 	li $24, 4
-	mul $25, $24, $25
+	mul $25,$24,$25
 	lui $3, %hi(array)
 	la $3, %lo(array)($3)
 	add $3, $3, $25

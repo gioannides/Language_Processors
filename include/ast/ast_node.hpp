@@ -1381,8 +1381,16 @@ class TypeSpecifier : public Node {
 
 		void render_asm(std::ofstream& file,Context& contxt) {
 
+			if(contxt.functionReturnType && !contxt.sizeof_ && !contxt.typedefs_ && !contxt.Cast){
 
-			if( TYPES != NULL && !contxt.sizeof_ && !contxt.typedefs_ && contxt.Cast){
+					contxt.functionReturnTypetemp = *TYPES;
+
+
+				}
+
+
+
+			else if( TYPES != NULL && !contxt.sizeof_ && !contxt.typedefs_ && contxt.Cast){
 					std::string types = *TYPES;			
 
 					
@@ -1474,12 +1482,7 @@ class TypeSpecifier : public Node {
 					contxt.is_unsigned = true;
 				}
 			}
-				else if(contxt.functionReturnType && !contxt.sizeof_ && !contxt.typedefs_ && !contxt.Cast){
-
-					contxt.functionReturnTypetemp = *TYPES;
-
-				}
-
+				
 				
 				
 				else if( TYPES != NULL && !contxt.sizeof_ && contxt.typedefs_  && !contxt.Cast){
@@ -1800,6 +1803,7 @@ class JumpStatement : public Node {
 								file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 								file << std::endl << "\t.set nomacro";
 								file << std::endl << "\tmfc1\t$2," << "$f" << contxt.Regs+1;			// MAY CAUSE PROBLEMS
+								file << std::endl << "\tnop" << std::endl;
 							}
 							file << std::endl << "\tmove\t$2," << "$" << contxt.Regs+1;
 						}
@@ -2553,8 +2557,18 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
-					file << std::endl << "\tnop";
+					if(contxt.regType[contxt.Regs+1] == 'f'){
+						file << std::endl << BEGIN_2 << ":" << "\tli.s\t$f1,0";
+						
+						file << std::endl << "\tc.eq.s\t$f" << contxt.Regs+1 << ",$f1";
+						file << std::endl << "\tnop";
+						file << std::endl << "\tbc1t\t" << END;
+						file << std::endl << "\tnop";
+					}
+					else{				
+						file << std::endl << BEGIN_2 << ":" << "\tbeq\t$" << contxt.Regs+1 << ",$0," << END;
+						file << std::endl << "\tnop";
+					}
 				}
 				file << std::endl << WHILE << ":";
 
@@ -2563,8 +2577,14 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 
 				StatementPtr->render_asm(file,contxt);
 				if(!contxt.reading)	{
-					file << "\n\tb " << BEGIN_;
-					file << std::endl << "\tnop";
+					if(contxt.regType[contxt.Regs+1] == 'f'){
+						file << "\n\tb " << BEGIN_;
+						file << std::endl << "\tnop";					
+					}
+					else{
+						file << "\n\tb " << BEGIN_;
+						file << std::endl << "\tnop";
+					}
 				}
 				contxt.LoopHeader.pop_back();
 				contxt.LastScope.pop_back();
@@ -2596,8 +2616,18 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	
 				{
-					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
-					file << std::endl << "\tnop";				
+					if(contxt.regType[contxt.Regs+1] == 'f'){
+						file << std::endl << BEGIN_2 << ":" << "\tli.s\t$f1,0";
+						
+						file << std::endl << "\tc.eq.s\t$f" << contxt.Regs+1 << ",$f1";
+						file << std::endl << "\tnop";
+						file << std::endl << "\tbc1t\t" << END;
+						file << std::endl << "\tnop";
+					}
+					else{
+						file << std::endl << BEGIN_2 << ":" << "\tbeq\t$" << contxt.Regs+1 <<",$0," << END;
+						file << std::endl << "\tnop";
+					}			
 					file << "\n\tb " << DO;
 					file << std::endl << "\tnop";
 				}
@@ -2623,8 +2653,19 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				ExpressionStatementPtr2->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
-					file << std::endl << "\tnop";
+
+					if(contxt.regType[contxt.Regs+1] == 'f'){
+						file << std::endl << BEGIN_2 << ":" << "\tli.s\t$f1,0";
+						
+						file << std::endl << "\tc.eq.s\t$f" << contxt.Regs+1 << ",$f1";
+						file << std::endl << "\tnop";
+						file << std::endl << "\tbc1t\t" << END;
+						file << std::endl << "\tnop";
+					}
+					else{
+						file << std::endl << BEGIN_2 << ":" << "\tbeq\t$" << contxt.Regs+1 <<",$0," << END;
+						file << std::endl << "\tnop";
+					}
 				}
 
 				contxt.LastScope.push_back(END);
@@ -2660,8 +2701,18 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				ExpressionStatementPtr2->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << BEGIN_2 << ":" << "\tbeq\t$2,$0," << END;
-					file << std::endl << "\tnop";					
+					if(contxt.regType[contxt.Regs+1] == 'f'){
+						file << std::endl << BEGIN_2 << ":" << "\tli.s\t$f1,0";
+						
+						file << std::endl << "\tc.eq.s\t$f" << contxt.Regs+1 << ",$f1";
+						file << std::endl << "\tnop";
+						file << std::endl << "\tbc1t\t" << END;
+						file << std::endl << "\tnop";
+					}
+					else{
+						file << std::endl << BEGIN_2 << ":" << "\tbeq\t$" << contxt.Regs+1 <<",$0," << END;
+						file << std::endl << "\tnop";
+					}				
 				}
 				contxt.TestConditionContinue = AssignmentExpressionPtr; //In case of a continue
 				StatementPtr->render_asm(file,contxt);
@@ -2704,12 +2755,22 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << "\tbeq\t$2,$0," << END;
-					file << std::endl << "\tnop";
+					if(contxt.regType[contxt.Regs+1] == 'f'){
+						file << std::endl << "\tli.s\t$f1,0";
+						
+						file << std::endl << "\tc.eq.s\t$f" << contxt.Regs+1 << ",$f1";
+						file << std::endl << "\tnop";
+						file << std::endl << "\tbc1t\t" << END;
+						file << std::endl << "\tnop";
+					}
+					else{
+						file << std::endl << "\tbeq\t$" << contxt.Regs+1 <<",$0," << END;
+						file << std::endl << "\tnop";
+					}
 				}
 				file << std::endl << IF << ":";
 				StatementPtr->render_asm(file,contxt);
-			    file << std::endl << END << ":"; 
+			        file << std::endl << END << ":"; 
 			}
 			
 			
@@ -2718,8 +2779,17 @@ inline void SelectionStatement::render_asm(std::ofstream& file, Context& contxt)
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				if(!contxt.reading)	{
-					file << std::endl << "\tbeq\t$2,$0," << ELSE;
-					file << std::endl << "\tnop";
+					if(contxt.regType[contxt.Regs+1] == 'f'){
+						file << std::endl << "\tli.s\t$f1,0";						
+						file << std::endl << "\tc.eq.s\t$f" << contxt.Regs+1 << ",$f1";
+						file << std::endl << "\tnop";
+						file << std::endl << "\tbc1t\t" << ELSE;
+						file << std::endl << "\tnop";
+					}
+					else{
+						file << std::endl << "\tbeq\t$" << contxt.Regs+1 <<",$0," << ELSE;
+						file << std::endl << "\tnop";
+					}
 				}
 				file << std::endl << IF << ":";
 				StatementPtr->render_asm(file,contxt);
@@ -2841,8 +2911,15 @@ inline void LabeledStatement::render_asm(std::ofstream& file,Context& contxt) {
 						ConstantExpressionPtr->render_asm(file,contxt); //li in register 3
 						contxt.rhs_of_expression = false;
 
-						file << std::endl << "\tbeq\t$" << contxt.Regs << ",$" << contxt.Regs+1 << "," << CASE;  //beq
-
+						if(contxt.regType[contxt.Regs+1] == 'f'){					
+							file << std::endl << "\tc.eq.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+							file << std::endl << "\tnop";
+							file << std::endl << "\tbc1t\t" << CASE;
+							file << std::endl << "\tnop";
+						}
+						else{
+							file << std::endl << "\tbeq\t$" << contxt.Regs << ",$" << contxt.Regs+1 << "," << CASE;  //beq
+						}
 						contxt.Cases.push_back(contxt.SwitchTemp);
 						file << std::endl << "\tnop";				//nop
 					contxt.SwitchControl = 0;

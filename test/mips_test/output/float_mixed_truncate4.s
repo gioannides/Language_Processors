@@ -23,25 +23,30 @@ $END2:	.set noreorder
 	sw $31,132($sp)
 	move $fp,$sp
 
-	sw $4,140($sp)
-	sw $5,144($sp)
+	swc1	$f12,140($sp)
+	swc1 $f14, 144($sp)
 	sw $6,148($sp)
-	sw $7,152($sp)# ida- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
-	lw	$2, 140($sp) #a# idb- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
-	lw	$3, 144($sp) #b
-	add	$2, $2, $3# idc- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
+	sw $7,152($sp)
+	lwc1	$f2, 140($sp) #a
+	nop	
+	lwc1	$f3, 144($sp) #b
+	nop	
+	add.s	$f2,$f2,$f3
 	lw	$3, 148($sp) #c
-	add	$2, $2, $3
-$END4:
-	sw	$2,128($sp) #s
-# ids- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
+	mtc1	$3,$f3
+	nop
 
-	lw	$2, 128($sp) #s
+	cvt.s.w	$f3,$f3
+	nop
+
+	add.s	$f2,$f2,$f3
+$END4:
+	swc1	$f2,128($sp) #s
+
+	lwc1	$f2, 128($sp) #s
+	nop	
 $END5:
-	move	$2,$2
+	mov.s	$f0,$f2
 	move	$sp,$fp
 	lw	$31,132($sp)
 	lw	$fp,136($sp)

@@ -9,7 +9,7 @@ int main(){
 	int result = array[0] + array[2];
 	if(result == arrays()){
 
-		return 30;
+		return 0;
 	}
 		return 75;
 

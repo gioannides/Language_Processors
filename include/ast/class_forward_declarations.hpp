@@ -209,10 +209,13 @@ inline void CastToType(std::ofstream& file, Context& contxt, std::string IDENTIF
 						file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 						file << std::endl << "\t.set nomacro\t";
 						file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
+						file << std::endl << "\tnop" << std::endl;
 						file << std::endl << "\tsll\t$" << contxt.Regs+1 << "," << "$" << contxt.Regs+1 << ",16";
 						file << std::endl << "\tsra\t$" << contxt.Regs+1 << "," << "$" << contxt.Regs+1 << ",16";
 						file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
+						file << std::endl << "\tnop" << std::endl;
 						file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						file << std::endl << "\tnop" << std::endl;
 						contxt.regType[contxt.Regs+1]='f';
 						
 					}
@@ -222,23 +225,29 @@ inline void CastToType(std::ofstream& file, Context& contxt, std::string IDENTIF
 						file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 						file << std::endl << "\t.set nomacro\t";
 						file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
+						file << std::endl << "\tnop" << std::endl;
 						file << std::endl << "\tsll\t$" << contxt.Regs+1 << "," << "$" << contxt.Regs+1 << ",24";
 						file << std::endl << "\tsra\t$" << contxt.Regs+1 << "," << "$" << contxt.Regs+1 << ",24";
 						file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
+						file << std::endl << "\tnop" << std::endl;
 						file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						file << std::endl << "\tnop" << std::endl;
 						contxt.regType[contxt.Regs+1]='f';
 						
 					}
 					else if(contxt.Variables[i].DataType == "float" && (contxt.CastType == "int" || contxt.CastType == "unsigned" || contxt.CastType == "signed") ){
 						
 						file << std::endl << "\tcvt.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						file << std::endl << "\tnop" << std::endl;
 						contxt.regType[contxt.Regs+1]='f';
 						
 					}
 					else if( (contxt.Variables[i].DataType == "short" || contxt.Variables[i].DataType == "int" || contxt.Variables[i].DataType == "unsigned" ||contxt.Variables[i].DataType == "char" || contxt.Variables[i].DataType == "signed") && contxt.CastType == "float" ){
 						
 						file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << "," << "$f" << contxt.Regs+1;
+						file << std::endl << "\tnop" << std::endl;
 						file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+						file << std::endl << "\tnop" << std::endl;
 						contxt.regType[contxt.Regs+1]='f';
 						
 					}
@@ -288,7 +297,9 @@ inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt
 	else if(contxt.regType[reg1] != contxt.regType[reg2] && reg2 > 1 && reg1 > 1){
 		if(contxt.regType[reg1] != 'f'  && contxt.regType[reg2] == 'f'){
 			file << std::endl << "\tmtc1\t$" << reg1 << ",$f" << reg1;
+			file << std::endl << "\tnop" << std::endl;
 			file << std::endl << "\tcvt.s.w\t$f" << reg1 << ",$f" << reg1;
+			file << std::endl << "\tnop" << std::endl;
 			if(contxt.regType[reg1] == 'u'){
 				file << std::endl << "\tandi\t$" << reg1 << ",$" << reg1 << ",0xFF";
 			}
@@ -296,7 +307,9 @@ inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt
 		}
 		else if(contxt.regType[reg1] == 'f' && contxt.regType[reg2] != 'f'){
 			file << std::endl << "\tmtc1\t$" << reg2 << ",$f" << reg2;
+			file << std::endl << "\tnop" << std::endl;
 			file << std::endl << "\tcvt.s.w\t$f" << reg2 << ",$f" << reg2;
+			file << std::endl << "\tnop" << std::endl;
 			if(contxt.regType[reg1] == 'u'){
 				file << std::endl << "\tandi\t$" << reg2 << ",$" << reg2 << ",0xFF";
 			}
@@ -310,12 +323,12 @@ inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt
 inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 {
 
-	if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType != "float"){
+	if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType != "float"  ){
 		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
 			
 		contxt.regType[contxt.Regs+1]='i';
 	}
-	else if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType == "float"){
+	else if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType == "float" ){
 
 		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;	
 		
@@ -328,6 +341,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << ".set nomacro" << std::endl;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\tnop" << std::endl;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
 			}
@@ -341,6 +355,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << ".set nomacro" << std::endl;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\tnop" << std::endl;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
 			}
@@ -354,6 +369,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << ".set nomacro" << std::endl;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\tnop" << std::endl;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
 			}
@@ -390,6 +406,7 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << ".set nomacro" << std::endl;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\tnop" << std::endl;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
 			}
@@ -405,6 +422,7 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << ".set nomacro" << std::endl;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\tnop" << std::endl;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
 			}
@@ -420,6 +438,7 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 			file << std::endl << "\ttrunc.w.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$" << contxt.Regs+1;
 			file << std::endl << ".set nomacro" << std::endl;
 			file << std::endl << "\tmfc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
+			file << std::endl << "\tnop" << std::endl;
 			if(contxt.regType[contxt.Regs+1] == 'u'){
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
 			}

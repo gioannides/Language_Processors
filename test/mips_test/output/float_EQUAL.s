@@ -26,29 +26,33 @@ $END2:	.set noreorder
 	swc1	$f12,140($sp)
 	swc1 $f14, 144($sp)
 	sw $6,148($sp)
-	sw $7,152($sp)# ida- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
+	sw $7,152($sp)
 	lwc1	$f2, 140($sp) #a
-	nop	# idb- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
+	nop	
 	lwc1	$f3, 144($sp) #b
-	nop	# idx- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
-
+	nop	
 	lw	$4, 148($sp) #x
 	mtc1	$4,$f4
+	nop
+
 	cvt.s.w	$f4,$f4
+	nop
+
 	sub.s	$f3,$f3,$f4
 	c.eq.s	$f2,$f3
 	bc1f	$NOT_EQ5
+	nop
+
 	li.s	$f2,1
 	b	$ENDEQ5
 	nop	
 $NOT_EQ5:
 	mtc1	$0,$f2
+	nop
+
 $ENDEQ5:
 $END4:
 	swc1	$f2,128($sp) #s
-# ids- f_call0- reading0- function1- SizeOf:0- lhs_of_assignment:0
 
 	lwc1	$f2, 128($sp) #s
 	nop	
