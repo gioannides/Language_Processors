@@ -83,13 +83,13 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 				if (contxt.function  && !contxt.sizeof_ && !contxt.enum_constant){
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 					if( *OPERATOR == "*" ){
-						if(contxt.is_unsigned){
+						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u' ){
 							file << std::endl << "\tmultu\t$" << contxt.Regs << ", $" << contxt.Regs + 1;
 							file << std::endl << "\tmflo\t$" << contxt.Regs;
 							contxt.regType[contxt.Regs]='u';
 							contxt.regType[contxt.Regs+1]='u';
 						}
-						else if(contxt.float_){
+						else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 							file << std::endl << "\tmul.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='f';
 							contxt.regType[contxt.Regs+1]='f';
@@ -103,13 +103,13 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 						
 					}
 					else if(  *OPERATOR == "/" ){
-						if(contxt.is_unsigned){
+						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
 							file << std::endl << "\tdivu\t$" << contxt.Regs << ", $" << contxt.Regs + 1;
 							file << std::endl << "\tmflo\t$" << contxt.Regs;
 							contxt.regType[contxt.Regs]='u';
 							contxt.regType[contxt.Regs+1]='u';
 						}
-						else if(contxt.float_){
+						else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 							file << std::endl << "\tdiv.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='f';
 							contxt.regType[contxt.Regs+1]='f';
@@ -123,7 +123,7 @@ inline void MultiplicativeExpression::render_asm(std::ofstream& file,Context& co
 						
 					}
 					else if(  *OPERATOR == "%" ){
-						if(contxt.is_unsigned) {
+						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u') {
 							file << std::endl << "\tdivu\t$" << contxt.Regs << ", $" << contxt.Regs + 1;
 							contxt.regType[contxt.Regs]='u';
 							contxt.regType[contxt.Regs+1]='u';
@@ -201,12 +201,12 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 					if( *OPERATOR == "+" ){
 
-						if(contxt.is_unsigned){
+						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u' ){
 							file << std::endl << "\taddu\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 							contxt.regType[contxt.Regs]='u';
 							contxt.regType[contxt.Regs+1]='u';
 						}
-						else if(contxt.float_){
+						else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 							file << std::endl << "\tadd.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='f';
 							contxt.regType[contxt.Regs+1]='f';
@@ -218,12 +218,12 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 						}
 					}
 					else if(  *OPERATOR == "-" ){
-						if(contxt.is_unsigned) {
+						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u') {
 							file << std::endl << "\tsubu\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 							contxt.regType[contxt.Regs]='u';
 							contxt.regType[contxt.Regs+1]='u';
 						}
-						else if(contxt.float_){
+						else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 							file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='f';
 							contxt.regType[contxt.Regs+1]='f';
@@ -299,7 +299,8 @@ inline void ShiftExpression::render_asm(std::ofstream& file,Context& contxt) {
 						contxt.regType[contxt.Regs+1]='i';
 					}
 					else if(  *OPERATOR == ">>" ){
-						if(contxt.is_unsigned){
+	
+						if(contxt.regType[contxt.Regs] == 'u' || contxt.regType[contxt.Regs+1] == 'u'){
 							file << std::endl << "\tsrlv\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='u';
 							contxt.regType[contxt.Regs+1]='u';
@@ -335,7 +336,7 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 					//postfix_ops(contxt, file);
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);	
 					if( *OPERATOR == "<" ){
-						if(contxt.is_unsigned){
+						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u' || contxt.Variables[contxt.good_i].DataType == "unsigned"){
 							file << std::endl << "\tsltu\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='u';
 						}
@@ -366,11 +367,11 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 						}
 					}
 					else if(  *OPERATOR == ">" ){
-						if(contxt.is_unsigned){
+						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
 							file << std::endl << "\tsgtu\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='u';
 						}
-						else if(contxt.float_){
+						else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 							std::string label_id = labelGen(contxt);
 							std::string END = "$ENDGT" + label_id;
 							std::string NOT_GREATER = "$NOT_GT" + label_id;
@@ -397,11 +398,11 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 						}
 					}
 					else if( *OPERATOR == "<=" ){
-						if(contxt.is_unsigned) {
+						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u') {
 							file << std::endl << "\tsleu\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='u';
 						}
-						else if(contxt.float_){
+						else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 							std::string label_id = labelGen(contxt);
 							std::string END = "$ENDLE" + label_id;
 							std::string NOT_LE = "$NOT_LE" + label_id;
@@ -429,11 +430,11 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 						}
 					}
 					else if(  *OPERATOR == ">=" ){
-						if(contxt.is_unsigned){
+						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
 							file << std::endl << "\tsgeu\t$" << contxt.Regs << ", $" << contxt.Regs << ", $" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='u';
 						}
-						else if(contxt.float_){
+						else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 							std::string label_id = labelGen(contxt);
 							std::string END = "$ENDGE" + label_id;
 							std::string NOT_GE = "$NOT_GE" + label_id;
@@ -574,7 +575,7 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 					//postfix_ops(contxt, file);
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);	
 					if( *OPERATOR == "==" ){
-						if(contxt.float_){
+						if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 							std::string label_id = labelGen(contxt);
 							std::string END = "$ENDEQ" + label_id;
 							std::string NOT_EQ = "$NOT_EQ" + label_id;
@@ -605,22 +606,22 @@ inline void EqualityExpression::render_asm(std::ofstream& file,Context& contxt) 
 					}
 					else if(  *OPERATOR == "!=" ){
 
-						if(contxt.float_){
+						if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 							std::string label_id = labelGen(contxt);
 							std::string END = "$ENDEQ" + label_id;
-							std::string NOT_EQ = "$NOT_EQ" + label_id;
+							std::string _EQ = "$_EQ" + label_id;
 
 							file << std::endl << "\tc.eq.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1;
 							contxt.regType[contxt.Regs]='f';
 							contxt.regType[contxt.Regs+1]='f';
-							file << std::endl << "\tbc1t\t" << NOT_EQ;
+							file << std::endl << "\tbc1t\t" << _EQ;
 							file << std::endl << "\tnop" << std::endl;
 						
 							file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
 							contxt.regType[contxt.Regs]='f';
 							file << std::endl << "\tb\t" << END;
 							file << std::endl << "\tnop\t";
-							file << std::endl << NOT_EQ << ":";
+							file << std::endl << _EQ << ":";
 							file << std::endl << "\tmtc1\t$0,$f" << contxt.Regs;
 							contxt.regType[contxt.Regs]='f';
 							file << std::endl << "\tnop" << std::endl;
@@ -783,7 +784,7 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 				SHORTCIRCUIT = "$SHORTCIRCUIT_AND" + label_id;
 				if(contxt.function){
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
-					if(contxt.float_){
+					if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 						label_id = labelGenLogical(contxt);
 						std::string NOT_0 = "$NOT_0" + label_id;
 						std::string DONE = "$DONE_" + label_id;
@@ -833,7 +834,7 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 				if (contxt.function && !contxt.sizeof_ && !contxt.enum_constant)
 				{
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
-					if(contxt.float_){
+					if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 						label_id = labelGenLogical(contxt);
 						std::string NOT_0 = "$NOT_0" + label_id;
 						std::string DONE = "$DONE_" + label_id;
@@ -898,7 +899,7 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 				if(contxt.function){
 
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
-					if(contxt.float_){
+					if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 						label_id = labelGenLogical(contxt);
 						std::string NOT_0 = "$NOT_0" + label_id;
 						std::string DONE = "$DONE_" + label_id;
@@ -946,7 +947,7 @@ inline void LogicalOrExpression::render_asm(std::ofstream& file,Context& contxt)
 				if (contxt.function && !contxt.sizeof_ && !contxt.enum_constant){
 					typePromotion(contxt.Regs,contxt.Regs+1,file,contxt);
 					
-					if(contxt.float_){
+					if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 						label_id = labelGenLogical(contxt);
 						std::string NOT_0 = "$NOT_0" + label_id;
 						std::string DONE = "$DONE_" + label_id;
@@ -1255,6 +1256,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			if(found_0nothing_1local_2globl && contxt.is_array)
 			{
 				file << std::endl << "\tli $24, " << contxt.Variables[good_index].word_size;
+				
 				file << std::endl << "\tmul $25,$24,$25";
 			}	  		
 			if(contxt.lhs_of_assignment && !contxt.sizeof_ && !contxt.enum_constant )
@@ -1309,7 +1311,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 							//std::cout <<  contxt.Enum[i].ScopeID << " " <<  contxt.Enum[i].IDENTIFIER << " " <<  contxt.Enum[i].value << std::endl;
 							if(contxt.Enum[i].IDENTIFIER == *IDENTIFIER && contxt.Enum[i].ScopeID == contxt.funct_id){
 								file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].value;
-								
+								contxt.regType[contxt.Regs+1]='i';
 								found = true;
 								break;
 							}
@@ -1318,6 +1320,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 							for( int i(0); i < contxt.Enum.size(); i++){
 								if(contxt.Enum[i].IDENTIFIER == *IDENTIFIER && contxt.Enum[i].ScopeID == "global"){
 									file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].value;
+									contxt.regType[contxt.Regs+1]='i';
 									found = true;
 									break;
 								}
@@ -1797,76 +1800,90 @@ if(!contxt.sizeof_){
 		load_globals(contxt, file, good_index);
 	}
 	if(contxt.AssignmentOperator == "*="){
-		if(contxt.is_unsigned){
+		if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
 			file << std::endl << "\tmultu\t$" << contxt.Regs << ",$" << contxt.Regs+1;
 			file << std::endl << "\tmflo\t$" << contxt.Regs;
 			contxt.regType[contxt.Regs]='u';
+			contxt.regType[contxt.Regs+1]='i';
 		}
-		else if(contxt.float_){
+		else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 			file << std::endl << "\tmul.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
 			contxt.regType[contxt.Regs]='f';
+			contxt.regType[contxt.Regs+1]='f';
 		}
 		else {
 			file << std::endl << "\tmult\t$" << contxt.Regs << ",$" << contxt.Regs+1;
 			file << std::endl << "\tmflo\t$" << contxt.Regs;
 			contxt.regType[contxt.Regs]='i';
+			contxt.regType[contxt.Regs+1]='i';
 		}
 		
 	}
 	else if(contxt.AssignmentOperator == "/="){
-			if(contxt.is_unsigned){
+			if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
 				file << std::endl << "\tdivu\t$" << contxt.Regs+1 << ",$" << contxt.Regs;
 				file << std::endl << "\tmflo\t$"<< contxt.Regs;
 				contxt.regType[contxt.Regs]='u';
+				contxt.regType[contxt.Regs+1]='i';
 						}
-			else if(contxt.float_){
+			else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 				file << std::endl << "\tdiv.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
 				contxt.regType[contxt.Regs]='f';
+				contxt.regType[contxt.Regs+1]='f';
 			}					
 			else{
 				file << std::endl << "\tdiv\t$" << contxt.Regs+1 << ",$" << contxt.Regs;
 				file << std::endl << "\tmflo\t$"<< contxt.Regs;
 				contxt.regType[contxt.Regs]='i';
+				contxt.regType[contxt.Regs+1]='i';
 			}
 	}
 	else if(contxt.AssignmentOperator == "%="){
-			if(contxt.is_unsigned){
+			if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
 				file << std::endl << "\tdivu\t$" << contxt.Regs+1 << ",$" << contxt.Regs;
 				file << std::endl << "\tmfhi\t$"<< contxt.Regs;
 				contxt.regType[contxt.Regs]='u';
+				contxt.regType[contxt.Regs+1]='i';
 			}
 			else{
 				file << std::endl << "\tdiv\t$" << contxt.Regs+1 << ",$" << contxt.Regs;
 				file << std::endl << "\tmfhi\t$"<< contxt.Regs;
 				contxt.regType[contxt.Regs]='i';
+				contxt.regType[contxt.Regs+1]='i';
 			}
 	}
 	else if(contxt.AssignmentOperator == "+="){
-			if(contxt.is_unsigned){
+			if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
 				file << std::endl << "\taddu\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 				contxt.regType[contxt.Regs]='u';
+				contxt.regType[contxt.Regs+1]='u';
 			}
-			else if(contxt.float_){
+			else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 				file << std::endl << "\tadd.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
 				contxt.regType[contxt.Regs]='f';
+				contxt.regType[contxt.Regs+1]='f';
 			}	
 			else{
 				file << std::endl << "\tadd\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 				contxt.regType[contxt.Regs]='i';
+				contxt.regType[contxt.Regs+1]='i';
 			}
 	}
 	else if(contxt.AssignmentOperator == "-="){
-			if(contxt.is_unsigned){
+			if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
 				file << std::endl << "\tsubu\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ", $" << contxt.Regs;
 				contxt.regType[contxt.Regs]='u';
+				contxt.regType[contxt.Regs+1]='i';
 			}
-			else if(contxt.float_){
+			else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
 				file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
 				contxt.regType[contxt.Regs]='f';
+				contxt.regType[contxt.Regs+1]='f';
 			}	
 			else{
 				file << std::endl << "\tsub\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ", $" << contxt.Regs;
 				contxt.regType[contxt.Regs]='i';
+				contxt.regType[contxt.Regs+1]='i';
 			}
 	}
 	else if(contxt.AssignmentOperator == "<<="){
@@ -1874,49 +1891,56 @@ if(!contxt.sizeof_){
 			contxt.regType[contxt.Regs]='i';
 	}
 	else if(contxt.AssignmentOperator == ">>="){
-			if(contxt.is_unsigned){
+			if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
 				file << std::endl << "\tsrlv\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 				contxt.regType[contxt.Regs]='u';
+				
 			}
 			else{
 				file << std::endl << "\tsrav\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 				contxt.regType[contxt.Regs]='i';
+				
 			}
 	}
 	else if(contxt.AssignmentOperator == "&="){
 			file << std::endl << "\tand\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 			contxt.regType[contxt.Regs]='i';
+			contxt.regType[contxt.Regs+1]='i';
 	}
 	else if(contxt.AssignmentOperator == "^="){
 			file << std::endl << "\txor\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 			contxt.regType[contxt.Regs]='i';
+			contxt.regType[contxt.Regs+1]='i';
 	}
 	else if(contxt.AssignmentOperator == "|="){
 			file << std::endl << "\tor\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 			contxt.regType[contxt.Regs]='i';
+			contxt.regType[contxt.Regs+1]='i';
 	}
 	else if(contxt.AssignmentOperator == "++"){
-			if(contxt.float_){
-				file << std::endl << "\tli.s\t$f" << contxt.Regs+1 << ",1";
-				contxt.regType[contxt.Regs+1]='f';
-				file << std::endl << "\tadd.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+			if(contxt.regType[contxt.Regs+1] == 'f' || contxt.regType[contxt.Regs]=='f'  ){
+				file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
 				contxt.regType[contxt.Regs]='f';
+				file << std::endl << "\tadd.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+				contxt.regType[contxt.Regs+1]='f';
 			}
 			else{	
 				file << std::endl << "\taddiu\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ",1";
 				contxt.regType[contxt.Regs]='i';
+				contxt.regType[contxt.Regs+1]='i';
 			}
 	}
 	else if(contxt.AssignmentOperator == "--"){
-			if(contxt.float_){
-				file << std::endl << "\tli.s\t$f" << contxt.Regs+1 << ",1";
+			if(contxt.regType[contxt.Regs+1] == 'f' || contxt.regType[contxt.Regs]=='f'  ){
+				file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
 				contxt.regType[contxt.Regs+1]='f';
-				file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+				file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
 				contxt.regType[contxt.Regs]='f';
 			}
 			else{	
 				file << std::endl << "\taddiu\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ",-1";
 				contxt.regType[contxt.Regs]='i';
+				contxt.regType[contxt.Regs+1]='i';
 			}						
 	}
 			contxt.AssignmentOperator = "df";
