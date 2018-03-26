@@ -1943,17 +1943,17 @@ if(!contxt.sizeof_){
 			}
 	}
 	else if(contxt.AssignmentOperator == "<<="){
-			file << std::endl << "\tsllv\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
+			file << std::endl << "\tsllv\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ", $" << contxt.Regs;
 			contxt.regType[contxt.Regs]='i';
 	}
 	else if(contxt.AssignmentOperator == ">>="){
 			if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
-				file << std::endl << "\tsrlv\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
+				file << std::endl << "\tsrlv\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ", $" << contxt.Regs;
 				contxt.regType[contxt.Regs]='u';
 				
 			}
 			else{
-				file << std::endl << "\tsrav\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
+				file << std::endl << "\tsrav\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ", $" << contxt.Regs;
 				contxt.regType[contxt.Regs]='i';
 				
 			}

@@ -2542,7 +2542,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 			std::string END = "$END" + label_id;
 			std::string FOR = "$FOR" + label_id;
 			std::string BEGIN_ = "$BEGIN" + label_id;
-			std::string BEGIN_2 = "$BEGIN2" + label_id;
+			std::string BEGIN_2 = "$BEGIN2_" + label_id;
 
 
 			if( ITERATIVE_TYPE != NULL && *ITERATIVE_TYPE == "while" && AssignmentExpressionPtr != NULL && StatementPtr != NULL) {
@@ -2632,10 +2632,11 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 					}			
 					file << "\n\tb " << DO;
 					file << std::endl << "\tnop";
+					file << std::endl << END << ":";
 				}
 				contxt.LoopHeader.pop_back();
 				contxt.LastScope.pop_back();
-				file << std::endl << END << ":";
+				
 				contxt.BreakCounter--;
 				contxt.ContinueCounter--;
 				
