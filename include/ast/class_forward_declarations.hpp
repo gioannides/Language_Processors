@@ -23,6 +23,7 @@ struct bindings {
 		int param_offset = 0;
 		bool Pointer=false;
 		int PointerLevels=0;
+		int PointerLevelsTemp=0;
 	};
 
 struct function_details{
@@ -65,9 +66,13 @@ struct Context{
 
 	int PointerCounter=0;
 	bool PointerArithmetic=false;
+	std::vector<char>PointerVector;
+	bool WasDereferencing = false;
+	int found_0nothing_1local_2globl;
 
 	bool Cast=false;
 	std::string CastType = "";
+	
 
 
 	std::vector<Enumeration> Enum;
@@ -323,18 +328,19 @@ inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt
 inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 {
 
-	if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType != "float"  ){
+	if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType != "float" ){
 		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
 			
 		contxt.regType[contxt.Regs+1]='i';
 	}
-	else if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType == "float" ){
+	else if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType == "float"){
 
 		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;	
 		
 		contxt.regType[contxt.Regs+1]='i';
 
 	}
+	
 	else if(contxt.Variables[good_index].DataType == "char") {
 		if(contxt.regType[contxt.Regs+1] == 'f'){
 			file << std::endl << ".set macro" << std::endl;

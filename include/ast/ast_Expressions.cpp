@@ -1562,6 +1562,10 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 				UnaryExpressionPtr->render_asm(file,contxt);			//TODO: This is for identifier names and values
 				contxt.lhs_of_assignment = false;
 				contxt.AssignmentOperator = "df";
+				/*if(contxt.WasDereferencing){
+					file << std::endl << "\tsw\t$"<<contxt.Regs+1<<",0($"<<contxt.Regs+2<<")";
+					contxt.WasDereferencing = false;			
+				}*/
 				
 			}				
 			else if(ConditionalExpressionPtr != NULL) {
@@ -1629,6 +1633,9 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 				if(!contxt.function){
 					if(UnaryOperatorPtr != NULL){
 						contxt.UnaryOperators.push_back(UnaryOperatorPtr->render_asm(file,contxt));
+						if(UnaryOperatorPtr->render_asm(file,contxt) == '*'){
+							contxt.PointerVector.push_back(UnaryOperatorPtr->render_asm(file,contxt));
+						}
 					}
 				}
 
@@ -1662,39 +1669,88 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 							}
 							else{
 								file << std::endl << "\taddiu $" << contxt.Regs+1 << ", $sp, " << contxt.Variables[contxt.good_i].offset << "# memory address " << contxt.Variables[contxt.good_i].id;
-							contxt.regType[contxt.Regs+1]='u';
+							
 							}
+							
 						}
 						else{
 							 file << std::endl << "\tlui\t$" << contxt.Regs+1 << ",%hi" << "(" << contxt.Variables[contxt.good_i].id << ")"; 
 							file << std::endl << "\taddiu $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[contxt.good_i].id << ")" << "# memory address " << contxt.Variables[contxt.good_i].id;
-							contxt.regType[contxt.Regs+1]='u';
+							
 
 						}
+						contxt.regType[contxt.Regs+1] = '&';
 						
 					}
 					else if(UnaryOperatorPtr->render_asm(file,contxt) == '*')
 					{
-							
-						if(contxt.Variables[contxt.good_i].DataType == "char" && contxt.Variables[contxt.good_i].PointerLevels==0){
-							file << std::endl << "\tlb $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
-							contxt.regType[contxt.Regs+1]='c';
-						}
-						else if(contxt.Variables[contxt.good_i].DataType == "short" && contxt.Variables[contxt.good_i].PointerLevels==0){
-							file << std::endl << "\tlh $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
-							contxt.regType[contxt.Regs+1]='i';
-						}
-						else if(contxt.Variables[contxt.good_i].DataType == "int" || contxt.Variables[contxt.good_i].DataType =="unsigned" || contxt.Variables[contxt.good_i].DataType =="signed" || contxt.Variables[contxt.good_i].PointerLevels > 0 ){
-							file << std::endl << "\tlw $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
-							contxt.Variables[contxt.good_i].PointerLevels=contxt.Variables[contxt.good_i].PointerLevels-1;
-							contxt.regType[contxt.Regs+1]='i';
-						}
+				
+						if(!contxt.lhs_of_assignment){		
+							if(contxt.Variables[contxt.good_i].DataType == "char" && contxt.Variables[contxt.good_i].PointerLevelsTemp==0){
+								file << std::endl << "\tlb $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+								contxt.Variables[contxt.good_i].PointerLevelsTemp = contxt.Variables[contxt.good_i].PointerLevels;
+								contxt.regType[contxt.Regs+1]='c';
+								}
+							else if(contxt.Variables[contxt.good_i].DataType == "short" && contxt.Variables[contxt.good_i].PointerLevelsTemp==0){
+								file << std::endl << "\tlh $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+								contxt.Variables[contxt.good_i].PointerLevelsTemp = contxt.Variables[contxt.good_i].PointerLevels;
+								contxt.regType[contxt.Regs+1]='i';
+							}
+							else if((contxt.Variables[contxt.good_i].DataType == "int" || contxt.Variables[contxt.good_i].DataType =="unsigned" || contxt.Variables[contxt.good_i].DataType =="signed" || contxt.Variables[contxt.good_i].DataType =="short") || contxt.Variables[contxt.good_i].PointerLevelsTemp > 0 ){
+								file << std::endl << "\tlw $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+								contxt.Variables[contxt.good_i].PointerLevelsTemp=contxt.Variables[contxt.good_i].PointerLevelsTemp-1;
+								contxt.regType[contxt.Regs+1]='i';
+							}
 					 	
-						else if(contxt.Variables[contxt.good_i].DataType == "float" && contxt.Variables[contxt.good_i].PointerLevels==0){
+							else if(contxt.Variables[contxt.good_i].DataType == "float" && contxt.Variables[contxt.good_i].PointerLevelsTemp==0){
 							
-							file << std::endl << "\tlwc1 $f" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
-							contxt.regType[contxt.Regs+1]='f';
+								file << std::endl << "\tlwc1 $f" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+								contxt.Variables[contxt.good_i].PointerLevelsTemp = contxt.Variables[contxt.good_i].PointerLevels;
+								contxt.regType[contxt.Regs+1]='f';
+							}
 						}
+						/*else{
+							if(contxt.Variables[contxt.good_i].DataType == "char" && contxt.PointerVector.size()<=1){
+								file << std::endl << "\tlb $" << contxt.Regs+2 <<  ", 0($" << contxt.Regs+2 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+								
+								contxt.regType[contxt.Regs+1]='c';
+								if(contxt.PointerVector.size()){
+									contxt.PointerVector.pop_back();
+								}
+								}
+							else if(contxt.Variables[contxt.good_i].DataType == "short"  && contxt.PointerVector.size()<=1){
+								file << std::endl << "\tlh $" << contxt.Regs+2 <<  ", 0($" << contxt.Regs+2 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+								
+								contxt.regType[contxt.Regs+1]='i';
+								if(contxt.PointerVector.size()){
+									contxt.PointerVector.pop_back();
+								}
+							}
+							else if((contxt.Variables[contxt.good_i].DataType == "int" || contxt.Variables[contxt.good_i].DataType =="unsigned" || contxt.Variables[contxt.good_i].DataType =="signed" || contxt.Variables[contxt.good_i].DataType =="short") || contxt.PointerVector.size() > 1 ){
+								file << std::endl << "\tlw $" << contxt.Regs+2 <<  ", 0($" << contxt.Regs+2 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+								
+								contxt.regType[contxt.Regs+1]='i';
+								if(contxt.PointerVector.size()){
+									contxt.PointerVector.pop_back();
+								}
+							}
+					 	
+							else if(contxt.Variables[contxt.good_i].DataType == "float" && contxt.PointerVector.size()<=1){
+							
+								file << std::endl << "\tlwc1 $f" << contxt.Regs+2 <<  ", 0($" << contxt.Regs+2 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
+								
+								contxt.regType[contxt.Regs+1]='f';
+								if(contxt.PointerVector.size()){
+									contxt.PointerVector.pop_back();
+								}
+							}
+							contxt.WasDereferencing = true;
+
+						}*/
+
+
+
+						
 						
 					}
 
@@ -1887,17 +1943,17 @@ if(!contxt.sizeof_){
 			}
 	}
 	else if(contxt.AssignmentOperator == "<<="){
-			file << std::endl << "\tsllv\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
+			file << std::endl << "\tsllv\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ", $" << contxt.Regs;
 			contxt.regType[contxt.Regs]='i';
 	}
 	else if(contxt.AssignmentOperator == ">>="){
 			if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u'){
-				file << std::endl << "\tsrlv\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
+				file << std::endl << "\tsrlv\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ", $" << contxt.Regs;
 				contxt.regType[contxt.Regs]='u';
 				
 			}
 			else{
-				file << std::endl << "\tsrav\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
+				file << std::endl << "\tsrav\t$" << contxt.Regs <<", $" << contxt.Regs+1 << ", $" << contxt.Regs;
 				contxt.regType[contxt.Regs]='i';
 				
 			}
