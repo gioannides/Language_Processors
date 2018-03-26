@@ -1430,6 +1430,7 @@ class TypeSpecifier : public Node {
 			else if( TYPES != NULL && !contxt.sizeof_ && !contxt.typedefs_  && !contxt.Cast ){
 				std::string types = *TYPES;			// Require conversion to be used
 				contxt.variable.PointerLevels = contxt.PointerCounter;
+				contxt.variable.PointerLevelsTemp = contxt.PointerCounter;
 				contxt.PointerCounter = 0;
 				if (types=="char"){
 					if(!contxt.variable.Pointer){
@@ -2498,6 +2499,7 @@ inline void Declarator::render_asm(std::ofstream& file,Context& contxt) {
 				DirectDecLarator->render_asm(file,contxt);
 				contxt.variable.Pointer = false;
 				contxt.variable.PointerLevels = 0;
+				contxt.variable.PointerLevelsTemp = 0;
 				
 			}
 			
