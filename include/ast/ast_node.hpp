@@ -2058,7 +2058,7 @@ class FunctionDefinition : public Node {
 			}
 			//std::cout << "start of compund" << contxt.funct_id << std::endl;
 			if( CompoundStatementPtr != NULL ) { // function_def.area is calculated here
-				contxt.totalStackArea = 12+104;
+				contxt.totalStackArea = 12+104+44;
 				contxt.reading = true;						// this flag is used to prevent writing asm on file<< while reading ahead
 				CompoundStatementPtr->render_asm(file,contxt);  // ...(file,initialized,function)
 				contxt.reading = false;

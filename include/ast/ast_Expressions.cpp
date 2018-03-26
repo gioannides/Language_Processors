@@ -1053,11 +1053,15 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 							}
 						}
 						if (offset<=0 || offset > contxt.totalStackArea-4){
-							offset=116;
+							offset=116+44;
 						}
 						for(i=1; i<25; i++)
 						{
 							file << "\n\tsw $" << i << ", " << offset-(i*4) << "($sp)";
+						}
+						for(i=10; i<21; i++)
+						{
+							file << "\n\tswc1 $f" << i << ", " << offset-100-(i-10)*4 << "($sp)";
 						}
 						//file << "\n\tsw $31," << offset-(i*4) << "($sp)"; 
 					}
@@ -1136,8 +1140,13 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						{
 							file << "\n\tlw $" << i << "," << offset-(i*4) << "($sp)";
 						}
+						for(i=10; i<21; i++)
+						{
+							file << "\n\tlwc1 $f" << i << ", " << offset-100-(i-10)*4 << "($sp)";
+						}
 						//file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
 						file << "\n\tmove $" << contxt.Regs+1 << ", $25"; 
+						
 					}
 					contxt.nested_function_calls--;
 				}
@@ -1261,33 +1270,38 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			}	  		
 			if(contxt.lhs_of_assignment && !contxt.sizeof_ && !contxt.enum_constant )
 			{
+				// if(contxt.Variables[good_index].Pointer)
+				// {
+				// 	contxt.pointer_word_size=contxt.Variables[good_index].word_size;
+				// }
+				// else {
 				//file << "# lhs_of_assignment is set\n";
-				if(found_0nothing_1local_2globl)
-				{
-					if(contxt.AssignmentOperator != "df" && contxt.AssignmentOperator != "=")
+					if(found_0nothing_1local_2globl)
 					{
-						AssignmentOperator(file,good_index,contxt,found_0nothing_1local_2globl);				
+						if(contxt.AssignmentOperator != "df" && contxt.AssignmentOperator != "=")
+						{
+							AssignmentOperator(file,good_index,contxt,found_0nothing_1local_2globl);				
+						}
 					}
-				}
-				if(found_0nothing_1local_2globl==1)
-				{
-					store_locals(contxt, file, good_index);
-				}					
-				else if(found_0nothing_1local_2globl==2) 
-				{
-					store_globals(contxt, file, good_index);
-				}			
-				else
-				{
+					if(found_0nothing_1local_2globl==1)
+					{
+						store_locals(contxt, file, good_index);
+					}					
+					else if(found_0nothing_1local_2globl==2) 
+					{
+						store_globals(contxt, file, good_index);
+					}			
+					else
+					{
 						
 					//else{
 						//file << std::endl << "#VARIABLE : " << *IDENTIFIER << "NOT DECLARED!!!\n";
 					//}
-				}
+					}
+				//}
 			}
 			else
 			{
-
 			 	if(found_0nothing_1local_2globl==1 && !contxt.sizeof_ && !contxt.enum_constant) 
 			 	{
 			 		load_locals(contxt, file, good_index);
@@ -1302,14 +1316,14 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 						CastToType(file,contxt,*IDENTIFIER);
 					}
 			
-				}		
-				else
+				}			
+					else
 					
-				{	if(!contxt.enum_constant){	
-						bool found = false;
-						for( int i(0); i < contxt.Enum.size(); i++){
+					{	if(!contxt.enum_constant){	
+							bool found = false;
+							for( int i(0); i < contxt.Enum.size(); i++){
 							//std::cout <<  contxt.Enum[i].ScopeID << " " <<  contxt.Enum[i].IDENTIFIER << " " <<  contxt.Enum[i].value << std::endl;
-							if(contxt.Enum[i].IDENTIFIER == *IDENTIFIER && contxt.Enum[i].ScopeID == contxt.funct_id){
+								if(contxt.Enum[i].IDENTIFIER == *IDENTIFIER && contxt.Enum[i].ScopeID == contxt.funct_id){
 								file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << contxt.Enum[i].value;
 								contxt.regType[contxt.Regs+1]='i';
 								found = true;
@@ -1422,7 +1436,10 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				}
 			}
 		}
-		
+		if(contxt.pointer_word_size)
+		{
+			temp*=contxt.pointer_word_size;
+		}
 		if(contxt.function && contxt.UnaryOperators.size() != 0 && contxt.variable.DataType != "float")
 		{
 			if(contxt.UnaryOperators[contxt.UnaryOperators.size()-1] == '-' && !contxt.function) 
@@ -1562,6 +1579,11 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 				UnaryExpressionPtr->render_asm(file,contxt);			//TODO: This is for identifier names and values
 				contxt.lhs_of_assignment = false;
 				contxt.AssignmentOperator = "df";
+				if(contxt.pointer_word_size)
+				{
+					contxt.pointer_word_size=0;
+					file << std::endl << "\tsw $" << contxt.Regs << ", 0($" << contxt.Regs+1 << ")";
+				}
 				/*if(contxt.WasDereferencing){
 					file << std::endl << "\tsw\t$"<<contxt.Regs+1<<",0($"<<contxt.Regs+2<<")";
 					contxt.WasDereferencing = false;			

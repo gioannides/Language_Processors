@@ -117,7 +117,7 @@ struct Context{
 	std::string funct_id = "";
 	std::vector<bindings> Variables;
 	bindings variable;
-	int totalStackArea = 12+104; //For the whole stack
+	int totalStackArea = 12+104+44; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
 	std::string AssignmentOperator = "df";
@@ -187,6 +187,7 @@ struct Context{
 	bool is_array =false;
 
 	int nested_function_calls = 0;
+	int pointer_word_size =0;
 };
 
 inline std::string labelGenEnum(Context& contxt) {
