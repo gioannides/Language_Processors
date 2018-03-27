@@ -23,37 +23,36 @@ mkdir -p $workingout
 for DRIVER in $workingin/*_driver.c ; do
     NAME=$(basename $DRIVER _driver.c)
     TESTCODE=$workingin/$NAME.c
-    
-
-    
-    # Compile driver with normal GCC
-    mips-linux-gnu-gcc -c $DRIVER -o $workingout/${NAME}_driver.o
+        
+    # Generate assembly for driver
+    mips-linux-gnu-gcc -S -w -march=mips1 -mfp32 -O0 $DRIVER -o $workingout/${NAME}_driver.s
     if [[ $? -ne 0 ]]; then
         >&2 echo "ERROR : Couldn't compile driver program using GCC."
         continue
     fi
     
-    # Compile test function with compiler under test to assembly
-    $COMPILER -S  $workingin/$NAME.c  -o  $workingout/$NAME.s
+    # Generate assembly for slave
+    $COMPILER -S $workingin/${NAME}.c -o $workingout/${NAME}.s
     if [[ $? -ne 0 ]]; then
         >&2 echo "ERROR : Compiler returned error message."
         continue
     fi
     
-    # Link driver object and assembly into executable
-    mips-linux-gnu-gcc -w -c  $workingout/${NAME}.s -o $workingout/${NAME}.o
-    mips-linux-gnu-gcc -static  $workingout/${NAME}_driver.o $workingout/${NAME}.o -o $workingout/${NAME}_result.o
-    if [[ $? -ne 0 ]]; then
-        >&2 echo "ERROR : Linker returned error message."
-        continue
+    # Generate GOT_EXIT_CODE
+    mips-linux-gnu-gcc -w -static $workingout/${NAME}_driver.s $workingout/${NAME}.s -o $workingout/${NAME}_result
+    qemu-mips $workingout/${NAME}_result
+    GOT_EXIT_CODE=$?
+    
+    # Generate EXP_EXIT_CODE
+    mips-linux-gnu-gcc -w -static -march=mips1 -mfp32 -O0 $workingin/${NAME}.c $workingin/${NAME}_driver.c -o $workingout/${NAME}_gcc_result
+    qemu-mips $workingout/${NAME}_gcc_result
+    EXP_EXIT_CODE=$?
+    
+    if [[ $GOT_EXIT_CODE -ne $EXP_EXIT_CODE ]]; then
+        echo -e ${wht}$NAME.c ${red}"[FAIL]" ${wht}"Expected" $EXP_EXIT_CODE ", got" $GOT_EXIT_CODE
+    else
+   	    echo -e ${wht}$NAME.c ${grn}"[PASS]"
     fi
     
-    # Run the actual executable
-    qemu-mips $workingout/${NAME}_result.o
-    if [[ $? -ne 30 ]]; then
-        >&2 echo -e ${wht}$NAME.c ${red}"[FAIL]" ${wht}"Expected 30 , got $?"
-    else
-   	echo -e "${wht}$NAME.c ${grn}[PASS]"
-    fi
-    rm test/mips_test/output/*.o
+    
 done

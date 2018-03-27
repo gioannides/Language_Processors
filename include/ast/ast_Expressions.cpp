@@ -1815,7 +1815,7 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 							
 
 						}
-						contxt.regType[contxt.Regs+1] = '&';
+						contxt.regType[contxt.Regs+1] = 'u';
 						
 					}
 					else if(UnaryOperatorPtr->render_asm(file,contxt) == '*')
@@ -1823,7 +1823,7 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 				
 						if(!contxt.lhs_of_assignment){
 							contxt.PointerLHSEval = false;	
-							
+						
 							if(contxt.Variables[contxt.good_i].DataType == "char" && contxt.Variables[contxt.good_i].PointerLevelsTemp==1){
 								file << std::endl << "\tlb $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
 								contxt.Variables[contxt.good_i].PointerLevelsTemp = contxt.Variables[contxt.good_i].PointerLevels;
@@ -1846,6 +1846,7 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 								contxt.Variables[contxt.good_i].PointerLevelsTemp = contxt.Variables[contxt.good_i].PointerLevels;
 								contxt.regType[contxt.Regs+1]='f';
 							}
+						
 						}
 						else{
 							
@@ -2094,7 +2095,7 @@ if(!contxt.sizeof_){
 			contxt.regType[contxt.Regs+1]='i';
 	}
 	else if(contxt.AssignmentOperator == "++"){
-			if(contxt.regType[contxt.Regs+1] == 'f' || contxt.regType[contxt.Regs]=='f'  ){
+			if(contxt.regType[contxt.Regs+1] == 'f'){
 				file << std::endl << "\tli.s\t$f" << contxt.Regs << ",1";
 				contxt.regType[contxt.Regs]='f';
 				file << std::endl << "\tadd.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;

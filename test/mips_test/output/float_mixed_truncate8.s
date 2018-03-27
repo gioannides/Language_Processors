@@ -18,16 +18,16 @@ operations:
 
 $END2:	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-140
-	sw $fp,136($sp)
-	sw $31,132($sp)
+	addiu $sp,$sp,-184
+	sw $fp,180($sp)
+	sw $31,176($sp)
 	move $fp,$sp
 
-	swc1	$f12,140($sp)
-	swc1 $f14, 144($sp)
-	sw $6,148($sp)
-	sw $7,152($sp)
-	lwc1	$f2, 140($sp) #a
+	swc1	$f12,184($sp)
+	swc1 $f14, 188($sp)
+	sw $6,192($sp)
+	sw $7,196($sp)
+	lwc1	$f2, 184($sp) #a
 	nop	
 	li.s	$f1,0
 	c.eq.s	$f2,$f1
@@ -51,7 +51,7 @@ $DONE_8:
 	sne $2,$0,$2
 	beq $0,$2,$SHORTCIRCUIT_AND7
 	nop	
-	lwc1	$f3, 144($sp) #b
+	lwc1	$f3, 188($sp) #b
 	nop	
 	mtc1	$2,$f2
 	nop
@@ -82,29 +82,10 @@ $DONE_9:
 	and $2,$2,$3
 $SHORTCIRCUIT_AND7:
 $END6:
-	li.s	$f1,0
-	c.eq.s	$f2,$f1
-	bc1f	$NOT_011
-	nop	
-	b	$DONE_11
-	nop	
-$NOT_011:
-	li.s	$f1,1
-	c.lt.s	$f2,$f1
-	bc1t	$LT_THAN111
-	nop	
-	b	$DONE_11
-	nop	
-$LT_THAN111:
-	li.s	$f2,1
-$DONE_11:
-	cvt.w.s	$f2,$f2
-	mfc1	$2,$f2
-	nop	
 	sne $2,$0,$2
 	bne $2,$0,$SHORTCIRCUIT_OR10
 	nop	
-	lwc1	$f3, 144($sp) #b
+	lwc1	$f3, 188($sp) #b
 	nop	
 	mtc1	$2,$f2
 	nop
@@ -114,28 +95,29 @@ $DONE_11:
 
 	li.s	$f1,0
 	c.eq.s	$f3,$f1
-	bc1f	$NOT_012
+	bc1f	$NOT_011
 	nop	
-	b	$DONE_12
+	b	$DONE_11
 	nop	
-$NOT_012:
+$NOT_011:
 	li.s	$f1,1
 	c.lt.s	$f3,$f1
-	bc1t	$LT_THAN112
+	bc1t	$LT_THAN111
 	nop	
-	b	$DONE_12
+	b	$DONE_11
 	nop	
-$LT_THAN112:
+$LT_THAN111:
 	li.s	$f3,1
-$DONE_12:
+$DONE_11:
 	cvt.w.s	$f3,$f3
 	mfc1	$3,$f3
 	nop	
 	sne $3,$0,$3
-	addi	$4, $3, 1 #++
-	mtc1	$4,$f4
-	cvt.s.w	$f4,$f4
-	swc1	$f4,144($sp) #b
+	lwc1	$f4, 188($sp) #b
+	nop	
+	li.s	$f4,1
+	add.s	$f4,$f4,$f3
+	swc1	$f4,188($sp) #b
 
 	or $2,$2,$3
 $SHORTCIRCUIT_OR10:
@@ -143,24 +125,24 @@ $END5:
 $END4:
 	mtc1	$2,$f2
 	cvt.s.w	$f2,$f2
-	swc1	$f2,128($sp) #result
+	swc1	$f2,172($sp) #result
 
-	lwc1	$f2, 144($sp) #b
+	lwc1	$f2, 188($sp) #b
 	nop	
-$END13:
+$END12:
 	mov.s	$f0,$f2
 	move	$sp,$fp
-	lw	$31,132($sp)
-	lw	$fp,136($sp)
-	addiu	$sp,$sp,140
+	lw	$31,176($sp)
+	lw	$fp,180($sp)
+	addiu	$sp,$sp,184
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,132($sp)
-	lw $fp,136($sp)
-	addiu $sp,$sp,140
+	lw $31,176($sp)
+	lw $fp,180($sp)
+	addiu $sp,$sp,184
 	j $31
 
 	nop

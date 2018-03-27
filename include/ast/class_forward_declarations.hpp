@@ -24,6 +24,7 @@ struct bindings {
 		bool Pointer=false;
 		int PointerLevels=0;
 		int PointerLevelsTemp=0;
+		bool initialized = false;
 	};
 
 struct function_details{
@@ -70,6 +71,7 @@ struct Context{
 	bool PointerLHSEval = false;
 	int found_0nothing_1local_2globl;
 	bool PointerNotStored=false;
+	bool AddressOf=false;
 	std::string GlobalPointerValue = "";
 
 	bool Cast=false;
@@ -532,23 +534,28 @@ inline void load_globals(Context& contxt, std::ofstream& file, int good_index)
 {
 
 	if(contxt.Variables[good_index].Pointer && contxt.Variables[good_index].DataType != "float"){
-	    file << std::endl << "\tlui\t$" << contxt.Regs+1 << ",%hi" << "(" << contxt.Variables[good_index].id << ")"; 
-	  file << std::endl << "\tlw\t$" << contxt.Regs+1 <<  ",%lo(" << contxt.Variables[good_index].id << ")" << "($" << contxt.Regs+1 << ")";
+    		if(contxt.AddressOf){		
+	   		 file << std::endl << "\tlui\t$" << contxt.Regs+1 << ",%hi" << "(" << contxt.Variables[good_index].id << ")"; 
+	 		 file << std::endl << "\tlw\t$" << contxt.Regs+1 <<  ",%lo(" << contxt.Variables[good_index].id << ")" << "($" << contxt.Regs+1 << ")";
 			
-			contxt.regType[contxt.Regs+1]='i';
+			 contxt.regType[contxt.Regs+1]='i';
+		}
 		
 	    return;
 	}
 	else if(contxt.Variables[good_index].Pointer && contxt.Variables[good_index].DataType == "float"){
-		
-		 file << std::endl << "\tlui\t$" << contxt.Regs+1 << ",%hi" << "(" << contxt.Variables[good_index].id << ")"; 
-                file << std::endl << "\tlw\t$" << contxt.Regs+1 <<  ",%lo(" << contxt.Variables[good_index].id << ")" << "($" << contxt.Regs+1 << ")";
-	   	 contxt.regType[contxt.Regs+1]='f';
-	    return;
+		if(contxt.Variables[good_index].initialized){
+			file << std::endl << "\tlui\t$" << contxt.Regs+1 << ",%hi" << "(" << contxt.Variables[good_index].id << ")"; 
+                	file << std::endl << "\tlw\t$" << contxt.Regs+1 <<  ",%lo(" << contxt.Variables[good_index].id << ")" << "($" << contxt.Regs+1 << ")";
+	   	 	contxt.regType[contxt.Regs+1]='f';
+	    	return;
+		}
 	}
 	
-	file << std::endl << "\tlui $" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
-	file << std::endl << "\tla $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
+	if(!contxt.Variables[good_index].Pointer){
+		file << std::endl << "\tlui $" << contxt.Regs+1 << ", %hi(" << contxt.Variables[good_index].id << ")";
+		file << std::endl << "\tla $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
+	}
 	if(contxt.Variables[good_index].DataType=="unsigned"){
 			contxt.regType[contxt.Regs+1]='u';
 		}	

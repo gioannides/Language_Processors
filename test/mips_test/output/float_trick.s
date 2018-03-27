@@ -17,21 +17,21 @@
 NOTEQUAL:
 	.set noreorder
 	.set nomacro
-	addiu $sp,$sp,-136
-	sw $fp,132($sp)
-	sw $31,128($sp)
+	addiu $sp,$sp,-180
+	sw $fp,176($sp)
+	sw $31,172($sp)
 	move $fp,$sp
 
-	swc1	$f12,136($sp)
-	swc1 $f14, 140($sp)
-	sw $6,144($sp)
-	sw $7,148($sp)
-	lwc1	$f2, 136($sp) #a
+	swc1	$f12,180($sp)
+	swc1 $f14, 184($sp)
+	sw $6,188($sp)
+	sw $7,192($sp)
+	lwc1	$f2, 180($sp) #a
 	nop	
-	lwc1	$f3, 140($sp) #b
+	lwc1	$f3, 184($sp) #b
 	nop	
 	mul.s	$f2,$f2,$f3
-	lw	$3, 144($sp) #x
+	lw	$3, 188($sp) #x
 	mtc1	$3,$f3
 	nop
 
@@ -42,17 +42,17 @@ NOTEQUAL:
 $END3:
 	mov.s	$f0,$f2
 	move	$sp,$fp
-	lw	$31,128($sp)
-	lw	$fp,132($sp)
-	addiu	$sp,$sp,136
+	lw	$31,172($sp)
+	lw	$fp,176($sp)
+	addiu	$sp,$sp,180
 	j	$31
 
 	nop
 
 	move $sp,$fp
-	lw $31,128($sp)
-	lw $fp,132($sp)
-	addiu $sp,$sp,136
+	lw $31,172($sp)
+	lw $fp,176($sp)
+	addiu $sp,$sp,180
 	j $31
 
 	nop

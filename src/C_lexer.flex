@@ -32,7 +32,7 @@ extern "C" int fileno(FILE *stream);
 %%
 #[^\n]*\n		{  return vtoken(PREPROCESSOR); LineNo++;}
 
-"/*"			{  }
+"/*"[^\n]*"*/"		{  }
 
 "//"[^\n]*              { /* consume //-comment */ }
 

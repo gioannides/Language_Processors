@@ -7,6 +7,7 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
+#include <regex>
 
 #include "class_forward_declarations.hpp"
 
@@ -724,6 +725,9 @@ class Initializer : public Node {
 				 	
 				if(contxt.Variables[contxt.good_i].Pointer){
 					file << std::endl << "\t.word\t" << contxt.GlobalPointerValue; //contxt.variable.value;
+					std::string str = contxt.GlobalPointerValue;
+    					std::regex regex_pattern("[A-Za-z_]([A-Za-z_]|[0-9])*");
+					contxt.AddressOf = std::regex_match(str,regex_pattern);   					
 				}
 				
 				else if( contxt.variable.word_size > 4 ){					
@@ -796,7 +800,7 @@ class InitDeclarator : public Node {
 			if( InitiaLizer != NULL && DecLarator != NULL) 
 			{
 				contxt.initialized = true;
-				
+				contxt.variable.initialized = true;
 				/*for(int i=0; i<contxt.Variables.size(); i++) {	//Predict the signedness of LHS, made DirectDeclarator members public...
 					std::cout << contxt.Variables[i].id << contxt.Variables[i].DataType << std::endl;				
 					if(*(DecLarator->DirectDecLarator->IDENTIFIER) == contxt.Variables[i].id) {
@@ -847,6 +851,7 @@ class InitDeclarator : public Node {
 			else if(DecLarator != NULL &&  InitiaLizer == NULL){
 				//file << std::endl << "# global not initialized" << std::endl;
 				contxt.initialized = false;
+				contxt.variable.initialized = false;
 				contxt.lhs_of_assignment=true;
 				DecLarator->render_asm(file,contxt);
 				contxt.lhs_of_assignment=false;
