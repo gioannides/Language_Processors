@@ -914,6 +914,7 @@ inline void LogicalAndExpression::render_asm(std::ofstream& file,Context& contxt
 						file<<   std::endl << "\tnop\t";
 					}		
 					file<<   std::endl << "\tsne $" << contxt.Regs+1 << ",$0,$" << contxt.Regs+1;
+					postfix_ops(contxt, file);
 					file<< std::endl << "\tand $" << contxt.Regs << ",$" << contxt.Regs << ",$" << contxt.Regs+1;
 					contxt.regType[contxt.Regs]='i';
 					contxt.regType[contxt.Regs+1]='i';
@@ -1523,7 +1524,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			contxt.variable.value = temp_f;
 		}
 		
-		if(is_char){		
+		if(is_char && contxt.function){		
 			file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << temp;
 			contxt.regType[contxt.Regs+1]='i';
 		}
@@ -1729,14 +1730,24 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 						
 						if(u<4)
 						{
-							if((ki+u)>=0 && contxt.regType[u+4] != 'f'/*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
+							if((ki+u)>=0 /*&& contxt.regType[u+4] != 'f'/*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
 							{
-								file << std::endl << "\tmove\t$" << u+4 << ", $" << contxt.Regs+1 << " #load parameter " << u+1; 
+								
+								file << std::endl << "\tmove\t$" << u+4 << ", $" << contxt.Regs+1 << " #load parameter " << u+1;
+								if(contxt.hack_counter == 0){
+									file << std::endl << "\tmov.s\t$f12" << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
+									contxt.hack_counter++;
+								}
+								else if(contxt.hack_counter == 1){
+									file << std::endl << "\tmov.s\t$f14" << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
+									contxt.hack_counter = 0;
+								}
+								
 							}
-							else 
+							/*else 
 							{
 								file << std::endl << "\tmov.s\t$f" << u+4 << ", $f" << contxt.Regs+1 << " #load parameter " << u+1; 
-							}
+							*///}
 						}
 						ki=contxt.Variables.size();
 					}

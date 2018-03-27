@@ -76,6 +76,8 @@ struct Context{
 	std::string CastType = "";
 	
 
+	int floatt=0;
+	int hack_counter=0;
 
 	std::vector<Enumeration> Enum;
 	Enumeration EnumTemp;
@@ -562,20 +564,22 @@ inline void load_globals(Context& contxt, std::ofstream& file, int good_index)
 					//file << std::endl << "\tlb $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+1 << ")";
 					contxt.regType[contxt.Regs+1]='c';
 				}
-				else if((contxt.Variables[good_index].DataType== "int" || "unsigned" || "signed") && contxt.Variables[good_index].DataType != "float")
-				{
-					file << std::endl << "\tlw $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
-					//file << std::endl << "\tlw $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
-					contxt.regType[contxt.Regs+1]='i';
-   				}
 				else if(contxt.Variables[good_index].DataType == "short" && contxt.Variables[good_index].DataType != "float")
 				{
 					file << std::endl << "\tlh $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
 					//file << std::endl << "\tlw $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
 					contxt.regType[contxt.Regs+1]='i';
    				}
+				else if((contxt.Variables[good_index].DataType== "int" ||contxt.Variables[good_index].DataType== "unsigned" || contxt.Variables[good_index].DataType=="signed") && contxt.Variables[good_index].DataType != "float")
+				{
+					file << std::endl << "\tlw $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
+					//file << std::endl << "\tlw $" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";                            	
+					contxt.regType[contxt.Regs+1]='i';
+   				}
+				
 				else if( contxt.Variables[good_index].DataType == "float") //TODO: CHECK OK
-				{	file << std::endl << "\tlwc1 $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
+				{				
+					file << std::endl << "\tlwc1 $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
 					//file << std::endl << "\tlwc1 $f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";     
 		                       	file << std::endl << "\tnop\t";
 					contxt.regType[contxt.Regs+1]='f';
@@ -639,14 +643,32 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 	else if (contxt.AssignmentOperator == "--" && contxt.is_postfix && !contxt.reading)
 	{
 		
-		if(contxt.regType[contxt.Regs] == 'f' || contxt.regType[contxt.Regs+1] == 'f'){			
+		if(contxt.regType[contxt.Regs] == 'f' || contxt.regType[contxt.Regs+1] == 'f'){
+			if(contxt.Variables[contxt.good_i].scope=="global")
+			{
+				load_globals(contxt, f, index);
+			}
+			else 
+			{
+				load_locals(contxt, f, index);
+			
+			}				
 			f << std::endl << "\tli.s\t$f" << contxt.Regs+1 << ",-1";
 			contxt.regType[contxt.Regs]='f';
 			f << std::endl << "\tadd.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
 			contxt.regType[contxt.Regs+1]='f';
 		}
 		else{
-			f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", -1 #--";
+			if(contxt.Variables[contxt.good_i].scope=="global")
+			{
+				load_globals(contxt, f, index);
+			}
+			else 
+			{
+				load_locals(contxt, f, index);
+			
+			}		
+			f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs+1 << ", -1 #--";
 		}
 		
 		if(contxt.Variables[contxt.good_i].scope=="global")

@@ -2098,31 +2098,47 @@ class FunctionDefinition : public Node {
 			// file << std::endl << "\taddiu $28,$28,%lo(__gnu_local_gp)";
 
 			
-			int floatt=0;
+			contxt.floatt=0;
 			for(int i=0; i<contxt.Variables.size(); i++)
 			{
 				if(contxt.Variables[i].param_offset==0 && contxt.Variables[i].scope==contxt.funct_id && contxt.Variables[i].DataType == "float")
 				{
-					floatt++;
+					contxt.floatt++;
 				}
-				if(floatt==1 && contxt.Variables[i].param_offset==4 && contxt.Variables[i].scope==contxt.funct_id && contxt.Variables[i].DataType == "float")
+				if(contxt.floatt==1 && contxt.Variables[i].param_offset==4 && contxt.Variables[i].scope==contxt.funct_id && contxt.Variables[i].DataType == "float")
 				{
-					floatt++;	
+					contxt.floatt++;	
 				}
 			}
-			if(floatt)
+			if(contxt.floatt)
 			{
 				file << std::endl << "\tswc1\t$f12," <<  contxt.totalStackArea + 4*(4-3) << "($sp)"; 
 			}
-			if(floatt==2)
+			if(contxt.floatt==2)
 			{
 				file << std::endl << "\tswc1 $f14, " << contxt.totalStackArea + 4*(5-3) << "($sp)"; 
 			}
 
-			
-			for(int i=4+floatt; i<=7; i++) //shift by 4 all the parameters
+			std::string dataType = "";
+			int j = 0;	
+			for(int i=4+contxt.floatt; i<=7; i++) //shift by 4 all the parameters
 			{
-				file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)"; 
+				if(contxt.Variables.size() > j){						
+					dataType = contxt.Variables[j].DataType;
+				}
+						
+				if(dataType == "char"){
+					file << std::endl << "\tsb $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)";
+				}
+				else if(dataType == "short"){
+					file << std::endl << "\tsh $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)";
+				}
+				else{
+					file << std::endl << "\tsw $" << i <<  "," << contxt.totalStackArea + 4*(i-3) << "($sp)";
+				}
+				dataType = "";
+				j++;
+				
 			}
 
 			contxt.variable.offset=contxt.totalStackArea-4;
