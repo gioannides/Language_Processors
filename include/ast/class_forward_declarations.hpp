@@ -67,8 +67,10 @@ struct Context{
 	int PointerCounter=0;
 	bool PointerArithmetic=false;
 	std::vector<char>PointerVector;
-	bool WasDereferencing = false;
+	bool PointerLHSEval = false;
 	int found_0nothing_1local_2globl;
+	bool PointerNotStored=false;
+	std::string GlobalPointerValue = "";
 
 	bool Cast=false;
 	std::string CastType = "";
@@ -117,7 +119,7 @@ struct Context{
 	std::string funct_id = "";
 	std::vector<bindings> Variables;
 	bindings variable;
-	int totalStackArea = 12+104; //For the whole stack
+	int totalStackArea = 12+104+44; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
 	std::string AssignmentOperator = "df";
@@ -529,7 +531,7 @@ inline void load_globals(Context& contxt, std::ofstream& file, int good_index)
 
 	if(contxt.Variables[good_index].Pointer && contxt.Variables[good_index].DataType != "float"){
 	    file << std::endl << "\tlui\t$" << contxt.Regs+1 << ",%hi" << "(" << contxt.Variables[good_index].id << ")"; 
-	    file << std::endl << "\taddiu\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 <<  "%lo(" << contxt.Variables[good_index].id << ")";
+	  file << std::endl << "\tlw\t$" << contxt.Regs+1 <<  ",%lo(" << contxt.Variables[good_index].id << ")" << "($" << contxt.Regs+1 << ")";
 			
 			contxt.regType[contxt.Regs+1]='i';
 		
@@ -538,7 +540,7 @@ inline void load_globals(Context& contxt, std::ofstream& file, int good_index)
 	else if(contxt.Variables[good_index].Pointer && contxt.Variables[good_index].DataType == "float"){
 		
 		 file << std::endl << "\tlui\t$" << contxt.Regs+1 << ",%hi" << "(" << contxt.Variables[good_index].id << ")"; 
-                 file << std::endl << "\taddiu\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 <<  "%lo(" << contxt.Variables[good_index].id << ")";
+                file << std::endl << "\tlw\t$" << contxt.Regs+1 <<  ",%lo(" << contxt.Variables[good_index].id << ")" << "($" << contxt.Regs+1 << ")";
 	   	 contxt.regType[contxt.Regs+1]='f';
 	    return;
 	}
@@ -593,14 +595,33 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 	if(contxt.AssignmentOperator == "++" && contxt.is_postfix && !contxt.reading)
 	{ 
 		
-		if(contxt.regType[contxt.Regs] == 'f' || contxt.regType[contxt.Regs+1] == 'f'){			
+		if(contxt.regType[contxt.Regs] == 'f' || contxt.regType[contxt.Regs+1] == 'f'){
+			if(contxt.Variables[contxt.good_i].scope=="global")
+			{
+				load_globals(contxt, f, index);
+			}
+			else 
+			{
+				load_locals(contxt, f, index);
+			
+			}		
 			f << std::endl << "\tli.s\t$f" << contxt.Regs+1 << ",1";
 			contxt.regType[contxt.Regs]='f';
 			f << std::endl << "\tadd.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
 			contxt.regType[contxt.Regs+1]='f';
 		}
 		else{
-			f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs << ", 1 #++";
+			if(contxt.Variables[contxt.good_i].scope=="global")
+			{
+				load_globals(contxt, f, index);
+			}
+			else 
+			{
+				load_locals(contxt, f, index);
+			
+			}
+	
+			f << "\n\taddi\t$" << contxt.Regs+1 << ", $" << contxt.Regs+1 << ", 1 #++";
 		}
 					
 		if(contxt.Variables[contxt.good_i].scope=="global")

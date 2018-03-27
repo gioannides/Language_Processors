@@ -202,37 +202,85 @@ inline void AdditiveExpression::render_asm(std::ofstream& file,Context& contxt) 
 					if( *OPERATOR == "+" ){
 
 						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u' ){
-							file << std::endl << "\taddu\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
-							contxt.regType[contxt.Regs]='u';
-							contxt.regType[contxt.Regs+1]='u';
+							if(contxt.lhs_of_assignment){ // TODO: NEW THING
+								file << std::endl << "\taddu\t$" << contxt.Regs+1 <<", $" << contxt.Regs+2 << ", $" << contxt.Regs + 1;
+								contxt.regType[contxt.Regs+1]='u';
+								contxt.regType[contxt.Regs+2]='u';
+							}
+							else{
+								file << std::endl << "\taddu\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
+								contxt.regType[contxt.Regs]='u';
+								contxt.regType[contxt.Regs+1]='u';
+							}
+							
 						}
 						else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
-							file << std::endl << "\tadd.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
-							contxt.regType[contxt.Regs]='f';
-							contxt.regType[contxt.Regs+1]='f';
+							if(contxt.lhs_of_assignment){ //TODO: NEW THING
+								file << std::endl << "\tadd.s\t$f" << contxt.Regs+1 <<", $f" << contxt.Regs+2 << ", $f" << contxt.Regs + 1;
+								contxt.regType[contxt.Regs+1]='f';
+								contxt.regType[contxt.Regs+2]='f';
+							}
+							else{
+								file << std::endl << "\tadd.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+								contxt.regType[contxt.Regs]='f';
+								contxt.regType[contxt.Regs+1]='f';
+							}
+							
 						}						
 						else{
+							if(contxt.lhs_of_assignment){ //TODO: NEW THING
+								file << std::endl << "\tadd\t$" << contxt.Regs+1 <<", $" << contxt.Regs+2 << ", $" << contxt.Regs + 1;
+								contxt.regType[contxt.Regs+2]='i';
+								contxt.regType[contxt.Regs+1]='i';
+							}
+							else{
 							file << std::endl << "\tadd\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
 							contxt.regType[contxt.Regs]='i';
 							contxt.regType[contxt.Regs+1]='i';
+							}
+							
 						}
 					}
 					else if(  *OPERATOR == "-" ){
 						if(contxt.regType[contxt.Regs]=='u' || contxt.regType[contxt.Regs+1]=='u') {
-							file << std::endl << "\tsubu\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
-							contxt.regType[contxt.Regs]='u';
-							contxt.regType[contxt.Regs+1]='u';
+							if(contxt.lhs_of_assignment){ //TODO: NEW THING
+								file << std::endl << "\tsubu\t$" << contxt.Regs+1 <<", $" << contxt.Regs+2 << ", $" << contxt.Regs + 1;
+								contxt.regType[contxt.Regs+2]='u';
+								contxt.regType[contxt.Regs+1]='u';
+							}
+							else{
+								file << std::endl << "\tsubu\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
+								contxt.regType[contxt.Regs]='u';
+								contxt.regType[contxt.Regs+1]='u';
+							}
+							
 						}
 						else if(contxt.regType[contxt.Regs]=='f' || contxt.regType[contxt.Regs+1]=='f'){
-							file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
-							contxt.regType[contxt.Regs]='f';
-							contxt.regType[contxt.Regs+1]='f';
+							if(contxt.lhs_of_assignment){ //TODO: NEW THING
+								file << std::endl << "\tsub.s\t$" << contxt.Regs+1 <<", $" << contxt.Regs+2 << ", $" << contxt.Regs + 1;
+								contxt.regType[contxt.Regs+2]='f';
+								contxt.regType[contxt.Regs+1]='f';
+							}
+							else{
+								file << std::endl << "\tsub.s\t$f" << contxt.Regs << ",$f" << contxt.Regs << ",$f" << contxt.Regs+1;
+								contxt.regType[contxt.Regs]='f';
+								contxt.regType[contxt.Regs+1]='f';
+							}
+							
 
 						}
 						else{
-							file << std::endl << "\tsub\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
-							contxt.regType[contxt.Regs]='i';
-							contxt.regType[contxt.Regs+1]='i';
+							if(contxt.lhs_of_assignment){ //TODO: NEW THING
+								file << std::endl << "\tsub\t$" << contxt.Regs+1 <<", $" << contxt.Regs+2 << ", $" << contxt.Regs + 1;
+								contxt.regType[contxt.Regs+2]='i';
+								contxt.regType[contxt.Regs+1]='i';	
+							}
+							else{
+								file << std::endl << "\tsub\t$" << contxt.Regs <<", $" << contxt.Regs << ", $" << contxt.Regs + 1;
+								contxt.regType[contxt.Regs]='i';
+								contxt.regType[contxt.Regs+1]='i';
+							}
+							
 						}
 					}
 					
@@ -1053,11 +1101,15 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 							}
 						}
 						if (offset<=0 || offset > contxt.totalStackArea-4){
-							offset=116;
+							offset=116+44;
 						}
 						for(i=1; i<25; i++)
 						{
 							file << "\n\tsw $" << i << ", " << offset-(i*4) << "($sp)";
+						}
+						for(i=10; i<21; i++)
+						{
+							file << "\n\tswc1 $f" << i << ", " << offset-100-(i-10)*4 << "($sp)";
 						}
 						//file << "\n\tsw $31," << offset-(i*4) << "($sp)"; 
 					}
@@ -1136,6 +1188,10 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						{
 							file << "\n\tlw $" << i << "," << offset-(i*4) << "($sp)";
 						}
+						for(i=10; i<21; i++)
+						{
+							file << "\n\tlwc1 $f" << i << ", " << offset-100-(i-10)*4 << "($sp)";
+						}
 						//file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
 						file << "\n\tmove $" << contxt.Regs+1 << ", $25"; 
 					}
@@ -1193,6 +1249,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		if(contxt.sizeof_){
 			findSize(contxt,*IDENTIFIER);
 		}
+
 
 		if(contxt.Regs>=24 && !contxt.sizeof_)
 		{
@@ -1264,18 +1321,29 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				//file << "# lhs_of_assignment is set\n";
 				if(found_0nothing_1local_2globl)
 				{
+					
 					if(contxt.AssignmentOperator != "df" && contxt.AssignmentOperator != "=")
 					{
 						AssignmentOperator(file,good_index,contxt,found_0nothing_1local_2globl);				
 					}
 				}
-				if(found_0nothing_1local_2globl==1)
-				{
-					store_locals(contxt, file, good_index);
+				if(found_0nothing_1local_2globl==1){
+					if(!contxt.Variables[good_index].Pointer){
+						store_locals(contxt, file, good_index);
+					}
+					else{
+						contxt.PointerNotStored = true;
+						//std::cout << contxt.Variables[contxt.good_i].PointerLevelsTemp << " " <<  contxt.Variables[contxt.good_i].id << std::endl;
+						
+					}
 				}					
-				else if(found_0nothing_1local_2globl==2) 
-				{
-					store_globals(contxt, file, good_index);
+				else if(found_0nothing_1local_2globl==2){
+					if(!contxt.Variables[good_index].Pointer){
+						store_globals(contxt, file, good_index);
+					}
+					else{
+						contxt.PointerNotStored = true;
+					}
 				}			
 				else
 				{
@@ -1464,12 +1532,39 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 		if(!contxt.reading && contxt.function && !is_char && !contxt.enum_constant) 
 		{	
 			if(contxt.variable.DataType == "float" || (std::floor(std::stod(*CONSTANT))) != std::stod(*CONSTANT)){
-				file <<  std::endl << "\tli.s\t$f" << contxt.Regs+1 << ", " << temp_f; //TODO: CHECK OK
-				contxt.regType[contxt.Regs+1]='f';
+				
+				if(contxt.lhs_of_assignment){
+					file <<  std::endl << "\tli.s\t$f" << contxt.Regs+2 << ", " << temp_f;
+					for(int i(0); i < 2; i++){
+						file << std::endl << "\taddu\t$" << contxt.Regs+2 << ",$" << contxt.Regs+2 << ",$" << contxt.Regs+2; //TODO: NEW THING
+					}
+					file << std::endl << "\tmtc1\t$" << contxt.Regs+2 << ",$f" << contxt.Regs+2;
+					contxt.regType[contxt.Regs+2]='f';
+				}
+				else{
+
+					file <<  std::endl << "\tli.s\t$f" << contxt.Regs+1 << ", " << temp_f; 
+					contxt.regType[contxt.Regs+1]='f';
+				}
+				
 			}
 			else if(contxt.variable.DataType != "float" || (std::floor(std::stod(*CONSTANT))) == std::stod(*CONSTANT)){
-				file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << temp;
-				contxt.regType[contxt.Regs+1]='i';
+				if(contxt.lhs_of_assignment){						//TODO: NEW THING
+					int j = 0;
+					file <<  std::endl << "\tli\t$" << contxt.Regs+2 << ", " << temp;
+					if(contxt.variable.DataType == "char") { j = 0; }
+					else if(contxt.variable.DataType == "short") { j = 1; }
+					else { j = 2; }
+					for(int i(0); i < j; i++){
+						file << std::endl << "\taddu\t$" << contxt.Regs+2 << ",$" << contxt.Regs+2 << ",$" << contxt.Regs+2;
+					}
+					contxt.regType[contxt.Regs+2]='i';
+				}
+				else{
+					file <<  std::endl << "\tli\t$" << contxt.Regs+1 << ", " << temp;
+					contxt.regType[contxt.Regs+1]='i';
+				}
+				
 			}
 			
 		}
@@ -1502,6 +1597,12 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 			// 	std::cout << "\n";
 			 }
 		}
+	}
+
+	else if(IDENTIFIER != NULL && !contxt.function && !contxt.function_dec && !contxt.lhs_of_assignment){
+			
+			contxt.GlobalPointerValue = *IDENTIFIER;
+
 	}
 
 }
@@ -1560,12 +1661,36 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 				contxt.AssignmentOperator = *AssignmentOperator;	
 				contxt.lhs_of_assignment = true;
 				UnaryExpressionPtr->render_asm(file,contxt);			//TODO: This is for identifier names and values
+				
+				if(contxt.PointerNotStored){
+					if(!contxt.PointerLHSEval){
+						file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[contxt.good_i].offset << "($sp) #" << contxt.Variables[contxt.good_i].id;	
+					}
+					else{
+						if(contxt.Variables[contxt.good_i].DataType == "char"){
+						file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", " << "0($" <<  contxt.Regs+2  << ")" << "#" << contxt.Variables[contxt.good_i].id;
+			
+						}
+						else if(contxt.Variables[contxt.good_i].DataType == "short"){
+						file << std::endl << "\tsh\t$" << contxt.Regs+1 << ", " << "0($" <<  contxt.Regs+2  << ")" << "#" << contxt.Variables[contxt.good_i].id;
+						}
+						else if(contxt.Variables[contxt.good_i].DataType != "float"){
+						file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << "0($" <<  contxt.Regs+2  << ")" << "#" << contxt.Variables[contxt.good_i].id;
+						}
+						else if(contxt.Variables[contxt.good_i].DataType == "float"){
+						file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", " << "0($" <<  contxt.Regs+2  << ")" << "#" << contxt.Variables[contxt.good_i].id;
+						}
+		
+
+					}
+					contxt.Variables[contxt.good_i].PointerLevelsTemp = contxt.Variables[contxt.good_i].PointerLevels;
+					contxt.regType[contxt.Regs+1]='i';
+					contxt.PointerNotStored = false;
+				}
 				contxt.lhs_of_assignment = false;
 				contxt.AssignmentOperator = "df";
-				/*if(contxt.WasDereferencing){
-					file << std::endl << "\tsw\t$"<<contxt.Regs+1<<",0($"<<contxt.Regs+2<<")";
-					contxt.WasDereferencing = false;			
-				}*/
+				
+
 				
 			}				
 			else if(ConditionalExpressionPtr != NULL) {
@@ -1685,68 +1810,52 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 					else if(UnaryOperatorPtr->render_asm(file,contxt) == '*')
 					{
 				
-						if(!contxt.lhs_of_assignment){		
-							if(contxt.Variables[contxt.good_i].DataType == "char" && contxt.Variables[contxt.good_i].PointerLevelsTemp==0){
+						if(!contxt.lhs_of_assignment){
+							contxt.PointerLHSEval = false;	
+							
+							if(contxt.Variables[contxt.good_i].DataType == "char" && contxt.Variables[contxt.good_i].PointerLevelsTemp==1){
 								file << std::endl << "\tlb $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
 								contxt.Variables[contxt.good_i].PointerLevelsTemp = contxt.Variables[contxt.good_i].PointerLevels;
 								contxt.regType[contxt.Regs+1]='c';
 								}
-							else if(contxt.Variables[contxt.good_i].DataType == "short" && contxt.Variables[contxt.good_i].PointerLevelsTemp==0){
+							else if(contxt.Variables[contxt.good_i].DataType == "short" && contxt.Variables[contxt.good_i].PointerLevelsTemp==1){
 								file << std::endl << "\tlh $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
 								contxt.Variables[contxt.good_i].PointerLevelsTemp = contxt.Variables[contxt.good_i].PointerLevels;
 								contxt.regType[contxt.Regs+1]='i';
 							}
-							else if((contxt.Variables[contxt.good_i].DataType == "int" || contxt.Variables[contxt.good_i].DataType =="unsigned" || contxt.Variables[contxt.good_i].DataType =="signed" || contxt.Variables[contxt.good_i].DataType =="short") || contxt.Variables[contxt.good_i].PointerLevelsTemp > 0 ){
+							else if((contxt.Variables[contxt.good_i].DataType == "int" || contxt.Variables[contxt.good_i].DataType =="unsigned" || contxt.Variables[contxt.good_i].DataType =="signed") || contxt.Variables[contxt.good_i].PointerLevelsTemp > 1 ){
 								file << std::endl << "\tlw $" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
 								contxt.Variables[contxt.good_i].PointerLevelsTemp=contxt.Variables[contxt.good_i].PointerLevelsTemp-1;
 								contxt.regType[contxt.Regs+1]='i';
 							}
 					 	
-							else if(contxt.Variables[contxt.good_i].DataType == "float" && contxt.Variables[contxt.good_i].PointerLevelsTemp==0){
+							else if(contxt.Variables[contxt.good_i].DataType == "float" && contxt.Variables[contxt.good_i].PointerLevelsTemp==1){
 							
 								file << std::endl << "\tlwc1 $f" << contxt.Regs+1 <<  ", 0($" << contxt.Regs+1 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
 								contxt.Variables[contxt.good_i].PointerLevelsTemp = contxt.Variables[contxt.good_i].PointerLevels;
 								contxt.regType[contxt.Regs+1]='f';
 							}
 						}
-						/*else{
-							if(contxt.Variables[contxt.good_i].DataType == "char" && contxt.PointerVector.size()<=1){
-								file << std::endl << "\tlb $" << contxt.Regs+2 <<  ", 0($" << contxt.Regs+2 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
-								
-								contxt.regType[contxt.Regs+1]='c';
-								if(contxt.PointerVector.size()){
-									contxt.PointerVector.pop_back();
-								}
-								}
-							else if(contxt.Variables[contxt.good_i].DataType == "short"  && contxt.PointerVector.size()<=1){
-								file << std::endl << "\tlh $" << contxt.Regs+2 <<  ", 0($" << contxt.Regs+2 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
-								
-								contxt.regType[contxt.Regs+1]='i';
-								if(contxt.PointerVector.size()){
-									contxt.PointerVector.pop_back();
-								}
-							}
-							else if((contxt.Variables[contxt.good_i].DataType == "int" || contxt.Variables[contxt.good_i].DataType =="unsigned" || contxt.Variables[contxt.good_i].DataType =="signed" || contxt.Variables[contxt.good_i].DataType =="short") || contxt.PointerVector.size() > 1 ){
+						else{
+							
+							contxt.PointerLHSEval = true;
+							if( contxt.Variables[contxt.good_i].PointerLevelsTemp > 1 ){
 								file << std::endl << "\tlw $" << contxt.Regs+2 <<  ", 0($" << contxt.Regs+2 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
-								
+								contxt.Variables[contxt.good_i].PointerLevelsTemp=contxt.Variables[contxt.good_i].PointerLevelsTemp-1;
 								contxt.regType[contxt.Regs+1]='i';
-								if(contxt.PointerVector.size()){
-									contxt.PointerVector.pop_back();
-								}
 							}
 					 	
-							else if(contxt.Variables[contxt.good_i].DataType == "float" && contxt.PointerVector.size()<=1){
+							 if(contxt.Variables[contxt.good_i].DataType == "float" && contxt.Variables[contxt.good_i].PointerLevelsTemp==1){
 							
 								file << std::endl << "\tlwc1 $f" << contxt.Regs+2 <<  ", 0($" << contxt.Regs+2 << ") # dereferencing pointer " <<  contxt.Variables[contxt.good_i].id;
-								
+								contxt.Variables[contxt.good_i].PointerLevelsTemp = contxt.Variables[contxt.good_i].PointerLevels;
 								contxt.regType[contxt.Regs+1]='f';
-								if(contxt.PointerVector.size()){
-									contxt.PointerVector.pop_back();
-								}
 							}
-							contxt.WasDereferencing = true;
 
-						}*/
+
+
+						}
+						
 
 
 

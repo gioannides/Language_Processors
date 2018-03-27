@@ -722,8 +722,11 @@ class Initializer : public Node {
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				if(!contxt.function && !contxt.function_dec) {
 				 	
+				if(contxt.Variables[contxt.good_i].Pointer){
+					file << std::endl << "\t.word\t" << contxt.GlobalPointerValue; //contxt.variable.value;
+				}
 				
-				if( contxt.variable.word_size > 4 ){					
+				else if( contxt.variable.word_size > 4 ){					
 					file << std::endl << "\t.double\t" << contxt.variable.value ; 	//TODO: Convert to IEEE-754 for FLOAT and DOUBLE
 				}
 				else if( (contxt.variable.word_size==4) && contxt.variable.DataType!="float"){
@@ -1428,10 +1431,8 @@ class TypeSpecifier : public Node {
 
 			
 			else if( TYPES != NULL && !contxt.sizeof_ && !contxt.typedefs_  && !contxt.Cast ){
-				std::string types = *TYPES;			// Require conversion to be used
-				contxt.variable.PointerLevels = contxt.PointerCounter;
-				contxt.variable.PointerLevelsTemp = contxt.PointerCounter;
-				contxt.PointerCounter = 0;
+				std::string types = *TYPES;		// Require conversion to be used
+				
 				if (types=="char"){
 					if(!contxt.variable.Pointer){
 						contxt.variable.word_size = 1;				///it should be size=1, you need lb and sb
@@ -2058,7 +2059,7 @@ class FunctionDefinition : public Node {
 			}
 			//std::cout << "start of compund" << contxt.funct_id << std::endl;
 			if( CompoundStatementPtr != NULL ) { // function_def.area is calculated here
-				contxt.totalStackArea = 12+104;
+				contxt.totalStackArea = 12+104+44;
 				contxt.reading = true;						// this flag is used to prevent writing asm on file<< while reading ahead
 				CompoundStatementPtr->render_asm(file,contxt);  // ...(file,initialized,function)
 				contxt.reading = false;
@@ -2496,7 +2497,13 @@ inline void Declarator::render_asm(std::ofstream& file,Context& contxt) {
 				
 				contxt.variable.Pointer = true;
 				PointerPtr->render_asm(file,contxt);
+
+				contxt.variable.PointerLevels = contxt.PointerCounter;
+				contxt.variable.PointerLevelsTemp = contxt.PointerCounter;
+				
+				
 				DirectDecLarator->render_asm(file,contxt);
+				contxt.PointerCounter = 0;
 				contxt.variable.Pointer = false;
 				contxt.variable.PointerLevels = 0;
 				contxt.variable.PointerLevelsTemp = 0;

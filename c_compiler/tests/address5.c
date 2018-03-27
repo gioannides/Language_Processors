@@ -9,3 +9,5 @@ int main(){
 	c = &u;
 	return *x + *u + **c;
 }
+
+
