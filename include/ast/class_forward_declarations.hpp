@@ -121,7 +121,7 @@ struct Context{
 	std::string funct_id = "";
 	std::vector<bindings> Variables;
 	bindings variable;
-	int totalStackArea = 12+104+44; //For the whole stack
+	int totalStackArea = 12+104+120; //For the whole stack
 	int StackOffset = 0;	//the offset from $sp for each variable
 	int Regs=1;
 	std::string AssignmentOperator = "df";

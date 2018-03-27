@@ -1101,19 +1101,10 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 								}
 							}
 						}
-						if (offset<=0 || offset > contxt.totalStackArea-4){
-							offset=116+44;
-						}
-						for(i=1; i<25; i++)
-						{
-							file << "\n\tsw $" << i << ", " << offset-(i*4) << "($sp)";
-						}
-						for(i=10; i<21; i++)
-						{
-							file << "\n\tswc1 $f" << i << ", " << offset-100-(i-10)*4 << "($sp)";
-						}
+						
 						//file << "\n\tsw $31," << offset-(i*4) << "($sp)"; 
 					}
+
 					contxt.nested_function_calls++;
 					contxt.is_function_call=true;
 					
@@ -1137,7 +1128,20 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 					{
 						off = 16;
 					}
-
+					//file << "\n offset =" << off << "\n";
+					if(!contxt.reading){	
+						if (offset<=0 || offset > contxt.totalStackArea-4){
+							offset=116+120+off-4;
+						}
+						for(i=1; i<25; i++)
+						{
+							file << "\n\tsw $" << i << ", " << offset-(i*4) << "($sp)";
+						}
+						for(int j=1; j<31; j++)
+						{
+							file << "\n\tswc1 $f" << j << ", " << offset-100-(j-1)*4 << "($sp)";
+						}
+					}
 					if(contxt.nested_function_calls>1 && !contxt.reading)
 					{
 						file << std::endl << "\taddiu $sp, $sp, -" << off;
@@ -1189,9 +1193,9 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						{
 							file << "\n\tlw $" << i << "," << offset-(i*4) << "($sp)";
 						}
-						for(i=10; i<21; i++)
+						for(int j=1; j<31; j++)
 						{
-							file << "\n\tlwc1 $f" << i << ", " << offset-100-(i-10)*4 << "($sp)";
+							file << "\n\tlwc1 $f" << j << ", " << offset-100-(j-1)*4 << "($sp)";
 						}
 						//file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
 						file << "\n\tmove $" << contxt.Regs+1 << ", $25"; 
