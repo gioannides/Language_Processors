@@ -2064,7 +2064,7 @@ class FunctionDefinition : public Node {
 			}
 			//std::cout << "start of compund" << contxt.funct_id << std::endl;
 			if( CompoundStatementPtr != NULL ) { // function_def.area is calculated here
-				contxt.totalStackArea = 12+104+44;
+				contxt.totalStackArea = 12+104+120;
 				contxt.reading = true;						// this flag is used to prevent writing asm on file<< while reading ahead
 				CompoundStatementPtr->render_asm(file,contxt);  // ...(file,initialized,function)
 				contxt.reading = false;
@@ -2072,6 +2072,7 @@ class FunctionDefinition : public Node {
 			contxt.is_function_call=false;	
 			//std:: cout << "\nmax_offset" << contxt.max_offset << " " <<  contxt.funct_id <<"\n";
 			contxt.totalStackArea+=contxt.max_offset;
+			file << "\n max_offset = " << contxt.max_offset << "\n";
 			contxt.max_offset=16;
 			//print_scopes(contxt, file);
 			if(contxt.Scopes.size()>=1){
