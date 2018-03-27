@@ -1,9 +1,9 @@
 int main(){
 
 
-int** x;
-int* z;
-int y = 9;
+unsigned ** x;
+unsigned* z;
+unsigned y = 9;
 x = &z;
 z=&y;
 
