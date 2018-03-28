@@ -2337,15 +2337,20 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 				}
 				if(round1_square2_closed3==2)
 				{
-					DirectDeclaratorPtr->render_asm(file, contxt);
-					round1_square2_closed3=0;
-				
-					contxt.count_array_initializers=0;
-					if(ConstantExpRession!=NULL)
+					if(ConstantExpRession!=NULL) //TODO: FINISH IT
 					{
+						contxt.LocalArray=true;
 						ConstantExpRession->render_asm(file,contxt);
-						contxt.no_array_elements=contxt.eval[contxt.Regs+1];
+						contxt.LocalArray=false;
+						if(contxt.ArraySize.size()){
+							contxt.no_array_elements=contxt.ArraySize[contxt.ArraySize.size()-1];
+							
+						}
 					}
+					DirectDeclaratorPtr->render_asm(file, contxt);
+					round1_square2_closed3=0;				
+					contxt.count_array_initializers=0;
+					
 				}
 			}else if( DirectDeclaratorPtr != NULL) {
 				//std::cout << "print this once" << std::endl; 

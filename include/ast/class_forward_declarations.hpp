@@ -75,6 +75,9 @@ struct Context{
 	std::string GlobalPointerValue = "";
 	int FloatRegCount=12;
 
+	bool LocalArray = false;
+	std::vector<int>ArraySize;
+
 	bool Cast=false;
 	std::string CastType = "";
 	
