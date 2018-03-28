@@ -858,20 +858,7 @@ inline void findSize(Context& contxt,std::string IDENTIFIER){
 			}
 }
 
-inline std::string GetBinary32( float value )
-{
-    union
-    {
-         float input;   // assumes sizeof(float) == sizeof(int)
-         int   output;
-    }    data;
- 
-    data.input = value;
- 
-    std::bitset<sizeof(float) * CHAR_BIT>   bits(data.output);
- 
-    return bits.to_string<char,std::char_traits<char>,std::allocator<char> >();
-}
+
 		
 
 class Node;
