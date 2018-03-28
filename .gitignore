@@ -1,9 +1,0 @@
-*.o
-bin/*
-*.tab.cpp
-*.yy.cpp
-*.output
-*.tab.hpp
-tmp/*
-c_compiler/*
-*.s
