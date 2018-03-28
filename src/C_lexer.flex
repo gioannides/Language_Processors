@@ -8,7 +8,8 @@
    the yylval variable. */
 
 #include "C_parser.tab.hpp"
-#include <stdlib.h>		
+#include <stdlib.h>
+#include <stdio.h>		
 #include <string>
 #include <iostream>
 #include "../include/ast/class_forward_declarations.hpp"		
@@ -32,7 +33,7 @@ extern "C" int fileno(FILE *stream);
 %%
 #[^\n]*\n		{  return vtoken(PREPROCESSOR); LineNo++;}
 
-"/*"[^\n]*"*/"		{  }
+\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/		{ /*consume comment*/ }
 
 "//"[^\n]*              { /* consume //-comment */ }
 
@@ -312,6 +313,9 @@ void yyerror (char const *s)
 	
   	exit(1);
 }
+
+
+
 
 int type(){
 	int i=0;

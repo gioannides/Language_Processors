@@ -741,7 +741,7 @@ class Initializer : public Node {
 					contxt.float_ = false;
 				}
 				else if(contxt.variable.word_size==2){
-					file << std::endl << "\t.half\t" << contxt.variable.value;
+					file << std::endl << "\t.half\t" << contxt.eval_f[contxt.Regs+1];
 				}
 				else if(contxt.variable.word_size==1){
 					file << std::endl << "\t.byte\t" << contxt.eval[contxt.Regs+1];
@@ -2318,7 +2318,7 @@ inline void DeclarationList::render_asm(std::ofstream& file,Context& contxt) {
 
 inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 
-			if(contxt.function)
+			if(contxt.function  && round1_square2_closed3==1)
 			{
 				round1_square2_closed3=0;
 			}

@@ -1705,6 +1705,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 			{
 				file << "\n# merge\n";
 				int ki=0;
+				
 				while(ki<contxt.Variables.size())
 				{
 					if(contxt.Scopes.size()-contxt.nested_function_calls && contxt.Scopes[contxt.Scopes.size()-contxt.nested_function_calls]==contxt.Variables[ki].scope)
@@ -1734,18 +1735,36 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 						
 						if(u<4)
 						{
-							if((ki+u)>=0 /*&& contxt.regType[u+4] != 'f'/*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
+							if((ki+u)>=0 && contxt.regType[u+4] != 'f'/*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
 							{
+								if(contxt.Variables[ki+u].DataType != "float"){
+									file << std::endl << "\tmove\t$" << u+4 << ", $" << contxt.Regs+1 << " #load parameter " << u+1;
+								}
+								else if(contxt.Variables[ki+u].DataType == "float" && contxt.FloatRegCount == 12){
+
+									file << std::endl << "\tmov.s\t$f" << contxt.FloatRegCount << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
+									contxt.FloatRegCount+=2;
+		
+								}
+								else if(contxt.Variables[ki+u].DataType == "float" && contxt.FloatRegCount == 14){
+
+									file << std::endl << "\tmov.s\t$f" << contxt.FloatRegCount << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
+									contxt.FloatRegCount=6;
+		
+								}
+								else if(contxt.Variables[ki+u].DataType == "float" && contxt.FloatRegCount == 6){
+
+									file << std::endl << "\tmfc1\t$" << contxt.FloatRegCount << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
+									contxt.FloatRegCount=7;
+		
+								}
+								else if(contxt.Variables[ki+u].DataType == "float" && contxt.FloatRegCount == 7){
+
+									file << std::endl << "\tmfc1\t$" << contxt.FloatRegCount << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
+									contxt.FloatRegCount=12;
+		
+								}
 								
-								file << std::endl << "\tmove\t$" << u+4 << ", $" << contxt.Regs+1 << " #load parameter " << u+1;
-								if(contxt.hack_counter == 0){
-									file << std::endl << "\tmov.s\t$f12" << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
-									contxt.hack_counter++;
-								}
-								else if(contxt.hack_counter == 1){
-									file << std::endl << "\tmov.s\t$f14" << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
-									contxt.hack_counter = 0;
-								}
 								
 							}
 							/*else 
@@ -1756,6 +1775,7 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 						ki=contxt.Variables.size();
 					}
 					ki++;
+					
 				}
 			}
 		}

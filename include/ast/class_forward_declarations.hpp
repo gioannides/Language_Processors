@@ -73,6 +73,7 @@ struct Context{
 	bool PointerNotStored=false;
 	bool AddressOf=false;
 	std::string GlobalPointerValue = "";
+	int FloatRegCount=12;
 
 	bool Cast=false;
 	std::string CastType = "";
