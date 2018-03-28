@@ -11,5 +11,5 @@ TestCtoPythonParser,ConstructedCtoPythonParser,8,gi316,59b0bfd6f1749c6837ea81f61
 StartCodeGen,CompletedCodeGenLab,6,gi316,e19a8b7f4f75cc816b67328eaaaad57b0f7846cc,"Using principles learned from the CodeGen lab, structure the implementation of the Abstract Syntax Tree to MIPS I assembly"
 AbasicCodegenVersion,StartedCodeGen,8,ap4116,e19a8b7f4f75cc816b67328eaaaad57b0f7846cc,The CodeGen at least works for all of the basic cases and hopefully even more
 A_workingCodegen,AbasicCodegenVersion,8,gi316,7c966c8935e6a212e3d804590b0bf400eb9baca7,Verify the CodeGen works for most of the cases and hopefully (near) all
-TestBenchDesign,WorkingCompilerAndCodeGen,8,ap4116,,Make up a formal TestBench to test extensively the Compiler and Translator
-WriteTheReport,AllOfTheAbove,8,gi316,,Finish writing the report/documentation
+TestBenchFinal,WorkingCompilerAndCodeGen,8,ap4116,6996b8da74cc8529b91539bdeaea8b32b97f9bdc,Make up a formal TestBench to test extensively the Compiler and Translator
+FinishTheManagementLogs,AllOfTheAbove,8,gi316,,Finish the documentation of the deliverable in the csv file and conclusions text file
