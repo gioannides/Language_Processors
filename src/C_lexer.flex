@@ -150,7 +150,7 @@ extern "C" int fileno(FILE *stream);
 											contxt.TypeDef.DummyName += yytext[i];
 											i++;
 										}
-										if(contxt.TypeDef.TypeSpec != "int" || "short" || "long" || "char" || "void" || "unsigned" || "signed" || "double" ){
+										if(contxt.TypeDef.TypeSpec != "int" || contxt.TypeDef.TypeSpec !=  "short" || contxt.TypeDef.TypeSpec !=  "long" ||contxt.TypeDef.TypeSpec !=  "char" || contxt.TypeDef.TypeSpec !=  "void" || contxt.TypeDef.TypeSpec !=  "unsigned" || contxt.TypeDef.TypeSpec !=  "signed" || contxt.TypeDef.TypeSpec !=  "double" ){
 
 											for(int i(0); i < contxt.TypeAssoc.size(); i++){
 											

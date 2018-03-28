@@ -2344,6 +2344,8 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 						contxt.LocalArray=false;
 						if(contxt.ArraySize.size()){
 							contxt.no_array_elements=contxt.ArraySize[contxt.ArraySize.size()-1];
+							contxt.ArraySize.pop_back();
+							
 						
 						}
 					}
