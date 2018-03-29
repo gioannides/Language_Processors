@@ -1,18 +1,19 @@
 int main()
 {
     
-int a,b=8;
-    if(a<b){
-        a=a-1;
-        if(a>b){
-            b=b+3;
-            if(a==b){
-                return a*b;
+int x=0;
+int y=45;
+    if(x<y){
+        x-=-1;
+        if(x>y){
+            y+=+3;
+            if(x==y){
+                return x*y;
             }
         }
-        return b;
+        return y;
     }
-    return 13;
+    return x;
 }
 
 

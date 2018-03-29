@@ -1,6 +1,6 @@
 int main(){
-  char c = '\n';
-  char b = 'b';
-  char e = 'e';
-  return c;
+  char x = '\n';
+  char y = '\b';
+  char d = '\a';
+  return x+y+d;
 }

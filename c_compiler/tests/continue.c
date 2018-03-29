@@ -1,19 +1,16 @@
-
-
-
 int main(){
 	
 	int x = 1;
 	int y = 0;
-	for(x; x <= 50; ++x) {
+	for(x <= 50; x++;) {
 
 		if(x == 33){
-			continue;
+		goto xs;
 		}
 
 		y++;
 	}
-		
+xs:		
 	return y;
 
 }

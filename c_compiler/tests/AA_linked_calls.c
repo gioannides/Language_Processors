@@ -1,15 +1,20 @@
-int a=1, b=2;
-int f()
-{
-	int d=93+(a+=90);
-	return b+d+a;
+int c=1, w=2;
+
+
+int foo(){
+
+	short k=12+(w+=12);
+	return k+c+w;
 }
-int g()
-{
-	char cha = 'x';
-	return b*(!(f()+9))+a+cha;
+int goo(){
+
+	char y = 'x';
+	int r = c + w + y;
+	return w+(!~(foo()+r*88));
 }
+
+
 int main()
 {
-	return g();
+	return goo();
 }

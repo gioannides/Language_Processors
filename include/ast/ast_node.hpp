@@ -1879,7 +1879,7 @@ class SelectionStatement : public Node {
 
 class ExpressionStatement : public Node {
 
-	private:
+	public:
 		Expression* AssignmentExpressionPtr;
 		
 	public:
@@ -2660,6 +2660,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.TestConditionContinue = AssignmentExpressionPtr; //In case of a continue
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
+				
 				if(!contxt.reading)	
 				{
 					if(contxt.regType[contxt.Regs+1] == 'f'){
@@ -2678,6 +2679,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 					file << std::endl << "\tnop";
 					file << std::endl << END << ":";
 				}
+
 				contxt.LoopHeader.pop_back();
 				contxt.LastScope.pop_back();
 				
@@ -2699,6 +2701,8 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = true;
 				ExpressionStatementPtr2->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
+				if(ExpressionStatementPtr2->AssignmentExpressionPtr!=NULL)
+				{
 				if(!contxt.reading)	{
 
 					if(contxt.regType[contxt.Regs+1] == 'f'){
@@ -2714,6 +2718,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 						file << std::endl << "\tnop";
 					}
 				}
+			}
 
 				contxt.LastScope.push_back(END);
 				contxt.BreakTracker.push_back(contxt.BreakCounter);
@@ -2747,6 +2752,8 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				contxt.rhs_of_expression = true;
 				ExpressionStatementPtr2->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
+				if(ExpressionStatementPtr2->AssignmentExpressionPtr!=NULL)
+				{
 				if(!contxt.reading)	{
 					if(contxt.regType[contxt.Regs+1] == 'f'){
 						file << std::endl << BEGIN_2 << ":" << "\tli.s\t$f1,0";
@@ -2761,6 +2768,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 						file << std::endl << "\tnop";
 					}				
 				}
+			}
 				contxt.TestConditionContinue = AssignmentExpressionPtr; //In case of a continue
 				StatementPtr->render_asm(file,contxt);
 				

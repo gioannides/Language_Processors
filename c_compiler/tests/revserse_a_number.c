@@ -17,4 +17,4 @@ int main()
    return 0;
 }
 
-//https://www.programmingsimplified.com/c/source-code/c-program-reverse-number
+/*https://www.programmingsimplified.com/c/source-code/c-program-reverse-number*/

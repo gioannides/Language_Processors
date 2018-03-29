@@ -1,13 +1,15 @@
-int a=1, b=2;
-int f()
+int x = 45;
+int y = 85;
+
+int foo()
 {
-	return b;
+	return ~x;
 }
-int g()
+int goo()
 {
-	return f()+f();
+	return -(foo()+foo());
 }
 int main()
 {
-	return g();
+	return goo();
 }

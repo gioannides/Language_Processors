@@ -1,13 +1,12 @@
 int main()                    
 {     
-      int y = 0;
-    int x;
-    for (x = 0; x < 10; x++) {
-        if (x == 5)
-        {
+    int y = 0;
+    int x=0;
+    for (x < 10; x++;) {
+        if (x == 5){
             continue;
         }
-        y = y + x;
+        y += (y + x);
     }
 
 return y;                                 

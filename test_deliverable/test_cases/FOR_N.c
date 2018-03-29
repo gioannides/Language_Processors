@@ -1,9 +1,10 @@
-int FOR_N(int i){
+int FOR_N(){
 
-	while(i){
-	
-		i = i - 1;
+	int i=1;
+	for(i=0;i<6;i=i+1){
+
 
 	}
+		
 return i;
 }

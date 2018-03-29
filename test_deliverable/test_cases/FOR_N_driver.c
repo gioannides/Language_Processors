@@ -1,9 +1,9 @@
-int FOR_N(int i);
+int FOR_N();
 
 
 int main() {
 
-		if(FOR_N(10) != 0){
+		if(FOR_N() != 5){
 			return 1;
 		}	
 	
