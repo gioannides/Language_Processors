@@ -305,7 +305,6 @@ inline void CastToType(std::ofstream& file, Context& contxt, std::string IDENTIF
 
 
 inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt){
-
 	if(contxt.regType[reg1] != 'f' && contxt.regType[reg2] != 'f' && reg2 > 1 && reg1 > 1){
 		//do nothing
 	}
@@ -471,7 +470,7 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 			file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 			file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 		}
-		file << std::endl << "\tswc1 $" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ")";
+		file << std::endl << "\tswc1 $f" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ")";
 		//file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($" << contxt.Regs+2 << ")";
 		contxt.regType[contxt.Regs+1]='f';
 	}
@@ -537,7 +536,7 @@ inline void load_locals(Context& contxt, std::ofstream& file, int good_index)
 	else if(contxt.Variables[good_index].DataType == "float") //TODO: CHECK OK
 	{
 		//file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
-		file << std::endl << "\tlwc1\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ") #" << contxt.Variables[good_index].id;	
+		file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ") #" << contxt.Variables[good_index].id;	
 		
 		file << std::endl << "\tnop\t";
 		contxt.regType[contxt.Regs+1]='f';		
@@ -606,7 +605,7 @@ inline void load_globals(Context& contxt, std::ofstream& file, int good_index)
 				
 				else if( contxt.Variables[good_index].DataType == "float") //TODO: CHECK OK
 				{				
-					file << std::endl << "\tlwc1 $" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
+					file << std::endl << "\tlwc1 $f" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ")";
 					//file << std::endl << "\tlwc1 $f" << contxt.Regs+1 << ", %lo(" << contxt.Variables[good_index].id << ")($"<< contxt.Regs+1 << ")";     
 		                       	file << std::endl << "\tnop\t";
 					contxt.regType[contxt.Regs+1]='f';

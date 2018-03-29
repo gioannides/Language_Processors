@@ -3,7 +3,7 @@ int main() {
 int x = 0;
 	do{
 
-		if( x++== 12){
+		if( x++== 76){
 			continue;
 		}
 

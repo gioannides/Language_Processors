@@ -1,7 +1,7 @@
-int test_add(int a, int b){
-  return a + b;
+int ww(int x, int y){
+  return x + y;
 }
 
 int main(){
-  return test_add(4,54);
+  return ww(444,233);
 }

@@ -2,29 +2,29 @@
 int x = 0;
 
 int main(){
-int i = 0;;;;;
+int iqq = 0;;;;;
 do{
 
-for(i;i<100;++i){
+for(iqq;iqq<100;++iqq){
 
-	if( i <= 25){
+	if( iqq <= 25){
 
 		x+=1;
 
 	}
 	else{
 
-		while( i > 25 && i <50){
+		while( iqq > 12 && iqq <33){
 	
-			if(i<40?1:0){
+			if(iqq<122?1:0){
 			
 				x+=1;
-				i++;
+				iqq++;
 
 			}
 			else{
 				x-=1;
-				i++;
+				iqq++;
 
 			}
 			continue;

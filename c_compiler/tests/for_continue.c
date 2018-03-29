@@ -5,7 +5,7 @@ int main(){
         if (x <= 12){
             continue;
         }
-        y = y + x;
+        y +=+x;
 }
 return y;
 }

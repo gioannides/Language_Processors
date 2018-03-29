@@ -1,14 +1,14 @@
-int g()
+int d()
 {
-    return 5;
+    return 444;
 }
 
 int h()
 {
-    return 127;
+    return 222;
 }
 
 int main()
 {
-    return g() + h();
+    return d() + h();
 }

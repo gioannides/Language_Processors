@@ -1,14 +1,14 @@
-int mult(char a, char b){
-  char c = 0;
-  while (a!=0){
-    c = c + b;
-    a = a - 1;
+int kl(char x, char y){
+  char d = 0;
+  while (y!=0){
+    d += x;
+    y -= 1 ;
   }
-  return c;
+  return d;
 }
 
 int main(){
-  char a = 5;
-  char b = 7;
-  return mult(a,b);
+  char x = 5;
+  char y = 7;
+  return kl(x,y);
 }

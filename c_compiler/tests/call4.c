@@ -1,8 +1,8 @@
-int test(int a){
+int hh(int a){
   return a;
 }
 
 int main(){
-  int i = 5;
-  return test(i-3);
+  int i = 8;
+  return hh(i+99);
 }

@@ -6,8 +6,8 @@ int main()
  
   
    temp = x;
-   x    = y;
-   y    = temp;
+   x = y;
+   y = temp;
  
    return (x==y);
 }

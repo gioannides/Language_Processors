@@ -1,11 +1,11 @@
 
 
 
-char f(char x){
+char foo(char x){
 
 	if(x<=9){
 		x+=1;
-		f(x);
+		foo(x);
 	}
 return x;
 }
@@ -16,7 +16,7 @@ int main(){
 
 	
 
-	return ((f(x)?f(3):f(14)));
+	return ((foo(x)?foo(3):foo(14)));
 
 }
 
