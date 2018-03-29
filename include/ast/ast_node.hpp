@@ -2294,7 +2294,7 @@ class TranslationUnit : public Node{
 			// 	std::cout << contxt.functions_declared[i].name << " - " << contxt.functions_declared[i].paramters_size; 
 			// }
 			 // print_scopes(contxt,file);
-			 // print_variables(contxt,file);
+			  //print_variables(contxt,file);
 			//print_declared(contxt, file);
 		}
 
@@ -2344,6 +2344,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 						contxt.LocalArray=false;
 						if(contxt.ArraySize.size()){
 							contxt.no_array_elements=contxt.ArraySize[contxt.ArraySize.size()-1];
+							file << "\n#no_array_elements: " << contxt.no_array_elements;
 							contxt.ArraySize.pop_back();
 							
 						
@@ -2353,12 +2354,17 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 						contxt.totalStackArea+=(contxt.no_array_elements-1)*contxt.variable.word_size;
 					}
 					else{
+						if(!contxt.reading){
 						contxt.StackOffset += (contxt.no_array_elements-1)*contxt.variable.word_size;
 						contxt.variable.offset = contxt.StackOffset-4;//contxt.variable.word_size;
 						contxt.variable.offset = contxt.totalStackArea - contxt.variable.offset - 8; 
 					}
+				}
 					DirectDeclaratorPtr->render_asm(file, contxt);
-					round1_square2_closed3=0;				
+					
+					if(!contxt.reading){
+						round1_square2_closed3=0;				
+					}
 					//contxt.count_array_initializers=0;
 					
 				}

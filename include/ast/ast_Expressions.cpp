@@ -1540,7 +1540,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 					}	
 				}
 		  	} 
-			if(found_0nothing_1local_2globl && contxt.is_array)
+			if(found_0nothing_1local_2globl && contxt.nested_arrays)
 			{
 				file << std::endl << "\tli $24, " << contxt.Variables[good_index].word_size;
 				

@@ -1,9 +1,9 @@
-int FOR_N();
+int WHILE_N();
 
 
 int main() {
 
-		if(FOR_N() != 5){
+		if(WHILE_N() != 3){
 			return 1;
 		}	
 	

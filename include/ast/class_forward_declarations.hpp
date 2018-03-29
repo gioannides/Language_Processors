@@ -330,22 +330,24 @@ inline void typePromotion(int reg1,int reg2, std::ofstream& file,Context& contxt
 			}
 		}
 	}
-
 }
 
 
 
 inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 {
-
+	file << std::endl << "\taddiu $" << contxt.Regs+2 << ", $sp, " << contxt.Variables[good_index].offset; 
+	if(contxt.nested_arrays){	
+		file << std::endl << "\tadd $" << contxt.Regs+2 << ", $" << contxt.Regs+2 << ", $25";
+	}
 	if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType != "float" ){
-		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ") #" << contxt.Variables[good_index].id;
 			
 		contxt.regType[contxt.Regs+1]='i';
 	}
 	else if(contxt.Variables[good_index].Pointer && contxt.Variables[contxt.good_i].DataType == "float"){
 
-		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;	
+		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ") #" << contxt.Variables[good_index].id;	
 		
 		contxt.regType[contxt.Regs+1]='i';
 
@@ -362,7 +364,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
 			}
 		}
-		file << std::endl << "\tsb\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		file << std::endl << "\tsb\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ") #" << contxt.Variables[good_index].id;
 		contxt.regType[contxt.Regs+1]='c';
 	}
 	else if(contxt.Variables[good_index].DataType=="short" && contxt.Variables[good_index].DataType != "float"){
@@ -376,7 +378,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
 			}
 		}	
-		file << std::endl << "\tsh\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+		file << std::endl << "\tsh\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ") #" << contxt.Variables[good_index].id << "\n";
 		contxt.regType[contxt.Regs+1]='i';
 	}				
 	else if((contxt.Variables[good_index].DataType == "int" || contxt.Variables[good_index].DataType == "signed" || contxt.Variables[good_index].DataType =="unsigned") && contxt.Variables[good_index].DataType != "float"){
@@ -390,7 +392,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 				file << std::endl << "\tandi\t$" << contxt.Regs+1 << ",$" << contxt.Regs+1 << ",0xFF";
 			}
 		}	
-		file << std::endl << "\tsw\t$" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+		file << std::endl << "\tsw\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ") #" << contxt.Variables[good_index].id << "\n";
 		contxt.regType[contxt.Regs+1]='i';
 	}
 	else if(contxt.Variables[good_index].DataType == "float"){ //TODO: CHECK OK		
@@ -399,7 +401,7 @@ inline void store_locals(Context& contxt, std::ofstream& file, int good_index)
 			file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 		}
 
-		file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << "," << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id << "\n";
+		file << std::endl << "\tswc1\t$f" << contxt.Regs+1 << ", 0($" << contxt.Regs+2 << ") #" << contxt.Variables[good_index].id << "\n";
 		contxt.regType[contxt.Regs+1]='f';
 	}
 	if(contxt.Variables[good_index].DataType == "unsigned") {
@@ -484,8 +486,13 @@ inline void store_globals(Context& contxt, std::ofstream& file, int good_index)
 
 inline void load_locals(Context& contxt, std::ofstream& file, int good_index)
 {
+	file << std::endl << "\taddiu $" << contxt.Regs+1 << ", $sp, " << contxt.Variables[good_index].offset; 
+	if(contxt.nested_arrays){
+		file << std::endl << "\tadd $" << contxt.Regs+1 << ", $" << contxt.Regs+1 << ", $25";				
+	}
 	if(contxt.Variables[good_index].Pointer && contxt.Variables[good_index].DataType != "float"){
-		file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		//file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ") #" << contxt.Variables[good_index].id;	
 		
 		
 			contxt.regType[contxt.Regs+1]='i';
@@ -493,20 +500,25 @@ inline void load_locals(Context& contxt, std::ofstream& file, int good_index)
 	}
 	else if(contxt.Variables[good_index].Pointer && contxt.Variables[good_index].DataType == "float"){
 		
-		file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
-		
+		//file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ") #" << contxt.Variables[good_index].id;	
+
 		contxt.regType[contxt.Regs+1]='i';
 	}
 	
 			
 	else if(contxt.Variables[good_index].DataType == "char" )  
 	{
-		file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		//file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		file << std::endl << "\tlb\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ") #" << contxt.Variables[good_index].id;	
+		
 		contxt.regType[contxt.Regs+1]='c';
 	}
 	else if( (contxt.Variables[good_index].DataType == "int" ||contxt.Variables[good_index].DataType == "unsigned" || contxt.Variables[good_index].DataType =="signed") && contxt.Variables[good_index].DataType != "float")
 	{
-		file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;	
+		//file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;	
+		file << std::endl << "\tlw\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ") #" << contxt.Variables[good_index].id;	
+		
 		if(contxt.Variables[good_index].DataType=="unsigned"){
 			contxt.regType[contxt.Regs+1]='u';
 		}	
@@ -517,12 +529,16 @@ inline void load_locals(Context& contxt, std::ofstream& file, int good_index)
 	}
 	else if(contxt.Variables[good_index].DataType== "short" && contxt.Variables[good_index].DataType != "float")
 	{
-		file << std::endl << "\tlh\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;			
+		//file << std::endl << "\tlh\t$" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;			
+		file << std::endl << "\tlh\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ") #" << contxt.Variables[good_index].id;	
+		
 		contxt.regType[contxt.Regs+1]='i';					
 	}
 	else if(contxt.Variables[good_index].DataType == "float") //TODO: CHECK OK
 	{
-		file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		//file << std::endl << "\tlwc1\t$f" << contxt.Regs+1 << ", " << contxt.Variables[good_index].offset << "($sp) #" << contxt.Variables[good_index].id;
+		file << std::endl << "\tlwc1\t$" << contxt.Regs+1 << ", 0($" << contxt.Regs+1 << ") #" << contxt.Variables[good_index].id;	
+		
 		file << std::endl << "\tnop\t";
 		contxt.regType[contxt.Regs+1]='f';		
 	}
