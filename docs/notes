@@ -6,12 +6,27 @@ Reaching the end of this coursework, we have drawn some conclusions based on the
 Conclusion Outcomes:
 
 1) We believe that we managed our time wisely by starting early, since it gave us the chance to make mistakes and have enough time to correct them.
-This can be seen from the Actual Effort and Estimated Effort logs. It can be seen in many occasions that the Actual Effort was greater than the Estimated one.
+   This can be seen from the Actual Effort and Estimated Effort logs. It can be seen in many occasions that the Actual Effort was far greater than the Estimated one.
 
 2) Due to lack of confidence in using a fully Object Oriented Programming approach, many of the methods used to implement the compiler are redundant. For example if inheritance 
-was used appropriately, the total number of classes of the Abstract Syntax Tree would be much lower, and much less time would be needed to accomplish a single task (in terms of coding it).
+   was used appropriately, the total number of classes of the Abstract Syntax Tree would be much less, and much less time would be needed to accomplish a single task (in terms of coding it).
 
 3) The approach used for traversing the AST tree, and the way it was built, allowed for a better gathering of information. For example all of the expressions
-could have been merged into one class called BinaryOperations. This would require knowing what the operation being carried out would be. Having a separate class for each Binary operation
-does not require any further information gathering. This idea was carried throughout the whole completion of the deliverable. The reason was that we couldn't predict any complications we would have if we made any simplification design choices, so we decided to stick to the "safe" way, even though that meant more time coding/typing.
+   could have been merged into one class called BinaryOperations. This would require knowing what the operation being carried out would be. Having a separate class for each Binary operation
+   does not require any further information gathering. This idea was carried throughout the whole completion of the deliverable.
+   The reason was that we couldn't predict any complications we would have if we made any simplification design choices, so we decided to stick to the "safe" way,
+   even though that meant more time coding/typing.
 
+4) The testbench finalization was a crucial milestone for the project, and it was started to be done from early stages. It changed throughout the process in terms of
+   the focus of the testing. It began by testing basic functionality and later on different C constructs interacting with each other ( eg. A for-loop within a switch-case).
+   Almost all of the test cases were written by us, however a small amount was taken from the Internet. Unfortunately due to some problems we had on github (eg MERGE conflicts) some of 
+   these tests not written by us may have not been referenced, because they got untracked on the way. We apologize for that. Any tests that have been verified from 
+   the Internet have a comment of the soure they were taken from.
+
+#References:
+
+http://port70.net/~nsz/c/c89/c89-draft.html#3.3
+
+The above link provides the C89 ANSI DRAFT DOCUMENTATION. It was used as a guide and it was very helpful in
+giving a very detailed description of the language. Unfortuantely due to time constaints, we couldn't implement all
+of the features of the language in the Code Generation stage.

@@ -1,7 +1,7 @@
-int IF_T(int i){
+int IF_T(){
 
-	if(i){
-		return i;
+	if(1){
+		return 8;
 	}
-return 0;
+return 9;
 }

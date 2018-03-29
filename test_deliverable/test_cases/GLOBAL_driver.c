@@ -1,11 +1,9 @@
-int global = 45;
-
-int GLOBAL();
+extern int global;
 
 
 int main() {
 
-		if(GLOBAL() == 65 && global == 78){
+		if( global == 45){
 			return 0;
 		}	
 	

@@ -1,7 +1,8 @@
-int IF_F(int i){
+int IF_F(){
 
-	if(i){
-		return i;
+	
+	if(0){
+		return 9;
 	}
-return 0;
+return 8;
 }

@@ -1,11 +1,12 @@
-int LOCAL_ARRAY(int i){
+int LOCAL_ARRAY(){
 
-int j = i;
-int array[i];
+int j;
 
-array[i-1] = 45;
+int array[4];
 
-j = array[i-1];
+array[3] = 45;
+
+j = array[3];
 
 return j;
 }

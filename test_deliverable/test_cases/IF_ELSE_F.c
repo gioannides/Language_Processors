@@ -1,10 +1,11 @@
-int IF_ELSE_F(int j){
+int IF_ELSE_F(){
+	int j = 0;
 
-	if(j){
+	if(0){
 		j= j + 10;
 	}
 	else{
-		j= j + 10;
+		j= j + 20;
 	}
 return j;
 }

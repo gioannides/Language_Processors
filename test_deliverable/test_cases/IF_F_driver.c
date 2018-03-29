@@ -1,10 +1,10 @@
-int IF_F(int i);
+int IF_F();
 
 
 int main() {
 
-		int i = 0;
-		if(IF_F(i) != i){
+		
+		if(IF_F() != 8){
 			return 1;
 		}
 	
