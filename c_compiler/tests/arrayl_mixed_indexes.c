@@ -1,12 +1,11 @@
-int i=12;
-
 int main()
 {
 	int a[100];
 	int j=0;
-	for(j;j<28;j++)
-	{
-		a[j]=j;
+	int i = 0;
+	for(i;i<=99;i++){
+		a[i]=i;
 	}
-	return a[i+j-10];
+	j = 99;
+	return a[j];
 }
