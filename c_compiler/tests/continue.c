@@ -5,7 +5,7 @@ int main(){
 	for(x <= 50; x++;) {
 
 		if(x == 33){
-		goto xs;
+			goto xs;
 		}
 
 		y++;

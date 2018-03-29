@@ -1,13 +1,13 @@
 int main()                    
 {     
-     int x;
+     int x=99;
     int y = 0;
-    for(x = -10; x < 10; x = x + 1)
+    for(x = -10; x < 10; x++)
     {
         if (x) {
             break;
         }
-        y = y + x;
+        y +=x;
     }
     return y;                                         
 } 

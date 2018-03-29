@@ -1,15 +1,14 @@
-
-
 int main() {
-int b ;
-	int a =9;
-    int c = 2;
-    while(a) {
-        a = b;
-        break;
-        c = 465;
-    }
-    return c;
+	int x=999;
+	int y = 9;
+    	int z = 2;
+   	while(y) {
+       		y += x;
+        	break;
+       		z = 465; /*dead code*/ 
+    	}
+
+    	return z;
 }
 
 
