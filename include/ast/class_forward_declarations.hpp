@@ -65,6 +65,7 @@ struct Switch{
 
 struct Context{
 
+	std::string DataType="";
 	int PointerCounter=0;
 	bool PointerArithmetic=false;
 	std::vector<char>PointerVector;

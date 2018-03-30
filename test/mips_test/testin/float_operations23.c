@@ -9,7 +9,7 @@ float f(){
 			break;
 		}
 		else{
-			y+=z;
+			z=y+z;
 		}
 	}
 }

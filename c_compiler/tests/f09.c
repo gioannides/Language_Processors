@@ -1,6 +1,4 @@
-int main()
-{
-    
+int main(){    
 int x=0;
 int y=45;
     if(x<y){
@@ -15,5 +13,3 @@ int y=45;
     }
     return x;
 }
-
-

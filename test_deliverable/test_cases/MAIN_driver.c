@@ -1,1 +1,1 @@
-/* Doesnt have to do anything */
+/* Doesn't have to do anything */

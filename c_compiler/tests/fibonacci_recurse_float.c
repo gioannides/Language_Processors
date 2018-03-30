@@ -1,4 +1,4 @@
-unsigned fibonacci_recursive(unsigned n)
+float fibonacci_recursive(float n)
 {
     if (n == 0) 
     {
@@ -13,7 +13,8 @@ unsigned fibonacci_recursive(unsigned n)
 
 int main(){
 
-	return fibonacci_recursive(10);
+	float a = 8;
+	return fibonacci_recursive(a);
 
 }
 

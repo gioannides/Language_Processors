@@ -1792,6 +1792,7 @@ class JumpStatement : public Node {
 						if( AssignmentExpressionPtr != NULL && !contxt.reading){
 							if( contxt.regType[contxt.Regs+1] != 'f'){
 								file << std::endl << "\tmtc1\t$" << contxt.Regs+1 << ",$f" << contxt.Regs+1;		// MAY CAUSE PROBLEMS
+								file << std::endl << "\tcvt.s.w\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1;
 							}
 							file << std::endl << "\tmov.s\t$f0," << "$f" << contxt.Regs+1;
 						}
@@ -2072,7 +2073,7 @@ class FunctionDefinition : public Node {
 			contxt.is_function_call=false;	
 			//std:: cout << "\nmax_offset" << contxt.max_offset << " " <<  contxt.funct_id <<"\n";
 			contxt.totalStackArea+=contxt.max_offset;
-			file << "\n max_offset = " << contxt.max_offset << "\n";
+			//file << "\n max_offset = " << contxt.max_offset << "\n";
 			contxt.max_offset=16;
 			//print_scopes(contxt, file);
 			if(contxt.Scopes.size()>=1){
@@ -2664,13 +2665,14 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 				StatementPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = true;
 				contxt.TestConditionContinue = AssignmentExpressionPtr; //In case of a continue
+				file << std::endl << BEGIN_2 << ":";
 				AssignmentExpressionPtr->render_asm(file,contxt);
 				contxt.rhs_of_expression = false;
 				
 				if(!contxt.reading)	
 				{
 					if(contxt.regType[contxt.Regs+1] == 'f'){
-						file << std::endl << BEGIN_2 << ":" << "\tli.s\t$f1,0";
+						file << std::endl << "\tli.s\t$f1,0";
 						
 						file << std::endl << "\tc.eq.s\t$f" << contxt.Regs+1 << ",$f1";
 						file << std::endl << "\tnop";
@@ -2678,7 +2680,7 @@ inline void IterationStatement::render_asm(std::ofstream& file, Context& contxt)
 						file << std::endl << "\tnop";
 					}
 					else{
-						file << std::endl << BEGIN_2 << ":" << "\tbeq\t$" << contxt.Regs+1 <<",$0," << END;
+						file << std::endl << "\tbeq\t$" << contxt.Regs+1 <<",$0," << END;
 						file << std::endl << "\tnop";
 					}			
 					file << "\n\tb " << DO;

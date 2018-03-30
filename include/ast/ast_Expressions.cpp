@@ -1410,7 +1410,12 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						}
 					}
 					if(!contxt.reading){
-						file << "\n\tmove\t$25, $2"; 
+						if(contxt.regType[3] != 'f'){
+							file << "\n\tmove\t$25, $2"; 
+						}
+						else{
+							file << std::endl << "\tmov.s\t$f0,$f2";
+						}
 						for(i=1; i<25; i++)
 						{
 							file << "\n\tlw $" << i << "," << offset-(i*4) << "($sp)";
@@ -1420,7 +1425,12 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 							file << "\n\tlwc1 $f" << j << ", " << offset-100-(j-1)*4 << "($sp)";
 						}
 						//file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
-						file << "\n\tmove $" << contxt.Regs+1 << ", $25"; 
+						if(contxt.regType[3] != 'f'){
+							file << "\n\tmove $" << contxt.Regs+1 << ", $25"; 
+						}
+						else{
+							file << std::endl << "\tmov.s\t$f" << contxt.Regs+1 << ",$f0";
+						}
 					}
 					contxt.nested_function_calls--;
 				}
@@ -1429,7 +1439,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 					bool temp_lhs=contxt.lhs_of_assignment;
 					contxt.lhs_of_assignment=0;
 					if(!contxt.reading){
-						file << std::endl << "\tsw $25, " << contxt.totalStackArea << "($sp)";
+						//file << std::endl << "\tsw $25, " << contxt.totalStackArea << "($sp)";
 						file << std::endl << "\tmove $25, $0"; 
 					}
 					contxt.Regs++;
@@ -1448,7 +1458,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 					PostFixExpressionPtr->render_asm(file,contxt);
 					
 					if(!contxt.reading){
-					file << std::endl << "\tlw $25, " << contxt.totalStackArea << "($sp)";
+					//file << std::endl << "\tlw $25, " << contxt.totalStackArea << "($sp)";
 					}
 					contxt.nested_arrays--;
 					contxt.is_array=false;
@@ -1568,7 +1578,11 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				}
 				if(found_0nothing_1local_2globl==1){
 					if(!contxt.Variables[good_index].Pointer){
+						
+						contxt.DataType = contxt.Variables[good_index].DataType;
+						
 						store_locals(contxt, file, good_index);
+						
 					}
 					else{
 						contxt.PointerNotStored = true;
@@ -1578,7 +1592,11 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				}					
 				else if(found_0nothing_1local_2globl==2){
 					if(!contxt.Variables[good_index].Pointer){
+						
+						contxt.DataType = contxt.Variables[good_index].DataType;
+						
 						store_globals(contxt, file, good_index);
+						
 					}
 					else{
 						contxt.PointerNotStored = true;
@@ -1597,14 +1615,22 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 
 			 	if(found_0nothing_1local_2globl==1 && !contxt.sizeof_ && !contxt.enum_constant) 
 			 	{
+					
+					contxt.DataType = contxt.Variables[good_index].DataType;
+					
 			 		load_locals(contxt, file, good_index);
+					
 					if(contxt.Cast){
 						CastToType(file,contxt,*IDENTIFIER);
 					}			
 			  	}
      		   		 else if(found_0nothing_1local_2globl==2 && !contxt.sizeof_ && !contxt.enum_constant) 
 				{
+					
+					contxt.DataType = contxt.Variables[good_index].DataType;
+					
 					load_globals(contxt, file, good_index);
+					
 					if(contxt.Cast){
 						CastToType(file,contxt,*IDENTIFIER);
 					}
@@ -1771,7 +1797,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 
 		if(!contxt.reading && contxt.function && !is_char && !contxt.enum_constant) 
 		{	
-			if(contxt.variable.DataType == "float" || (std::floor(std::stod(*CONSTANT))) != std::stod(*CONSTANT)){
+			if(contxt.DataType == "float" || (std::floor(std::stod(*CONSTANT))) != std::stod(*CONSTANT)){
 				
 				if(contxt.lhs_of_assignment){
 					file <<  std::endl << "\tli.s\t$f" << contxt.Regs+2 << ", " << temp_f;
@@ -1788,7 +1814,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 				}
 				
 			}
-			else if(contxt.variable.DataType != "float" || (std::floor(std::stod(*CONSTANT))) == std::stod(*CONSTANT)){
+			else if(contxt.DataType != "float" || (std::floor(std::stod(*CONSTANT))) == std::stod(*CONSTANT)){
 				if(contxt.lhs_of_assignment){						//TODO: NEW THING
 					int j = 0;
 					file <<  std::endl << "\tli\t$" << contxt.Regs+2 << ", " << temp;
@@ -1970,32 +1996,32 @@ inline void AssignmentExpression::render_asm(std::ofstream& file, Context& contx
 						
 						if(u<4)
 						{
-							if((ki+u)>=0 && contxt.regType[u+4] != 'f'/*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
+							if((ki+u)>=0 /*&& contxt.regType[u+4] != 'f'/*&& contxt.Variables[ki+contxt.argument_no-1].DataType != "float"*/)
 							{
 								if(contxt.Variables[ki+u].DataType != "float"){
 									file << std::endl << "\tmove\t$" << u+4 << ", $" << contxt.Regs+1 << " #load parameter " << u+1;
 								}
-								else if(contxt.Variables[ki+u].DataType == "float" && contxt.FloatRegCount == 12){
+								else if(contxt.Variables[ki+u].DataType == "float" && (u+4) == 4){
 
-									file << std::endl << "\tmov.s\t$f" << contxt.FloatRegCount << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
+									file << std::endl << "\tmov.s\t$f12" << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
 									contxt.FloatRegCount+=2;
 		
 								}
-								else if(contxt.Variables[ki+u].DataType == "float" && contxt.FloatRegCount == 14){
+								else if(contxt.Variables[ki+u].DataType == "float" && (u+4) == 5){
 
-									file << std::endl << "\tmov.s\t$f" << contxt.FloatRegCount << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
+									file << std::endl << "\tmov.s\t$f14" << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
 									contxt.FloatRegCount=6;
 		
 								}
-								else if(contxt.Variables[ki+u].DataType == "float" && contxt.FloatRegCount == 6){
+								else if(contxt.Variables[ki+u].DataType == "float" && (u+4) == 6){
 
-									file << std::endl << "\tmfc1\t$" << contxt.FloatRegCount << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
+									file << std::endl << "\tmfc1\t$6" << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
 									contxt.FloatRegCount=7;
 		
 								}
-								else if(contxt.Variables[ki+u].DataType == "float" && contxt.FloatRegCount == 7){
+								else if(contxt.Variables[ki+u].DataType == "float" && (u+4) == 7){
 
-									file << std::endl << "\tmfc1\t$" << contxt.FloatRegCount << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
+									file << std::endl << "\tmfc1\t$7"  << ", $f" << contxt.Regs+1 << " #load parameter " << u+1;
 									contxt.FloatRegCount=12;
 		
 								}

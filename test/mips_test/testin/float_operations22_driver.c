@@ -12,7 +12,7 @@ int main(){
 			break;
 		}
 		else{
-			k+=z;
+			k=k+z;
 		}
 	}
 	
