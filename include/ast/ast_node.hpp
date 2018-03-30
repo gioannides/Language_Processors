@@ -959,7 +959,9 @@ class InitDeclaratorList : public Node {
 				InitDeclaratorListPtr->render_asm(file,contxt);
 				
 			}
-			InitDecLarator->render_asm(file,contxt);
+			if(InitDecLarator != NULL){
+				InitDecLarator->render_asm(file,contxt);
+			}
 			
 
 		}
