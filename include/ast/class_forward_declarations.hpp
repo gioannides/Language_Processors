@@ -64,6 +64,7 @@ struct Switch{
 
 
 struct Context{
+	
 
 	std::string DataType="";
 	int PointerCounter=0;
@@ -626,7 +627,7 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 	if(contxt.AssignmentOperator == "++" && contxt.is_postfix && !contxt.reading)
 	{ 
 		
-		if(contxt.regType[contxt.Regs] == 'f' || contxt.regType[contxt.Regs+1] == 'f'){
+		if(contxt.regType[contxt.Regs+1] == 'f'){
 			if(contxt.Variables[contxt.good_i].scope=="global")
 			{
 				load_globals(contxt, f, index);
@@ -636,9 +637,9 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 				load_locals(contxt, f, index);
 			
 			}		
-			f << std::endl << "\tli.s\t$f" << contxt.Regs+1 << ",1";
+			f << std::endl << "\tli.s\t$f" << contxt.Regs+2 << ",1";
 			contxt.regType[contxt.Regs]='f';
-			f << std::endl << "\tadd.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
+			f << std::endl << "\tadd.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs+2;
 			contxt.regType[contxt.Regs+1]='f';
 		}
 		else{
@@ -670,7 +671,7 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 	else if (contxt.AssignmentOperator == "--" && contxt.is_postfix && !contxt.reading)
 	{
 		
-		if(contxt.regType[contxt.Regs] == 'f' || contxt.regType[contxt.Regs+1] == 'f'){
+		if(contxt.regType[contxt.Regs+1] == 'f'){
 			if(contxt.Variables[contxt.good_i].scope=="global")
 			{
 				load_globals(contxt, f, index);
@@ -680,9 +681,9 @@ inline void postfix_ops(Context& contxt, std::ofstream& f) //this needs to be fi
 				load_locals(contxt, f, index);
 			
 			}				
-			f << std::endl << "\tli.s\t$f" << contxt.Regs+1 << ",-1";
+			f << std::endl << "\tli.s\t$f" << contxt.Regs+2 << ",-1";
 			contxt.regType[contxt.Regs]='f';
-			f << std::endl << "\tadd.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs;
+			f << std::endl << "\tadd.s\t$f" << contxt.Regs+1 << ",$f" << contxt.Regs+1 << ",$f" << contxt.Regs+2;
 			contxt.regType[contxt.Regs+1]='f';
 		}
 		else{
