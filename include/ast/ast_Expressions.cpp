@@ -1410,7 +1410,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 						}
 					}
 					if(!contxt.reading){
-						if(contxt.regType[3] != 'f'){
+						if(contxt.regType[2] != 'f'){
 							file << "\n\tmove\t$25, $2"; 
 						}
 						else{
@@ -1425,7 +1425,7 @@ inline void PostFixExpression::render_asm(std::ofstream& file,Context& contxt) {
 							file << "\n\tlwc1 $f" << j << ", " << offset-100-(j-1)*4 << "($sp)";
 						}
 						//file << "\n\tlw $31," << offset-(i*4) << "($sp)"; 
-						if(contxt.regType[3] != 'f'){
+						if(contxt.regType[contxt.Regs+1] != 'f'){
 							file << "\n\tmove $" << contxt.Regs+1 << ", $25"; 
 						}
 						else{

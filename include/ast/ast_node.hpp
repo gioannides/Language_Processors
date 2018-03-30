@@ -2047,13 +2047,13 @@ class FunctionDefinition : public Node {
 				DeclaratorPtr->render_asm(file,contxt);
 				//std::cout << "end of declarator" << std::endl;
 				file << std::endl;
-				file << "\t.text" << std::endl;
-				file << "\t.align\t2" << std::endl; 
-				file << "\t.globl\t" << contxt.funct_id << std::endl;
-				file << "\t.set\t" << "nomips16" << std::endl;
-				file << "\t.set\t" << "nomicromips" << std::endl;
-				file << "\t.ent\t" << contxt.funct_id << std::endl;
-				file << "\t.type\t" << contxt.funct_id << "," << " @function" << std::endl;
+				file << std::endl << "\t.text" << std::endl;
+				file << std::endl << "\t.align\t2" << std::endl; 
+				file << std::endl << "\t.globl\t" << contxt.funct_id << std::endl;
+				file << std::endl << "\t.set\t" << "nomips16" << std::endl;
+				file << std::endl << "\t.set\t" << "nomicromips" << std::endl;
+				file << std::endl << "\t.ent\t" << contxt.funct_id << std::endl;
+				file << std::endl << "\t.type\t" << contxt.funct_id << "," << " @function" << std::endl;
 				file << contxt.funct_id << ":" << std::endl;
 				contxt.protect = true;
 			}
@@ -2096,10 +2096,10 @@ class FunctionDefinition : public Node {
 			//contxt.function_def.area = contxt.totalStackArea;
 			
 			//contxt.functions.push_back(contxt.function_def);
-			file << "\t.set noreorder" << std::endl;
-			file << "\t.set nomacro" << std::endl;
+			file << std::endl << "\t.set noreorder" << std::endl;
+			file << std::endl << "\t.set nomacro" << std::endl;
 			
-			file << "\taddiu $sp,$sp,-"<< contxt.totalStackArea+4;
+			file << std::endl << "\taddiu $sp,$sp,-"<< contxt.totalStackArea+4;
 			file << std::endl << "\tsw $fp," << contxt.totalStackArea << "($sp)";
 			file << std::endl << "\tsw $31," << contxt.totalStackArea-4 <<"($sp)";
 			file << std::endl << "\tmove $fp,$sp\n";
@@ -2163,10 +2163,10 @@ class FunctionDefinition : public Node {
 			file << std::endl << "\taddiu $sp,$sp," << contxt.totalStackArea + 4;
 			file << std::endl << "\tj $31" << std::endl;
 			file << std::endl << "\tnop" << std::endl;
-			file << "\t.set macro" << std::endl;
-			file << "\t.set reorder" << std::endl;
-			file << "\t.end " << contxt.funct_id << std::endl;
-			file << "\t.size " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;
+			file << std::endl << "\t.set macro" << std::endl;
+			file << std::endl << "\t.set reorder" << std::endl;
+			file << std::endl << "\t.end " << contxt.funct_id << std::endl;
+			file << std::endl << "\t.size " << contxt.funct_id << ", .-" << contxt.funct_id << std::endl;
 			//contxt.totalStackArea = 8;
 			//print_variables(contxt, file);
 			if(contxt.Scopes.size()>0){
@@ -2329,7 +2329,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 			}
 			if(round1_square2_closed3) 
 			{
-				//file << std::endl << *BracketPtr << " llooooookkkk heereee";
+				
 
 				if(round1_square2_closed3==1) //this is a  function declaration
 				{
