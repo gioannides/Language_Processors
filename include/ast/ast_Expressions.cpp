@@ -472,7 +472,6 @@ inline void RelationalExpression::render_asm(std::ofstream& file,Context& contxt
 					if( OPERATOR != NULL && *OPERATOR == "<" ){
 						
 							int result = contxt.ArraySize[contxt.ArraySize.size()-2] <  contxt.ArraySize[contxt.ArraySize.size()-1];
-							std::cout << result << std::endl;
 							contxt.ArraySize.pop_back();
 							contxt.ArraySize.pop_back();
 							contxt.ArraySize.push_back(result);
@@ -2050,19 +2049,13 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 				PostFixExpressionPtr->render_asm(file,contxt);
 		}
 	
-		if(CastExpressionPtr != NULL && !contxt.reading) {
 
-				if(!contxt.function){
-					if(UnaryOperatorPtr != NULL){
-						contxt.UnaryOperators.push_back(UnaryOperatorPtr->render_asm(file,contxt));
-						if(UnaryOperatorPtr->render_asm(file,contxt) == '*'){
-							contxt.PointerVector.push_back(UnaryOperatorPtr->render_asm(file,contxt));
-						}
-					}
-				}
-				/*if(contxt.LocalArray  && contxt.function){
-					std::cout << "here" << std::endl;
+		if(contxt.LocalArray  && contxt.function && CastExpressionPtr != NULL && contxt.reading){
 					
+
+						
+						CastExpressionPtr->render_asm(file,contxt);
+
 						if( UnaryOperatorPtr->render_asm(file,contxt) == '~' ){
 								if(contxt.ArraySize.size()>=1){
 								int result = ~contxt.ArraySize[contxt.ArraySize.size()-1] ;
@@ -2086,8 +2079,20 @@ inline void UnaryExpression::render_asm(std::ofstream& file, Context& contxt)  {
 								}
 						}
 					
+					
 				
-				}*/
+		}
+		else if(CastExpressionPtr != NULL && !contxt.reading) {
+
+				if(!contxt.function){
+					if(UnaryOperatorPtr != NULL){
+						contxt.UnaryOperators.push_back(UnaryOperatorPtr->render_asm(file,contxt));
+						if(UnaryOperatorPtr->render_asm(file,contxt) == '*'){
+							contxt.PointerVector.push_back(UnaryOperatorPtr->render_asm(file,contxt));
+						}
+					}
+				}
+				
 				CastExpressionPtr->render_asm(file,contxt);
 				
 
