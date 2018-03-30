@@ -12,3 +12,6 @@
 [x] Type Casting
 [x] sizeof
 [x] All Expressions
+
+
+The doc/notes provides some additional information about this coursework, other than the management files.

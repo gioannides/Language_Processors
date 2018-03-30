@@ -34,13 +34,19 @@ inline void Indent_Generator(Statement* StatementPointer, std::ofstream& file,bo
 
 inline void MultiplicativeExpression::print_py(std::ofstream& file) {
 
-			if(OPERATOR==NULL){
+			if(OPERATOR==NULL && CaStExpression != NULL){
 				CaStExpression->print_py(file);
 			}
 			else{ 
-				MultiplicativeExpressionPtr->print_py(file);
-				file <<*OPERATOR;
-				CaStExpression->print_py(file);
+				if(MultiplicativeExpressionPtr != NULL){
+					MultiplicativeExpressionPtr->print_py(file);
+				}
+				if(OPERATOR != NULL){
+					file <<*OPERATOR;
+				}
+				if(CaStExpression != NULL){
+					CaStExpression->print_py(file);
+				}
 				
 			}
 
@@ -50,13 +56,19 @@ inline void MultiplicativeExpression::print_py(std::ofstream& file) {
 
 inline void AdditiveExpression::print_py(std::ofstream& file) {
 
-			if(OPERATOR==NULL){
+			if(OPERATOR==NULL && MultiplicativeExpressioN != NULL){
 				MultiplicativeExpressioN->print_py(file);
 			}
 			else{ 
-				AdditiveExpressionPtr->print_py(file);
-				file << *OPERATOR;
-				MultiplicativeExpressioN->print_py(file);
+				if(AdditiveExpressionPtr != NULL){
+					AdditiveExpressionPtr->print_py(file);
+				}
+				if(OPERATOR != NULL){
+					file << *OPERATOR;
+				}
+				if(MultiplicativeExpressioN != NULL){
+					MultiplicativeExpressioN->print_py(file);
+				}
 				
 			}
 
@@ -67,13 +79,19 @@ inline void AdditiveExpression::print_py(std::ofstream& file) {
 
 inline void ShiftExpression::print_py(std::ofstream& file) {
 
-			if(OPERATOR==NULL){
+			if(OPERATOR==NULL && AdditiVeExpression != NULL){
 				AdditiVeExpression->print_py(file);
 			}
 			else{ 
-				ShiftExpressionPtr->print_py(file);
-				file << *OPERATOR;
-				AdditiVeExpression->print_py(file);
+				if(ShiftExpressionPtr != NULL){
+					ShiftExpressionPtr->print_py(file);
+				}
+				if(OPERATOR != NULL){
+					file << *OPERATOR;
+				}
+				if(AdditiVeExpression != NULL){
+					AdditiVeExpression->print_py(file);
+				}
 				
 			}
 
@@ -84,13 +102,19 @@ inline void ShiftExpression::print_py(std::ofstream& file) {
 
 inline void RelationalExpression::print_py(std::ofstream& file) {
 
-			if(OPERATOR==NULL){
+			if(OPERATOR==NULL && SHiftExpression != NULL){
 				SHiftExpression->print_py(file);
 			}
 			else{ 
-				RelationalExpressionPtr->print_py(file);
-				file << *OPERATOR;
-				SHiftExpression->print_py(file);
+				if(RelationalExpressionPtr != NULL){
+					RelationalExpressionPtr->print_py(file);
+				}
+				if(OPERATOR != NULL){
+					file << *OPERATOR;
+				}
+				if(SHiftExpression != NULL){
+					SHiftExpression->print_py(file);
+				}
 				
 			}
 
@@ -101,13 +125,19 @@ inline void RelationalExpression::print_py(std::ofstream& file) {
 
 inline void EqualityExpression::print_py(std::ofstream& file) {
 
-			if(OPERATOR==NULL){
+			if(OPERATOR==NULL && RElationalExpression != NULL){
 				RElationalExpression->print_py(file);
 			}
 			else{ 
-				EqualityExpressionPtr->print_py(file);
-				file <<*OPERATOR;
-				RElationalExpression->print_py(file);
+				if(EqualityExpressionPtr != NULL){
+					EqualityExpressionPtr->print_py(file);
+				}
+				if(OPERATOR != NULL){
+					file <<*OPERATOR;
+				}
+				if(RElationalExpression != NULL){
+					RElationalExpression->print_py(file);
+				}
 				
 			}
 
@@ -116,13 +146,19 @@ inline void EqualityExpression::print_py(std::ofstream& file) {
 
 inline void AndExpression::print_py(std::ofstream& file) {
 
-			if(BIT_AND==NULL){
+			if(BIT_AND==NULL && EqualitYExpression != NULL){
 				EqualitYExpression->print_py(file);
 			}
 			else{ 
-				AndExpressionPtr->print_py(file);
-				file << " " << "&" << " ";
-				EqualitYExpression->print_py(file);
+				if(AndExpressionPtr != NULL){
+					AndExpressionPtr->print_py(file);
+				}
+				if(BIT_AND != NULL){
+					file << " " << "&" << " ";
+				}
+				if(EqualitYExpression != NULL){
+					EqualitYExpression->print_py(file);
+				}
 				
 			}
 
@@ -132,13 +168,19 @@ inline void AndExpression::print_py(std::ofstream& file) {
 
 inline void ExclusiveOrExpression::print_py(std::ofstream& file) {
 
-			if(EXCL_OR==NULL){
+			if(EXCL_OR==NULL && ANDexpression != NULL){
 				ANDexpression->print_py(file);
 			}
 			else{ 
-				ExclusiveOrExpressionPtr->print_py(file);
-				file << " " << "^" << " ";
-				ANDexpression->print_py(file);
+				if(ExclusiveOrExpressionPtr != NULL){
+					ExclusiveOrExpressionPtr->print_py(file);
+				}
+				if(EXCL_OR != NULL){
+					file << " " << "^" << " ";
+				}
+				if(ANDexpression != NULL){
+					ANDexpression->print_py(file);
+				}
 				
 			}
 
@@ -148,13 +190,19 @@ inline void ExclusiveOrExpression::print_py(std::ofstream& file) {
 
 inline void InclusiveOrExpression::print_py(std::ofstream& file) {
 
-			if(INC_OR==NULL){
+			if(INC_OR==NULL && EXclusiveOrExpression != NULL){
 				EXclusiveOrExpression->print_py(file);
 			}
 			else{ 
-				InclusiveOrExpressionPtr->print_py(file);
-				file << " " << "|" << " ";
-				EXclusiveOrExpression->print_py(file);
+				if(InclusiveOrExpressionPtr != NULL){
+					InclusiveOrExpressionPtr->print_py(file);
+				}
+				if(INC_OR != NULL){
+					file << " " << "|" << " ";
+				}
+				if(EXclusiveOrExpression != NULL){
+					EXclusiveOrExpression->print_py(file);
+				}
 				
 			}
 
@@ -163,13 +211,19 @@ inline void InclusiveOrExpression::print_py(std::ofstream& file) {
 
 
 inline void LogicalAndExpression::print_py(std::ofstream& file) {
-			if(AND_OP==NULL){
+			if(AND_OP==NULL && INclusiveOrExpression != NULL){
 				INclusiveOrExpression->print_py(file);
 			}
 			else{ 
-				LogicalAndExpressionPtr->print_py(file);
-				file << " and ";
-				INclusiveOrExpression->print_py(file);
+				if(LogicalAndExpressionPtr != NULL){
+					LogicalAndExpressionPtr->print_py(file);
+				}
+				if(AND_OP != NULL){
+					file << " and ";
+				}
+				if(INclusiveOrExpression != NULL){
+					INclusiveOrExpression->print_py(file);
+				}
 				
 			}
 
@@ -177,13 +231,19 @@ inline void LogicalAndExpression::print_py(std::ofstream& file) {
 
 
 inline void LogicalOrExpression::print_py(std::ofstream& file) {
-			if(OR_OP==NULL){
+			if(OR_OP==NULL && LogicalAndExpressionPtr != NULL){
 				LogicalAndExpressionPtr->print_py(file);
 			}
 			else{ 
-				LogicalOrExpressionPtr->print_py(file);
-				file << " or ";
-				LogicalAndExpressionPtr->print_py(file);
+				if(LogicalOrExpressionPtr != NULL){
+					LogicalOrExpressionPtr->print_py(file);
+				}
+				if(OR_OP != NULL){
+					file << " or ";
+				}
+				if(LogicalAndExpressionPtr != NULL){
+					LogicalAndExpressionPtr->print_py(file);
+				}
 				
 			}
 		}
@@ -195,8 +255,9 @@ inline void IdentifierList::print_py(std::ofstream& file) {
 				IdentifierListPtr->print_py(file);
 				file << ",";
 			}
-
-			file << *IDENTIFIER;					
+			if(IDENTIFIER != NULL){
+				file << *IDENTIFIER;
+			}				
 		
 		}
 
@@ -208,9 +269,10 @@ inline void ParameterList::print_py(std::ofstream& file) {
 				ParameterListPtr->print_py(file);
 				file << ",";
 			}
-
-			ParameterDeclarationPtr->print_py(file);						
-		
+			if(ParameterDeclarationPtr != NULL){
+				ParameterDeclarationPtr->print_py(file);
+			}						
+			
 		}
 
 
@@ -236,19 +298,27 @@ inline void DirectDeclarator::print_py(std::ofstream& file, bool initialized, bo
 			if(!function) {							//This handles initializing variables, and identifying the global ones by the level of indentation of
 											// counter_py
 				if(counter_py == 0 && !ParameterVariable ){
-					GlobalVars.push_back(*IDENTIFIER);
+					if(IDENTIFIER != NULL){
+						GlobalVars.push_back(*IDENTIFIER);
+					}
 				}
 	
 				for( int i(0); i<counter_py; i++) { file << "\t"; }
 				if(!initialized && !ParameterVariable){
-					file << *IDENTIFIER << "=0" << std::endl;
+					if(IDENTIFIER != NULL){
+						file << *IDENTIFIER << "=0" << std::endl;
+					}
 				}
 
 				else if(!ParameterVariable){
-					file << *IDENTIFIER << "=";
+					if(IDENTIFIER != NULL){
+						file << *IDENTIFIER << "=";
+					}
 				}
 				else{
-					file << *IDENTIFIER;
+					if(IDENTIFIER != NULL){
+						file << *IDENTIFIER;
+					}
 					ParameterVariable = false;
 				}
 				
@@ -283,7 +353,9 @@ inline void Declarator::print_py(std::ofstream& file, bool initialized, bool fun
 			if( DeclaratorPtr != NULL) {
 				DeclaratorPtr->print_py(file,initialized,function);
 			}
-			DirectDecLarator->print_py(file,initialized,function);
+			if(DirectDecLarator != NULL){
+				DirectDecLarator->print_py(file,initialized,function);
+			}
 		}
 
 
@@ -293,7 +365,9 @@ inline void Initializer::print_py(std::ofstream& file) {
 			if(InitializerListPtr!=NULL){
 				InitializerListPtr->print_py(file);
 			}
-			AssignmentExpressionPtr->print_py(file);
+			if(AssignmentExpressionPtr != NULL){
+				AssignmentExpressionPtr->print_py(file);
+			}
 
 		}
 inline void InitializerList::print_py(std::ofstream& file){
@@ -314,13 +388,17 @@ inline void InitializerList::print_py(std::ofstream& file){
 
 
 inline void InitDeclarator::print_py(std::ofstream& file) {
-			if( InitiaLizer == NULL ) {		
+			if( InitiaLizer == NULL && DecLarator != NULL ) {		
 				DecLarator->print_py(file,false);
 				file << std::endl;
 			}			
 			else{
-				DecLarator->print_py(file,true);
-				InitiaLizer->print_py(file);
+				if(DecLarator != NULL){
+					DecLarator->print_py(file,true);
+				}
+				if(InitiaLizer != NULL){
+					InitiaLizer->print_py(file);
+				}
 				file << std::endl;
 			}
 				
@@ -334,14 +412,18 @@ inline void InitDeclaratorList::print_py(std::ofstream& file) {
 			if( InitDeclaratorListPtr != NULL){
 				InitDeclaratorListPtr->print_py(file);
 			}
-			InitDecLarator->print_py(file);
+			if(InitDecLarator != NULL){
+				InitDecLarator->print_py(file);
+			}
 		}
 
 
 
 
 inline void StorageClassSpecifiers::print_py(std::ofstream& file) {
-			file << *TYPES << " ";
+			if(TYPES != NULL){
+				file << *TYPES << " ";
+			}
 		}
 
 
@@ -356,7 +438,9 @@ inline void Declaration::print_py(std::ofstream& file) {
 inline void JumpStatement::print_py(std::ofstream& file) {
 			
 			for( int i(0); i<counter_py; i++) { file << "\t"; }
-			file << *JUMP_TYPE << " ";
+			if(JUMP_TYPE != NULL){
+				file << *JUMP_TYPE << " ";
+			}
 			if(AssignmentExpressionPtr != NULL) {
 				AssignmentExpressionPtr->print_py(file);
 			}
@@ -376,8 +460,9 @@ inline std::string* SelectionStatement::get_info() {				//can be used for else i
 
 
 inline void ExpressionStatement::print_py(std::ofstream& file) {
-
-			AssignmentExpressionPtr->print_py(file);
+			if(AssignmentExpressionPtr != NULL){
+				AssignmentExpressionPtr->print_py(file);
+			}
 			file << std::endl;
 		}
 
@@ -392,7 +477,9 @@ inline void DeclarationList::print_py(std::ofstream& file) {
 
 				}
 				function = false;
-				DeclarationPtr->print_py(file);
+				if(DeclarationPtr != NULL){
+					DeclarationPtr->print_py(file);
+				}
 
 			}
 
@@ -409,7 +496,9 @@ inline void StatementList::print_py(std::ofstream& file) {
 				StatementListPtr->print_py(file);
 
 			}
+			if(StatementPtr != NULL){
 				StatementPtr->print_py(file);
+			}
 
 				
 
@@ -699,7 +788,7 @@ inline void CompoundStatement::print_py(std::ofstream& file, bool initialized, b
 
 inline void ConditionalExpression::print_py(std::ofstream& file) {
 
-		if( ExpressioN == NULL ) {
+		if( ExpressioN == NULL  && LogicalORExpression != NULL) {
 			LogicalORExpression->print_py(file);
 		}
 		else {
@@ -817,7 +906,9 @@ inline void ArgumentExpressionList::print_py(std::ofstream& file) {
 			ArgumentExpressionListPtr->print_py(file);
 			file << ",";
 		}
-		AssignmentExpressionPtr->print_py(file);
+		if(AssignmentExpressionPtr != NULL){
+			AssignmentExpressionPtr->print_py(file);
+		}
 		
 
 }

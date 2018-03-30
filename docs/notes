@@ -19,7 +19,7 @@ Conclusion Outcomes:
 
 4) The testbench finalization was a crucial milestone for the project, and it was started to be done from early stages. It changed throughout the process in terms of
    the focus of the testing. It began by testing basic functionality and later on different C constructs interacting with each other ( eg. A for-loop within a switch-case).
-   Almost all of the test cases were written by us, however a small amount was taken from the Internet. Unfortunately due to some problems we had on github (eg MERGE conflicts) some of 
+   Almost all of the test cases were written by us, however a small amount was taken from the Internet. Unfortunately due to some problems we had on github (eg. MERGE conflicts) some of 
    these tests not written by us may have not been referenced, because they got untracked on the way. We apologize for that. Any tests that have been verified from 
    the Internet have a comment of the soure they were taken from.
 

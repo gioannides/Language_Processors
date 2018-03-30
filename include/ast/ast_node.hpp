@@ -2315,7 +2315,9 @@ inline void DeclarationList::render_asm(std::ofstream& file,Context& contxt) {
 			if(DeclarationListPtr != NULL) {
 				DeclarationListPtr->render_asm(file,contxt);
 			}
-			DeclarationPtr->render_asm(file,contxt);
+			if(DeclarationPtr != NULL){
+				DeclarationPtr->render_asm(file,contxt);
+			}
 }
 
 
@@ -2347,7 +2349,7 @@ inline void DirectDeclarator::render_asm(std::ofstream& file,Context& contxt) {
 						contxt.LocalArray=false;
 						if(contxt.ArraySize.size()){
 							contxt.no_array_elements=contxt.ArraySize[contxt.ArraySize.size()-1];
-							file << "\n#no_array_elements: " << contxt.no_array_elements;
+							file << "\n#no_array_elements: " << contxt.no_array_elements << std::endl;
 							contxt.ArraySize.pop_back();
 							
 						

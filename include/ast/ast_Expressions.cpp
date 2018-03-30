@@ -1796,7 +1796,7 @@ inline void PrimaryExpression::render_asm(std::ofstream& file,Context& contxt)
 					
 
 		if(!contxt.reading && contxt.function && !is_char && !contxt.enum_constant) 
-		{	
+		{	if(contxt.is_array) { contxt.DataType = "int"; }
 			if(contxt.DataType == "float" || (std::floor(std::stod(*CONSTANT))) != std::stod(*CONSTANT)){
 				
 				if(contxt.lhs_of_assignment){
