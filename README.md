@@ -15,3 +15,11 @@
 
 
 The doc/notes provides some additional information about this coursework, other than the management files.
+
+#Outcome:
+Awarded the best compiler of EIE year 2 award. 
+
+
+Python translator - 100%
+C-compiler - 97.34%
+Test cases - 90%
