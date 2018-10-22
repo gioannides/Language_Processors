@@ -21,5 +21,5 @@ Awarded the best compiler of EIE year 2 award.
 
 
 Python translator - 100%
-C-compiler - 97.34%
+C-compiler - 97.39%
 Test cases - 90%
