@@ -1,17 +1,149 @@
+Overview
+========
+
+There is a single code deliverable. This deliverable contains three components:
+
+- [*Test suite*]: Each submission must contain a set of test programs which 
+  are able to determine whether a given compiler implements certain C language
+  features correctly.
+
+- [*C-translator*]: Your compiler will be able to translate a sub-set of C
+  into equivalent Python. This allows each submission to demonstrate lexing and
+  parsing functionality, even if the code generation is weak.
+
+- [*C-compiler*]: This is a compiler from C to MIPS assembly.
+
+  
+In all cases, the source language is pre-processed C90. The target environment
+is Ubuntu 16.04, so the lab Ubuntu distribution, or equivalently an
+Ubuntu 16.04 VM as configured in the attached Vagrantfile. If there is any conflict,
+then the VM has precedence.
+
+Associated with all deliverables is [a time-tracking/project management component](management.md).
+
+
+A compiler for the C language
+====================================
+
+The program reads C source code from a file, and writes
+MIPS assembly to another file.
+
+Program build and execution
+---------------------------
+
+The program should is built using the command:
+
+    make bin/c_compiler
+
+The compilation function is invoked using the flag `-S`, with
+the source file and output file specified on the command line:
+
+    bin/c_compiler -S [source-file.c] -o [dest-file.s]
+    
+
+Input Format
+------------
+
+The input format is pre-processed C89.
+
+Output Format
+-------------
+
+The output format should be MIPS1 assembly code.
+
+It should be possible to assemble and link this code
+against a C run-time, and have it execute correctly
+on a MIPS processor as emulated by `qemu-mips`.
+
+C Translator
+============
+
+The compiler supports a translation mode, which translates
+a sub-set of pre-processed C89 into Python.
+
+Program build and execution
+---------------------------
+
+The program can be built using the command:
+
+    make bin/c_compiler
+
+The translator function is invoked using the flag `--translate`, with
+the source file and output file specified on the command line:
+
+    bin/c_compiler --translate [source-file.c] -o [dest-file.py]
+    
+
+Input format
+------------
+
+The input file will be pre-processed [ANSI C](https://en.wikipedia.org/wiki/ANSI_C),
+also called C90 or C89. It's what's generally thought of as "classic" or "normal" C,
+but not the _really_ old one without function prototypes. C90 is still often used in embedded systems, and pretty much the
+entire linux kernel is in C90.
+
+
+The test inputs will is a set of files of increasing complexity and
+variety. The initial files will contain a small number of basic tokens,
+then the lexicon will be increased, and finally Pre-Processor directives
+(see next section) will be included. All files will be [well-formed](https://en.wikipedia.org/wiki/Well-formedness).
+
+Output format
+-------------
+
+The output format will be a Python3equivalent to the input C.
+
+The full set of patterns required is described [here].
+
+As an example, we would translate the input program:
+
+```
+int f(int x)
+{
+  return x*x;
+}
+```
+into the python:
+```
+def f(x):
+    return x*x
+```
+
+Or this program:
+```
+int f(int x)
+{
+  if(x>1){
+    return x*f(x-1);
+  }else{
+    return x;
+  }
+}
+```
+turns into this:
+```
+def f(x):
+   if x>1:
+       return x*f(x-1)
+   else:
+       return x
+```
+
+
 #Features:
 
-[x] Integer Arithmetic
-[x] Floating Point Arithemetic
-[x] Arrays
-[x] All of the Statements (IfElse,While,For,Switch, etc)
-[x] Pointers
-[x] Enumerations
-[x] TypeDef
-[x] Function Calls
-[x] Local & Global variables
-[x] Type Casting
-[x] sizeof
-[x] All Expressions
+- Integer Arithmetic
+- Floating Point Arithemetic
+- Arrays
+- All of the Statements (IfElse,While,For,Switch, etc)
+- Pointers
+- Enumerations
+- TypeDef
+- Function Calls
+- Local & Global variables
+- Type Casting
+- sizeof
+- All Expressions
 
 
 The doc/notes provides some additional information about this coursework, other than the management files.
