@@ -3,23 +3,17 @@ Overview
 
 There is a single code deliverable. This deliverable contains three components:
 
-- [*Test suite*]: Each submission must contain a set of test programs which 
-  are able to determine whether a given compiler implements certain C language
-  features correctly.
-
-- [*C-translator*]: Your compiler will be able to translate a sub-set of C
+- [*C-translator*]: The compiler is able to translate a sub-set of C
   into equivalent Python. This allows each submission to demonstrate lexing and
   parsing functionality, even if the code generation is weak.
 
 - [*C-compiler*]: This is a compiler from C to MIPS assembly.
 
   
-In all cases, the source language is pre-processed C90. The target environment
+In all cases, the source language is pre-processed C89. The target environment
 is Ubuntu 16.04, so the lab Ubuntu distribution, or equivalently an
 Ubuntu 16.04 VM as configured in the attached Vagrantfile. If there is any conflict,
 then the VM has precedence.
-
-Associated with all deliverables is [a time-tracking/project management component](management.md).
 
 
 A compiler for the C language
