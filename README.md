@@ -43,9 +43,9 @@ The input format is pre-processed C89.
 Output Format
 -------------
 
-The output format should be MIPS1 assembly code.
+The output format is MIPS1 assembly code.
 
-It should be possible to assemble and link this code
+It is possible to assemble and link this code
 against a C run-time, and have it execute correctly
 on a MIPS processor as emulated by `qemu-mips`.
 
