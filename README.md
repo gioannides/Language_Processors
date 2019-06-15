@@ -1,7 +1,7 @@
 Overview
 ========
 
-There is a single code deliverable. This deliverable contains three components:
+There is a single code deliverable. This deliverable contains two components:
 
 - [*C-translator*]: The compiler is able to translate a sub-set of C
   into equivalent Python. This allows each submission to demonstrate lexing and
