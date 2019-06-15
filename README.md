@@ -25,7 +25,7 @@ MIPS assembly to another file.
 Program build and execution
 ---------------------------
 
-The program should is built using the command:
+The program is built using the command:
 
     make bin/c_compiler
 
