@@ -85,7 +85,7 @@ then the lexicon will be increased, and finally Pre-Processor directives
 Output format
 -------------
 
-The output format will be a Python3equivalent to the input C.
+The output format will be a Python 3 equivalent to the input C.
 
 The full set of patterns required is described [here].
 
