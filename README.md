@@ -1,11 +1,11 @@
 Overview
 ========
 
-There is a single code deliverable. This deliverable contains two components:
+This code contains two components:
 
 - [*C-translator*]: The compiler is able to translate a sub-set of C
-  into equivalent Python. This allows each submission to demonstrate lexing and
-  parsing functionality, even if the code generation is weak.
+  into equivalent Python. This allows demonstration of lexing and
+  parsing functionality.
 
 - [*C-compiler*]: This is a compiler from C to MIPS assembly.
 
