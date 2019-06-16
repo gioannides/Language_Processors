@@ -11,8 +11,7 @@ This code contains two components:
 
   
 In all cases, the source language is pre-processed C89. The target environment
-is Ubuntu 16.04, so the lab Ubuntu distribution, or equivalently an
-Ubuntu 16.04 VM as configured in the attached Vagrantfile. If there is any conflict,
+is Ubuntu 16.04, or equivalently an Ubuntu 16.04 VM. If there is any conflict,
 then the VM has precedence.
 
 
