@@ -1,4 +1,4 @@
-<img src="https://fossbytes.com/wp-content/uploads/2016/11/C-Language-Name.png"/>
+<img src="https://csharp-station.com/wp-content/uploads/2018/05/C-language.jpg"/>
 
 
 Overview
