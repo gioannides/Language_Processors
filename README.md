@@ -1,4 +1,4 @@
-<img src="https://csharp-station.com/wp-content/uploads/2018/05/C-language.jpg"/>
+<img src="https://csharp-station.com/wp-content/uploads/2018/05/C-language.jpg" align="middle"/>
 
 
 Overview
