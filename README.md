@@ -18,7 +18,8 @@ This code contains two components:
   
 In all cases, the source language is pre-processed C89. The target environment
 is Ubuntu 16.04, or equivalently an Ubuntu 16.04 VM. If there is any conflict,
-then the VM has precedence.
+then the VM has precedence. Make sure you have installed <b>Bison</b>, <b>Flex</b> and <b>qemu-mips</b>
+on your local machine otherwise you cannot run the compiler.
 
 
 A compiler for the C language
