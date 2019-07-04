@@ -129,7 +129,8 @@ def f(x):
 ```
 
 
-#Features:
+Features:
+=========
 
 - Integer Arithmetic
 - Floating Point Arithemetic
@@ -147,7 +148,8 @@ def f(x):
 
 The doc/notes provides some additional information about this coursework, other than the management files.
 
-#Outcome:
+Outcome:
+--------
 Awarded the best compiler of EIE year 2 award. 
 
 
